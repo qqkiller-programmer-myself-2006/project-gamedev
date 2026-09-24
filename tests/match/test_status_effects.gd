@@ -97,6 +97,57 @@ func test_statuses_are_defined_in_content() -> void:
 	assert_eq([h.content.get_int("statuses.toxin.damage"), h.content.get_int("statuses.toxin.turns")], [5, 2])
 
 
+func test_every_status_carries_its_badge_colour_and_tick_interval() -> void:
+	h = MatchHarness.new(1)
+	var colours := {}
+	for status in ["bleed", "poison", "toxin", "venom_coat"]:
+		var colour := str(h.content.get_value("statuses.%s.color" % status, ""))
+		assert_true(Color.html_is_valid(colour), "%s has a colour" % status)
+		colours[colour] = true
+		assert_eq(h.content.get_int("statuses.%s.tick_every" % status), 1)
+	assert_eq(colours.size(), 4, "each kind has its own colour")
+
+
+func test_tick_colour_is_sent_with_every_tick() -> void:
+	_start()
+	_use("poison_dart")
+	assert_eq(_statuses("e0")[0]["color"], h.content.get_value("statuses.poison.color"))
+	_until_my_turn()
+	assert_eq(_of("status_tick", "e0")[0]["color"], h.content.get_value("statuses.poison.color"))
+
+
+func test_a_slow_dot_ticks_only_every_nth_turn() -> void:
+	_start({}, {"statuses": {"bleed": {"tick_every": 2, "turns": 6}}})
+	_use("bleed_dart")
+	_until_my_turn()
+	assert_eq(_of("status_tick", "e0").size(), 0, "first turn: no tick yet")
+	_defend()
+	_until_my_turn()
+	assert_eq(_of("status_tick", "e0").size(), 1, "second turn: it ticks")
+	assert_eq(_statuses("e0")[0]["tick_every"], 2)
+
+
+func test_new_dot_kinds_are_data_only() -> void:
+	_start({}, {"statuses": {"burn": {"name": "Burn", "kind": "dot", "damage": 4, "turns": 2, "max_stacks": 2,
+			"tick_every": 1, "color": "#ff8a2a"}},
+			"items": {"burn_dart": {"name": "Burn Dart", "use": {"target": "enemy", "damage": {"amount": 1},
+			"apply_status": [{"status": "burn", "stacks": 1}]}}},
+			"party": {"starting_inventory": {"burn_dart": 1}}})
+	_use("burn_dart")
+	_until_my_turn()
+	var ticks := _of("status_tick", "e0")
+	assert_eq([ticks[0]["name"], ticks[0]["damage"], ticks[0]["color"]], ["Burn", 4, "#ff8a2a"])
+
+
+func test_unknown_status_names_are_ignored() -> void:
+	_start({}, {"items": {"odd_dart": {"name": "Odd Dart", "use": {"target": "enemy", "damage": {"amount": 1},
+			"apply_status": [{"status": "no_such_status", "stacks": 1}]}}},
+			"party": {"starting_inventory": {"odd_dart": 1}}})
+	_use("odd_dart")
+	assert_eq(_statuses("e0"), [], "nothing is put on the target")
+	assert_eq(_of("status_applied").size(), 0)
+
+
 func test_applying_a_dot_is_announced_and_shown_on_the_target() -> void:
 	_start()
 	_use("bleed_dart")

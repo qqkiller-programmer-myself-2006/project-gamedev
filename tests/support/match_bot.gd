@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Default "thinking time" per kind of decision when simulating human pacing
 ## (seconds of game time before the bot answers). Tests use no delay.
-const HUMAN_PACE := {"vote": 10.0, "combat": 8.0, "class": 10.0, "merchant": 25.0, "story": 25.0}
+const HUMAN_PACE := {"vote": 10.0, "combat": 8.0, "class": 10.0, "merchant": 25.0, "story": 25.0, "rest": 30.0}
 
 var harness: MatchHarness
 var sessions: Array[int] = []
@@ -143,6 +143,10 @@ func _act_in_encounter(session: int, slot: int, view: Dictionary, encounter: Dic
 			elif encounter["stage"] == "outcome" and not encounter["you_are_ready"] \
 					and _ready_to(session, "story", tag + "-read"):
 				_send(session, {"type": "ready"})
+		"rest":
+			if not encounter["you_are_ready"] and _ready_to(session, "rest", tag + "-camp"):
+				_camp(session, slot, view, encounter)
+				_send(session, {"type": "ready"})
 		"merchant":
 			if not encounter["you_are_ready"] and _ready_to(session, "merchant", tag + "-shop"):
 				_shop(session, encounter)
@@ -165,6 +169,29 @@ func _ready_to(session: int, kind: String, key: String) -> bool:
 
 ## Shopping policy: one of the best healing Item the Party can afford, plus
 ## a Spirit Bloom when Gold allows.
+## Camp policy: craft one piece of gear if the bag allows, put on gear for
+## empty slots, and spend stat points on the Class's main stat.
+func _camp(session: int, slot: int, view: Dictionary, encounter: Dictionary) -> void:
+	for recipe in encounter["recipes"]:
+		if recipe["craftable"] and recipe["category"] != "Vials":
+			_send(session, {"type": "craft", "recipe": recipe["recipe"]})
+			break
+	var me: Dictionary = view["party"][slot]
+	var taken := {}
+	for entry in view["inventory"]:
+		if entry["kind"] != "gear":
+			continue
+		for gear_slot in encounter["gear_slots"]:
+			if str(gear_slot).begins_with(entry["gear_slot"]) and not me["gear"].has(gear_slot) \
+					and not taken.has(gear_slot):
+				_send(session, {"type": "equip", "item": entry["item"], "gear_slot": gear_slot})
+				taken[gear_slot] = true
+				break
+	var stat := str({"mage": "mag", "guardian": "def", "classless": "max_hp"}.get(me["class"], "atk"))
+	for i in int(me["points"]):
+		_send(session, {"type": "invest", "stat": stat})
+
+
 func _shop(session: int, encounter: Dictionary) -> void:
 	for wanted in ["tonic", "herb"]:
 		for entry in encounter["stock"]:

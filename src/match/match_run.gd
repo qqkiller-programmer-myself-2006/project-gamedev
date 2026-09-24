@@ -12,11 +12,16 @@ extends RefCounted
 ##   action {slot, action, target, item, skill}   (combat, see CombatEncounter)
 ##   class_choice {accept}                        (Class Encounter offer)
 ##   buy {item}, ready                            (Merchant)
+##   craft {recipe}, equip {item, gear_slot},
+##   unequip {gear_slot}, invest {stat}, ready    (Rest camp, ADR-0011)
 ##   vote {option}, ready                         (Story Event choice / reading)
 
 const PARTY_SIZE := 5
 ## In-Match command types (routed here by MatchServer during a Match).
-const COMMANDS: Array[String] = ["vote", "action", "class_choice", "buy", "ready"]
+const COMMANDS: Array[String] = ["vote", "action", "class_choice", "buy", "ready",
+		"craft", "equip", "unequip", "invest"]
+## Stats a character sheet is built from (crit is a ratio, the rest integers).
+const STATS: Array[String] = ["max_hp", "atk", "def", "mag", "res", "spd"]
 
 var number := 1
 var phase := "voting"
@@ -157,6 +162,9 @@ func inventory_view() -> Array:
 			"name": str(data.get("name", item)),
 			"description": str(data.get("description", "")),
 			"count": inventory[item],
+			"kind": str(data.get("kind", "consumable")),
+			"category": str(data.get("category", "")),
+			"gear_slot": str(data.get("gear", {}).get("slot", "")),
 			"target": str(data.get("use", {}).get("target", "")),
 		})
 	return out
@@ -220,6 +228,7 @@ func grant_exp(slot: int, amount: int) -> void:
 		character["exp"] -= int(thresholds[character["level"] - 1])
 		var old_max: int = character["max_hp"]
 		character["level"] += 1
+		character["points"] = int(character.get("points", 0)) + content.get_int("leveling.points_per_level", 0)
 		_apply_stats(character)
 		if character["hp"] > 0:
 			character["hp"] = mini(character["max_hp"], character["hp"] + character["max_hp"] - old_max)
@@ -247,6 +256,9 @@ func party_view() -> Array:
 			"res": c["res"],
 			"spd": c["spd"],
 			"crit": c.get("crit", 0.0),
+			"points": int(c.get("points", 0)),
+			"invested": c.get("invested", {}).duplicate(),
+			"gear": _gear_view(c),
 			"controller": "human" if _humans[c["slot"]] else "ai",
 		})
 	return out
@@ -268,6 +280,9 @@ func _create_party() -> void:
 			"class": "classless",
 			"level": 1,
 			"exp": 0,
+			"points": 0,
+			"invested": {},
+			"gear": {},
 		}
 		_apply_stats(character)
 		character["hp"] = character["max_hp"]
@@ -276,14 +291,158 @@ func _create_party() -> void:
 		party.append(character)
 
 
-## Recomputes a character's stats from its class and level (content data).
+## Recomputes a character's stats from its class and level, invested stat
+## points and equipped gear (content data).
 func _apply_stats(character: Dictionary) -> void:
 	var base := content.get_dict("classes.%s.stats" % character["class"])
 	var growth := content.get_dict("leveling.growth")
+	var invest := content.get_dict("leveling.invest")
+	var invested: Dictionary = character.get("invested", {})
 	var levels: int = character["level"] - 1
-	for stat in ["max_hp", "atk", "def", "mag", "res", "spd"]:
-		character[stat] = int(base.get(stat, 0)) + int(growth.get(stat, 0)) * levels
+	for stat in STATS:
+		character[stat] = int(base.get(stat, 0)) + int(growth.get(stat, 0)) * levels \
+				+ int(invest.get(stat, 0)) * int(invested.get(stat, 0))
 	character["crit"] = float(base.get("crit", 0.0))
+	for item in character.get("gear", {}).values():
+		var bonus := content.get_dict("items.%s.gear.stats" % item)
+		for stat in bonus:
+			if stat == "crit":
+				character["crit"] = float(character["crit"]) + float(bonus[stat])
+			elif STATS.has(stat):
+				character[stat] = int(character[stat]) + int(bonus[stat])
+
+
+# --- Camp: crafting, gear and stat points (ADR-0011) --------------------------
+
+## Crafts `recipe` from the shared inventory. Returns "" or an error code.
+func craft(slot: int, recipe: String) -> String:
+	var data := content.get_dict("crafting.recipes.%s" % recipe)
+	if data.is_empty():
+		return "invalid_recipe"
+	var materials: Dictionary = data.get("materials", {})
+	for item in materials:
+		if int(inventory.get(item, 0)) < int(materials[item]):
+			return "missing_materials"
+	for item in materials:
+		_take_item(str(item), int(materials[item]))
+	var made := str(data.get("makes", recipe))
+	add_item(made, int(data.get("count", 1)))
+	emit({"type": "crafted", "slot": slot, "recipe": recipe, "item": made,
+			"name": str(content.get_value("items.%s.name" % made, made))})
+	return ""
+
+
+## Puts gear from the shared inventory on the character in `slot`. An empty
+## `gear_slot` picks the item's own slot (the first free charm slot for
+## charms). Whatever was there goes back to the inventory.
+func equip(slot: int, item: String, gear_slot: String = "") -> String:
+	if int(inventory.get(item, 0)) <= 0:
+		return "item_unavailable"
+	var kind := str(content.get_dict("items.%s.gear" % item).get("slot", ""))
+	if kind.is_empty():
+		return "not_gear"
+	if gear_slot.is_empty():
+		gear_slot = _free_gear_slot(party[slot], kind)
+	if not gear_slots().has(gear_slot) or not gear_slot.begins_with(kind):
+		return "wrong_gear_slot"
+	var character: Dictionary = party[slot]
+	var gear: Dictionary = character["gear"]
+	var old_max: int = character["max_hp"]
+	_take_item(item, 1)
+	if gear.has(gear_slot):
+		add_item(str(gear[gear_slot]), 1)
+	gear[gear_slot] = item
+	_restat(character, old_max)
+	emit({"type": "equipped", "slot": slot, "gear_slot": gear_slot, "item": item})
+	return ""
+
+
+func unequip(slot: int, gear_slot: String) -> String:
+	var character: Dictionary = party[slot]
+	var gear: Dictionary = character["gear"]
+	if not gear.has(gear_slot):
+		return "nothing_equipped"
+	var old_max: int = character["max_hp"]
+	add_item(str(gear[gear_slot]), 1)
+	gear.erase(gear_slot)
+	_restat(character, old_max)
+	emit({"type": "unequipped", "slot": slot, "gear_slot": gear_slot})
+	return ""
+
+
+## Spends one stat point of the character in `slot` on `stat`.
+func invest(slot: int, stat: String) -> String:
+	var character: Dictionary = party[slot]
+	if int(character.get("points", 0)) <= 0:
+		return "no_points"
+	if not content.get_dict("leveling.invest").has(stat):
+		return "invalid_stat"
+	var old_max: int = character["max_hp"]
+	character["points"] = int(character["points"]) - 1
+	character["invested"][stat] = int(character["invested"].get(stat, 0)) + 1
+	_restat(character, old_max)
+	emit({"type": "invested", "slot": slot, "stat": stat, "points": character["points"]})
+	return ""
+
+
+## An AI-controlled character at camp: spends its points on its Class's
+## focus stat and puts on any gear left in the bag for its empty slots.
+func camp_ai(slot: int) -> void:
+	var character: Dictionary = party[slot]
+	var focus := str(content.get_value("classes.%s.invest_focus" % character["class"], "max_hp"))
+	while int(character.get("points", 0)) > 0:
+		if not invest(slot, focus).is_empty():
+			break
+	var ids := inventory.keys()
+	ids.sort()
+	for item in ids:
+		var kind := str(content.get_dict("items.%s.gear" % item).get("slot", ""))
+		if kind.is_empty():
+			continue
+		while int(inventory.get(item, 0)) > 0:
+			var free := _free_gear_slot(character, kind)
+			if free.is_empty() or character["gear"].has(free):
+				break
+			equip(slot, item, free)
+
+
+## Every equipment slot a character has, e.g. helmet ... charm3.
+func gear_slots() -> Array:
+	return content.get_array("crafting.gear_slots")
+
+
+func _free_gear_slot(character: Dictionary, kind: String) -> String:
+	var first := ""
+	for gear_slot in gear_slots():
+		if not str(gear_slot).begins_with(kind):
+			continue
+		if first.is_empty():
+			first = gear_slot
+		if not character["gear"].has(gear_slot):
+			return gear_slot
+	return first
+
+
+func _take_item(item: String, count: int) -> void:
+	inventory[item] = int(inventory.get(item, 0)) - count
+	if int(inventory[item]) <= 0:
+		inventory.erase(item)
+
+
+## Rebuilds stats after gear or points change; HP follows any max HP change.
+func _restat(character: Dictionary, old_max: int) -> void:
+	_apply_stats(character)
+	if character["hp"] > 0:
+		character["hp"] = clampi(character["hp"] + character["max_hp"] - old_max, 1, character["max_hp"])
+
+
+func _gear_view(character: Dictionary) -> Dictionary:
+	var out := {}
+	for gear_slot in character.get("gear", {}):
+		var item := str(character["gear"][gear_slot])
+		out[gear_slot] = {"item": item, "name": str(content.get_value("items.%s.name" % item, item)),
+				"description": str(content.get_value("items.%s.description" % item, ""))}
+	return out
 
 
 # --- Journey ----------------------------------------------------------------

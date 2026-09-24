@@ -50,6 +50,25 @@ func test_every_match_offers_class_encounter_early_and_merchant_before_boss() ->
 		assert_true(merchant, "seed %d offers a Merchant before the Boss" % seed_value)
 
 
+func test_no_class_encounter_in_the_last_layer_before_the_boss() -> void:
+	for seed_value in 150:
+		var layers := _route_log(seed_value)
+		for option in layers[4]:
+			assert_ne(option["type"], "class", "seed %d: Class Encounters only in Layers 1-4" % seed_value)
+
+
+func test_live_tally_shows_who_voted_for_which_path() -> void:
+	var h := MatchHarness.new(3)
+	var trio := h.start_with_humans(3)
+	h.server.command(trio[0], {"type": "vote", "option": 1})
+	h.server.command(trio[2], {"type": "vote", "option": 1})
+	var options: Array = h.match_view(trio[1])["vote"]["options"]
+	assert_eq(options[1]["voters"], [0, 2], "every player sees the votes as they come in")
+	assert_eq(options[1]["votes"], 2)
+	assert_eq(options[0]["voters"], [])
+	assert_eq(h.match_view(trio[1])["vote"]["voted_slots"], [0, 2])
+
+
 func test_single_player_vote_decides_immediately() -> void:
 	var h := MatchHarness.new(3)
 	var solo := h.start_with_humans(1)[0]

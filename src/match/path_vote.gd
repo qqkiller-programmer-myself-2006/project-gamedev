@@ -86,10 +86,17 @@ func _public_options() -> Array:
 	var out: Array = []
 	for i in options.size():
 		var option: Dictionary = options[i]
+		var voters: Array = []
+		for slot in votes:
+			if votes[slot] == i:
+				voters.append(slot)
+		voters.sort()
 		out.append({
 			"index": i,
 			"type": option["type"],
 			"name": option["name"],
 			"hint": option["hint"],
+			"voters": voters,
+			"votes": voters.size(),
 		})
 	return out

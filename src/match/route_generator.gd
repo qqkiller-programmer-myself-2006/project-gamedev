@@ -5,6 +5,8 @@ extends RefCounted
 ##   - a Class Encounter option in at least one of the first
 ##     `class_by_layer` Layers
 ##   - a Merchant option in at least one Layer before the Guardian Boss
+##   - no Class Encounter after Layer `class_last_layer` (the last Layer
+##     before the Guardian Boss is for getting ready, not for a new Class)
 
 const TYPES: Array[String] = ["combat", "merchant", "rest", "treasure", "story", "class"]
 
@@ -16,10 +18,13 @@ static func generate(rng: GameRng, content: ForestContent) -> Array:
 	var min_options := content.get_int("journey.options_min", 2)
 	var max_options := content.get_int("journey.options_max", 3)
 	var weights := content.get_dict("journey.type_weights")
+	var class_last := content.get_int("journey.guarantees.class_last_layer", layer_count)
+	var late_weights := weights.duplicate()
+	late_weights.erase("class")
 	var layers: Array = []
 	for layer in layer_count:
 		var count := rng.randi_range(min_options, max_options)
-		layers.append(_pick_types(rng, weights, count))
+		layers.append(_pick_types(rng, weights if layer < class_last else late_weights, count))
 
 	var class_by := mini(content.get_int("journey.guarantees.class_by_layer", 2), layer_count)
 	if class_by > 0 and not _offered(layers, "class", 0, class_by):
