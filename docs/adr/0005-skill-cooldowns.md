@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by ADR-0009
 ---
 
 # จำกัดการใช้ Skill ด้วย cooldown นับเป็น turn ของตัวละคร ไม่ใช้ resource (MP/SP)

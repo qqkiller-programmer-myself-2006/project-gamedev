@@ -69,12 +69,20 @@ _Avoid_: class menu, class selection screen
 _Avoid_: trial boss, mini-boss
 
 **Skill**:
-action เฉพาะ Class ที่ถูกจำกัดด้วย cooldown นับเป็น turn ของตัวละครนั้นเอง (ADR-0005); ตัวละคร Classless ไม่มี Skill
+action เฉพาะ Class ที่ใช้ Energy ตามค่าที่กำหนดและติด cooldown นับเป็น turn ของตัวละครนั้นเอง (ADR-0009); ตัวละคร Classless ไม่มี Skill
 _Avoid_: ability, spell (เมื่อหมายถึง action ในระบบ)
 
+**Energy**:
+พลังของตัวละครใน Party ที่ใช้จ่ายค่า Skill: เริ่ม Combat ที่ 1, ได้ +1 ตอนเริ่ม turn ของตัวเอง, สูงสุด 6 และรีเซ็ตทุก Combat (ADR-0009); Attack, Defend และ Item ไม่ใช้ Energy และศัตรูไม่มี Energy
+_Avoid_: mana, MP, SP, stamina
+
 **Tier 1 Class**:
-Class ระดับแรกของ Forest vertical slice ได้แก่ Swordsman, Archer, Mage และ Guardian
+Class ระดับแรกของ Forest vertical slice ได้แก่ Swordsman, Archer, Mage, Guardian และ Rogue (ADR-0010)
 _Avoid_: starter class (เพราะผู้เล่นไม่ได้เริ่มเกมด้วย Class)
+
+**Rogue**:
+Tier 1 Class สาย Melee DoT ที่ใช้มีดและยาพิษติด DoT หลายชนิดบนเป้าเดียว แล้วปิดด้วย Skill ที่แรงขึ้นตามจำนวนชนิด DoT บนเป้า; มี passive Enervation (ADR-0010)
+_Avoid_: assassin, thief
 
 **AI replacement**:
 พฤติกรรมควบคุม slot ที่ไม่มีผู้เล่นจริง โดยใช้ behavior preset ตาม Class ของตัวละคร
@@ -85,6 +93,18 @@ _Avoid_: bot player, NPC player
 **Action window**:
 ช่วงเวลา 15 วินาทีที่ตัวละครต้องเลือก action ในแต่ละ turn หากหมดเวลาจะใช้ Defend อัตโนมัติ
 _Avoid_: input phase, command phase
+
+**Status effect**:
+สถานะชั่วคราวบนตัวละครหรือศัตรูที่มีจำนวน stack และ duration นับเป็น turn ของตัวที่ติด; ถูกล้างทั้งหมดเมื่อจบ Combat หรือ Challenge (ADR-0010)
+_Avoid_: buff/debuff (เมื่อหมายถึงระบบโดยรวม), condition
+
+**DoT**:
+Status effect ที่ทำ damage ตอนเริ่ม turn ของตัวที่ติด ตามจำนวน stack โดยไม่ผ่าน DEF/RES; ใน slice มี 3 ชนิดคือ Bleed, Poison และ Toxin ซึ่งติดบนเป้าเดียวกันพร้อมกันได้
+_Avoid_: poison (เมื่อหมายถึง DoT ทุกชนิด), tick effect
+
+**Enervation**:
+passive ของ Rogue: damage ตรงแรงขึ้น 5% ต่อชนิด DoT บนเป้า (ไม่เกิน ×1.4), DoT ที่ Rogue ติดแรงขึ้น 15% และ Rogue รับ damage จาก DoT มากขึ้น ×1.15
+_Avoid_: boon, perk (slice นี้ไม่มีระบบ Boon)
 
 **Path Voting**:
 การที่ผู้เล่นจริงโหวตเลือกเส้นทางถัดไปหลัง Encounter; AI ไม่มีสิทธิ์โหวต และกรณีเสมอให้สุ่มจากตัวเลือกที่คะแนนเท่ากัน
