@@ -1,5 +1,27 @@
 {
   "version": 1,
   "region": "forest",
-  "rules": {}
+  "rules": {
+    "empty_room_grace_seconds": 30
+  },
+  "party": {
+    "members": [
+      {"id": "arin", "name": "Arin"},
+      {"id": "bram", "name": "Bram"},
+      {"id": "cora", "name": "Cora"},
+      {"id": "dain", "name": "Dain"},
+      {"id": "wren", "name": "Wren"}
+    ]
+  },
+  "classes": {
+    "classless": {
+      "name": "Classless",
+      "stats": {"max_hp": 40, "atk": 8, "def": 3, "mag": 4, "res": 3, "spd": 10, "crit": 0.05},
+      "skills": []
+    }
+  },
+  "leveling": {
+    "exp_to_next": [20, 35, 55, 80, 110, 150],
+    "growth": {"max_hp": 5, "atk": 1, "def": 1, "mag": 1, "res": 1, "spd": 0}
+  }
 }

@@ -39,8 +39,16 @@ server ที่เป็นผู้ตัดสินผลของ combat, v
 _Avoid_: client-authoritative, peer host
 
 **Room code**:
-รหัสยาว 6 ตัวอักษรที่ Host ใช้สร้างห้อง และผู้เล่นอื่นใช้เข้าร่วม Match
+รหัสยาว 6 ตัวอักษรที่ Host ใช้สร้างห้อง และผู้เล่นอื่นใช้เข้าร่วม Match; ป้อนแบบไม่สนตัวพิมพ์เล็กใหญ่ และไม่มีตัวอักษรที่สับสนง่าย (0/O, 1/I/L)
 _Avoid_: invite link, lobby ID
+
+**Host**:
+ผู้เล่นที่สร้างห้อง และเป็นคนเดียวที่เริ่ม Match ได้; ถ้า Host ออกจากห้อง สิทธิ์ Host ส่งต่อให้ผู้เล่นจริงใน slot ลำดับต่ำสุดที่เหลืออยู่
+_Avoid_: owner, admin, leader
+
+**Match interface**:
+seam เดียวของ game logic (`MatchServer`): รับ command จาก session แล้วคืน event และ snapshot โดยรับ seed, clock และข้อมูล content ของ Forest จากภายนอก; test และ transport adapter คุยกับเกมผ่าน interface นี้เท่านั้น
+_Avoid_: game API, backend
 
 ## Characters and progression
 
