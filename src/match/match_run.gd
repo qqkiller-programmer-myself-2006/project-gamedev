@@ -11,10 +11,11 @@ extends RefCounted
 ##   vote {option}
 ##   action {slot, action, target, item, skill}   (combat, see CombatEncounter)
 ##   class_choice {accept}                        (Class Encounter offer)
+##   buy {item}, ready                            (Merchant)
 
 const PARTY_SIZE := 5
 ## In-Match command types (routed here by MatchServer during a Match).
-const COMMANDS: Array[String] = ["vote", "action", "class_choice"]
+const COMMANDS: Array[String] = ["vote", "action", "class_choice", "buy", "ready"]
 
 var number := 1
 var phase := "voting"
@@ -317,6 +318,12 @@ func _make_encounter(option: Dictionary) -> Encounter:
 			return CombatEncounter.new(option, EnemyGroups.pick(rng, content, layer, str(option["site"])))
 		"class":
 			return ClassEncounter.new(option)
+		"merchant":
+			return MerchantEncounter.new(option)
+		"rest":
+			return RestEncounter.new(option)
+		"treasure":
+			return TreasureEncounter.new(option)
 	return PlaceholderEncounter.new(option)
 
 

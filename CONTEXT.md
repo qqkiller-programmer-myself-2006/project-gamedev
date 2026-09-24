@@ -90,6 +90,18 @@ _Avoid_: route selection (เมื่อหมายถึงกระบวน
 เหตุการณ์หนึ่งระหว่างการเดินทาง ซึ่งใน vertical slice อาจเป็น Combat, Merchant, Rest, Treasure, Story Event หรือ Class Encounter
 _Avoid_: quest node, random event (เว้นแต่กำลังพูดถึง implementation randomness)
 
+**Merchant**:
+Encounter ที่ผู้เล่นจริงคนใดก็ได้ซื้อ Item ด้วย Gold ร่วมของ Party; ร้านปิดเมื่อผู้เล่นจริงทุกคนกดพร้อมไปต่อหรือหมดเวลา; ไม่มีการขายของ และ AI ไม่ซื้อ
+_Avoid_: shop screen, store
+
+**Gold**:
+เงินร่วมของทั้ง Party (ไม่ใช่ของผู้เล่นแต่ละคน) ได้จาก Combat และ Treasure ใช้ที่ Merchant
+_Avoid_: coins, money (ในเอกสารระบบ)
+
+**Reward**:
+สิ่งที่ Party ได้หลังชนะ Combat หรือจาก Treasure: EXP ให้ตัวละครทุกตัว, Gold และ Item เข้าคลังร่วม
+_Avoid_: loot (เมื่อหมายถึงผลรวมหลัง Encounter)
+
 **Guardian Boss**:
 ศัตรูหลักที่ปิดท้าย Forest vertical slice และเป็นเกณฑ์จบการเดินทางของ Match
 _Avoid_: final boss (เกมเต็มยังมี Guardian หลาย Region)

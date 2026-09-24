@@ -67,12 +67,25 @@ func act(session: int) -> void:
 				"combat":
 					if encounter["your_turn"]:
 						_fight(session, slot, view, encounter)
+				"merchant":
+					if not encounter["you_are_ready"]:
+						_shop(session, encounter)
+						harness.server.command(session, {"type": "ready"})
 				"class":
 					if encounter["stage"] == "challenge" and encounter["trial"]["your_turn"]:
 						_fight(session, slot, view, encounter["trial"])
 					elif encounter["stage"] == "offer" and encounter["offer"]["you_can_decide"]:
 						harness.server.command(session, {"type": "class_choice",
 								"accept": accept_class.call(encounter["class"], slot)})
+
+
+## Shopping policy: buy one of the best healing Item the Party can afford.
+func _shop(session: int, encounter: Dictionary) -> void:
+	for wanted in ["tonic", "herb", "spirit_bloom"]:
+		for entry in encounter["stock"]:
+			if entry["item"] == wanted and entry["affordable"]:
+				harness.server.command(session, {"type": "buy", "item": wanted})
+				return
 
 
 ## Combat policy: heal the most hurt ally below 40% HP when an Item allows

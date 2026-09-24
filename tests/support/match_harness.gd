@@ -99,6 +99,19 @@ static func class_and_combat(class_id: String) -> Dictionary:
 	}
 
 
+## Content where every Layer offers exactly the given Encounter types.
+static func only_routes(types: Array) -> Dictionary:
+	var weights := {"combat": 0, "merchant": 0, "rest": 0, "treasure": 0, "story": 0, "class": 0}
+	for type in types:
+		weights[type] = 1
+	return {"journey": {
+		"options_min": types.size(),
+		"options_max": types.size(),
+		"type_weights": weights,
+		"guarantees": {"class_by_layer": 0, "merchant_before_boss": false},
+	}}
+
+
 ## Every human votes for the route of `type` in the current Layer, then the
 ## travel time passes.
 func take_route(sessions: Array[int], type: String) -> void:

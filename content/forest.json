@@ -781,6 +781,67 @@
           "weight": 2
         }
       ]
+    },
+    "merchant": {
+      "seconds": 45,
+      "greeting": "\"Herbs, tonics, a little fire in a jar. Coin first, friends.\"",
+      "stock": [
+        {
+          "item": "herb",
+          "quantity": 5
+        },
+        {
+          "item": "tonic",
+          "quantity": 2
+        },
+        {
+          "item": "spirit_bloom",
+          "quantity": 1
+        },
+        {
+          "item": "firebomb",
+          "quantity": 2
+        }
+      ]
+    },
+    "rest": {
+      "seconds": 4,
+      "heal_ratio": 0.6,
+      "text": "The Party rests. Wounds are cleaned and bandaged."
+    },
+    "treasure": {
+      "seconds": 4,
+      "rolls": 2,
+      "text": "Among the dust and leaves, something useful catches the light.",
+      "loot": [
+        {
+          "gold": [
+            12,
+            25
+          ],
+          "weight": 4
+        },
+        {
+          "item": "herb",
+          "count": 2,
+          "weight": 3
+        },
+        {
+          "item": "tonic",
+          "count": 1,
+          "weight": 2
+        },
+        {
+          "item": "spirit_bloom",
+          "count": 1,
+          "weight": 1
+        },
+        {
+          "item": "firebomb",
+          "count": 1,
+          "weight": 2
+        }
+      ]
     }
   },
   "skills": {
