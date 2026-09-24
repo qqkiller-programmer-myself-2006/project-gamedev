@@ -280,8 +280,9 @@ func _begin_layer(next_layer: int) -> void:
 	layer = next_layer
 	phase = "voting"
 	encounter = null
-	var deadline: float = clock.now() + content.get_float("rules.vote_seconds", 20.0)
-	vote = PathVote.new(layer, routes[layer - 1], deadline)
+	var seconds := content.get_float("rules.vote_seconds", 20.0)
+	var deadline: float = clock.now() + seconds
+	vote = PathVote.new(layer, routes[layer - 1], deadline, seconds)
 	var view := vote.view()
 	emit({"type": "vote_started", "layer": layer, "options": view["options"], "deadline": deadline})
 
@@ -388,12 +389,14 @@ func _reach_boss() -> void:
 
 
 func _end_match(outcome: String) -> void:
+	var reached_boss := phase == "boss"
 	phase = outcome
 	encounter = null
 	vote = null
 	var ending := content.get_dict("ending.%s" % outcome)
 	summary = {
 		"result": outcome,
+		"reached_boss": reached_boss,
 		"title": str(ending.get("title", "")),
 		"text": str(ending.get("text", "")),
 		"layer": layer,

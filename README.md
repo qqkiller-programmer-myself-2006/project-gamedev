@@ -8,15 +8,22 @@ The current goal is the Forest vertical slice described in
 - Decisions: [`docs/adr/`](docs/adr/)
 - Product requirements: [`docs/prd.md`](docs/prd.md)
 - Testing guide: [`docs/testing.md`](docs/testing.md)
+- Running server and clients: [`docs/running.md`](docs/running.md)
+- Balance and pacing: [`docs/balance.md`](docs/balance.md)
 
 ## Project layout
 
 ```text
 project.godot          Godot project (one codebase for server, PC and browser)
-content/forest.json    All Forest content and balance numbers
+content/forest.json    All Forest content, text and balance numbers
 src/core/              Injected dependencies: GameRng, ManualClock, SystemClock, ForestContent
 src/match/             Authoritative game logic behind the Match interface (MatchServer)
-tests/                 Headless tests (run_tests.gd runner, TestCase, MatchHarness)
+src/net/               Wire protocol, WebSocket server transport and client connection
+src/server/            Headless server node (GameServer)
+src/client/            Client UI: screens, per-phase panels, theme, settings, sounds
+src/app/               Entry point: --server starts the server, otherwise the client
+tests/                 Headless tests (runner, Match tests, regression, network)
+tools/                 simulate.gd (balance), ui_preview.gd (screenshots)
 scripts/               Command-line helpers
 ```
 
@@ -24,7 +31,9 @@ scripts/               Command-line helpers
 
 ```bash
 # Godot 4.7.2 must be on PATH as `godot` (or set GODOT=/path/to/godot)
-./scripts/run_tests.sh
+./scripts/run_tests.sh                               # all tests, headless
+godot --headless --path . -- --server --port=8910    # authoritative server
+godot --path . -- --url=ws://127.0.0.1:8910          # PC client (open two for co-op)
 ```
 
 ## The Match interface

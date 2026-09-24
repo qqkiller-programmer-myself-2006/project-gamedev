@@ -7,14 +7,17 @@ extends RefCounted
 var layer: int
 var options: Array
 var deadline: float
+## How long the vote is open, in seconds.
+var seconds := 0.0
 ## slot -> option index
 var votes: Dictionary = {}
 
 
-func _init(layer_number: int, route_options: Array, closes_at: float) -> void:
+func _init(layer_number: int, route_options: Array, closes_at: float, duration: float = 0.0) -> void:
 	layer = layer_number
 	options = route_options
 	deadline = closes_at
+	seconds = duration
 
 
 ## Records a vote. Returns "" on success or an error code.
@@ -75,6 +78,7 @@ func view() -> Dictionary:
 		"options": _public_options(),
 		"voted_slots": voted,
 		"deadline": deadline,
+		"seconds": seconds,
 	}
 
 

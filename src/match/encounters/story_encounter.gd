@@ -37,8 +37,8 @@ func start(run: MatchRun) -> void:
 		_show_outcome(run, data.get("outcome", {}))
 	else:
 		stage = "choosing"
-		vote = PathVote.new(run.layer, choice_options,
-				run.clock.now() + run.content.get_float("rules.story_vote_seconds", 20.0))
+		var seconds := run.content.get_float("rules.story_vote_seconds", 20.0)
+		vote = PathVote.new(run.layer, choice_options, run.clock.now() + seconds, seconds)
 		deadline = vote.deadline
 
 
