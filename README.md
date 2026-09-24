@@ -60,7 +60,27 @@ seed, a clock and `ForestContent` — and exposes:
 | `snapshot(session)` | State this session should see |
 | `close_session(session)` | Connection dropped |
 
-## งานล่าสุด: Energy, DoT, Rogue และหน้าจอแบบ AAC
+## งานล่าสุด: Rest camp, Ready check และ HUD ตาม issue #31–#37
+
+| Issue | สิ่งที่ทำ |
+| --- | --- |
+| #31 Party HUD 5 ตัว | timeline แสดง Party 5 ตัว + ศัตรูในลำดับ initiative พร้อมป้ายผู้ควบคุม `YOU` / `P2` / `AI` / `FOE`, ตัวเลข HP, แถบ HP แดง และแถบ Energy ฟ้า; การ์ดของตัวที่ถึงตา fade-in เมื่อ turn เปลี่ยน (ปิดได้ด้วย Reduced motion); 5 Party + 3 ศัตรูไม่ต้อง scroll |
+| #32 Action window | แถบเวลา 15 วินาทีบน HUD ล่างที่หดลงและเปลี่ยนเป็นสีเตือนเมื่อเหลือ ≤ 5 วินาที คู่กับตัวเลขวินาที; server ยังเป็นผู้ตัดสิน timeout และ Defend อัตโนมัติ (`window_seconds` ใน combat view) |
+| #33 Class Encounter | Class Encounter ไม่ออกใน Layer 5 แล้ว (`journey.guarantees.class_last_layer = 4`) ส่วน Classless start, Challenge ที่ไม่มีใครล้ม/HP คืน/ไม่มี reward และ Accept/Skip มีอยู่แล้วพร้อม test |
+| #34 Initiative tracker | ตัวที่ถึงตามีทั้ง `>` ป้าย และกรอบสีทอง (ไม่ใช้สีอย่างเดียว); tooltip บอก Speed, HP, Energy และสถานะ; rebuild จาก snapshot ทุกครั้ง |
+| #35 Status effect | DoT เป็น data ทั้งหมด: `statuses.<id>` มี `tick_every` และ `color` แล้ว; เพิ่มชนิดใหม่ได้โดยไม่แก้โค้ด (มี test ชนิด Burn); status ที่ไม่มีใน content ถูกข้าม; badge ย่อเมื่อมีมากกว่า 2 ชนิดเพื่อให้ 4 badge ไม่ล้น; ตัวเลข DoT ที่ tick พร้อมกันซ้อนขึ้นไม่ทับกัน |
+| #36 Rest 3 คอลัมน์ | ซ้าย **Crafting** (กรองหมวด Boots/Robes/Charms/Vials/Quivers, checklist material OK/NEED x/y, ปุ่ม Craft เปิดเมื่อของครบ) กลาง **Shared Inventory** (Equip, Inspect, Party Gold) ขวา **Equipment & Stats** (gear 8 ช่อง, stat sheet, Invest Points) ล่าง `Ready (x/N)` |
+| #37 Path Voting + Ready check | การ์ดเส้นทางแสดงจำนวนโหวตและชื่อคนที่โหวตแบบ live (`options[].voters`); Rest รอผู้เล่นจริงทุกคนกด Ready หรือหมดเวลา, AI ไม่ต้องกด, คนที่หลุดนับเป็น Ready |
+
+**กติกาใหม่ (ADR-0011):** ศัตรูดรอป material, คราฟต์ gear/ยาที่ Rest, gear บวก stat, level-up ได้ stat point, AI ลงแต้มและหยิบ gear ที่เหลือตอนแคมป์ปิด; Gold และคลังยังเป็นของทั้ง Party จึงไม่มี Transfer Gold
+**Command ใหม่:** `craft {recipe}`, `equip {item, gear_slot?}`, `unequip {gear_slot}`, `invest {stat}` และ `ready` ที่ Rest
+**Test:** 227 → 248 ข้อ (`tests/match/test_rest_camp.gd` ใหม่ 13 ข้อ + vote tally, Layer 5, DoT data และ contrast ของสี badge)
+
+| Rest camp | Timeline + Action window | Live vote tally |
+| --- | --- | --- |
+| ![](docs/screenshots/camp_rest.png) | ![](docs/screenshots/combat_timeline.png) | ![](docs/screenshots/vote_tally.png) |
+
+## งานก่อนหน้า: Energy, DoT, Rogue และหน้าจอแบบ AAC
 
 งานชุดนี้ส่งใน [PR #29](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/pull/29)
 (merge แล้ว, ปิด #22–#26) โดยอ้างอิงระบบและหน้าตาจากเกม An Average Campaign (AAC)
@@ -232,7 +252,7 @@ Merchant และ Rest ใช้หน้า 3 คอลัมน์ตาม�
 | ขวา | stat sheet เลือกดูได้ทีละตัวละคร: Class, Lvl, HP, EXP, Energy สูงสุด, ATK, DEF, MAG, RES, SPD, Crit | เหมือนกัน |
 | ล่าง | "Ready (x/y) [R]" และเวลาปิดร้าน | เวลาที่เดินทางต่อ |
 
-ไม่มี Crafting, Equipment และการโอน Gold จากภาพ เพราะอยู่นอกขอบเขตของ [spec #2](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/2)
+ตอนนั้นยังไม่มี Crafting และ Equipment; ตอนนี้ Rest มีแล้วตาม [ADR-0011](docs/adr/0011-rest-camp-crafting-gear-and-stat-points.md) (ดูหัวข้อ "งานล่าสุด" ด้านบน)
 
 ### 7. วิธีลองใช้
 

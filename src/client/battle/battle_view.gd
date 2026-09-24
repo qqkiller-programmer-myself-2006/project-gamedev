@@ -21,6 +21,12 @@ var _combat: Dictionary = {}
 var _me := ""
 var _deadline: Variant = null
 var _countdown: Label
+## Action window as a draining bar under the countdown (cosmetic: the server
+## enforces the deadline and Defends for you when it passes).
+var _window_bar: ProgressBar
+var _window_seconds := 15.0
+## Actor shown last time, so the timeline only animates when the turn moves.
+var _last_actor := ""
 ## Callables for keys 1-9 in the current list (cards or targets).
 var _choices: Array[Callable] = []
 ## Token id -> [x, y] fraction of the stage for its top-left corner.
@@ -172,6 +178,7 @@ func build(view: Dictionary, combat: Dictionary) -> void:
 		_screen.combat_mode_key = mode_key
 		_screen.combat_mode = ""
 	_deadline = combat.get("deadline")
+	_window_seconds = maxf(1.0, float(combat.get("window_seconds", 15.0)))
 	_choices.clear()
 	_build_region(view)
 	_build_header(view)
@@ -191,6 +198,10 @@ func tick() -> void:
 	var left := _app.seconds_left(_deadline)
 	_countdown.text = "%ds" % ceili(left)
 	_countdown.add_theme_color_override("font_color", UiKit.WARN if left <= 5.0 else UiKit.TEXT)
+	if _window_bar != null and is_instance_valid(_window_bar):
+		_window_bar.value = clampf(left / _window_seconds, 0.0, 1.0) * _window_bar.max_value
+		_window_bar.add_theme_stylebox_override("fill", UiKit.flat_box(UiKit.WARN if left <= 5.0 else UiKit.GOOD,
+				Color(0, 0, 0, 0), 0, 0))
 	if _combat.get("your_turn", false):
 		_screen.warn_if_short(_deadline, left)
 
@@ -299,6 +310,10 @@ func _build_header(view: Dictionary) -> void:
 		_header.add_child(UiKit.panel(head, "HudPanel"))
 
 
+## Initiative tracker: everyone in this round's turn order (Speed, highest
+## first), the active combatant marked by an arrow, a NOW tag and a border
+## (not colour alone), who controls each Party character, and HP (and
+## Energy) from the latest server snapshot.
 func _build_timeline(view: Dictionary) -> void:
 	UiKit.clear(_timeline)
 	var title := UiKit.pixel_label("Turn %d" % int(_combat.get("round", 1)), "title")
@@ -307,32 +322,51 @@ func _build_timeline(view: Dictionary) -> void:
 	_timeline.add_child(title)
 	var remaining: Array = _combat.get("turn_order", [])
 	var order: Array = _combat.get("round_order", remaining)
+	var actor := str(_combat.get("actor", ""))
 	for id in order:
 		var unit := _unit(view, str(id))
 		if unit.is_empty():
 			continue
-		var entry := UiKit.vbox(2)
+		var entry := UiKit.vbox(1)
 		var acted := not remaining.has(id)
-		var is_actor: bool = id == _combat.get("actor", "")
-		var label_text := "%s (%d)" % [_screen.name_of(str(id)), int(unit.get("spd", 0))]
-		if is_actor:
-			label_text = "> " + label_text
+		var is_actor: bool = id == actor
+		var head := UiKit.hbox(4)
+		var tag := _controller_tag(str(id), unit)
+		head.add_child(UiKit.pixel_label(("> " if is_actor else "") + tag[0], "small", tag[1]))
 		var color := UiKit.ACCENT if is_actor else (UiKit.TEXT_DIM if acted else UiKit.TEXT)
-		var name_label := UiKit.pixel_label(label_text, "small", color)
+		var name_label := UiKit.pixel_label(_screen.name_of(str(id)), "small", color)
 		name_label.clip_text = true
-		entry.add_child(name_label)
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_child(name_label)
 		var hp := int(unit.get("hp", 0))
-		entry.add_child(UiKit.stat_bar(hp, int(unit.get("max_hp", 1)), UiKit.BAR_HP, "", 7))
+		head.add_child(UiKit.pixel_label("DOWN" if hp <= 0 else str(hp), "small", UiKit.TEXT_DIM if hp <= 0 else UiKit.TEXT))
+		entry.add_child(head)
+		entry.add_child(UiKit.stat_bar(hp, int(unit.get("max_hp", 1)), UiKit.BAR_HP, "", 6))
 		if unit.has("energy"):
-			entry.add_child(UiKit.stat_bar(int(unit["energy"]), int(unit.get("energy_max", 6)), UiKit.BAR_ENERGY, "", 5))
+			entry.add_child(UiKit.stat_bar(int(unit["energy"]), int(unit.get("energy_max", 6)), UiKit.BAR_ENERGY, "", 4))
 		var card := UiKit.panel(entry, "HudPanel")
 		if is_actor:
 			card.add_theme_stylebox_override("panel", UiKit.flat_box(UiKit.HUD_BG, UiKit.ACCENT, 2, 6))
 		card.modulate = Color(1, 1, 1, 0.55) if hp <= 0 or acted else Color.WHITE
-		card.tooltip_text = "%s - HP %d/%d%s%s" % [_screen.name_of(str(id)), hp, int(unit.get("max_hp", 1)),
+		card.tooltip_text = "%s (%s) - Speed %d - HP %d/%d%s%s" % [_screen.name_of(str(id)), tag[2],
+				int(unit.get("spd", 0)), hp, int(unit.get("max_hp", 1)),
 				(", Energy %d/%d" % [int(unit["energy"]), int(unit.get("energy_max", 6))]) if unit.has("energy") else "",
-				" (already acted this round)" if acted else ""]
+				" (already acted this round)" if acted else (" - acting now" if is_actor else "")]
 		_timeline.add_child(card)
+		if is_actor and actor != _last_actor:
+			_app.fade_in(card, 0.3)
+	_last_actor = actor
+
+
+## [short tag, colour, long name] for who controls a timeline entry.
+func _controller_tag(id: String, unit: Dictionary) -> Array:
+	if not id.begins_with("p"):
+		return ["FOE", UiKit.ENEMY, "enemy"]
+	if id == _me:
+		return ["YOU", UiKit.ACCENT, "you"]
+	if str(unit.get("controller", "")) == "ai":
+		return ["AI", UiKit.TEXT_DIM, "AI"]
+	return ["P%d" % (int(id.substr(1)) + 1), UiKit.ALLY, "player"]
 
 
 func _build_stage(view: Dictionary) -> void:
@@ -435,6 +469,11 @@ func _build_bottom(view: Dictionary) -> void:
 	info.add_child(UiKit.spacer())
 	info.add_child(UiKit.pixel_label("%d Gold" % int(view.get("gold", 0)), "heading", UiKit.ACCENT))
 	hud.add_child(info)
+	_window_bar = null
+	if _deadline != null:
+		_window_bar = UiKit.stat_bar(1000, 1000, UiKit.GOOD, "", 6)
+		_window_bar.tooltip_text = "Action window: when it runs out you Defend automatically."
+		hud.add_child(_window_bar)
 	if not me.is_empty():
 		var bars := UiKit.hbox(10)
 		var hp := UiKit.stat_bar(int(me["hp"]), int(me["max_hp"]), UiKit.BAR_HP, "%d/%d" % [int(me["hp"]), int(me["max_hp"])], 24, "body")

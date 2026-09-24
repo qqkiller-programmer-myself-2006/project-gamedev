@@ -17,6 +17,15 @@ func test_text_colours_meet_wcag_aa_on_every_panel() -> void:
 			assert_true(ratio >= 4.5, "%s on %s is %.2f:1" % [text_name, bg_name, ratio])
 
 
+func test_status_badge_colours_from_content_are_readable() -> void:
+	var content := ForestContent.load_default()
+	var badge_bg := Color(0.05, 0.05, 0.06)
+	for status in content.get_dict("statuses"):
+		var colour := UiKit.status_color(str(content.get_value("statuses.%s.color" % status, "")))
+		var ratio := contrast(colour, badge_bg)
+		assert_true(ratio >= 4.5, "%s badge text %.2f:1" % [status, ratio])
+
+
 func test_disabled_button_text_stays_readable() -> void:
 	var ratio := contrast(Color("#8a948b"), Color("#1a221e"))
 	assert_true(ratio >= 3.0, "disabled text %.2f:1" % ratio)

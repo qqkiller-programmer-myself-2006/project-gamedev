@@ -1,7 +1,7 @@
 class_name VotePanel
 extends VBoxContainer
-## Path Voting: the 2-3 route options with their Encounter type, who has
-## voted, and the time left. Keys 1-3 vote.
+## Path Voting: the 2-3 route options with their Encounter type, a live
+## tally of who voted for which path, and the time left. Keys 1-3 vote.
 
 var _options: Array = []
 var _deadline: Variant = null
@@ -65,6 +65,12 @@ func _option_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> Co
 	box.add_child(UiKit.para(str(option["hint"])))
 	box.add_child(UiKit.para(str(UiText.TYPE_HELP.get(option["type"], "")), "dim"))
 	box.add_child(UiKit.spacer())
+	var voters: Array = option.get("voters", [])
+	var tally := UiKit.flow(4)
+	tally.add_child(UiKit.label("Votes: %d" % voters.size(), "heading" if not voters.is_empty() else "dim"))
+	for slot in voters:
+		tally.add_child(UiKit.badge(_voter_name(screen, int(slot)), UiKit.ALLY))
+	box.add_child(tally)
 	var mine: bool = screen.get_meta("my_vote_%d" % int(screen.match_view()["layer"]), -1) == index
 	var text := "Your vote" if mine else ("[%d] Vote for this path" % (index + 1))
 	var button := UiKit.button(text, func() -> void: _vote(screen, app, index))
@@ -80,6 +86,13 @@ func _option_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> Co
 func _vote(screen: MatchScreen, app: ClientApp, index: int) -> void:
 	screen.set_meta("my_vote_%d" % int(screen.match_view()["layer"]), index)
 	app.send({"type": "vote", "option": index})
+
+
+static func _voter_name(screen: MatchScreen, slot: int) -> String:
+	var slots: Array = screen.room_view().get("slots", [])
+	if slot < slots.size() and not str(slots[slot].get("owner_name", "")).is_empty():
+		return str(slots[slot]["owner_name"])
+	return screen.name_of("p%d" % slot)
 
 
 static func _voter_status(screen: MatchScreen, view: Dictionary, vote: Dictionary) -> String:

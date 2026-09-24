@@ -151,6 +151,7 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 		"actor": actor,
 		"actor_controller": _controller_of(run, actor),
 		"deadline": deadline if deadline >= 0.0 else null,
+		"window_seconds": run.content.get_float("rules.action_window_seconds", 15.0),
 		"your_turn": your_turn,
 		"defending": defending_ids,
 		"protected": protected_view,

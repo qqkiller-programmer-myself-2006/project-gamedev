@@ -26,9 +26,9 @@ const HUD_BORDER := Color(0.66, 0.68, 0.7, 0.9)
 const BAR_HP := Color("#d8453c")
 const BAR_ENERGY := Color("#3b9ae1")
 const BAR_BACK := Color(0.06, 0.06, 0.07, 0.9)
-## Status effect colour and short tag. The tag is always drawn next to the
-## colour so colour is never the only cue.
-const STATUS_COLORS := {"bleed": Color("#ef5245"), "poison": Color("#62d65e"), "toxin": Color("#b574ee")}
+## Status effect short tag. The colour comes from content (`statuses.<id>.color`,
+## sent with every status view and tick); the tag is always drawn next to it
+## so colour is never the only cue.
 const STATUS_TAGS := {"bleed": "BLD", "poison": "PSN", "toxin": "TOX", "venom_coat": "PREP"}
 
 ## Base font sizes per label style; multiplied by the text-size setting.
@@ -194,8 +194,9 @@ static func energy_segments(value: int, max_value: int, height: float = 20.0, st
 	return holder
 
 
-static func status_color(status: String) -> Color:
-	return STATUS_COLORS.get(status, ACCENT)
+## The colour the server sent for a status ("#rrggbb"), or ACCENT.
+static func status_color(html: String) -> Color:
+	return Color(html) if Color.html_is_valid(html) else ACCENT
 
 
 static func status_tag(status: String) -> String:
@@ -203,12 +204,16 @@ static func status_tag(status: String) -> String:
 
 
 ## A small square badge for one Status effect: tag, stacks and turns left.
-static func status_badge(entry: Dictionary) -> PanelContainer:
+## `compact` drops the turns (still in the tooltip) so four badges fit in a
+## row above a token.
+static func status_badge(entry: Dictionary, compact: bool = false) -> PanelContainer:
 	var status := str(entry.get("status", ""))
-	var color := status_color(status)
-	var line := hbox(3)
+	var color := status_color(str(entry.get("color", "")))
+	var line := hbox(2 if compact else 3)
 	line.add_child(pixel_label(status_tag(status), "small", color))
 	var count := "x%d %dt" % [int(entry.get("stacks", 1)), int(entry.get("turns", 0))]
+	if compact:
+		count = "%d" % int(entry.get("stacks", 1))
 	if str(entry.get("kind", "dot")) != "dot":
 		count = "%d" % int(entry.get("charges", 0))
 	line.add_child(pixel_label(count, "small"))

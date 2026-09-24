@@ -1306,7 +1306,7 @@
       "turns": 3,
       "max_stacks": 5,
       "description": "Loses 3 HP per stack at the start of each of its turns, ignoring armour. Lasts 3 turns; stacks up to 5.",
-      "color": "#e0473f",
+      "color": "#ef5245",
       "tick_every": 1
     },
     "poison": {
@@ -1316,7 +1316,7 @@
       "turns": 4,
       "max_stacks": 5,
       "description": "Loses 2 HP per stack at the start of each of its turns, ignoring armour. Lasts 4 turns; stacks up to 5.",
-      "color": "#58c24a",
+      "color": "#62d65e",
       "tick_every": 1
     },
     "toxin": {
@@ -1326,7 +1326,7 @@
       "turns": 2,
       "max_stacks": 3,
       "description": "Loses 5 HP per stack at the start of each of its turns, ignoring armour. Lasts 2 turns; stacks up to 3.",
-      "color": "#a35ee0",
+      "color": "#b574ee",
       "tick_every": 1
     },
     "venom_coat": {
