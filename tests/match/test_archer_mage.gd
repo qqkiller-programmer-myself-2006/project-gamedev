@@ -7,6 +7,8 @@ const SLOW_TANKY := {"enemies": {
 	"bramble_archer": {"stats": {"max_hp": 500, "spd": 5, "crit": 0}, "rewards": {"drops": []}},
 }}
 const NO_CLASS_CRITS := {"classes": {"archer": {"stats": {"crit": 0}}, "mage": {"stats": {"crit": 0}}}}
+## The whole Party takes the Class so Class mechanics are tested in isolation.
+const WHOLE_PARTY := {"rules": {"ai_class_cap": 5}}
 
 var h: MatchHarness
 var sessions: Array[int] = []
@@ -18,7 +20,7 @@ func _start(class_id: String, enemies: Array = ["grey_wolf", "grey_wolf"], extra
 		seed_value: int = 5) -> void:
 	var group := {"encounters": {"combat": {"groups": [{"id": "test", "enemies": enemies, "layers": [1, 5]}]}}}
 	h = MatchHarness.new(seed_value, MatchHarness.merge([MatchHarness.class_and_combat(class_id),
-			MatchHarness.EXACT_DAMAGE, SLOW_TANKY, group, extra]))
+			MatchHarness.EXACT_DAMAGE, SLOW_TANKY, WHOLE_PARTY, group, extra]))
 	sessions = h.start_with_humans(1)
 	h.gain_class(sessions)
 	h.take_route(sessions, "combat")

@@ -6,10 +6,12 @@ extends Encounter
 ##    round limit. Beating the trainer in time passes; otherwise it fails and
 ##    no Class is offered. HP returns to what it was before the trial.
 ## 2. offer: every Classless character may take the Class. Humans answer
-##    with class_choice {accept} before the deadline (no answer = decline);
-##    AI-controlled characters accept on their own. A Class can be taken by
-##    any number of characters. If nobody is Classless, passing grants
-##    mastery EXP instead.
+##    with class_choice {accept} before the deadline (no answer = decline).
+##    AI-controlled characters decide on their own, in slot order: they
+##    accept unless `rules.ai_class_cap` characters already have that Class,
+##    so the AI keeps the Party varied. Humans may take a Class however many
+##    characters have it. If nobody is Classless, passing grants mastery EXP
+##    instead.
 ##
 ## Command: class_choice {accept: bool}   (during the offer)
 
@@ -78,7 +80,7 @@ func on_control_changed(run: MatchRun, slot: int) -> void:
 	if stage == "challenge":
 		_trial.on_control_changed(run, slot)
 	elif stage == "offer" and eligible.has(slot) and not decisions.has(slot) and not run.is_human(slot):
-		_decide(run, slot, true)
+		_decide(run, slot, _ai_accepts(run))
 		_close_offer_if_settled(run)
 
 
@@ -169,8 +171,17 @@ func _advance(run: MatchRun) -> void:
 	})
 	for slot in eligible:
 		if not run.is_human(slot):
-			_decide(run, slot, true)
+			_decide(run, slot, _ai_accepts(run))
 	_close_offer_if_settled(run)
+
+
+## AI takes the Class unless enough of the Party already has it.
+func _ai_accepts(run: MatchRun) -> bool:
+	var holders := 0
+	for character in run.party:
+		if character["class"] == class_id:
+			holders += 1
+	return holders < run.content.get_int("rules.ai_class_cap", 2)
 
 
 func _decide(run: MatchRun, slot: int, accept: bool) -> void:

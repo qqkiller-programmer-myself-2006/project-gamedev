@@ -7,8 +7,14 @@ extends RefCounted
 ## that need to walk the whole journey without testing combat balance.
 ## They never touch journey data, so routes are the same as with real content.
 const EASY := {
-	"leveling": {"growth": {"max_hp": 400, "atk": 60}},
-	"classes": {"classless": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}}},
+	"leveling": {"growth": {"max_hp": 400, "atk": 60, "mag": 60}},
+	"classes": {
+		"classless": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
+		"swordsman": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
+		"archer": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
+		"mage": {"stats": {"max_hp": 999, "atk": 120, "mag": 120, "def": 60, "spd": 40}},
+		"guardian": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
+	},
 }
 
 ## Content overrides whose routes only ever offer Combat Encounters.

@@ -15,7 +15,8 @@
     "crit_multiplier": 1.5,
     "weakness_multiplier": 1.5,
     "revive_hp_ratio": 0.3,
-    "class_offer_seconds": 20
+    "class_offer_seconds": 20,
+    "ai_class_cap": 2
   },
   "party": {
     "members": [
@@ -172,6 +173,41 @@
         "intro": "Blue fire gathers into a figure between the pillars. \"Words of power answer only to a steady mind. Prove yours.\"",
         "pass": "The flames bow low. \"The old words are yours now. Use them gently.\"",
         "fail": "The fire gutters out. \"Your mind wanders. Return when it is still.\""
+      }
+    },
+    "guardian": {
+      "name": "Guardian",
+      "role": "Tank / Defense",
+      "description": "The Party's shield. The most HP and Defense of any Class; protects allies and blunts incoming damage.",
+      "stats": {
+        "max_hp": 70,
+        "atk": 9,
+        "def": 9,
+        "mag": 2,
+        "res": 6,
+        "spd": 7,
+        "crit": 0.05
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "melee",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "skills": [
+        "protect",
+        "shield_wall"
+      ],
+      "ai": "guardian",
+      "challenge": {
+        "trainer": "stone_sentinel",
+        "rounds": 3,
+        "intro": "The stone knight raises its shield. \"None pass who cannot stand firm. Strike me, and endure my answer.\"",
+        "pass": "The sentinel kneels and offers its shield. \"Stand before those you love. That is the Guardian's oath.\"",
+        "fail": "The sentinel does not move. \"You are not yet a wall. Return when you are.\""
       }
     }
   },
@@ -596,6 +632,31 @@
       },
       "weakness": [],
       "rewards": {}
+    },
+    "stone_sentinel": {
+      "name": "Stone Sentinel",
+      "row": "front",
+      "behavior": "charge_strongest",
+      "description": "A living statue testing your endurance. Its blows are heavy but will not truly hurt you.",
+      "stats": {
+        "max_hp": 66,
+        "atk": 11,
+        "def": 4,
+        "mag": 0,
+        "res": 4,
+        "spd": 6,
+        "crit": 0.0
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [],
+      "rewards": {}
     }
   },
   "encounters": {
@@ -782,6 +843,28 @@
           "power": 1.6,
           "element": "ice"
         }
+      }
+    },
+    "protect": {
+      "name": "Protect",
+      "class": "guardian",
+      "description": "Guard one ally until your next turn: attacks aimed at them hit you instead, with 30% less damage.",
+      "cooldown": 0,
+      "use": {
+        "target": "other_ally",
+        "status": "protect",
+        "multiplier": 0.7
+      }
+    },
+    "shield_wall": {
+      "name": "Shield Wall",
+      "class": "guardian",
+      "description": "Raise your shield for everyone: the whole Party takes 40% less damage until your next turn. Cooldown: 3 turns.",
+      "cooldown": 3,
+      "use": {
+        "target": "self",
+        "status": "shield_wall",
+        "multiplier": 0.6
       }
     }
   },

@@ -15,6 +15,7 @@ const CLASS_AND_COMBAT := {
 	},
 }
 const WEAK_TRAINER := {"enemies": {"old_swordsman": {"stats": {"max_hp": 1}}}}
+const WEAK_TRAINER_WHOLE_PARTY := {"enemies": {"old_swordsman": {"stats": {"max_hp": 1}}}, "rules": {"ai_class_cap": 5}}
 const SLOW_TANKY_WOLVES := {"enemies": {"grey_wolf": {"stats": {"max_hp": 500, "spd": 5}}}}
 
 var h: MatchHarness
@@ -96,7 +97,8 @@ func test_beating_the_trainer_offers_the_class_to_every_classless_character() ->
 	assert_eq(encounter["stage"], "offer")
 	assert_eq(encounter["passed"], true)
 	assert_eq(encounter["offer"]["eligible"], [0, 1, 2, 3, 4])
-	assert_eq(encounter["offer"]["decisions"], {"1": true, "2": true, "3": true, "4": true}, "AI accepts on its own")
+	assert_eq(encounter["offer"]["decisions"], {"1": true, "2": true, "3": false, "4": false},
+			"AI decides on its own and stops at two of a Class")
 	assert_eq(encounter["offer"]["you_can_decide"], true)
 
 
@@ -144,11 +146,25 @@ func test_several_characters_can_take_the_same_class() -> void:
 	_fight_trial()
 	h.server.command(sessions[0], {"type": "class_choice", "accept": true})
 	h.server.command(sessions[1], {"type": "class_choice", "accept": true})
-	assert_eq(_classes(), ["swordsman", "swordsman", "swordsman", "swordsman", "swordsman"])
+	assert_eq(_classes(), ["swordsman", "swordsman", "swordsman", "swordsman", "classless"],
+			"humans always may; AI stopped once two had it")
+
+
+func test_ai_left_classless_takes_a_class_at_a_later_encounter_up_to_the_cap() -> void:
+	_start(1)
+	_take_route("class")
+	_fight_trial()
+	h.server.command(sessions[0], {"type": "class_choice", "accept": false})
+	assert_eq(_classes(), ["classless", "swordsman", "swordsman", "classless", "classless"])
+	_take_route("class")
+	_fight_trial()
+	var offer: Dictionary = _encounter()["offer"]
+	assert_eq(offer["eligible"], [0, 3, 4])
+	assert_eq(offer["decisions"], {"3": false, "4": false}, "two Swordsmen already")
 
 
 func test_declining_keeps_classless_and_allows_a_later_class_encounter() -> void:
-	_start(2)
+	_start(2, WEAK_TRAINER_WHOLE_PARTY)
 	_take_route("class")
 	_fight_trial()
 	h.server.command(sessions[0], {"type": "class_choice", "accept": true})
@@ -195,7 +211,7 @@ func test_answering_twice_is_rejected_while_others_decide() -> void:
 
 
 func test_passing_with_nobody_classless_grants_mastery_exp() -> void:
-	_start(1)
+	_start(1, WEAK_TRAINER_WHOLE_PARTY)
 	_take_route("class")
 	_fight_trial()
 	h.server.command(sessions[0], {"type": "class_choice", "accept": true})

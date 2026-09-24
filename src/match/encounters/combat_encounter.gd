@@ -9,10 +9,15 @@ extends Encounter
 ##
 ## Every action (Attack, Skill, Item, enemy attacks) is described by an
 ## "action profile" from content data:
-##   {"target": "enemy"|"all_enemies"|"ally"|"fallen_ally"|"self",
+##   {"target": "enemy"|"all_enemies"|"ally"|"other_ally"|"all_allies"|"fallen_ally"|"self",
 ##    "range": "melee"|"ranged",
 ##    "damage": {"stat": "atk"|"mag", "power": 1.0, "element": "physical"} or {"amount": 18, ...},
-##    "heal": 30, "revive_ratio": 0.4}
+##    "heal": 30, "revive_ratio": 0.4,
+##    "status": "protect"|"shield_wall", "multiplier": 0.7}
+##
+## Statuses last until the user's next turn: "protect" redirects damage
+## aimed at the protected ally to the protector (reduced by the multiplier);
+## "shield_wall" reduces damage taken by the whole Party.
 ##
 ## Skills are limited by cooldowns counted in the character's own turns
 ## (ADR-0005); cooldowns reset at the start of every Combat.
@@ -36,6 +41,10 @@ var deadline := -1.0
 var act_at := -1.0
 ## ids that Defended and take reduced damage until their next turn.
 var defending: Dictionary = {}
+## protected ally id -> {"by": protector id, "multiplier": float}
+var protected: Dictionary = {}
+## protector id -> damage multiplier for the whole Party (Shield Wall)
+var shields: Dictionary = {}
 ## "" while fighting, then "victory", "defeat" or (trials only) "timeout".
 var result := ""
 var rewards: Dictionary = {}
@@ -108,6 +117,9 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 			and result.is_empty()
 	var defending_ids: Array = defending.keys()
 	defending_ids.sort()
+	var protected_view := {}
+	for ally in protected:
+		protected_view[ally] = protected[ally]["by"]
 	var out := {
 		"kind": "combat",
 		"trial": trial,
@@ -120,6 +132,8 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 		"deadline": deadline if deadline >= 0.0 else null,
 		"your_turn": your_turn,
 		"defending": defending_ids,
+		"protected": protected_view,
+		"shielded": not shields.is_empty(),
 		"result": result,
 		"rewards": rewards,
 	}
@@ -176,6 +190,10 @@ func _next_turn(run: MatchRun) -> void:
 func _begin_turn(run: MatchRun, id: String) -> void:
 	actor = id
 	defending.erase(id)
+	shields.erase(id)
+	for ally in protected.keys():
+		if protected[ally]["by"] == id:
+			protected.erase(ally)
 	if cooldowns.has(id):
 		for skill in cooldowns[id]:
 			cooldowns[id][skill] = maxi(0, int(cooldowns[id][skill]) - 1)
@@ -300,6 +318,11 @@ func valid_targets(run: MatchRun, id: String, profile: Dictionary) -> Array[Stri
 					if melee and front_alive and enemy["row"] != "front":
 						continue
 					out.append(enemy["id"])
+		"other_ally":
+			if not on_enemy_side:
+				for i in run.party.size():
+					if run.party[i]["hp"] > 0 and _pid(i) != id:
+						out.append(_pid(i))
 		"ally", "all_allies":
 			if on_enemy_side:
 				for enemy in enemies:
@@ -389,7 +412,13 @@ func _apply_profile(run: MatchRun, source: String, profile: Dictionary, targets:
 		var unit := _unit(run, target)
 		var entry := {"target": target}
 		if profile.has("damage"):
-			entry.merge(_hit(run, source, unit, profile["damage"]))
+			var guard := _protector_of(run, target)
+			if guard.is_empty():
+				entry.merge(_hit(run, source, unit, profile["damage"]))
+			else:
+				entry = {"target": guard, "protected": target}
+				entry.merge(_hit(run, source, _unit(run, guard), profile["damage"],
+						float(protected[target]["multiplier"])))
 		if profile.has("heal") and unit["hp"] > 0:
 			var before: int = unit["hp"]
 			unit["hp"] = mini(unit["max_hp"], unit["hp"] + int(profile["heal"]))
@@ -397,13 +426,22 @@ func _apply_profile(run: MatchRun, source: String, profile: Dictionary, targets:
 		if profile.has("revive_ratio") and unit["hp"] <= 0:
 			unit["hp"] = maxi(1, int(round(unit["max_hp"] * float(profile["revive_ratio"]))))
 			entry["revived"] = true
-		entry["hp"] = unit["hp"]
+		match str(profile.get("status", "")):
+			"protect":
+				protected[target] = {"by": source, "multiplier": float(profile.get("multiplier", 1.0))}
+				entry["status"] = "protected"
+			"shield_wall":
+				shields[source] = float(profile.get("multiplier", 1.0))
+				entry["status"] = "shielded"
+		if not entry.has("target"):
+			entry["target"] = target
+		entry["hp"] = _unit(run, entry["target"])["hp"]
 		results.append(entry)
 	return results
 
 
 ## Computes and applies one damage instance. Returns what happened.
-func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary) -> Dictionary:
+func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary, multiplier: float = 1.0) -> Dictionary:
 	var rules := run.content
 	var attacker := _unit(run, source)
 	var element := str(damage.get("element", "physical"))
@@ -429,6 +467,10 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary)
 	var target_id := _id_of(target)
 	if defending.has(target_id):
 		amount *= rules.get_float("rules.defend_multiplier", 0.5)
+	if target_id.begins_with(PARTY_PREFIX):
+		for shield in shields.values():
+			amount *= float(shield)
+	amount *= multiplier
 	var dealt := maxi(1, int(round(amount)))
 	var floor_hp := 1 if trial and target_id.begins_with(PARTY_PREFIX) else 0
 	target["hp"] = maxi(mini(floor_hp, target["hp"]), target["hp"] - dealt)
@@ -438,6 +480,27 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary)
 		if target_id.begins_with(ENEMY_PREFIX):
 			defeated_kinds.append(str(target["kind"]))
 	return out
+
+
+## True when the Party should brace: less than half of its total HP is
+## left (fallen characters count as empty).
+func party_in_danger(run: MatchRun) -> bool:
+	var hp := 0
+	var max_hp := 0
+	for character in run.party:
+		hp += int(character["hp"])
+		max_hp += int(character["max_hp"])
+	return max_hp > 0 and hp * 2 < max_hp
+
+
+## The living ally protecting `target` from harm, or "".
+func _protector_of(run: MatchRun, target: String) -> String:
+	if not protected.has(target):
+		return ""
+	var guard: String = protected[target]["by"]
+	if _unit(run, guard)["hp"] <= 0:
+		return ""
+	return guard
 
 
 func _after_action(run: MatchRun) -> void:

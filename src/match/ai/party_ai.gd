@@ -12,10 +12,14 @@ extends RefCounted
 ##   archer     always picks off the weakest enemy, with Aimed Shot when ready
 ##   mage       Fireball when two or more enemies stand and it is ready, else
 ##              Frost Lance or a magic attack on the weakest enemy
+##   guardian   Protect the ally with the lowest HP share below 60% that
+##              nobody protects yet; Shield Wall when the Party is in danger;
+##              otherwise Defend
 
 const LOW_HP := 0.35
 const CRITICAL_HP := 0.2
 const FOCUS_WEAKEST_CHANCE := 0.7
+const NEEDS_PROTECTION := 0.6
 
 
 static func decide(run: MatchRun, combat: CombatEncounter, slot: int) -> Dictionary:
@@ -48,7 +52,28 @@ static func decide(run: MatchRun, combat: CombatEncounter, slot: int) -> Diction
 			if not lance.is_empty():
 				return _skill_on(run, combat, id, "frost_lance", weakest(run, combat, lance))
 			return _attack_weakest(run, combat, id)
+		"guardian":
+			return _guard(run, combat, id)
 	return _basic_attack(run, combat, id)
+
+
+static func _guard(run: MatchRun, combat: CombatEncounter, id: String) -> Dictionary:
+	if combat.party_in_danger(run) and not _ready_skill(run, combat, id, "shield_wall").is_empty():
+		return _skill_on(run, combat, id, "shield_wall", id)
+	var candidates := _ready_skill(run, combat, id, "protect")
+	var ward := ""
+	var ward_ratio := NEEDS_PROTECTION
+	for ally in candidates:
+		if combat.protected.has(ally):
+			continue
+		var unit: Dictionary = combat._unit(run, ally)
+		var ratio := float(unit["hp"]) / float(unit["max_hp"])
+		if ratio < ward_ratio:
+			ward = ally
+			ward_ratio = ratio
+	if not ward.is_empty():
+		return _skill_on(run, combat, id, "protect", ward)
+	return {"actor": id, "action": "defend"}
 
 
 static func _attack_weakest(run: MatchRun, combat: CombatEncounter, id: String) -> Dictionary:
