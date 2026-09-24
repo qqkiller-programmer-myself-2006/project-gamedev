@@ -19,7 +19,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	_voted = vote["voted_slots"].has(me)
 	add_child(UiKit.para("Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])], "title"))
 	add_child(UiKit.para("Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random.", "dim"))
-	var row := UiKit.hbox(12)
+	var row := UiKit.flow(12)
 	for option in _options:
 		row.add_child(_option_card(screen, app, option))
 	add_child(row)
@@ -73,7 +73,7 @@ func _option_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> Co
 	box.add_child(button)
 	var card := UiKit.panel(box, "HighlightPanel" if mine else "CardPanel")
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(200, 230)
+	card.custom_minimum_size = Vector2(250, 230)
 	return card
 
 

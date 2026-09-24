@@ -29,14 +29,13 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	add_child(UiKit.panel(stats, "CardPanel"))
 	for clue in summary.get("clues", []):
 		add_child(UiKit.para("- %s: %s" % [clue["title"], clue["text"]], "dim"))
-	var actions := UiKit.hbox(12)
+	var actions := UiKit.flow(12)
 	if screen.is_host():
 		var again := UiKit.button("Start a new Match [Enter]", func() -> void: app.send({"type": "start_match"}), true)
 		again.set_meta("focus_id", "again")
 		actions.add_child(again)
 	else:
 		actions.add_child(UiKit.label("Waiting for the Host to start a new Match...", "heading"))
-	actions.add_child(UiKit.spacer())
 	actions.add_child(UiKit.button("Clue log [C]", screen.toggle_clues))
 	add_child(actions)
 

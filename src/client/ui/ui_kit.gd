@@ -12,7 +12,7 @@ const ACCENT := Color("#f0c85c")
 const TEXT := Color("#f4f0e6")
 const TEXT_DIM := Color("#c3cbbf")
 const ALLY := Color("#8fd0f0")
-const ENEMY := Color("#f29384")
+const ENEMY := Color("#f8aca0")
 const GOOD := Color("#8ad98a")
 const WARN := Color("#f5b25e")
 const HP_FILL := Color("#5fb563")
@@ -126,6 +126,15 @@ static func vbox(separation: int = 8) -> VBoxContainer:
 static func hbox(separation: int = 8) -> HBoxContainer:
 	var node := HBoxContainer.new()
 	node.add_theme_constant_override("separation", separation)
+	return node
+
+
+## A row that wraps onto the next line when it runs out of width, so large
+## text sizes never push controls off screen.
+static func flow(separation: int = 8) -> HFlowContainer:
+	var node := HFlowContainer.new()
+	node.add_theme_constant_override("h_separation", separation)
+	node.add_theme_constant_override("v_separation", separation)
 	return node
 
 

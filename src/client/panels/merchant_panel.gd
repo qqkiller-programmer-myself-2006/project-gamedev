@@ -25,7 +25,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	for slot in encounter["ready"]:
 		ready_names.append(str(slots[int(slot)]["owner_name"]) if int(slot) < slots.size() else "?")
 	add_child(UiKit.label("Done shopping: %s" % (", ".join(ready_names) if not ready_names.is_empty() else "nobody yet"), "dim"))
-	var actions := UiKit.hbox(10)
+	var actions := UiKit.flow(10)
 	var done := UiKit.button("Waiting for the others..." if _ready else "Done shopping [R]",
 			func() -> void: app.send({"type": "ready"}), true)
 	done.disabled = _ready

@@ -22,6 +22,18 @@ func setup(app: ClientApp) -> void:
 	center.add_child(_body)
 
 
+func show_events(app: ClientApp, events: Array) -> void:
+	for event in events:
+		match str(event["type"]):
+			"player_joined":
+				app.toast("%s joined the room." % event["name"])
+				app.sounds.play("good")
+			"player_left":
+				app.toast("%s left. Their slot is AI controlled now." % event["name"])
+			"host_changed":
+				app.toast("%s is now the Host." % event["name"])
+
+
 func refresh(app: ClientApp, force: bool = false) -> void:
 	var room: Dictionary = app.snapshot.get("room", {})
 	var digest := JSON.stringify(room)
@@ -33,11 +45,10 @@ func refresh(app: ClientApp, force: bool = false) -> void:
 	var you: int = room.get("your_slot", -1)
 	var is_host: bool = you == room.get("host_slot", -2)
 
-	var heading := UiKit.hbox(12)
+	var heading := UiKit.flow(12)
 	heading.add_child(UiKit.label("Room code", "heading"))
 	var code := UiKit.label(str(room.get("code", "")), "huge", UiKit.ACCENT)
 	heading.add_child(code)
-	heading.add_child(UiKit.spacer())
 	var copy := UiKit.button("Copy code", func() -> void:
 		DisplayServer.clipboard_set(str(room.get("code", "")))
 		app.toast("Room code copied."))
@@ -52,7 +63,7 @@ func refresh(app: ClientApp, force: bool = false) -> void:
 	for slot in room.get("slots", []):
 		list.add_child(_slot_row(slot))
 
-	var actions := UiKit.hbox(12)
+	var actions := UiKit.flow(12)
 	if is_host:
 		var start := UiKit.button("Start the Match [Enter]", func() -> void: app.send({"type": "start_match"}), true)
 		start.set_meta("focus_id", "start")
@@ -63,7 +74,6 @@ func refresh(app: ClientApp, force: bool = false) -> void:
 			if slot["is_host"]:
 				host_name = slot["owner_name"]
 		actions.add_child(UiKit.label("Waiting for %s (Host) to start the Match..." % host_name, "heading"))
-	actions.add_child(UiKit.spacer())
 	var leave := UiKit.button("Leave room", func() -> void:
 		app.send({"type": "leave_room"})
 		app.disconnect_from_server())

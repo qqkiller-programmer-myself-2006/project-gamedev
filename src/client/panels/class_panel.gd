@@ -32,7 +32,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	if _offer.is_empty():
 		return
 	if _offer["you_can_decide"]:
-		var row := UiKit.hbox(10)
+		var row := UiKit.flow(10)
 		row.add_child(UiKit.label("Take the %s Class?" % info["name"], "heading"))
 		var accept := UiKit.button("Accept [Y]", func() -> void: app.send({"type": "class_choice", "accept": true}), true)
 		accept.set_meta("focus_id", "accept")

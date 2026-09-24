@@ -209,6 +209,7 @@ func _show_screen(screen: String) -> void:
 	_current_name = screen
 	_current.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_screen_holder.add_child(_current)
+	fade_in(_current, 0.25)
 	if _current.has_method("setup"):
 		_current.setup(self)
 	if not snapshot.is_empty() and _current.has_method("refresh"):
@@ -235,6 +236,29 @@ func banner(message: String, seconds: float = 2.5, cue: String = "") -> void:
 		create_tween().tween_property(_banner, "modulate:a", 1.0, 0.2)
 	else:
 		_banner.modulate.a = 1.0
+
+
+## Fades a control in (skipped with Reduced motion).
+func fade_in(node: CanvasItem, seconds: float = 0.2, slide: Vector2 = Vector2.ZERO) -> void:
+	if settings.reduced_motion:
+		return
+	node.modulate.a = 0.0
+	var tween := create_tween().set_parallel(true).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	tween.tween_property(node, "modulate:a", 1.0, seconds)
+	if slide != Vector2.ZERO and node is Control:
+		var control := node as Control
+		var target := control.position
+		control.position = target + slide
+		tween.tween_property(control, "position", target, seconds)
+
+
+## A short flash on a card that was hit or healed (skipped with Reduced motion).
+func flash(node: CanvasItem, color: Color) -> void:
+	if settings.reduced_motion or not is_instance_valid(node):
+		return
+	var tween := create_tween()
+	tween.tween_property(node, "modulate", color, 0.08)
+	tween.tween_property(node, "modulate", Color.WHITE, 0.25)
 
 
 ## Shows a one-time tutorial hint unless the player has seen it already.

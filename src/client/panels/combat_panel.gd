@@ -86,9 +86,8 @@ func handle_key(screen: MatchScreen, app: ClientApp, key: int) -> bool:
 func _header(screen: MatchScreen, encounter: Dictionary) -> void:
 	if encounter.get("kind") == "boss":
 		var boss: Dictionary = encounter["boss"]
-		var head := UiKit.hbox(12)
+		var head := UiKit.flow(12)
 		head.add_child(UiKit.label("%s, %s" % [boss["name"], boss["title"]], "heading", UiKit.ENEMY))
-		head.add_child(UiKit.spacer())
 		head.add_child(UiKit.badge("PHASE %d/%d: %s" % [int(boss["phase"]), int(boss["phases_total"]), boss["phase_name"]], UiKit.WARN))
 		add_child(head)
 		var telegraph: Dictionary = boss.get("telegraph", {})
@@ -107,7 +106,7 @@ func _header(screen: MatchScreen, encounter: Dictionary) -> void:
 
 
 func _build_enemies(screen: MatchScreen) -> void:
-	var row := UiKit.hbox(10)
+	var row := UiKit.flow(10)
 	var targets := _current_targets(screen)
 	for enemy in _combat.get("enemies", []):
 		var id := str(enemy["id"])
@@ -132,23 +131,22 @@ func _build_enemies(screen: MatchScreen) -> void:
 		var card := UiKit.panel(box, "HighlightPanel" if target_index >= 0 else "CardPanel")
 		card.tooltip_text = str(enemy.get("description", ""))
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		card.custom_minimum_size = Vector2(160, 0)
+		card.custom_minimum_size = Vector2(230, 0)
 		row.add_child(card)
 		screen.anchors[id] = card
 	add_child(row)
 
 
 func _build_your_turn(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
-	var banner := UiKit.hbox(10)
+	var banner := UiKit.flow(16)
 	banner.add_child(UiKit.label("YOUR TURN - %s" % screen.name_of(_me), "heading", UiKit.ACCENT))
-	banner.add_child(UiKit.spacer())
 	_countdown = UiKit.label("", "heading")
 	banner.add_child(_countdown)
 	add_child(banner)
 	var choices: Dictionary = _combat.get("choices", {})
 	var mode := screen.combat_mode
 	if mode.is_empty():
-		var actions := UiKit.hbox(10)
+		var actions := UiKit.flow(10)
 		actions.add_child(_action_button("Attack [A]", func() -> void: _set_mode(screen, "attack"), "attack"))
 		var skill := _action_button("Skill [S]", func() -> void: _set_mode(screen, "skills"), "skill")
 		if choices.get("skills", {}).is_empty():
@@ -211,7 +209,7 @@ func _build_your_turn(screen: MatchScreen, app: ClientApp, view: Dictionary) -> 
 
 func _build_waiting(screen: MatchScreen) -> void:
 	var actor := str(_combat.get("actor", ""))
-	var row := UiKit.hbox(10)
+	var row := UiKit.flow(10)
 	match str(_combat.get("actor_controller", "")):
 		"human":
 			row.add_child(UiKit.label("Waiting for %s to act..." % screen.name_of(actor), "heading"))

@@ -13,7 +13,7 @@ var anchors: Dictionary = {}
 var combat_mode := ""
 var combat_mode_key := ""
 
-var _top: HBoxContainer
+var _top: HFlowContainer
 var _party: VBoxContainer
 var _center: MarginContainer
 var _center_scroll: ScrollContainer
@@ -21,6 +21,7 @@ var _log: RichTextLabel
 var _log_lines: Array[String] = []
 var _tips: VBoxContainer
 var _panel: Control = null
+var _panel_key := ""
 var _digest := ""
 var _clue_overlay: Control = null
 var _last_warned_deadline := -1.0
@@ -35,13 +36,13 @@ func setup(client: ClientApp) -> void:
 	add_child(margin)
 	var column := UiKit.vbox(10)
 	margin.add_child(column)
-	_top = UiKit.hbox(12)
+	_top = UiKit.flow(12)
 	column.add_child(UiKit.panel(_top))
 	var middle := UiKit.hbox(12)
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(middle)
 	var party_scroll := ScrollContainer.new()
-	party_scroll.custom_minimum_size = Vector2(310, 0)
+	party_scroll.custom_minimum_size = Vector2(clampf(300.0 * client.settings.text_scale, 300.0, 440.0), 0)
 	party_scroll.follow_focus = true
 	party_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_party = UiKit.vbox(6)
@@ -341,16 +342,29 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				var target := str(result["target"])
 				if result.has("damage"):
 					hurt = true
+					client.flash(anchors.get(target), Color(1.6, 0.7, 0.7))
 					var text := "-%d" % int(result["damage"])
 					if result.get("crit", false):
 						text += " CRIT"
 					float_text(target, text, UiKit.ENEMY if target.begins_with("p") else UiKit.ACCENT)
 				elif result.has("heal"):
+					client.flash(anchors.get(target), Color(0.8, 1.5, 0.8))
 					float_text(target, "+%d" % int(result["heal"]), UiKit.GOOD)
 			if hurt:
 				client.sounds.play("hit")
 		"vote_resolved":
 			client.banner("Next: %s" % event["name"], 2.2, "vote")
+		"combat_ended":
+			var rewards: Dictionary = event.get("rewards", {})
+			if event["result"] == "victory" and int(rewards.get("exp", 0)) > 0:
+				client.banner("Victory! +%d EXP, +%d Gold" % [int(rewards["exp"]), int(rewards.get("gold", 0))], 2.5, "good")
+		"player_joined":
+			client.toast("%s joined." % event["name"])
+			client.sounds.play("click")
+		"treasure_found":
+			client.banner("Treasure! +%d Gold" % int(event["gold"]), 2.0, "good")
+		"clue_found":
+			client.banner("Story Clue: %s" % event["clue"]["title"], 2.5, "good")
 		"level_up":
 			float_text("p%d" % int(event["slot"]), "LEVEL UP", UiKit.GOOD)
 			client.sounds.play("good")
@@ -406,7 +420,6 @@ func _build_top(view: Dictionary) -> void:
 	_top.add_child(steps)
 	var where := "Guardian Boss" if phase == "boss" else "Layer %d of %d" % [layer, total]
 	_top.add_child(UiKit.label(where))
-	_top.add_child(UiKit.spacer())
 	_top.add_child(UiKit.label("Gold: %d" % int(view.get("gold", 0)), "heading", UiKit.ACCENT))
 	var clues := UiKit.button("Clues: %d [C]" % view.get("clues", []).size(), toggle_clues)
 	clues.set_meta("focus_id", "clues")
@@ -495,6 +508,10 @@ func _build_panel(view: Dictionary) -> void:
 	_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_center.add_child(_panel)
 	_panel.build(self, app, view)
+	var key := "%s-%d-%s" % [phase, int(view.get("layer", 0)), str(encounter.get("kind", "")) if encounter != null else ""]
+	if key != _panel_key:
+		_panel_key = key
+		app.fade_in(_panel, 0.25, Vector2(16, 0))
 
 
 func _scroll_to(control: Control) -> void:

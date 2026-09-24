@@ -57,9 +57,11 @@ func _process(delta: float) -> bool:
 		app.apply_settings()
 	if frame == 15:
 		_shot("01_title")
+		# Already "connected" in-process; Enter on the focused Create button
+		# sends create_room just like a real player would.
 		app.use_connection(local)
 		local.start()
-		app.send({"type": "create_room", "name": "Ann"})
+		_press(KEY_ENTER)
 		return false
 	if frame == 25:
 		friend = harness.server.open_session()
