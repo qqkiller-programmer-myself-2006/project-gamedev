@@ -994,6 +994,32 @@
       }
     }
   },
+  "statuses": {
+    "bleed": {
+      "name": "Bleed",
+      "kind": "dot",
+      "damage": 3,
+      "turns": 3,
+      "max_stacks": 5,
+      "description": "Loses 3 HP per stack at the start of each of its turns, ignoring armour. Lasts 3 turns; stacks up to 5."
+    },
+    "poison": {
+      "name": "Poison",
+      "kind": "dot",
+      "damage": 2,
+      "turns": 4,
+      "max_stacks": 5,
+      "description": "Loses 2 HP per stack at the start of each of its turns, ignoring armour. Lasts 4 turns; stacks up to 5."
+    },
+    "toxin": {
+      "name": "Toxin",
+      "kind": "dot",
+      "damage": 5,
+      "turns": 2,
+      "max_stacks": 3,
+      "description": "Loses 5 HP per stack at the start of each of its turns, ignoring armour. Lasts 2 turns; stacks up to 3."
+    }
+  },
   "class_encounters": {
     "mastery_exp": 15,
     "pass_exp": 12
