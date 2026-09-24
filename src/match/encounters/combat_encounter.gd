@@ -147,6 +147,7 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 		"round": round_number,
 		"enemies": _enemy_views(),
 		"turn_order": order.slice(maxi(turn_index, 0)),
+		"round_order": order.duplicate(),
 		"actor": actor,
 		"actor_controller": _controller_of(run, actor),
 		"deadline": deadline if deadline >= 0.0 else null,
@@ -468,6 +469,7 @@ func _choices_for(run: MatchRun, slot: int) -> Dictionary:
 		var ready := skill_cooldown(me, skill) == 0 and can_afford(run, me, skill)
 		skills[skill] = {
 			"name": run.content.get_value("skills.%s.name" % skill, skill),
+			"description": str(run.content.get_value("skills.%s.description" % skill, "")),
 			"cooldown": skill_cooldown(me, skill),
 			"energy": skill_energy(run, skill),
 			"affordable": can_afford(run, me, skill),
@@ -789,6 +791,7 @@ func _enemy_views() -> Array:
 			"name": enemy["name"],
 			"hp": enemy["hp"],
 			"max_hp": enemy["max_hp"],
+			"spd": enemy["spd"],
 			"row": enemy["row"],
 			"weakness": enemy["weakness"],
 			"description": enemy["description"],

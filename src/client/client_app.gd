@@ -245,6 +245,12 @@ func banner(message: String, seconds: float = 2.5, cue: String = "") -> void:
 		_banner.modulate.a = 1.0
 
 
+## Hides the banner now (e.g. when a screen with its own banner takes over).
+func clear_banner() -> void:
+	_banner_until = 0.0
+	_banner.visible = false
+
+
 ## Fades a control in (skipped with Reduced motion).
 func fade_in(node: CanvasItem, seconds: float = 0.2, slide: Vector2 = Vector2.ZERO) -> void:
 	if settings.reduced_motion:
@@ -277,7 +283,10 @@ func hint(key: String) -> void:
 	settings.save()
 	var box := UiKit.vbox(4)
 	box.add_child(UiKit.label("Tip", "body", UiKit.ACCENT))
-	var text := UiKit.para(UiText.HINTS[key], "small", Color(0, 0, 0, 0), 430)
+	var width := 430.0
+	if _current != null and _current.has_method("tip_width"):
+		width = _current.tip_width()
+	var text := UiKit.para(UiText.HINTS[key], "small", Color(0, 0, 0, 0), width)
 	box.add_child(text)
 	var panel := UiKit.panel(box, "HighlightPanel")
 	panel.set_meta("hint", true)

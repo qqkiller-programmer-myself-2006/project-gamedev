@@ -66,6 +66,8 @@ const HINTS := {
 	"skill": "You have a Class now. [S] opens your Skills; each Skill costs Energy and has a cooldown counted in your own turns.",
 	"class_offer": "Accept [Y] to take this Class, or Decline [N] to stay Classless and wait for another. Several characters can share a Class.",
 	"merchant": "Anyone can buy with the Party's shared Gold. Press [R] when you are done; the shop closes when everyone is ready.",
+	"energy": "Energy (the blue bar) pays for Skills: you start each Combat with 1 and regain 1 every later turn, up to 6. Attack, Defend and Items are free.",
+	"dot": "DoTs (Bleed BLD, Poison PSN, Toxin TOX) hurt at the start of each of their holder's turns, ignoring armour. The badge shows stacks (x) and turns left (t).",
 	"boss": "Watch the warnings: the Guardian announces its heaviest blows a turn early. Defend, Protect or raise Shield Wall before they land.",
 }
 

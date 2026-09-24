@@ -236,6 +236,7 @@ func party_view() -> Array:
 			"class_name": str(content.get_value("classes.%s.name" % c["class"], c["class"])),
 			"level": c["level"],
 			"exp": c["exp"],
+			"exp_next": _exp_to_next(int(c["level"])),
 			"hp": c["hp"],
 			"max_hp": c["max_hp"],
 			"energy": c.get("energy", content.get_int("rules.energy_start", 1)),
@@ -248,6 +249,12 @@ func party_view() -> Array:
 			"controller": "human" if _humans[c["slot"]] else "ai",
 		})
 	return out
+
+
+## EXP needed to reach the next level from `level` (0 at the level cap).
+func _exp_to_next(level: int) -> int:
+	var thresholds := content.get_array("leveling.exp_to_next")
+	return int(thresholds[level - 1]) if level - 1 < thresholds.size() else 0
 
 
 func _create_party() -> void:

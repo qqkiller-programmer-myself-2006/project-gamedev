@@ -2,7 +2,8 @@ class_name MatchScreen
 extends Control
 ## Everything during (and right after) a Match: journey progress, the Party
 ## with owner and human/AI control for every slot, the panel for the current
-## phase, and a readable log of what happened.
+## phase, and a readable log of what happened. Fights (Combats, Challenges
+## and the Guardian Boss) switch to the full-screen BattleView instead.
 
 var app: ClientApp
 ## id ("p0", "e1") -> display name, rebuilt on every refresh.
@@ -25,6 +26,9 @@ var _panel_key := ""
 var _digest := ""
 var _clue_overlay: Control = null
 var _last_warned_deadline := -1.0
+var _list_root: Control
+var _battle: BattleView
+var _battle_mode := false
 
 
 func setup(client: ClientApp) -> void:
@@ -74,11 +78,21 @@ func setup(client: ClientApp) -> void:
 	_tips = UiKit.vbox(0)
 	bottom.add_child(_tips)
 	column.add_child(bottom)
+	_list_root = margin
+	_battle = BattleView.new()
+	add_child(_battle)
+	_battle.setup(self, client)
+	_battle.visible = false
 
 
 ## Where one-time tips appear, next to the log so they never cover controls.
 func tip_slot() -> Container:
-	return _tips
+	return _battle.tips if _battle_mode else _tips
+
+
+## Tips are narrow in battle so they stay in the bottom-right corner.
+func tip_width() -> float:
+	return 210.0 if _battle_mode else 430.0
 
 
 func match_view() -> Dictionary:
@@ -111,6 +125,13 @@ func refresh(client: ClientApp, force: bool = false) -> void:
 	_collect_names(view)
 	var focus_id := _focused_id()
 	anchors.clear()
+	var combat := _active_combat(view)
+	_set_battle_mode(not combat.is_empty())
+	if _battle_mode:
+		_battle.build(view, combat)
+		if not _restore_focus(focus_id):
+			_battle.focus_default()
+		return
 	_build_top(view)
 	_build_party(view)
 	_build_panel(view)
@@ -122,7 +143,9 @@ func refresh(client: ClientApp, force: bool = false) -> void:
 
 
 func tick(client: ClientApp) -> void:
-	if _panel != null and _panel.has_method("tick"):
+	if _battle_mode:
+		_battle.tick()
+	elif _panel != null and _panel.has_method("tick"):
 		_panel.tick(self, client)
 
 
@@ -133,6 +156,8 @@ func handle_key(client: ClientApp, key: int) -> bool:
 	if key == KEY_ESCAPE and _clue_overlay != null:
 		toggle_clues()
 		return true
+	if _battle_mode:
+		return _battle.handle_key(key)
 	if _panel != null and _panel.has_method("handle_key"):
 		return _panel.handle_key(self, client, key)
 	return false
@@ -157,6 +182,30 @@ func warn_if_short(deadline: Variant, seconds_left: float) -> void:
 
 ## The combat view inside an Encounter view (a Class Encounter's trial,
 ## or the Combat/Boss Encounter itself), or {} when there is no fight.
+## The fight on screen right now, or {} outside fights.
+static func _active_combat(view: Dictionary) -> Dictionary:
+	if str(view.get("phase", "")) in ["voting", "travel", "victory", "defeat"]:
+		return {}
+	return combat_of(view.get("encounter"))
+
+
+func _set_battle_mode(on: bool) -> void:
+	if on == _battle_mode:
+		return
+	_battle_mode = on
+	_battle.visible = on
+	_list_root.visible = not on
+	if on and _panel != null:
+		_center.remove_child(_panel)
+		_panel.queue_free()
+		_panel = null
+		_panel_key = ""
+	app.close_hints()
+	if on:
+		app.clear_banner()
+		app.fade_in(_battle, 0.25)
+
+
 static func combat_of(encounter: Variant) -> Dictionary:
 	if encounter == null:
 		return {}
@@ -288,6 +337,14 @@ func describe(event: Dictionary) -> String:
 			return "Phase %d - %s: %s" % [int(event["phase"]), event["name"], event["text"]]
 		"match_ended":
 			return "Victory! The Forest is behind you." if event["result"] == "victory" else "Defeat. The Forest wins this time."
+		"status_applied":
+			if str(event.get("kind", "")) == "dot":
+				return "%s suffers %s (x%d, %d turns)." % [name_of(str(event["target"])), event["name"],
+						int(event["stacks"]), int(event["turns"])]
+			return "%s gains %s." % [name_of(str(event["target"])), event["name"]]
+		"status_tick":
+			return "%s takes %d from %s%s." % [name_of(str(event["target"])), int(event["damage"]), event["name"],
+					" and falls" if event.get("down", false) else ""]
 	return ""
 
 
@@ -330,13 +387,42 @@ func _describe_action(event: Dictionary) -> String:
 	return "%s %s: %s." % [actor, what, ", ".join(parts)] if not parts.is_empty() else "%s %s." % [actor, what]
 
 
+## A big announcement: the battle band while fighting, else the app banner.
+func _announce(client: ClientApp, message: String, seconds: float, cue: String) -> void:
+	if _battle_mode:
+		_battle.announce(message)
+		if not cue.is_empty():
+			client.sounds.play(cue)
+	else:
+		client.banner(message, seconds, cue)
+
+
 func _feedback(client: ClientApp, event: Dictionary) -> void:
 	var me := "p%d" % your_slot()
 	match str(event["type"]):
 		"turn_started":
 			if event["actor"] == me and event["controller"] == "human":
-				client.banner("Your turn!", 1.6, "turn")
+				_announce(client, "Your turn!", 1.6, "turn")
+		"status_tick":
+			var status := str(event["status"])
+			float_text(str(event["target"]), "-%d %s" % [int(event["damage"]), UiKit.status_tag(status)],
+					UiKit.status_color(status))
+			client.flash(anchors.get(str(event["target"])), Color(1.4, 0.8, 1.4))
+		"status_applied":
+			if str(event.get("kind", "")) == "dot":
+				var applied := str(event["status"])
+				float_text(str(event["target"]), "+%s" % UiKit.status_tag(applied), UiKit.status_color(applied))
 		"action_resolved":
+			if _battle_mode:
+				var named := ""
+				if event.has("move_name"):
+					named = str(event["move_name"])
+				elif event.has("skill"):
+					named = str(event["skill"]).replace("_", " ").capitalize()
+				elif event.has("item"):
+					named = str(event["item"]).replace("_", " ").capitalize()
+				if not named.is_empty():
+					_battle.announce(named)
 			var hurt := false
 			for result in event.get("results", []):
 				var target := str(result["target"])
@@ -357,7 +443,7 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 		"combat_ended":
 			var rewards: Dictionary = event.get("rewards", {})
 			if event["result"] == "victory" and int(rewards.get("exp", 0)) > 0:
-				client.banner("Victory! +%d EXP, +%d Gold" % [int(rewards["exp"]), int(rewards.get("gold", 0))], 2.5, "good")
+				_announce(client, "Victory! +%d EXP, +%d Gold" % [int(rewards["exp"]), int(rewards.get("gold", 0))], 2.5, "good")
 		"player_joined":
 			client.toast("%s joined." % event["name"])
 			client.sounds.play("click")
@@ -371,9 +457,9 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 		"class_changed":
 			client.sounds.play("good")
 		"boss_telegraph":
-			client.banner("Warning: %s next turn!" % event["name"], 2.5, "warn")
+			_announce(client, "Warning: %s next turn!" % event["name"], 2.5, "warn")
 		"boss_phase":
-			client.banner("Phase %d: %s" % [int(event["phase"]), event["name"]], 2.5, "warn")
+			_announce(client, "Phase %d: %s" % [int(event["phase"]), event["name"]], 2.5, "warn")
 		"slot_ai_takeover":
 			client.toast("%s is now controlled by AI." % event["character"])
 		"match_ended":
@@ -520,6 +606,7 @@ func _scroll_to(control: Control) -> void:
 
 
 func _add_log(line: String) -> void:
+	_battle.add_log(line)
 	_log_lines.append(line)
 	if _log_lines.size() > 60:
 		_log_lines.pop_front()
