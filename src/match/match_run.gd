@@ -246,6 +246,7 @@ func party_view() -> Array:
 			"mag": c["mag"],
 			"res": c["res"],
 			"spd": c["spd"],
+			"crit": c.get("crit", 0.0),
 			"controller": "human" if _humans[c["slot"]] else "ai",
 		})
 	return out

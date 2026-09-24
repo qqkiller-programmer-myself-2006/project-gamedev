@@ -3,7 +3,8 @@ extends Control
 ## Everything during (and right after) a Match: journey progress, the Party
 ## with owner and human/AI control for every slot, the panel for the current
 ## phase, and a readable log of what happened. Fights (Combats, Challenges
-## and the Guardian Boss) switch to the full-screen BattleView instead.
+## and the Guardian Boss) switch to the full-screen BattleView, and Merchant
+## and Rest to the three-column CampView.
 
 var app: ClientApp
 ## id ("p0", "e1") -> display name, rebuilt on every refresh.
@@ -29,6 +30,8 @@ var _last_warned_deadline := -1.0
 var _list_root: Control
 var _battle: BattleView
 var _battle_mode := false
+var _camp: CampView
+var _camp_mode := false
 
 
 func setup(client: ClientApp) -> void:
@@ -83,16 +86,24 @@ func setup(client: ClientApp) -> void:
 	add_child(_battle)
 	_battle.setup(self, client)
 	_battle.visible = false
+	_camp = CampView.new()
+	add_child(_camp)
+	_camp.setup(self, client)
+	_camp.visible = false
 
 
 ## Where one-time tips appear, next to the log so they never cover controls.
 func tip_slot() -> Container:
-	return _battle.tips if _battle_mode else _tips
+	if _battle_mode:
+		return _battle.tips
+	return _camp.tips if _camp_mode else _tips
 
 
 ## Tips are narrow in battle so they stay in the bottom-right corner.
 func tip_width() -> float:
-	return 210.0 if _battle_mode else 430.0
+	if _battle_mode:
+		return 210.0
+	return 300.0 if _camp_mode else 430.0
 
 
 func match_view() -> Dictionary:
@@ -126,11 +137,17 @@ func refresh(client: ClientApp, force: bool = false) -> void:
 	var focus_id := _focused_id()
 	anchors.clear()
 	var combat := _active_combat(view)
-	_set_battle_mode(not combat.is_empty())
+	var camp := _active_camp(view)
+	_set_fullscreen("battle" if not combat.is_empty() else ("camp" if not camp.is_empty() else ""))
 	if _battle_mode:
 		_battle.build(view, combat)
 		if not _restore_focus(focus_id):
 			_battle.focus_default()
+		return
+	if _camp_mode:
+		_camp.build(view, camp)
+		if not _restore_focus(focus_id):
+			_camp.focus_default()
 		return
 	_build_top(view)
 	_build_party(view)
@@ -145,6 +162,8 @@ func refresh(client: ClientApp, force: bool = false) -> void:
 func tick(client: ClientApp) -> void:
 	if _battle_mode:
 		_battle.tick()
+	elif _camp_mode:
+		_camp.tick()
 	elif _panel != null and _panel.has_method("tick"):
 		_panel.tick(self, client)
 
@@ -158,6 +177,8 @@ func handle_key(client: ClientApp, key: int) -> bool:
 		return true
 	if _battle_mode:
 		return _battle.handle_key(key)
+	if _camp_mode:
+		return _camp.handle_key(key)
 	if _panel != null and _panel.has_method("handle_key"):
 		return _panel.handle_key(self, client, key)
 	return false
@@ -189,21 +210,39 @@ static func _active_combat(view: Dictionary) -> Dictionary:
 	return combat_of(view.get("encounter"))
 
 
-func _set_battle_mode(on: bool) -> void:
-	if on == _battle_mode:
+## The Merchant or Rest Encounter on screen right now, or {}.
+static func _active_camp(view: Dictionary) -> Dictionary:
+	if str(view.get("phase", "")) in ["voting", "travel", "victory", "defeat"]:
+		return {}
+	var encounter = view.get("encounter")
+	if encounter != null and str(encounter.get("kind", "")) in ["merchant", "rest"]:
+		return encounter
+	return {}
+
+
+## Switches between the list layout ("") and a full-screen view
+## ("battle" or "camp").
+func _set_fullscreen(mode: String) -> void:
+	var battle := mode == "battle"
+	var camp := mode == "camp"
+	if battle == _battle_mode and camp == _camp_mode:
 		return
-	_battle_mode = on
-	_battle.visible = on
-	_list_root.visible = not on
-	if on and _panel != null:
+	_battle_mode = battle
+	_camp_mode = camp
+	_battle.visible = battle
+	_camp.visible = camp
+	_list_root.visible = not (battle or camp)
+	if (battle or camp) and _panel != null:
 		_center.remove_child(_panel)
 		_panel.queue_free()
 		_panel = null
 		_panel_key = ""
 	app.close_hints()
-	if on:
+	if camp:
+		_camp.reset()
+	if battle or camp:
 		app.clear_banner()
-		app.fade_in(_battle, 0.25)
+		app.fade_in(_battle if battle else _camp, 0.25)
 
 
 static func combat_of(encounter: Variant) -> Dictionary:

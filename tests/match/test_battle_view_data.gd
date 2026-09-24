@@ -26,3 +26,8 @@ func test_enemy_views_carry_speed() -> void:
 func test_party_view_carries_exp_to_next_level() -> void:
 	var me: Dictionary = h.match_view(sessions[0])["party"][0]
 	assert_eq([me["level"], me["exp"], me["exp_next"]], [1, 0, 20])
+
+
+func test_party_view_carries_crit_for_the_camp_stat_sheet() -> void:
+	var me: Dictionary = h.match_view(sessions[0])["party"][0]
+	assert_eq(me["crit"], 0.0, "Classless crit pinned to 0 by EXACT_DAMAGE")
