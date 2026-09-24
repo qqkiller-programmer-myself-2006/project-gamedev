@@ -434,6 +434,7 @@ func _make_enemy(run: MatchRun, kind: String, index: int) -> Dictionary:
 		"name": str(data.get("name", kind.capitalize())),
 		"row": str(data.get("row", "front")),
 		"behavior": str(data.get("behavior", "random")),
+		"description": str(data.get("description", "")),
 		"attack": data.get("attack", {"target": "enemy", "damage": {"stat": "atk", "power": 1.0}}),
 		"weakness": data.get("weakness", []),
 		"rewards": data.get("rewards", {}),
@@ -456,6 +457,7 @@ func _enemy_views() -> Array:
 			"max_hp": enemy["max_hp"],
 			"row": enemy["row"],
 			"weakness": enemy["weakness"],
+			"description": enemy["description"],
 		})
 	return out
 

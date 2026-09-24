@@ -269,6 +269,7 @@
       "name": "Grey Wolf",
       "row": "front",
       "behavior": "hunt_weakest",
+      "description": "Fast and relentless. Always goes for whoever is weakest.",
       "stats": {
         "max_hp": 26,
         "atk": 9,
@@ -297,6 +298,120 @@
           }
         ]
       }
+    },
+    "thornback_boar": {
+      "name": "Thornback Boar",
+      "row": "front",
+      "behavior": "charge_strongest",
+      "description": "Slow and armoured. Charges whoever looks the strongest. Fears fire.",
+      "stats": {
+        "max_hp": 48,
+        "atk": 12,
+        "def": 5,
+        "mag": 0,
+        "res": 1,
+        "spd": 7,
+        "crit": 0.05
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [
+        "fire"
+      ],
+      "rewards": {
+        "exp": 14,
+        "gold": 9,
+        "drops": [
+          {
+            "item": "herb",
+            "chance": 0.25
+          }
+        ]
+      }
+    },
+    "bramble_archer": {
+      "name": "Bramble Archer",
+      "row": "back",
+      "behavior": "random",
+      "description": "Shoots from the back row at anyone in sight. Melee cannot reach it while the front row stands.",
+      "stats": {
+        "max_hp": 20,
+        "atk": 10,
+        "def": 2,
+        "mag": 0,
+        "res": 2,
+        "spd": 11,
+        "crit": 0.1
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [
+        "fire"
+      ],
+      "rewards": {
+        "exp": 10,
+        "gold": 12,
+        "drops": [
+          {
+            "item": "firebomb",
+            "chance": 0.1
+          }
+        ]
+      }
+    },
+    "forest_wisp": {
+      "name": "Forest Wisp",
+      "row": "back",
+      "behavior": "healer",
+      "description": "Mends wounded allies. Hurls spirit fire when nobody needs healing.",
+      "stats": {
+        "max_hp": 18,
+        "atk": 3,
+        "def": 1,
+        "mag": 9,
+        "res": 6,
+        "spd": 12,
+        "crit": 0.0
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "mag",
+          "power": 1.0,
+          "element": "spirit"
+        }
+      },
+      "support": {
+        "name": "Mend",
+        "target": "ally",
+        "heal": 18,
+        "below_ratio": 0.6
+      },
+      "weakness": [],
+      "rewards": {
+        "exp": 12,
+        "gold": 8,
+        "drops": [
+          {
+            "item": "tonic",
+            "chance": 0.15
+          }
+        ]
+      }
     }
   },
   "encounters": {
@@ -310,9 +425,115 @@
           ],
           "layers": [
             1,
+            2
+          ],
+          "weight": 3
+        },
+        {
+          "id": "lone_boar",
+          "enemies": [
+            "thornback_boar"
+          ],
+          "layers": [
+            1,
+            2
+          ],
+          "weight": 2
+        },
+        {
+          "id": "wolf_and_archer",
+          "enemies": [
+            "grey_wolf",
+            "bramble_archer"
+          ],
+          "layers": [
+            1,
+            3
+          ],
+          "weight": 2
+        },
+        {
+          "id": "wolf_pack",
+          "enemies": [
+            "grey_wolf",
+            "grey_wolf",
+            "grey_wolf"
+          ],
+          "layers": [
+            2,
             5
           ],
-          "weight": 1
+          "weight": 2,
+          "sites": [
+            "wolf_trail"
+          ]
+        },
+        {
+          "id": "ambush",
+          "enemies": [
+            "grey_wolf",
+            "bramble_archer",
+            "bramble_archer"
+          ],
+          "layers": [
+            2,
+            5
+          ],
+          "weight": 2,
+          "sites": [
+            "bandit_road"
+          ]
+        },
+        {
+          "id": "boar_and_wisp",
+          "enemies": [
+            "thornback_boar",
+            "forest_wisp"
+          ],
+          "layers": [
+            2,
+            4
+          ],
+          "weight": 2
+        },
+        {
+          "id": "wolves_and_archer",
+          "enemies": [
+            "grey_wolf",
+            "grey_wolf",
+            "bramble_archer"
+          ],
+          "layers": [
+            2,
+            5
+          ],
+          "weight": 2
+        },
+        {
+          "id": "thicket_guard",
+          "enemies": [
+            "thornback_boar",
+            "grey_wolf",
+            "forest_wisp"
+          ],
+          "layers": [
+            3,
+            5
+          ],
+          "weight": 2
+        },
+        {
+          "id": "archer_nest",
+          "enemies": [
+            "thornback_boar",
+            "bramble_archer",
+            "forest_wisp"
+          ],
+          "layers": [
+            4,
+            5
+          ],
+          "weight": 2
         }
       ]
     }

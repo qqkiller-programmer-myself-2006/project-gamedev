@@ -10,7 +10,8 @@ var sessions: Array[int] = []
 
 
 func _combat(humans: int, extra: Dictionary = SLOW_TANKY_WOLVES, seed_value: int = 4) -> void:
-	h = MatchHarness.new(seed_value, MatchHarness.merge([MatchHarness.ALL_COMBAT, MatchHarness.EXACT_DAMAGE, extra]))
+	h = MatchHarness.new(seed_value, MatchHarness.merge([MatchHarness.ALL_COMBAT, MatchHarness.WOLF_PAIR,
+			MatchHarness.EXACT_DAMAGE, extra]))
 	sessions = h.start_with_humans(humans)
 	h.enter_first_encounter(sessions)
 

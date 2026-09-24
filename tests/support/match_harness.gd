@@ -18,6 +18,12 @@ const ALL_COMBAT := {
 		"guarantees": {"class_by_layer": 0, "merchant_before_boss": false},
 	},
 }
+## Every Combat Encounter is exactly two Grey Wolves.
+const WOLF_PAIR := {
+	"encounters": {"combat": {"groups": [
+		{"id": "wolf_pair", "enemies": ["grey_wolf", "grey_wolf"], "layers": [1, 5], "weight": 1},
+	]}},
+}
 ## Removes randomness from damage so tests can expect exact numbers.
 const EXACT_DAMAGE := {
 	"rules": {"damage_variance": 0},
