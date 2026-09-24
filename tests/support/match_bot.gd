@@ -57,6 +57,38 @@ func act(session: int) -> void:
 			if not vote["voted_slots"].has(slot):
 				var option: int = choose_route.call(vote["options"], slot)
 				harness.server.command(session, {"type": "vote", "option": option})
+		"encounter":
+			var encounter = view["encounter"]
+			if encounter != null and encounter.get("kind") == "combat" and encounter["your_turn"]:
+				_fight(session, slot, view, encounter)
+
+
+## Combat policy: heal the most hurt ally below 40% HP when an Item allows
+## it, otherwise attack the weakest enemy in reach.
+func _fight(session: int, slot: int, view: Dictionary, encounter: Dictionary) -> void:
+	var choices: Dictionary = encounter["choices"]
+	var hurt := ""
+	var hurt_ratio := 0.4
+	for character in view["party"]:
+		var ratio := float(character["hp"]) / float(character["max_hp"])
+		if character["hp"] > 0 and ratio < hurt_ratio:
+			hurt = "p%d" % character["slot"]
+			hurt_ratio = ratio
+	if not hurt.is_empty():
+		for item in choices["items"]:
+			var info: Dictionary = choices["items"][item]
+			if info["target"] == "ally" and info["targets"].has(hurt):
+				harness.server.command(session, {"type": "action", "slot": slot, "action": "item",
+						"item": item, "target": hurt})
+				return
+	var targets: Array = choices["attack"]["targets"]
+	var weakest := ""
+	var weakest_hp := 0
+	for enemy in encounter["enemies"]:
+		if targets.has(enemy["id"]) and (weakest.is_empty() or enemy["hp"] < weakest_hp):
+			weakest = enemy["id"]
+			weakest_hp = enemy["hp"]
+	harness.server.command(session, {"type": "action", "slot": slot, "action": "attack", "target": weakest})
 
 
 func events_of_type(type: String) -> Array:

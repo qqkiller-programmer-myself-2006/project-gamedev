@@ -9,10 +9,11 @@ extends RefCounted
 ##
 ## In-Match commands:
 ##   vote {option}
+##   action {slot, action, target, item, skill}   (combat, see CombatEncounter)
 
 const PARTY_SIZE := 5
 ## In-Match command types (routed here by MatchServer during a Match).
-const COMMANDS: Array[String] = ["vote"]
+const COMMANDS: Array[String] = ["vote", "action"]
 
 var number := 1
 var phase := "voting"
@@ -23,6 +24,12 @@ var routes: Array = []
 var vote: PathVote = null
 var last_vote: Dictionary = {}
 var encounter: Encounter = null
+## Party-wide resources shared by every character.
+var gold := 0
+var inventory: Dictionary = {}
+## Filled when the Match ends.
+var summary: Dictionary = {}
+var enemies_defeated := 0
 
 var rng: GameRng
 var clock
@@ -43,6 +50,9 @@ func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array
 	number = match_number
 	_started_at = clock.now()
 	_create_party()
+	gold = content.get_int("party.starting_gold", 0)
+	for item in content.get_dict("party.starting_inventory"):
+		add_item(item, content.get_int("party.starting_inventory.%s" % item))
 	routes = RouteGenerator.generate(rng, content)
 	emit({"type": "match_started", "number": number, "party": party_view(), "layers": routes.size()})
 	_begin_layer(1)
@@ -121,8 +131,52 @@ func snapshot(viewer_slot: int) -> Dictionary:
 		"vote": vote.view() if phase == "voting" and vote != null else null,
 		"last_vote": last_vote,
 		"encounter": _encounter_view(viewer_slot),
+		"gold": gold,
+		"inventory": inventory_view(),
+		"summary": summary,
 		"elapsed": clock.now() - _started_at,
 	}
+
+
+func inventory_view() -> Array:
+	var out: Array = []
+	var ids := inventory.keys()
+	ids.sort()
+	for item in ids:
+		var data := content.get_dict("items.%s" % item)
+		out.append({
+			"item": item,
+			"name": str(data.get("name", item)),
+			"description": str(data.get("description", "")),
+			"count": inventory[item],
+			"target": str(data.get("use", {}).get("target", "")),
+		})
+	return out
+
+
+func add_gold(amount: int) -> void:
+	gold += amount
+
+
+func add_item(item: String, count: int = 1) -> void:
+	if count <= 0:
+		return
+	inventory[item] = int(inventory.get(item, 0)) + count
+
+
+## Adds EXP to a character and applies any level-ups (content leveling data).
+func grant_exp(slot: int, amount: int) -> void:
+	var character: Dictionary = party[slot]
+	character["exp"] += amount
+	var thresholds := content.get_array("leveling.exp_to_next")
+	while character["level"] - 1 < thresholds.size() and character["exp"] >= int(thresholds[character["level"] - 1]):
+		character["exp"] -= int(thresholds[character["level"] - 1])
+		var old_max: int = character["max_hp"]
+		character["level"] += 1
+		_apply_stats(character)
+		if character["hp"] > 0:
+			character["hp"] = mini(character["max_hp"], character["hp"] + character["max_hp"] - old_max)
+		emit({"type": "level_up", "slot": slot, "level": character["level"], "max_hp": character["max_hp"]})
 
 
 func party_view() -> Array:
@@ -240,6 +294,9 @@ func _enter_encounter() -> void:
 
 
 func _make_encounter(option: Dictionary) -> Encounter:
+	match str(option["type"]):
+		"combat":
+			return CombatEncounter.new(option, EnemyGroups.pick(rng, content, layer, str(option["site"])))
 	return PlaceholderEncounter.new(option)
 
 
@@ -247,6 +304,11 @@ func _make_encounter(option: Dictionary) -> Encounter:
 func _after_encounter_step() -> void:
 	if phase != "encounter" or encounter == null or not encounter.done:
 		return
+	if encounter is CombatEncounter:
+		enemies_defeated += encounter.defeated_kinds.size()
+		if encounter.result == "defeat":
+			_end_match("defeat")
+			return
 	emit({"type": "encounter_completed", "layer": layer, "encounter_type": encounter.option["type"]})
 	if layer < routes.size():
 		_begin_layer(layer + 1)
@@ -258,6 +320,22 @@ func _reach_boss() -> void:
 	phase = "boss"
 	encounter = null
 	emit({"type": "boss_reached", "layer": layer})
+
+
+func _end_match(outcome: String) -> void:
+	phase = outcome
+	encounter = null
+	vote = null
+	summary = {
+		"result": outcome,
+		"layer": layer,
+		"layers_total": routes.size(),
+		"elapsed": clock.now() - _started_at,
+		"enemies_defeated": enemies_defeated,
+		"gold": gold,
+		"party": party_view(),
+	}
+	emit({"type": "match_ended", "result": outcome, "summary": summary})
 
 
 func _encounter_view(viewer_slot: int) -> Variant:

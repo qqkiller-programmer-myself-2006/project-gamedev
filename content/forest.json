@@ -4,7 +4,17 @@
   "rules": {
     "empty_room_grace_seconds": 30,
     "vote_seconds": 20,
-    "travel_seconds": 2.5
+    "travel_seconds": 2.5,
+    "action_window_seconds": 15,
+    "ai_turn_seconds": 0.8,
+    "enemy_turn_seconds": 0.9,
+    "combat_end_seconds": 3,
+    "defend_multiplier": 0.5,
+    "defense_factor": 0.5,
+    "damage_variance": 0.1,
+    "crit_multiplier": 1.5,
+    "weakness_multiplier": 1.5,
+    "revive_hp_ratio": 0.3
   },
   "party": {
     "members": [
@@ -28,7 +38,11 @@
         "id": "wren",
         "name": "Wren"
       }
-    ]
+    ],
+    "starting_gold": 0,
+    "starting_inventory": {
+      "herb": 3
+    }
   },
   "classes": {
     "classless": {
@@ -42,7 +56,16 @@
         "spd": 10,
         "crit": 0.05
       },
-      "skills": []
+      "skills": [],
+      "attack": {
+        "target": "enemy",
+        "range": "melee",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      }
     }
   },
   "leveling": {
@@ -196,6 +219,100 @@
           "classes": {
             "guardian": 1
           }
+        }
+      ]
+    }
+  },
+  "items": {
+    "herb": {
+      "name": "Healing Herb",
+      "description": "Restores 30 HP to one ally.",
+      "use": {
+        "target": "ally",
+        "heal": 30
+      },
+      "price": 12
+    },
+    "tonic": {
+      "name": "Forest Tonic",
+      "description": "Restores 70 HP to one ally.",
+      "use": {
+        "target": "ally",
+        "heal": 70
+      },
+      "price": 28
+    },
+    "spirit_bloom": {
+      "name": "Spirit Bloom",
+      "description": "Revives a fallen ally with 40% HP.",
+      "use": {
+        "target": "fallen_ally",
+        "revive_ratio": 0.4
+      },
+      "price": 40
+    },
+    "firebomb": {
+      "name": "Firebomb",
+      "description": "Deals 18 fire damage to every enemy.",
+      "use": {
+        "target": "all_enemies",
+        "damage": {
+          "amount": 18,
+          "element": "fire"
+        }
+      },
+      "price": 24
+    }
+  },
+  "enemies": {
+    "grey_wolf": {
+      "name": "Grey Wolf",
+      "row": "front",
+      "behavior": "hunt_weakest",
+      "stats": {
+        "max_hp": 26,
+        "atk": 9,
+        "def": 2,
+        "mag": 0,
+        "res": 1,
+        "spd": 13,
+        "crit": 0.05
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [],
+      "rewards": {
+        "exp": 8,
+        "gold": 5,
+        "drops": [
+          {
+            "item": "herb",
+            "chance": 0.15
+          }
+        ]
+      }
+    }
+  },
+  "encounters": {
+    "combat": {
+      "groups": [
+        {
+          "id": "wolf_pair",
+          "enemies": [
+            "grey_wolf",
+            "grey_wolf"
+          ],
+          "layers": [
+            1,
+            5
+          ],
+          "weight": 1
         }
       ]
     }

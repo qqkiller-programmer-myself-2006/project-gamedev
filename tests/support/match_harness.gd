@@ -11,6 +11,20 @@ const EASY := {
 	"classes": {"classless": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}}},
 }
 
+## Content overrides whose routes only ever offer Combat Encounters.
+const ALL_COMBAT := {
+	"journey": {
+		"type_weights": {"combat": 1, "merchant": 0, "rest": 0, "treasure": 0, "story": 0, "class": 0},
+		"guarantees": {"class_by_layer": 0, "merchant_before_boss": false},
+	},
+}
+## Removes randomness from damage so tests can expect exact numbers.
+const EXACT_DAMAGE := {
+	"rules": {"damage_variance": 0},
+	"classes": {"classless": {"stats": {"crit": 0}}},
+	"enemies": {"grey_wolf": {"stats": {"crit": 0}, "rewards": {"drops": []}}},
+}
+
 var clock := ManualClock.new()
 var content: ForestContent
 var server: MatchServer
@@ -36,6 +50,22 @@ func advance(seconds: float, step: float = 0.25) -> void:
 var code := ""
 ## Result of the most recent helper command, for tests that want to check it.
 var last_result: Dictionary = {}
+
+
+## Deep-merges content override dictionaries (later ones win).
+static func merge(overrides: Array) -> Dictionary:
+	var out := {}
+	for item in overrides:
+		out = ForestContent._merged(out, item)
+	return out
+
+
+## Every human votes for the first route and the travel time passes, so the
+## first Layer's Encounter has started.
+func enter_first_encounter(sessions: Array[int]) -> void:
+	for session in sessions:
+		server.command(session, {"type": "vote", "option": 0})
+	advance(content.get_float("rules.travel_seconds", 0.0) + 0.01, 0.01)
 
 
 ## Opens a session that creates a room; remembers the Room code.
