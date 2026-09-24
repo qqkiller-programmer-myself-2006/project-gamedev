@@ -74,6 +74,60 @@ func enter_first_encounter(sessions: Array[int]) -> void:
 	advance(content.get_float("rules.travel_seconds", 0.0) + 0.01, 0.01)
 
 
+## Content where every Layer offers one Combat and one Class Encounter for
+## `class_id` (with a trainer that falls in one hit).
+static func class_and_combat(class_id: String) -> Dictionary:
+	var trainer: String = {
+		"swordsman": "old_swordsman", "archer": "veteran_hunter",
+		"mage": "shrine_spirit", "guardian": "stone_sentinel",
+	}[class_id]
+	return {
+		"journey": {
+			"options_min": 2,
+			"options_max": 2,
+			"type_weights": {"combat": 1, "merchant": 0, "rest": 0, "treasure": 0, "story": 0, "class": 1},
+			"guarantees": {"class_by_layer": 0, "merchant_before_boss": false},
+			"sites": {"class": [{"id": "test_site", "name": "Test Site", "hint": "Test.", "classes": {class_id: 1}}]},
+		},
+		"enemies": {trainer: {"stats": {"max_hp": 1}}},
+	}
+
+
+## Every human votes for the route of `type` in the current Layer, then the
+## travel time passes.
+func take_route(sessions: Array[int], type: String) -> void:
+	var view := match_view(sessions[0])
+	for option in view["vote"]["options"]:
+		if option["type"] == type:
+			for session in sessions:
+				server.command(session, {"type": "vote", "option": option["index"]})
+			break
+	advance(content.get_float("rules.travel_seconds", 0.0) + 0.1, 0.1)
+
+
+## Humans attack the trainer until the Class Encounter's Challenge is over.
+func fight_trial(sessions: Array[int], limit: float = 90.0) -> void:
+	var waited := 0.0
+	while waited < limit:
+		var encounter = match_view(sessions[0]).get("encounter")
+		if encounter == null or encounter.get("stage") != "challenge":
+			return
+		for session in sessions:
+			var trial: Dictionary = match_view(session)["encounter"].get("trial", {})
+			if trial.get("your_turn", false):
+				server.command(session, {"type": "action", "action": "attack", "target": "e0"})
+		advance(0.1, 0.1)
+		waited += 0.1
+
+
+## Takes the Class Encounter route, passes it and has every human accept.
+func gain_class(sessions: Array[int]) -> void:
+	take_route(sessions, "class")
+	fight_trial(sessions)
+	for session in sessions:
+		server.command(session, {"type": "class_choice", "accept": true})
+
+
 ## Opens a session that creates a room; remembers the Room code.
 func create_room(display_name: String = "Host") -> int:
 	var session := server.open_session()

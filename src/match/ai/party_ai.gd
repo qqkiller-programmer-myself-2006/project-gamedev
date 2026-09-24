@@ -9,6 +9,9 @@ extends RefCounted
 ##   classless  attack (usually the weakest enemy it can reach)
 ##   swordsman  Power Slash the toughest enemy in reach whenever it is ready,
 ##              otherwise attack like Classless
+##   archer     always picks off the weakest enemy, with Aimed Shot when ready
+##   mage       Fireball when two or more enemies stand and it is ready, else
+##              Frost Lance or a magic attack on the weakest enemy
 
 const LOW_HP := 0.35
 const CRITICAL_HP := 0.2
@@ -31,7 +34,27 @@ static func decide(run: MatchRun, combat: CombatEncounter, slot: int) -> Diction
 			var slash := _ready_skill(run, combat, id, "power_slash")
 			if not slash.is_empty():
 				return _skill_on(run, combat, id, "power_slash", toughest(run, combat, slash))
+		"archer":
+			var aimed := _ready_skill(run, combat, id, "aimed_shot")
+			if not aimed.is_empty():
+				return _skill_on(run, combat, id, "aimed_shot", weakest(run, combat, aimed))
+			return _attack_weakest(run, combat, id)
+		"mage":
+			var fire := _ready_skill(run, combat, id, "fireball")
+			if fire.size() >= 2:
+				return {"actor": id, "action": "skill", "skill": "fireball",
+						"profile": combat.skill_profile(run, "fireball"), "targets": fire}
+			var lance := _ready_skill(run, combat, id, "frost_lance")
+			if not lance.is_empty():
+				return _skill_on(run, combat, id, "frost_lance", weakest(run, combat, lance))
+			return _attack_weakest(run, combat, id)
 	return _basic_attack(run, combat, id)
+
+
+static func _attack_weakest(run: MatchRun, combat: CombatEncounter, id: String) -> Dictionary:
+	var profile := combat.attack_profile(run, id)
+	return {"actor": id, "action": "attack", "profile": profile,
+			"targets": [weakest(run, combat, combat.valid_targets(run, id, profile))]}
 
 
 ## Targets for `skill` if `id` has it ready, else an empty array.

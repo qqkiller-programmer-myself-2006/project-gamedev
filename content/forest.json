@@ -104,6 +104,75 @@
         "pass": "The old man laughs and bows. \"You have the spirit of the blade.\"",
         "fail": "The old man sheathes his sword. \"Not yet. Come back when your arms are stronger.\""
       }
+    },
+    "archer": {
+      "name": "Archer",
+      "role": "Ranged DPS",
+      "description": "The fastest of the Party. Shoots any enemy, even in the back row, and often lands critical hits.",
+      "stats": {
+        "max_hp": 44,
+        "atk": 11,
+        "def": 3,
+        "mag": 3,
+        "res": 3,
+        "spd": 15,
+        "crit": 0.25
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "skills": [
+        "aimed_shot"
+      ],
+      "ai": "archer",
+      "challenge": {
+        "trainer": "veteran_hunter",
+        "rounds": 3,
+        "intro": "A veteran hunter strings her bow. \"Hunters strike first and never miss twice. Show me you can keep up.\"",
+        "pass": "She lowers her bow with a grin. \"Fast hands. Take this bow, it has waited for someone like you.\"",
+        "fail": "\"Too slow. The forest does not wait for anyone.\""
+      }
+    },
+    "mage": {
+      "name": "Mage",
+      "role": "Magic DPS / AoE",
+      "description": "Fragile but devastating. Magic ignores armour and Fireball strikes every enemy at once.",
+      "stats": {
+        "max_hp": 38,
+        "atk": 5,
+        "def": 2,
+        "mag": 14,
+        "res": 6,
+        "spd": 9,
+        "crit": 0.05
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "mag",
+          "power": 1.0,
+          "element": "arcane"
+        }
+      },
+      "skills": [
+        "fireball",
+        "frost_lance"
+      ],
+      "ai": "mage",
+      "challenge": {
+        "trainer": "shrine_spirit",
+        "rounds": 3,
+        "intro": "Blue fire gathers into a figure between the pillars. \"Words of power answer only to a steady mind. Prove yours.\"",
+        "pass": "The flames bow low. \"The old words are yours now. Use them gently.\"",
+        "fail": "The fire gutters out. \"Your mind wanders. Return when it is still.\""
+      }
     }
   },
   "leveling": {
@@ -475,6 +544,58 @@
       },
       "weakness": [],
       "rewards": {}
+    },
+    "veteran_hunter": {
+      "name": "Veteran Hunter",
+      "row": "front",
+      "behavior": "random",
+      "description": "A seasoned hunter testing your speed. Her blunt arrows sting but will not truly hurt you.",
+      "stats": {
+        "max_hp": 64,
+        "atk": 9,
+        "def": 3,
+        "mag": 0,
+        "res": 2,
+        "spd": 14,
+        "crit": 0.1
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [],
+      "rewards": {}
+    },
+    "shrine_spirit": {
+      "name": "Shrine Spirit",
+      "row": "front",
+      "behavior": "random",
+      "description": "An old guardian flame. It tests the mind, not the body, and will not truly hurt you.",
+      "stats": {
+        "max_hp": 58,
+        "atk": 3,
+        "def": 6,
+        "mag": 9,
+        "res": 2,
+        "spd": 10,
+        "crit": 0.0
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "mag",
+          "power": 1.0,
+          "element": "spirit"
+        }
+      },
+      "weakness": [],
+      "rewards": {}
     }
   },
   "encounters": {
@@ -614,6 +735,52 @@
           "stat": "atk",
           "power": 1.8,
           "element": "physical"
+        }
+      }
+    },
+    "aimed_shot": {
+      "name": "Aimed Shot",
+      "class": "archer",
+      "description": "A careful ranged shot at 140% ATK that always lands a critical hit. Reaches the back row. Cooldown: 2 turns.",
+      "cooldown": 2,
+      "use": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "atk",
+          "power": 1.4,
+          "element": "physical",
+          "always_crit": true
+        }
+      }
+    },
+    "fireball": {
+      "name": "Fireball",
+      "class": "mage",
+      "description": "Fire magic at 110% MAG that hits every enemy, front and back row. Burns enemies weak to fire harder. Cooldown: 2 turns.",
+      "cooldown": 2,
+      "use": {
+        "target": "all_enemies",
+        "range": "ranged",
+        "damage": {
+          "stat": "mag",
+          "power": 1.1,
+          "element": "fire"
+        }
+      }
+    },
+    "frost_lance": {
+      "name": "Frost Lance",
+      "class": "mage",
+      "description": "An ice spear at 160% MAG against one enemy anywhere on the field. Cooldown: 1 turn.",
+      "cooldown": 1,
+      "use": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "mag",
+          "power": 1.6,
+          "element": "ice"
         }
       }
     }
