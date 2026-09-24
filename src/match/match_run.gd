@@ -10,10 +10,11 @@ extends RefCounted
 ## In-Match commands:
 ##   vote {option}
 ##   action {slot, action, target, item, skill}   (combat, see CombatEncounter)
+##   class_choice {accept}                        (Class Encounter offer)
 
 const PARTY_SIZE := 5
 ## In-Match command types (routed here by MatchServer during a Match).
-const COMMANDS: Array[String] = ["vote", "action"]
+const COMMANDS: Array[String] = ["vote", "action", "class_choice"]
 
 var number := 1
 var phase := "voting"
@@ -30,6 +31,8 @@ var inventory: Dictionary = {}
 ## Filled when the Match ends.
 var summary: Dictionary = {}
 var enemies_defeated := 0
+## Class ids taken by at least one character during this Match.
+var classes_discovered: Array[String] = []
 
 var rng: GameRng
 var clock
@@ -164,6 +167,20 @@ func add_item(item: String, count: int = 1) -> void:
 	inventory[item] = int(inventory.get(item, 0)) + count
 
 
+## Gives a character a new Class: stats are rebuilt from the Class at the
+## current level and HP grows by any gain in max HP.
+func change_class(slot: int, class_id: String) -> void:
+	var character: Dictionary = party[slot]
+	var old_max: int = character["max_hp"]
+	character["class"] = class_id
+	_apply_stats(character)
+	character["hp"] = clampi(character["hp"] + character["max_hp"] - old_max, 1, character["max_hp"])
+	if not classes_discovered.has(class_id):
+		classes_discovered.append(class_id)
+	emit({"type": "class_changed", "slot": slot, "class": class_id,
+			"class_name": str(content.get_value("classes.%s.name" % class_id, class_id))})
+
+
 ## Adds EXP to a character and applies any level-ups (content leveling data).
 func grant_exp(slot: int, amount: int) -> void:
 	var character: Dictionary = party[slot]
@@ -186,6 +203,7 @@ func party_view() -> Array:
 			"slot": c["slot"],
 			"name": c["name"],
 			"class": c["class"],
+			"class_name": str(content.get_value("classes.%s.name" % c["class"], c["class"])),
 			"level": c["level"],
 			"exp": c["exp"],
 			"hp": c["hp"],
@@ -297,6 +315,8 @@ func _make_encounter(option: Dictionary) -> Encounter:
 	match str(option["type"]):
 		"combat":
 			return CombatEncounter.new(option, EnemyGroups.pick(rng, content, layer, str(option["site"])))
+		"class":
+			return ClassEncounter.new(option)
 	return PlaceholderEncounter.new(option)
 
 
@@ -332,6 +352,7 @@ func _end_match(outcome: String) -> void:
 		"layers_total": routes.size(),
 		"elapsed": clock.now() - _started_at,
 		"enemies_defeated": enemies_defeated,
+		"classes_discovered": classes_discovered.duplicate(),
 		"gold": gold,
 		"party": party_view(),
 	}

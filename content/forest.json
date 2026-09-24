@@ -14,7 +14,8 @@
     "damage_variance": 0.1,
     "crit_multiplier": 1.5,
     "weakness_multiplier": 1.5,
-    "revive_hp_ratio": 0.3
+    "revive_hp_ratio": 0.3,
+    "class_offer_seconds": 20
   },
   "party": {
     "members": [
@@ -65,6 +66,43 @@
           "power": 1.0,
           "element": "physical"
         }
+      },
+      "role": "Beginner",
+      "description": "No special training yet. Can Attack, Defend and use Items.",
+      "ai": "classless"
+    },
+    "swordsman": {
+      "name": "Swordsman",
+      "role": "Melee DPS",
+      "description": "Balanced and dependable. Strong melee strikes, solid health.",
+      "stats": {
+        "max_hp": 52,
+        "atk": 12,
+        "def": 5,
+        "mag": 3,
+        "res": 3,
+        "spd": 10,
+        "crit": 0.08
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "melee",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "skills": [
+        "power_slash"
+      ],
+      "ai": "swordsman",
+      "challenge": {
+        "trainer": "old_swordsman",
+        "rounds": 3,
+        "intro": "An old man lowers his practice blade. \"Land enough blows before I tire of you, and I will teach you the sword.\"",
+        "pass": "The old man laughs and bows. \"You have the spirit of the blade.\"",
+        "fail": "The old man sheathes his sword. \"Not yet. Come back when your arms are stronger.\""
       }
     }
   },
@@ -412,6 +450,31 @@
           }
         ]
       }
+    },
+    "old_swordsman": {
+      "name": "Old Swordsman",
+      "row": "front",
+      "behavior": "charge_strongest",
+      "description": "A retired blade master testing your resolve. He will not truly hurt you.",
+      "stats": {
+        "max_hp": 70,
+        "atk": 9,
+        "def": 4,
+        "mag": 0,
+        "res": 2,
+        "spd": 11,
+        "crit": 0.0
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [],
+      "rewards": {}
     }
   },
   "encounters": {
@@ -537,5 +600,25 @@
         }
       ]
     }
+  },
+  "skills": {
+    "power_slash": {
+      "name": "Power Slash",
+      "class": "swordsman",
+      "description": "A heavy melee strike dealing 180% ATK damage to one enemy. Cooldown: 2 turns.",
+      "cooldown": 2,
+      "use": {
+        "target": "enemy",
+        "range": "melee",
+        "damage": {
+          "stat": "atk",
+          "power": 1.8,
+          "element": "physical"
+        }
+      }
+    }
+  },
+  "class_encounters": {
+    "mastery_exp": 15
   }
 }

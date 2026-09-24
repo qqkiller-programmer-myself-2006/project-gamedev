@@ -4,9 +4,11 @@ extends RefCounted
 ## has no human, using a behavior preset per Class. Choices that involve
 ## chance use the Match's GameRng so a Match replays exactly from its seed.
 ##
-## Classless preset: heal itself with an Item when HP is low, Defend when HP
-## is critical and no Item is left, otherwise attack (usually the weakest
-## enemy it can reach).
+## Every preset first looks after itself: heal with an Item when HP is low,
+## Defend when HP is critical and no Item is left. Then:
+##   classless  attack (usually the weakest enemy it can reach)
+##   swordsman  Power Slash the toughest enemy in reach whenever it is ready,
+##              otherwise attack like Classless
 
 const LOW_HP := 0.35
 const CRITICAL_HP := 0.2
@@ -24,7 +26,36 @@ static func decide(run: MatchRun, combat: CombatEncounter, slot: int) -> Diction
 					"profile": run.content.get_dict("items.%s.use" % item), "targets": [id]}
 		if ratio < CRITICAL_HP:
 			return {"actor": id, "action": "defend"}
+	match str(run.content.get_value("classes.%s.ai" % me["class"], "classless")):
+		"swordsman":
+			var slash := _ready_skill(run, combat, id, "power_slash")
+			if not slash.is_empty():
+				return _skill_on(run, combat, id, "power_slash", toughest(run, combat, slash))
 	return _basic_attack(run, combat, id)
+
+
+## Targets for `skill` if `id` has it ready, else an empty array.
+static func _ready_skill(run: MatchRun, combat: CombatEncounter, id: String, skill: String) -> Array[String]:
+	if not combat.class_skills(run, id).has(skill) or combat.skill_cooldown(id, skill) > 0:
+		return []
+	return combat.valid_targets(run, id, combat.skill_profile(run, skill))
+
+
+static func _skill_on(run: MatchRun, combat: CombatEncounter, id: String, skill: String, target: String) -> Dictionary:
+	return {"actor": id, "action": "skill", "skill": skill, "profile": combat.skill_profile(run, skill),
+			"targets": [target]}
+
+
+## Enemy id with the most current HP among `targets` (ties: lowest id).
+static func toughest(run: MatchRun, combat: CombatEncounter, targets: Array[String]) -> String:
+	var best := ""
+	var best_hp := 0
+	for target in targets:
+		var hp: int = combat._unit(run, target)["hp"]
+		if best.is_empty() or hp > best_hp:
+			best = target
+			best_hp = hp
+	return best
 
 
 static func _basic_attack(run: MatchRun, combat: CombatEncounter, id: String) -> Dictionary:

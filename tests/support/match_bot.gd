@@ -10,6 +10,8 @@ var sessions: Array[int] = []
 var events: Array = []
 ## Chooses a route option: func(options: Array, slot: int) -> int
 var choose_route: Callable = func(_options: Array, _slot: int) -> int: return 0
+## Decides a Class offer: func(class_id: String, slot: int) -> bool
+var accept_class: Callable = func(_class_id: String, _slot: int) -> bool: return true
 ## Seconds of game time between bot decisions.
 var step := 0.5
 
@@ -59,8 +61,18 @@ func act(session: int) -> void:
 				harness.server.command(session, {"type": "vote", "option": option})
 		"encounter":
 			var encounter = view["encounter"]
-			if encounter != null and encounter.get("kind") == "combat" and encounter["your_turn"]:
-				_fight(session, slot, view, encounter)
+			if encounter == null:
+				return
+			match str(encounter.get("kind", "")):
+				"combat":
+					if encounter["your_turn"]:
+						_fight(session, slot, view, encounter)
+				"class":
+					if encounter["stage"] == "challenge" and encounter["trial"]["your_turn"]:
+						_fight(session, slot, view, encounter["trial"])
+					elif encounter["stage"] == "offer" and encounter["offer"]["you_can_decide"]:
+						harness.server.command(session, {"type": "class_choice",
+								"accept": accept_class.call(encounter["class"], slot)})
 
 
 ## Combat policy: heal the most hurt ally below 40% HP when an Item allows

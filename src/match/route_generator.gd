@@ -77,6 +77,8 @@ static func _force(rng: GameRng, layers: Array, type: String, index: int) -> voi
 
 static func _make_option(rng: GameRng, content: ForestContent, type: String) -> Dictionary:
 	var sites := content.get_array("journey.sites.%s" % type)
+	if type == "class":
+		sites = _class_sites(content, sites)
 	var site: Dictionary = rng.pick(sites) if not sites.is_empty() else {"id": type, "name": type.capitalize()}
 	var option := {
 		"type": type,
@@ -93,3 +95,20 @@ static func _make_option(rng: GameRng, content: ForestContent, type: String) -> 
 		var index := rng.weighted_index(weights)
 		option["class_id"] = str(ids[index]) if index >= 0 else "swordsman"
 	return option
+
+
+## Class sites reduced to the Classes that exist in content, dropping sites
+## that would offer none.
+static func _class_sites(content: ForestContent, sites: Array) -> Array:
+	var usable: Array = []
+	for site in sites:
+		var offers := {}
+		var classes: Dictionary = site.get("classes", {})
+		for id in classes:
+			if not content.get_dict("classes.%s" % id).is_empty():
+				offers[id] = classes[id]
+		if not offers.is_empty():
+			var copy: Dictionary = site.duplicate(true)
+			copy["classes"] = offers
+			usable.append(copy)
+	return usable

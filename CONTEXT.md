@@ -57,8 +57,16 @@ _Avoid_: game API, backend
 _Avoid_: default class, novice class
 
 **Class Encounter**:
-Encounter ที่เปิดโอกาสให้ตัวละครค้นพบหรือยืนยันการเปลี่ยนไปใช้ Class
+Encounter ที่เปิดโอกาสให้ตัวละครค้นพบหรือยืนยันการเปลี่ยนไปใช้ Class: เริ่มด้วย Challenge (การประลองแบบไม่ถึงตายกับผู้ฝึกสอนภายในจำนวน round ที่กำหนด) ถ้าผ่าน ตัวละคร Classless ทุกตัวเลือกรับหรือไม่รับ Class นั้นได้
 _Avoid_: class menu, class selection screen
+
+**Challenge**:
+การประลองใน Class Encounter ที่ต้องเอาชนะผู้ฝึกสอนให้ได้ภายใน round ที่กำหนด; ไม่มีใครล้ม ไม่มี reward และ HP กลับเป็นเหมือนก่อนประลอง
+_Avoid_: trial boss, mini-boss
+
+**Skill**:
+action เฉพาะ Class ที่ถูกจำกัดด้วย cooldown นับเป็น turn ของตัวละครนั้นเอง (ADR-0005); ตัวละคร Classless ไม่มี Skill
+_Avoid_: ability, spell (เมื่อหมายถึง action ในระบบ)
 
 **Tier 1 Class**:
 Class ระดับแรกของ Forest vertical slice ได้แก่ Swordsman, Archer, Mage และ Guardian

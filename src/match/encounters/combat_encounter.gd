@@ -14,6 +14,12 @@ extends Encounter
 ##    "damage": {"stat": "atk"|"mag", "power": 1.0, "element": "physical"} or {"amount": 18, ...},
 ##    "heal": 30, "revive_ratio": 0.4}
 ##
+## Skills are limited by cooldowns counted in the character's own turns
+## (ADR-0005); cooldowns reset at the start of every Combat.
+##
+## A trial (the Challenge of a Class Encounter) is non-lethal, gives no
+## rewards and ends as "timeout" when its round limit passes.
+##
 ## Command: action {slot, action: attack|defend|item|skill, target, item, skill}
 
 const PARTY_PREFIX := "p"
@@ -30,17 +36,24 @@ var deadline := -1.0
 var act_at := -1.0
 ## ids that Defended and take reduced damage until their next turn.
 var defending: Dictionary = {}
-## "" while fighting, then "victory" or "defeat".
+## "" while fighting, then "victory", "defeat" or (trials only) "timeout".
 var result := ""
 var rewards: Dictionary = {}
 var defeated_kinds: Array[String] = []
+## pid -> {skill id: own turns left before it can be used again}
+var cooldowns: Dictionary = {}
+## Trial settings: no deaths, no rewards, limited rounds (0 = unlimited).
+var trial := false
+var round_limit := 0
 
 var _end_at := -1.0
 
 
-func _init(route_option: Dictionary, enemy_kinds: Array) -> void:
+func _init(route_option: Dictionary, enemy_kinds: Array, trial_rounds: int = 0) -> void:
 	super(route_option)
 	option["enemy_kinds"] = enemy_kinds.duplicate()
+	trial = trial_rounds > 0
+	round_limit = trial_rounds
 
 
 func start(run: MatchRun) -> void:
@@ -97,6 +110,8 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 	defending_ids.sort()
 	var out := {
 		"kind": "combat",
+		"trial": trial,
+		"round_limit": round_limit,
 		"round": round_number,
 		"enemies": _enemy_views(),
 		"turn_order": order.slice(maxi(turn_index, 0)),
@@ -116,6 +131,9 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 # --- Rounds and turns -------------------------------------------------------
 
 func _start_round(run: MatchRun) -> void:
+	if trial and round_number >= round_limit:
+		_finish(run, "timeout")
+		return
 	round_number += 1
 	var ids: Array[String] = []
 	for i in run.party.size():
@@ -158,6 +176,9 @@ func _next_turn(run: MatchRun) -> void:
 func _begin_turn(run: MatchRun, id: String) -> void:
 	actor = id
 	defending.erase(id)
+	if cooldowns.has(id):
+		for skill in cooldowns[id]:
+			cooldowns[id][skill] = maxi(0, int(cooldowns[id][skill]) - 1)
 	deadline = -1.0
 	act_at = -1.0
 	var now: float = run.clock.now()
@@ -209,8 +230,33 @@ func _plan_for(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 				return {"error": "invalid_target"}
 			return {"actor": me, "action": "item", "item": item, "profile": profile, "targets": targets}
 		"skill":
-			return {"error": "skill_unavailable"}
+			var skill := str(cmd.get("skill", ""))
+			if not class_skills(run, me).has(skill):
+				return {"error": "skill_unavailable"}
+			if skill_cooldown(me, skill) > 0:
+				return {"error": "skill_on_cooldown"}
+			var profile := skill_profile(run, skill)
+			var targets := _targets_for_command(run, me, profile, str(cmd.get("target", "")))
+			if targets.is_empty():
+				return {"error": "invalid_target"}
+			return {"actor": me, "action": "skill", "skill": skill, "profile": profile, "targets": targets}
 	return {"error": "invalid_action"}
+
+
+## Skill ids the character's Class grants (none for Classless).
+func class_skills(run: MatchRun, id: String) -> Array:
+	if not id.begins_with(PARTY_PREFIX):
+		return []
+	return run.content.get_array("classes.%s.skills" % _unit(run, id)["class"])
+
+
+func skill_profile(run: MatchRun, skill: String) -> Dictionary:
+	return run.content.get_dict("skills.%s.use" % skill)
+
+
+## Own turns left before `skill` can be used again by `id` (0 = ready).
+func skill_cooldown(id: String, skill: String) -> int:
+	return int(cooldowns.get(id, {}).get(skill, 0))
 
 
 ## Targets an action with `profile` would hit when the player picked
@@ -286,11 +332,20 @@ func _choices_for(run: MatchRun, slot: int) -> Dictionary:
 			"target": str(profile.get("target", "")),
 			"targets": valid_targets(run, me, profile),
 		}
+	var skills := {}
+	for skill in class_skills(run, me):
+		var profile := skill_profile(run, skill)
+		skills[skill] = {
+			"name": run.content.get_value("skills.%s.name" % skill, skill),
+			"cooldown": skill_cooldown(me, skill),
+			"target": str(profile.get("target", "")),
+			"targets": valid_targets(run, me, profile) if skill_cooldown(me, skill) == 0 else [],
+		}
 	return {
 		"attack": {"targets": valid_targets(run, me, attack_profile(run, me))},
 		"defend": true,
 		"items": items,
-		"skills": {},
+		"skills": skills,
 	}
 
 
@@ -318,6 +373,11 @@ func _perform(run: MatchRun, plan: Dictionary, automatic: bool) -> void:
 					run.inventory.erase(plan["item"])
 			if plan.has("skill"):
 				event["skill"] = plan["skill"]
+				if id.begins_with(PARTY_PREFIX):
+					var cooldown := run.content.get_int("skills.%s.cooldown" % plan["skill"])
+					if not cooldowns.has(id):
+						cooldowns[id] = {}
+					cooldowns[id][plan["skill"]] = cooldown + 1 if cooldown > 0 else 0
 			event["results"] = _apply_profile(run, id, plan["profile"], plan["targets"])
 	run.emit(event)
 	_after_action(run)
@@ -370,7 +430,8 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary)
 	if defending.has(target_id):
 		amount *= rules.get_float("rules.defend_multiplier", 0.5)
 	var dealt := maxi(1, int(round(amount)))
-	target["hp"] = maxi(0, target["hp"] - dealt)
+	var floor_hp := 1 if trial and target_id.begins_with(PARTY_PREFIX) else 0
+	target["hp"] = maxi(mini(floor_hp, target["hp"]), target["hp"] - dealt)
 	var out := {"damage": dealt, "crit": crit, "weak": weak, "element": element}
 	if target["hp"] <= 0:
 		out["down"] = true
@@ -393,7 +454,7 @@ func _finish(run: MatchRun, outcome: String) -> void:
 	actor = ""
 	deadline = -1.0
 	act_at = -1.0
-	if outcome == "victory":
+	if outcome == "victory" and not trial:
 		rewards = _grant_rewards(run)
 	run.emit({"type": "combat_ended", "result": outcome, "rewards": rewards})
 	_end_at = run.clock.now() + run.content.get_float("rules.combat_end_seconds", 3.0)
