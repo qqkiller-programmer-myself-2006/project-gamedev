@@ -17,6 +17,9 @@
     "revive_hp_ratio": 0.3,
     "class_offer_seconds": 20,
     "ai_class_cap": 2,
+    "energy_start": 1,
+    "energy_regen": 1,
+    "energy_max": 6,
     "story_read_seconds": 25,
     "story_vote_seconds": 20
   },
@@ -904,8 +907,9 @@
     "power_slash": {
       "name": "Power Slash",
       "class": "swordsman",
-      "description": "A heavy melee strike dealing 180% ATK damage to one enemy. Cooldown: 2 turns.",
+      "description": "A heavy melee strike dealing 180% ATK damage to one enemy. Costs 2 Energy. Cooldown: 2 turns.",
       "cooldown": 2,
+      "energy": 2,
       "use": {
         "target": "enemy",
         "range": "melee",
@@ -919,8 +923,9 @@
     "aimed_shot": {
       "name": "Aimed Shot",
       "class": "archer",
-      "description": "A careful ranged shot at 140% ATK that always lands a critical hit. Reaches the back row. Cooldown: 2 turns.",
+      "description": "A careful ranged shot at 140% ATK that always lands a critical hit. Reaches the back row. Costs 2 Energy. Cooldown: 2 turns.",
       "cooldown": 2,
+      "energy": 2,
       "use": {
         "target": "enemy",
         "range": "ranged",
@@ -935,8 +940,9 @@
     "fireball": {
       "name": "Fireball",
       "class": "mage",
-      "description": "Fire magic at 110% MAG that hits every enemy, front and back row. Burns enemies weak to fire harder. Cooldown: 2 turns.",
+      "description": "Fire magic at 110% MAG that hits every enemy, front and back row. Burns enemies weak to fire harder. Costs 2 Energy. Cooldown: 2 turns.",
       "cooldown": 2,
+      "energy": 2,
       "use": {
         "target": "all_enemies",
         "range": "ranged",
@@ -950,8 +956,9 @@
     "frost_lance": {
       "name": "Frost Lance",
       "class": "mage",
-      "description": "An ice spear at 160% MAG against one enemy anywhere on the field. Cooldown: 1 turn.",
+      "description": "An ice spear at 160% MAG against one enemy anywhere on the field. Costs 1 Energy. Cooldown: 1 turn.",
       "cooldown": 1,
+      "energy": 1,
       "use": {
         "target": "enemy",
         "range": "ranged",
@@ -965,8 +972,9 @@
     "protect": {
       "name": "Protect",
       "class": "guardian",
-      "description": "Guard one ally until your next turn: attacks aimed at them hit you instead, with 30% less damage.",
+      "description": "Guard one ally until your next turn: attacks aimed at them hit you instead, with 30% less damage. Costs 1 Energy. No cooldown.",
       "cooldown": 0,
+      "energy": 1,
       "use": {
         "target": "other_ally",
         "status": "protect",
@@ -976,8 +984,9 @@
     "shield_wall": {
       "name": "Shield Wall",
       "class": "guardian",
-      "description": "Raise your shield for everyone: the whole Party takes 40% less damage until your next turn. Cooldown: 3 turns.",
+      "description": "Raise your shield for everyone: the whole Party takes 40% less damage until your next turn. Costs 2 Energy. Cooldown: 3 turns.",
       "cooldown": 3,
+      "energy": 2,
       "use": {
         "target": "self",
         "status": "shield_wall",

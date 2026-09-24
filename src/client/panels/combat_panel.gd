@@ -143,6 +143,8 @@ func _build_your_turn(screen: MatchScreen, app: ClientApp, view: Dictionary) -> 
 	_countdown = UiKit.label("", "heading")
 	banner.add_child(_countdown)
 	add_child(banner)
+	var energy := _party_energy(view, _me)
+	add_child(UiKit.para("Energy %d/%d - Skills spend Energy; you regain 1 each of your turns." % energy, "dim"))
 	var choices: Dictionary = _combat.get("choices", {})
 	var mode := screen.combat_mode
 	if mode.is_empty():
@@ -175,15 +177,26 @@ func _build_your_turn(screen: MatchScreen, app: ClientApp, view: Dictionary) -> 
 			list.add_child(UiKit.label("Use which Skill?", "heading"))
 			for skill_id in choices.get("skills", {}):
 				var info: Dictionary = choices["skills"][skill_id]
-				var ready: bool = int(info["cooldown"]) == 0 and not info["targets"].is_empty()
-				var text := "[%d] %s - %s" % [_choices.size() + 1, info["name"],
-						"ready" if ready else "cooling down: %d turn(s)" % int(info["cooldown"])]
+				var cooldown := int(info["cooldown"])
+				var cost := int(info.get("energy", 0))
+				var affordable := bool(info.get("affordable", true))
+				var usable: bool = cooldown == 0 and affordable and not info["targets"].is_empty()
+				var text := ""
+				if cooldown > 0:
+					text = "[%d] %s - cooling down: %d turn(s) (%d Energy)" % [_choices.size() + 1, info["name"], cooldown, cost]
+				elif not affordable:
+					text = "[%d] %s - needs %d Energy" % [_choices.size() + 1, info["name"], cost]
+				elif info["targets"].is_empty():
+					text = "[%d] %s - no valid target (%d Energy)" % [_choices.size() + 1, info["name"], cost]
+				else:
+					text = "[%d] %s - ready (%d Energy)" % [_choices.size() + 1, info["name"], cost]
 				var pick := func() -> void: _pick_skill(screen, app, skill_id, info)
 				var button := UiKit.button(text, pick)
-				button.disabled = not ready
+				button.disabled = not usable
 				button.set_meta("focus_id", "skill_" + skill_id)
 				list.add_child(button)
-				_choices.append(pick if ready else func() -> void: app.toast(UiText.error("skill_on_cooldown")))
+				var reason := "not_enough_energy" if not affordable else "skill_on_cooldown"
+				_choices.append(pick if usable else func() -> void: app.toast(UiText.error(reason)))
 		"items":
 			list.add_child(UiKit.label("Use which Item?", "heading"))
 			for item_id in choices.get("items", {}):
@@ -260,7 +273,8 @@ func _target_text(screen: MatchScreen, id: String) -> String:
 					", back row" if enemy["row"] != "front" else ""]
 	for character in screen.match_view().get("party", []):
 		if "p%d" % int(character["slot"]) == id:
-			return "%s (HP %d/%d)%s" % [screen.name_of(id), int(character["hp"]), int(character["max_hp"]),
+			return "%s (HP %d/%d, Energy %d/%d)%s" % [screen.name_of(id), int(character["hp"]), int(character["max_hp"]),
+					int(character.get("energy", 0)), int(character.get("energy_max", 6)),
 					" - you" if id == _me else ""]
 	return screen.name_of(id)
 
@@ -317,6 +331,13 @@ func _turn_order_text(screen: MatchScreen) -> String:
 			who = "> " + who
 		parts.append(who)
 	return "Turn order this round: " + "  |  ".join(parts)
+
+
+static func _party_energy(view: Dictionary, pid: String) -> Array:
+	for character in view.get("party", []):
+		if "p%d" % int(character["slot"]) == pid:
+			return [int(character.get("energy", 0)), int(character.get("energy_max", 6))]
+	return [0, 6]
 
 
 static func _action_button(text: String, callback: Callable, id: String) -> Button:

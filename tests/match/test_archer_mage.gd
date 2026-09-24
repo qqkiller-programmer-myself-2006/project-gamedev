@@ -109,6 +109,9 @@ func test_archer_critical_hits_come_from_the_seed() -> void:
 
 func test_aimed_shot_always_lands_a_critical_hit() -> void:
 	_start("archer")
+	assert_rejected(_act({"action": "skill", "skill": "aimed_shot", "target": "e0"}), "not_enough_energy")
+	assert_ok(_act({"action": "defend"}))
+	_until_my_turn()
 	assert_ok(_act({"action": "skill", "skill": "aimed_shot", "target": "e0"}))
 	var action := _last_action()
 	assert_eq(action["results"][0]["crit"], true)
@@ -126,6 +129,8 @@ func test_mage_attack_deals_magic_damage() -> void:
 
 func test_fireball_hits_every_enemy_and_burns_the_fire_weak_harder() -> void:
 	_start("mage", ["thornback_boar", "grey_wolf", "bramble_archer"])
+	assert_ok(_act({"action": "defend"}), "first turn saves Energy")
+	_until_my_turn()
 	assert_ok(_act({"action": "skill", "skill": "fireball"}))
 	var action := _last_action()
 	assert_eq(_targets(action), ["e0", "e1", "e2"], "front and back row")
@@ -136,12 +141,17 @@ func test_fireball_hits_every_enemy_and_burns_the_fire_weak_harder() -> void:
 
 
 func test_frost_lance_is_a_single_target_elemental_skill_with_short_cooldown() -> void:
-	_start("mage")
+	_start("mage", ["grey_wolf", "grey_wolf"], MatchHarness.merge([NO_CLASS_CRITS,
+			{"enemies": {"grey_wolf": {"stats": {"atk": 0}}}}]))
 	assert_ok(_act({"action": "skill", "skill": "frost_lance", "target": "e1"}))
 	var result: Dictionary = _last_action()["results"][0]
 	assert_eq([result["target"], result["damage"], result["element"]], ["e1", 22, "ice"])
 	_until_my_turn()
 	assert_rejected(_act({"action": "skill", "skill": "frost_lance", "target": "e1"}), "skill_on_cooldown")
+	assert_rejected(_act({"action": "skill", "skill": "fireball"}), "not_enough_energy",
+			"other skills have their own cooldown but still need Energy")
+	assert_ok(_act({"action": "defend"}))
+	_until_my_turn()
 	assert_ok(_act({"action": "skill", "skill": "fireball"}), "other skills have their own cooldown")
 	_until_my_turn()
 	assert_ok(_act({"action": "skill", "skill": "frost_lance", "target": "e0"}), "ready after one turn")
@@ -174,11 +184,18 @@ func test_archer_ai_picks_off_the_weakest_enemy() -> void:
 func test_mage_ai_uses_fireball_against_a_group() -> void:
 	_start("mage")
 	var p1 := []
-	for action in _actions(5.0):
+	for action in _actions(14.0):
 		if action["actor"] == "p1":
 			p1.append(action)
-	assert_eq(p1[0]["skill"], "fireball")
-	assert_eq(_targets(p1[0]), ["e0", "e1"])
+	assert_eq(p1[0]["skill"], "frost_lance", "opens with what it can afford")
+	var fire := {}
+	for action in p1:
+		if action.get("skill") == "fireball":
+			fire = action
+			break
+	assert_false(fire.is_empty(), "casts Fireball once Energy allows")
+	assert_eq(_targets(fire), ["e0", "e1"])
+	assert_eq(fire["energy_spent"], 2)
 
 
 func test_mage_ai_uses_single_target_magic_against_one_enemy() -> void:

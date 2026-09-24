@@ -73,7 +73,7 @@ action เฉพาะ Class ที่ใช้ Energy ตามค่าที�
 _Avoid_: ability, spell (เมื่อหมายถึง action ในระบบ)
 
 **Energy**:
-พลังของตัวละครใน Party ที่ใช้จ่ายค่า Skill: เริ่ม Combat ที่ 1, ได้ +1 ตอนเริ่ม turn ของตัวเอง, สูงสุด 6 และรีเซ็ตทุก Combat (ADR-0009); Attack, Defend และ Item ไม่ใช้ Energy และศัตรูไม่มี Energy
+พลังของตัวละครใน Party ที่ใช้จ่ายค่า Skill: เริ่ม Combat ที่ 1 (ใช้ได้ใน turn แรก), ได้ +1 ตอนเริ่มทุก turn ถัดไปของตัวเอง, สูงสุด 6 และรีเซ็ตทุก Combat (ADR-0009); Attack, Defend และ Item ไม่ใช้ Energy และศัตรูไม่มี Energy
 _Avoid_: mana, MP, SP, stamina
 
 **Tier 1 Class**:

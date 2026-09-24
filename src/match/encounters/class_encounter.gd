@@ -123,6 +123,7 @@ static func class_info(run: MatchRun, id: String) -> Dictionary:
 			"name": str(info.get("name", skill)),
 			"description": str(info.get("description", "")),
 			"cooldown": int(info.get("cooldown", 0)),
+			"energy": int(info.get("energy", 0)),
 		})
 	return {
 		"id": id,

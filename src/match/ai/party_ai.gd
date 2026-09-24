@@ -105,9 +105,11 @@ static func _attack_weakest(run: MatchRun, combat: CombatEncounter, id: String) 
 			"targets": [weakest(run, combat, combat.valid_targets(run, id, profile))]}
 
 
-## Targets for `skill` if `id` has it ready, else an empty array.
+## Targets for `skill` if `id` has it ready and can afford it, else empty.
 static func _ready_skill(run: MatchRun, combat: CombatEncounter, id: String, skill: String) -> Array[String]:
 	if not combat.class_skills(run, id).has(skill) or combat.skill_cooldown(id, skill) > 0:
+		return []
+	if not combat.can_afford(run, id, skill):
 		return []
 	return combat.valid_targets(run, id, combat.skill_profile(run, skill))
 

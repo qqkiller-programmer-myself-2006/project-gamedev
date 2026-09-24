@@ -19,8 +19,10 @@ extends Encounter
 ## aimed at the protected ally to the protector (reduced by the multiplier);
 ## "shield_wall" reduces damage taken by the whole Party.
 ##
-## Skills are limited by cooldowns counted in the character's own turns
-## (ADR-0005); cooldowns reset at the start of every Combat.
+## Skills cost Energy and are limited by cooldowns counted in the
+## character's own turns (ADR-0009); Energy and cooldowns reset at the
+## start of every Combat. Attack, Defend and Item cost 0 Energy.
+## Enemies have no Energy.
 ##
 ## A trial (the Challenge of a Class Encounter) is non-lethal, gives no
 ## rewards and ends as "timeout" when its round limit passes.
@@ -51,6 +53,8 @@ var rewards: Dictionary = {}
 var defeated_kinds: Array[String] = []
 ## pid -> {skill id: own turns left before it can be used again}
 var cooldowns: Dictionary = {}
+## Party ids that already had at least one turn (for first-turn Energy).
+var _had_turn: Dictionary = {}
 ## Trial settings: no deaths, no rewards, limited rounds (0 = unlimited).
 var trial := false
 var round_limit := 0
@@ -69,6 +73,7 @@ func start(run: MatchRun) -> void:
 	var kinds: Array = option["enemy_kinds"]
 	for i in kinds.size():
 		enemies.append(_make_enemy(run, str(kinds[i]), i))
+	_reset_energy(run)
 	run.emit({"type": "combat_started", "enemies": _enemy_views()})
 	_start_round(run)
 
@@ -197,6 +202,18 @@ func _begin_turn(run: MatchRun, id: String) -> void:
 	if cooldowns.has(id):
 		for skill in cooldowns[id]:
 			cooldowns[id][skill] = maxi(0, int(cooldowns[id][skill]) - 1)
+	# Energy starts at energy_start for the whole Party, so each character's
+	# first turn in a Combat grants no regen yet; every later own turn
+	# (including ones that time out into an automatic Defend) regains
+	# energy_regen up to energy_max.
+	if id.begins_with(PARTY_PREFIX):
+		if _had_turn.has(id):
+			var character := _unit(run, id)
+			character["energy"] = mini(int(character.get("energy_max",
+					run.content.get_int("rules.energy_max", 6))), int(character.get("energy",
+					run.content.get_int("rules.energy_start", 1))) + run.content.get_int("rules.energy_regen", 1))
+		else:
+			_had_turn[id] = true
 	deadline = -1.0
 	act_at = -1.0
 	var now: float = run.clock.now()
@@ -251,6 +268,8 @@ func _plan_for(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 			var skill := str(cmd.get("skill", ""))
 			if not class_skills(run, me).has(skill):
 				return {"error": "skill_unavailable"}
+			if _energy_of(run, me) < skill_energy(run, skill):
+				return {"error": "not_enough_energy"}
 			if skill_cooldown(me, skill) > 0:
 				return {"error": "skill_on_cooldown"}
 			var profile := skill_profile(run, skill)
@@ -275,6 +294,33 @@ func skill_profile(run: MatchRun, skill: String) -> Dictionary:
 ## Own turns left before `skill` can be used again by `id` (0 = ready).
 func skill_cooldown(id: String, skill: String) -> int:
 	return int(cooldowns.get(id, {}).get(skill, 0))
+
+
+## Energy `skill` costs (Attack, Defend and Item use 0).
+func skill_energy(run: MatchRun, skill: String) -> int:
+	return run.content.get_int("skills.%s.energy" % skill, 0)
+
+
+## Current Energy of a Party character (enemies have none: 0).
+func _energy_of(run: MatchRun, id: String) -> int:
+	if not id.begins_with(PARTY_PREFIX):
+		return 0
+	return int(_unit(run, id).get("energy", run.content.get_int("rules.energy_start", 1)))
+
+
+## True when `id` can afford `skill` right now (cooldown ignored).
+func can_afford(run: MatchRun, id: String, skill: String) -> bool:
+	if not id.begins_with(PARTY_PREFIX):
+		return false
+	return _energy_of(run, id) >= skill_energy(run, skill)
+
+
+## Every Party character starts the Combat (or Challenge) at
+## energy_start, capped by energy_max.
+func _reset_energy(run: MatchRun) -> void:
+	for character in run.party:
+		character["energy"] = run.content.get_int("rules.energy_start", 1)
+		character["energy_max"] = run.content.get_int("rules.energy_max", 6)
 
 
 ## Targets an action with `profile` would hit when the player picked
@@ -358,11 +404,14 @@ func _choices_for(run: MatchRun, slot: int) -> Dictionary:
 	var skills := {}
 	for skill in class_skills(run, me):
 		var profile := skill_profile(run, skill)
+		var ready := skill_cooldown(me, skill) == 0 and can_afford(run, me, skill)
 		skills[skill] = {
 			"name": run.content.get_value("skills.%s.name" % skill, skill),
 			"cooldown": skill_cooldown(me, skill),
+			"energy": skill_energy(run, skill),
+			"affordable": can_afford(run, me, skill),
 			"target": str(profile.get("target", "")),
-			"targets": valid_targets(run, me, profile) if skill_cooldown(me, skill) == 0 else [],
+			"targets": valid_targets(run, me, profile) if ready else [],
 		}
 	return {
 		"attack": {"targets": valid_targets(run, me, attack_profile(run, me))},
@@ -403,6 +452,11 @@ func _perform(run: MatchRun, plan: Dictionary, automatic: bool) -> void:
 			if plan.has("skill"):
 				event["skill"] = plan["skill"]
 				if id.begins_with(PARTY_PREFIX):
+					var cost := skill_energy(run, plan["skill"])
+					event["energy_spent"] = cost
+					var character := _unit(run, id)
+					character["energy"] = maxi(0, int(character.get("energy", cost)) - cost)
+					event["energy"] = character["energy"]
 					var cooldown := run.content.get_int("skills.%s.cooldown" % plan["skill"])
 					if not cooldowns.has(id):
 						cooldowns[id] = {}

@@ -238,6 +238,8 @@ func party_view() -> Array:
 			"exp": c["exp"],
 			"hp": c["hp"],
 			"max_hp": c["max_hp"],
+			"energy": c.get("energy", content.get_int("rules.energy_start", 1)),
+			"energy_max": c.get("energy_max", content.get_int("rules.energy_max", 6)),
 			"atk": c["atk"],
 			"def": c["def"],
 			"mag": c["mag"],
@@ -261,6 +263,8 @@ func _create_party() -> void:
 		}
 		_apply_stats(character)
 		character["hp"] = character["max_hp"]
+		character["energy"] = content.get_int("rules.energy_start", 1)
+		character["energy_max"] = content.get_int("rules.energy_max", 6)
 		party.append(character)
 
 

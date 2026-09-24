@@ -4,7 +4,7 @@ status: accepted
 
 # Skill ใช้ทั้ง Energy และ cooldown ทุก Class (แทน ADR-0005)
 
-ตัวละครใน Party ทุกตัวมี **Energy** ใน Combat: เริ่มแต่ละ Combat (และ Challenge) ที่ `energy_start`, ได้ `energy_regen` ตอนเริ่ม turn ของตัวเองทุกครั้ง (รวม turn ที่หมด Action window แล้วถูก Defend อัตโนมัติ) และสะสมได้ไม่เกิน `energy_max`; ค่าเริ่มต้นคือ 1 / +1 / 6 ตามแบบอ้างอิง AAC (`docs/references/aac_rogue/README.md`) Skill ทุกอย่างมีทั้ง `energy` (ค่าใช้) และ `cooldown` (นับเป็น turn ของตัวละครเอง เหมือนเดิม) ในข้อมูล content; Attack, Defend และ Item ใช้ 0 Energy Energy และ cooldown รีเซ็ตทุกครั้งที่เริ่ม Combat ใหม่ ศัตรูและ Guardian Boss ไม่มี Energy
+ตัวละครใน Party ทุกตัวมี **Energy** ใน Combat: เริ่มแต่ละ Combat (และ Challenge) ที่ `energy_start` ซึ่งเป็นค่าที่ใช้ได้ใน turn แรก, ได้ `energy_regen` ตอนเริ่มทุก turn ถัดไปของตัวเอง (รวม turn ที่หมด Action window แล้วถูก Defend อัตโนมัติ) และสะสมได้ไม่เกิน `energy_max`; ค่าเริ่มต้นคือ 1 / +1 / 6 ตามแบบอ้างอิง AAC (turn แรกมี 1/6 เหมือนภาพ `04`) (`docs/references/aac_rogue/README.md`) Skill ทุกอย่างมีทั้ง `energy` (ค่าใช้) และ `cooldown` (นับเป็น turn ของตัวละครเอง เหมือนเดิม) ในข้อมูล content; Attack, Defend และ Item ใช้ 0 Energy Energy และ cooldown รีเซ็ตทุกครั้งที่เริ่ม Combat ใหม่ ศัตรูและ Guardian Boss ไม่มี Energy
 
 เราเปลี่ยนจาก cooldown อย่างเดียวเพราะต้องการจังหวะแบบ "turn แรกเตรียม, turn ถัดไปปล่อยคอมโบ" ที่ Rogue (ADR-0010) และ DoT build ต้องใช้ และถ้า Rogue ใช้ Energy คนเดียว เกมจะมีสองระบบซ้อนกันซึ่งสับสนทั้งกับผู้เล่นและ AI replacement จึงใช้ Energy กับทุก Class
 
