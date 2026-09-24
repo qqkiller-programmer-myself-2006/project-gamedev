@@ -77,3 +77,20 @@ godot --headless --path . -s tools/simulate.gd -- --seeds=100 --humans=1,2 --pac
 | command ที่ถูกปฏิเสธ | 0 | 0 |
 
 win rate แทบไม่เปลี่ยนจากก่อนมี Energy (86% / 81%) เพราะ Skill ถูกใช้น้อยลงใน turn แรกแต่ยังใช้ได้เกือบทุก turn หลังจากนั้น
+
+## ผลหลังเพิ่ม Rogue และ DoT (issue #24) — 100 seed ต่อโหมด, ไม่มี `--pace`
+
+| หมวด | ค่า |
+| --- | --- |
+| Rogue | HP 42, ATK 11, DEF 3, MAG 3, RES 3, SPD 12, Crit 18%; Stab ×1.3 ATK เจาะ DEF 50% + Bleed; Prep Time เคลือบ Poison 3 ครั้ง; Poke Up 3 × 0.55 ATK + Bleed ทุกครั้ง; Inject Venom ×1.0 ATK +0.4 ต่อชนิด DoT + Toxin 2 stack |
+| Enervation | direct damage +5% ต่อชนิด DoT (สูงสุด ×1.4), DoT ที่ติด ×1.15, รับ DoT ×1.15 |
+| DoT | Bleed 3/stack 3 turn (สูงสุด 5), Poison 2/stack 4 turn (5), Toxin 5/stack 2 turn (3) |
+
+| | Single-player | Duo co-op |
+| --- | --- | --- |
+| Win rate | 90% | 86% |
+| แพ้ที่ | Boss 10 | Boss 8, ระหว่างทาง 6 |
+| Combat rounds / Boss rounds | 24.3 / 12.5 | 25.3 / 11.8 |
+| command ที่ถูกปฏิเสธ | 0 | 0 |
+
+ง่ายขึ้นเล็กน้อยเพราะ Class ที่ 5 เพิ่ม damage ต่อเนื่องให้ Party แต่ยังอยู่ในช่วง regression 70–97%

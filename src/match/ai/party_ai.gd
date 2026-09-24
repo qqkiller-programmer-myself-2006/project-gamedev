@@ -18,6 +18,10 @@ extends RefCounted
 ##   guardian   Protect the ally with the lowest HP share below 60% that
 ##              nobody protects yet; Shield Wall when the Party is in danger;
 ##              otherwise Defend
+##   rogue      focus the reachable enemy with the most DoT kinds (ties: the
+##              weakest); Prep Time when the weapon is not coated; Inject
+##              Venom once the focus carries 2+ DoT kinds; otherwise Poke Up,
+##              then Stab, then attack the focus
 
 const LOW_HP := 0.35
 const CRITICAL_HP := 0.2
@@ -63,7 +67,31 @@ static func decide(run: MatchRun, combat: CombatEncounter, slot: int) -> Diction
 			return _attack_weakest(run, combat, id)
 		"guardian":
 			return _guard(run, combat, id)
+		"rogue":
+			return _rogue(run, combat, id)
 	return _basic_attack(run, combat, id)
+
+
+static func _rogue(run: MatchRun, combat: CombatEncounter, id: String) -> Dictionary:
+	var reach := combat.valid_targets(run, id, combat.attack_profile(run, id))
+	var focus := ""
+	var focus_dots := -1
+	var focus_hp := 0
+	for target in reach:
+		var dots := combat.status_book.distinct_dots(target)
+		var hp: int = combat._unit(run, target)["hp"]
+		if dots > focus_dots or (dots == focus_dots and hp < focus_hp):
+			focus = target
+			focus_dots = dots
+			focus_hp = hp
+	if not combat.status_book.has(id, "venom_coat") and not _ready_skill(run, combat, id, "prep_time").is_empty():
+		return _skill_on(run, combat, id, "prep_time", id)
+	if focus_dots >= 2 and _ready_skill(run, combat, id, "inject_venom").has(focus):
+		return _skill_on(run, combat, id, "inject_venom", focus)
+	for skill in ["poke_up", "stab"]:
+		if _ready_skill(run, combat, id, skill).has(focus):
+			return _skill_on(run, combat, id, skill, focus)
+	return {"actor": id, "action": "attack", "profile": combat.attack_profile(run, id), "targets": [focus]}
 
 
 static func _react_to_threat(run: MatchRun, combat: CombatEncounter, id: String, preset: String,

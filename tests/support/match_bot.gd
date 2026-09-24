@@ -203,6 +203,10 @@ func _fight(session: int, slot: int, view: Dictionary, encounter: Dictionary) ->
 				_act(session, slot, {"action": "item", "item": item, "target": hurt})
 				return
 	var enemies: Array = encounter["enemies"]
+	var mine: Array = encounter.get("statuses", {}).get(me, [])
+	if _skill_ready(skills, "prep_time") and mine.filter(func(s): return s["status"] == "venom_coat").is_empty():
+		_act(session, slot, {"action": "skill", "skill": "prep_time", "target": me})
+		return
 	for skill in skills:
 		var info: Dictionary = skills[skill]
 		if info["cooldown"] > 0 or not info.get("affordable", true) or info["targets"].is_empty():

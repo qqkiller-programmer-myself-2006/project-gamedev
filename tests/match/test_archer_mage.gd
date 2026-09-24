@@ -84,7 +84,7 @@ func test_archer_is_noticeably_faster_than_other_classes() -> void:
 	var classes := h.content.get_dict("classes")
 	for other in classes:
 		if other != "archer":
-			assert_true(int(classes[other]["stats"]["spd"]) <= 10, "%s is slower" % other)
+			assert_true(int(classes[other]["stats"]["spd"]) <= 12, "%s is at least 3 slower" % other)
 
 
 func test_archer_shoots_into_the_back_row() -> void:
