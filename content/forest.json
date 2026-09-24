@@ -17,6 +17,9 @@
     "revive_hp_ratio": 0.3,
     "class_offer_seconds": 20,
     "ai_class_cap": 2,
+    "energy_start": 1,
+    "energy_regen": 1,
+    "energy_max": 6,
     "story_read_seconds": 25,
     "story_vote_seconds": 20
   },
@@ -221,6 +224,51 @@
         "pass": "The sentinel kneels and offers its shield. \"Stand before those you love. That is the Guardian's oath.\"",
         "fail": "The sentinel does not move. \"You are not yet a wall. Return when you are.\""
       }
+    },
+    "rogue": {
+      "name": "Rogue",
+      "role": "Melee DoT",
+      "description": "Daggers and poison. Stacks Bleed, Poison and Toxin on one enemy, then finishes it with Inject Venom. Fast and deadly, but fragile.",
+      "stats": {
+        "max_hp": 42,
+        "atk": 11,
+        "def": 3,
+        "mag": 3,
+        "res": 3,
+        "spd": 12,
+        "crit": 0.18
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "melee",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "skills": [
+        "stab",
+        "prep_time",
+        "poke_up",
+        "inject_venom"
+      ],
+      "ai": "rogue",
+      "passive": {
+        "name": "Enervation",
+        "description": "Direct hits deal 5% more damage for each different DoT on the target (up to 40% more). DoTs you apply are 15% stronger, but DoTs hurt you 15% more.",
+        "dot_bonus": 0.05,
+        "dot_bonus_cap": 1.4,
+        "dot_out": 1.15,
+        "dot_in": 1.15
+      },
+      "challenge": {
+        "trainer": "masked_outlaw",
+        "rounds": 3,
+        "intro": "A masked outlaw drops from a branch, dagger already spinning. \"Quick hands, quiet feet. Cut me before I tire of this, and I'll show you the rest.\"",
+        "pass": "The outlaw pulls down the mask and grins. \"Not bad. Take these vials, and never fight fair.\"",
+        "fail": "The outlaw vanishes into the ferns. \"Too slow. Find me when you've learned to strike first.\""
+      }
     }
   },
   "leveling": {
@@ -378,6 +426,14 @@
           "hint": "A moss-covered knight of stone blocks the path.",
           "classes": {
             "guardian": 1
+          }
+        },
+        {
+          "id": "bandit_hideout",
+          "name": "Bandit Hideout",
+          "hint": "A masked figure watches from the ferns, twirling a dagger.",
+          "classes": {
+            "rogue": 1
           }
         }
       ]
@@ -701,6 +757,31 @@
         "fire"
       ],
       "rewards": {}
+    },
+    "masked_outlaw": {
+      "name": "Masked Outlaw",
+      "row": "front",
+      "behavior": "random",
+      "description": "A bandit who fights dirty to test you. The blade is dulled; it will not truly hurt you.",
+      "stats": {
+        "max_hp": 60,
+        "atk": 9,
+        "def": 3,
+        "mag": 0,
+        "res": 2,
+        "spd": 14,
+        "crit": 0.1
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [],
+      "rewards": {}
     }
   },
   "encounters": {
@@ -904,8 +985,9 @@
     "power_slash": {
       "name": "Power Slash",
       "class": "swordsman",
-      "description": "A heavy melee strike dealing 180% ATK damage to one enemy. Cooldown: 2 turns.",
+      "description": "A heavy melee strike dealing 180% ATK damage to one enemy. Costs 2 Energy. Cooldown: 2 turns.",
       "cooldown": 2,
+      "energy": 2,
       "use": {
         "target": "enemy",
         "range": "melee",
@@ -919,8 +1001,9 @@
     "aimed_shot": {
       "name": "Aimed Shot",
       "class": "archer",
-      "description": "A careful ranged shot at 140% ATK that always lands a critical hit. Reaches the back row. Cooldown: 2 turns.",
+      "description": "A careful ranged shot at 140% ATK that always lands a critical hit. Reaches the back row. Costs 2 Energy. Cooldown: 2 turns.",
       "cooldown": 2,
+      "energy": 2,
       "use": {
         "target": "enemy",
         "range": "ranged",
@@ -935,8 +1018,9 @@
     "fireball": {
       "name": "Fireball",
       "class": "mage",
-      "description": "Fire magic at 110% MAG that hits every enemy, front and back row. Burns enemies weak to fire harder. Cooldown: 2 turns.",
+      "description": "Fire magic at 110% MAG that hits every enemy, front and back row. Burns enemies weak to fire harder. Costs 2 Energy. Cooldown: 2 turns.",
       "cooldown": 2,
+      "energy": 2,
       "use": {
         "target": "all_enemies",
         "range": "ranged",
@@ -950,8 +1034,9 @@
     "frost_lance": {
       "name": "Frost Lance",
       "class": "mage",
-      "description": "An ice spear at 160% MAG against one enemy anywhere on the field. Cooldown: 1 turn.",
+      "description": "An ice spear at 160% MAG against one enemy anywhere on the field. Costs 1 Energy. Cooldown: 1 turn.",
       "cooldown": 1,
+      "energy": 1,
       "use": {
         "target": "enemy",
         "range": "ranged",
@@ -965,8 +1050,9 @@
     "protect": {
       "name": "Protect",
       "class": "guardian",
-      "description": "Guard one ally until your next turn: attacks aimed at them hit you instead, with 30% less damage.",
+      "description": "Guard one ally until your next turn: attacks aimed at them hit you instead, with 30% less damage. Costs 1 Energy. No cooldown.",
       "cooldown": 0,
+      "energy": 1,
       "use": {
         "target": "other_ally",
         "status": "protect",
@@ -976,13 +1062,138 @@
     "shield_wall": {
       "name": "Shield Wall",
       "class": "guardian",
-      "description": "Raise your shield for everyone: the whole Party takes 40% less damage until your next turn. Cooldown: 3 turns.",
+      "description": "Raise your shield for everyone: the whole Party takes 40% less damage until your next turn. Costs 2 Energy. Cooldown: 3 turns.",
       "cooldown": 3,
+      "energy": 2,
       "use": {
         "target": "self",
         "status": "shield_wall",
         "multiplier": 0.6
       }
+    },
+    "stab": {
+      "name": "Stab",
+      "class": "rogue",
+      "description": "A piercing stab at 130% ATK that ignores half the target's DEF and causes Bleed. Costs 1 Energy. Cooldown: 4 turns.",
+      "cooldown": 4,
+      "energy": 1,
+      "use": {
+        "target": "enemy",
+        "range": "melee",
+        "damage": {
+          "stat": "atk",
+          "power": 1.3,
+          "element": "physical",
+          "pierce": 0.5
+        },
+        "apply_status": [
+          {
+            "status": "bleed",
+            "stacks": 1
+          }
+        ]
+      }
+    },
+    "prep_time": {
+      "name": "Prep Time",
+      "class": "rogue",
+      "description": "Coat your weapon with poison: your next 3 damaging actions also apply Poison. Costs 1 Energy. Cooldown: 6 turns.",
+      "cooldown": 6,
+      "energy": 1,
+      "use": {
+        "target": "self",
+        "apply_status": [
+          {
+            "status": "venom_coat",
+            "stacks": 1
+          }
+        ]
+      }
+    },
+    "poke_up": {
+      "name": "Poke Up",
+      "class": "rogue",
+      "description": "Three quick stabs at 55% ATK each on one enemy; every stab causes Bleed. Costs 2 Energy. Cooldown: 3 turns.",
+      "cooldown": 3,
+      "energy": 2,
+      "use": {
+        "target": "enemy",
+        "range": "melee",
+        "hits": 3,
+        "status_per_hit": true,
+        "damage": {
+          "stat": "atk",
+          "power": 0.55,
+          "element": "physical"
+        },
+        "apply_status": [
+          {
+            "status": "bleed",
+            "stacks": 1
+          }
+        ]
+      }
+    },
+    "inject_venom": {
+      "name": "Inject Venom",
+      "class": "rogue",
+      "description": "Drive venom into one enemy: 100% ATK plus 40% for each different DoT on it, then 2 stacks of Toxin. Costs 2 Energy. Cooldown: 6 turns.",
+      "cooldown": 6,
+      "energy": 2,
+      "use": {
+        "target": "enemy",
+        "range": "melee",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "per_dot": 0.4,
+          "element": "poison"
+        },
+        "apply_status": [
+          {
+            "status": "toxin",
+            "stacks": 2
+          }
+        ]
+      }
+    }
+  },
+  "statuses": {
+    "bleed": {
+      "name": "Bleed",
+      "kind": "dot",
+      "damage": 3,
+      "turns": 3,
+      "max_stacks": 5,
+      "description": "Loses 3 HP per stack at the start of each of its turns, ignoring armour. Lasts 3 turns; stacks up to 5."
+    },
+    "poison": {
+      "name": "Poison",
+      "kind": "dot",
+      "damage": 2,
+      "turns": 4,
+      "max_stacks": 5,
+      "description": "Loses 2 HP per stack at the start of each of its turns, ignoring armour. Lasts 4 turns; stacks up to 5."
+    },
+    "toxin": {
+      "name": "Toxin",
+      "kind": "dot",
+      "damage": 5,
+      "turns": 2,
+      "max_stacks": 3,
+      "description": "Loses 5 HP per stack at the start of each of its turns, ignoring armour. Lasts 2 turns; stacks up to 3."
+    },
+    "venom_coat": {
+      "name": "Prep Time",
+      "kind": "buff",
+      "turns": 4,
+      "charges": 3,
+      "max_stacks": 1,
+      "coats": {
+        "status": "poison",
+        "stacks": 1
+      },
+      "description": "Weapon coated: the next 3 damaging actions also apply Poison."
     }
   },
   "class_encounters": {

@@ -19,8 +19,20 @@ extends Encounter
 ## aimed at the protected ally to the protector (reduced by the multiplier);
 ## "shield_wall" reduces damage taken by the whole Party.
 ##
-## Skills are limited by cooldowns counted in the character's own turns
-## (ADR-0005); cooldowns reset at the start of every Combat.
+## Skills cost Energy and are limited by cooldowns counted in the
+## character's own turns (ADR-0009); Energy and cooldowns reset at the
+## start of every Combat. Attack, Defend and Item cost 0 Energy.
+## Enemies have no Energy.
+##
+## Status effects (ADR-0010) live in a StatusBook for this Combat only. A
+## profile may add them: "apply_status": [{"status": "bleed", "stacks": 1,
+## "turns": 3}], "hits": 3 (repeat damage and statuses per hit), damage
+## "pierce": 0.5 (ignore that share of DEF/RES) and "per_dot": 0.35 (extra
+## power per DoT kind on the target). DoTs tick at the start of a unit's own
+## turn, before Energy regen and before it acts. A Class "passive" of
+## {"dot_bonus": 0.05, "dot_bonus_cap": 1.4, "dot_out": 1.15, "dot_in": 1.15}
+## is Enervation; a buff status with "coats" makes the holder's next
+## damaging actions apply another status (Prep Time).
 ##
 ## A trial (the Challenge of a Class Encounter) is non-lethal, gives no
 ## rewards and ends as "timeout" when its round limit passes.
@@ -51,6 +63,12 @@ var rewards: Dictionary = {}
 var defeated_kinds: Array[String] = []
 ## pid -> {skill id: own turns left before it can be used again}
 var cooldowns: Dictionary = {}
+## Party ids that already had at least one turn (for first-turn Energy).
+var _had_turn: Dictionary = {}
+## Status effects on every unit, for this Combat only.
+var status_book: StatusBook = null
+## status_applied events waiting to be sent after the action that caused them.
+var _status_events: Array[Dictionary] = []
 ## Trial settings: no deaths, no rewards, limited rounds (0 = unlimited).
 var trial := false
 var round_limit := 0
@@ -67,8 +85,10 @@ func _init(route_option: Dictionary, enemy_kinds: Array, trial_rounds: int = 0) 
 
 func start(run: MatchRun) -> void:
 	var kinds: Array = option["enemy_kinds"]
+	status_book = StatusBook.new(run.content)
 	for i in kinds.size():
 		enemies.append(_make_enemy(run, str(kinds[i]), i))
+	_reset_energy(run)
 	run.emit({"type": "combat_started", "enemies": _enemy_views()})
 	_start_round(run)
 
@@ -127,6 +147,7 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 		"round": round_number,
 		"enemies": _enemy_views(),
 		"turn_order": order.slice(maxi(turn_index, 0)),
+		"round_order": order.duplicate(),
 		"actor": actor,
 		"actor_controller": _controller_of(run, actor),
 		"deadline": deadline if deadline >= 0.0 else null,
@@ -134,6 +155,7 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 		"defending": defending_ids,
 		"protected": protected_view,
 		"shielded": not shields.is_empty(),
+		"statuses": status_book.view_all() if status_book != null else {},
 		"result": result,
 		"rewards": rewards,
 	}
@@ -188,6 +210,9 @@ func _next_turn(run: MatchRun) -> void:
 
 
 func _begin_turn(run: MatchRun, id: String) -> void:
+	# DoTs tick before Energy regen and before the unit acts (ADR-0010).
+	if not _tick_statuses(run, id):
+		return
 	actor = id
 	defending.erase(id)
 	shields.erase(id)
@@ -197,6 +222,18 @@ func _begin_turn(run: MatchRun, id: String) -> void:
 	if cooldowns.has(id):
 		for skill in cooldowns[id]:
 			cooldowns[id][skill] = maxi(0, int(cooldowns[id][skill]) - 1)
+	# Energy starts at energy_start for the whole Party, so each character's
+	# first turn in a Combat grants no regen yet; every later own turn
+	# (including ones that time out into an automatic Defend) regains
+	# energy_regen up to energy_max.
+	if id.begins_with(PARTY_PREFIX):
+		if _had_turn.has(id):
+			var character := _unit(run, id)
+			character["energy"] = mini(int(character.get("energy_max",
+					run.content.get_int("rules.energy_max", 6))), int(character.get("energy",
+					run.content.get_int("rules.energy_start", 1))) + run.content.get_int("rules.energy_regen", 1))
+		else:
+			_had_turn[id] = true
 	deadline = -1.0
 	act_at = -1.0
 	var now: float = run.clock.now()
@@ -214,6 +251,48 @@ func _begin_turn(run: MatchRun, id: String) -> void:
 		"controller": controller,
 		"deadline": deadline if deadline >= 0.0 else null,
 	})
+
+
+## DoT damage and status countdown at the start of `id`'s turn. Returns
+## false when the unit fell (the Combat has already moved on or ended).
+func _tick_statuses(run: MatchRun, id: String) -> bool:
+	var unit := _unit(run, id)
+	var outcome := status_book.start_turn(id, float(_passive(run, id).get("dot_in", 1.0)))
+	for tick in outcome["ticks"]:
+		var floor_hp := 1 if trial and id.begins_with(PARTY_PREFIX) else 0
+		unit["hp"] = maxi(mini(floor_hp, unit["hp"]), unit["hp"] - int(tick["damage"]))
+		var down: bool = unit["hp"] <= 0
+		run.emit({"type": "status_tick", "round": round_number, "target": id, "status": tick["status"],
+				"name": tick["name"], "damage": tick["damage"], "hp": unit["hp"], "down": down})
+		if down:
+			if id.begins_with(ENEMY_PREFIX):
+				defeated_kinds.append(str(unit["kind"]))
+			status_book.clear_unit(id)
+			break
+	if unit["hp"] > 0:
+		for status in outcome["expired"]:
+			run.emit({"type": "status_expired", "target": id, "status": status})
+		return true
+	_after_action(run)
+	return false
+
+
+## Class passive of a Party character (e.g. Enervation), or {}.
+func _passive(run: MatchRun, id: String) -> Dictionary:
+	if not id.begins_with(PARTY_PREFIX):
+		return {}
+	return run.content.get_dict("classes.%s.passive" % _unit(run, id)["class"])
+
+
+## Adds a status from `source` to `target` and queues its event.
+func _add_status(run: MatchRun, source: String, target: String, spec: Dictionary) -> Dictionary:
+	var status := str(spec.get("status", ""))
+	var power := float(_passive(run, source).get("dot_out", 1.0))
+	var view := status_book.apply(target, status, int(spec.get("stacks", 1)), int(spec.get("turns", 0)), power)
+	var event := {"type": "status_applied", "target": target, "source": source}
+	event.merge(view)
+	_status_events.append(event)
+	return {"status": status, "stacks": view["stacks"], "turns": view["turns"]}
 
 
 func _act_automatically(run: MatchRun) -> void:
@@ -251,6 +330,8 @@ func _plan_for(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 			var skill := str(cmd.get("skill", ""))
 			if not class_skills(run, me).has(skill):
 				return {"error": "skill_unavailable"}
+			if _energy_of(run, me) < skill_energy(run, skill):
+				return {"error": "not_enough_energy"}
 			if skill_cooldown(me, skill) > 0:
 				return {"error": "skill_on_cooldown"}
 			var profile := skill_profile(run, skill)
@@ -275,6 +356,33 @@ func skill_profile(run: MatchRun, skill: String) -> Dictionary:
 ## Own turns left before `skill` can be used again by `id` (0 = ready).
 func skill_cooldown(id: String, skill: String) -> int:
 	return int(cooldowns.get(id, {}).get(skill, 0))
+
+
+## Energy `skill` costs (Attack, Defend and Item use 0).
+func skill_energy(run: MatchRun, skill: String) -> int:
+	return run.content.get_int("skills.%s.energy" % skill, 0)
+
+
+## Current Energy of a Party character (enemies have none: 0).
+func _energy_of(run: MatchRun, id: String) -> int:
+	if not id.begins_with(PARTY_PREFIX):
+		return 0
+	return int(_unit(run, id).get("energy", run.content.get_int("rules.energy_start", 1)))
+
+
+## True when `id` can afford `skill` right now (cooldown ignored).
+func can_afford(run: MatchRun, id: String, skill: String) -> bool:
+	if not id.begins_with(PARTY_PREFIX):
+		return false
+	return _energy_of(run, id) >= skill_energy(run, skill)
+
+
+## Every Party character starts the Combat (or Challenge) at
+## energy_start, capped by energy_max.
+func _reset_energy(run: MatchRun) -> void:
+	for character in run.party:
+		character["energy"] = run.content.get_int("rules.energy_start", 1)
+		character["energy_max"] = run.content.get_int("rules.energy_max", 6)
 
 
 ## Targets an action with `profile` would hit when the player picked
@@ -358,11 +466,15 @@ func _choices_for(run: MatchRun, slot: int) -> Dictionary:
 	var skills := {}
 	for skill in class_skills(run, me):
 		var profile := skill_profile(run, skill)
+		var ready := skill_cooldown(me, skill) == 0 and can_afford(run, me, skill)
 		skills[skill] = {
 			"name": run.content.get_value("skills.%s.name" % skill, skill),
+			"description": str(run.content.get_value("skills.%s.description" % skill, "")),
 			"cooldown": skill_cooldown(me, skill),
+			"energy": skill_energy(run, skill),
+			"affordable": can_afford(run, me, skill),
 			"target": str(profile.get("target", "")),
-			"targets": valid_targets(run, me, profile) if skill_cooldown(me, skill) == 0 else [],
+			"targets": valid_targets(run, me, profile) if ready else [],
 		}
 	return {
 		"attack": {"targets": valid_targets(run, me, attack_profile(run, me))},
@@ -403,28 +515,58 @@ func _perform(run: MatchRun, plan: Dictionary, automatic: bool) -> void:
 			if plan.has("skill"):
 				event["skill"] = plan["skill"]
 				if id.begins_with(PARTY_PREFIX):
+					var cost := skill_energy(run, plan["skill"])
+					event["energy_spent"] = cost
+					var character := _unit(run, id)
+					character["energy"] = maxi(0, int(character.get("energy", cost)) - cost)
+					event["energy"] = character["energy"]
 					var cooldown := run.content.get_int("skills.%s.cooldown" % plan["skill"])
 					if not cooldowns.has(id):
 						cooldowns[id] = {}
 					cooldowns[id][plan["skill"]] = cooldown + 1 if cooldown > 0 else 0
 			event["results"] = _apply_profile(run, id, plan["profile"], plan["targets"])
+			if plan["action"] != "item":
+				_apply_coating(run, id, event["results"])
 	run.emit(event)
+	for status_event in _status_events:
+		run.emit(status_event)
+	_status_events.clear()
 	_after_action(run)
 
 
 func _apply_profile(run: MatchRun, source: String, profile: Dictionary, targets: Array) -> Array:
 	var results: Array = []
+	var statuses: Array = profile.get("apply_status", [])
+	var per_hit := bool(profile.get("status_per_hit", false))
 	for target in targets:
 		var unit := _unit(run, target)
 		var entry := {"target": target}
 		if profile.has("damage"):
 			var guard := _protector_of(run, target)
-			if guard.is_empty():
-				entry.merge(_hit(run, source, unit, profile["damage"]))
-			else:
+			var multiplier := 1.0
+			if not guard.is_empty():
 				entry = {"target": guard, "protected": target}
-				entry.merge(_hit(run, source, _unit(run, guard), profile["damage"],
-						float(protected[target]["multiplier"])))
+				multiplier = float(protected[target]["multiplier"])
+			var struck := _unit(run, entry["target"])
+			var hits := maxi(1, int(profile.get("hits", 1)))
+			for n in hits:
+				var hit := _hit(run, source, struck, profile["damage"], multiplier)
+				if n == 0:
+					entry.merge(hit)
+				else:
+					entry["damage"] = int(entry["damage"]) + int(hit["damage"])
+					entry["crit"] = bool(entry["crit"]) or bool(hit["crit"])
+					if hit.has("down"):
+						entry["down"] = true
+				if hits > 1:
+					var each: Array = entry.get("hits", [])
+					each.append(hit["damage"])
+					entry["hits"] = each
+				if per_hit and struck["hp"] > 0:
+					for spec in statuses:
+						entry["applied"] = entry.get("applied", []) + [_add_status(run, source, entry["target"], spec)]
+				if struck["hp"] <= 0:
+					break
 		if profile.has("heal") and unit["hp"] > 0:
 			var before: int = unit["hp"]
 			unit["hp"] = mini(unit["max_hp"], unit["hp"] + int(profile["heal"]))
@@ -441,9 +583,32 @@ func _apply_profile(run: MatchRun, source: String, profile: Dictionary, targets:
 				entry["status"] = "shielded"
 		if not entry.has("target"):
 			entry["target"] = target
+		if not per_hit and _unit(run, entry["target"])["hp"] > 0:
+			for spec in statuses:
+				entry["applied"] = entry.get("applied", []) + [_add_status(run, source, entry["target"], spec)]
 		entry["hp"] = _unit(run, entry["target"])["hp"]
 		results.append(entry)
 	return results
+
+
+## A coated weapon (a buff status with "coats", e.g. Prep Time) adds its
+## status to every foe the holder's action damaged, using one charge.
+func _apply_coating(run: MatchRun, source: String, results: Array) -> void:
+	for held in status_book.view(source):
+		var coats := run.content.get_dict("statuses.%s.coats" % held["status"])
+		if coats.is_empty():
+			continue
+		var landed := false
+		for entry in results:
+			var target := str(entry["target"])
+			if entry.has("damage") and target[0] != source[0] and _unit(run, target)["hp"] > 0:
+				entry["applied"] = entry.get("applied", []) + [_add_status(run, source, target, coats)]
+				landed = true
+		if not landed:
+			continue
+		status_book.spend_charge(source, held["status"])
+		if not status_book.has(source, held["status"]):
+			_status_events.append({"type": "status_expired", "target": source, "status": held["status"]})
 
 
 ## Computes and applies one damage instance. Returns what happened.
@@ -451,14 +616,18 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary,
 	var rules := run.content
 	var attacker := _unit(run, source)
 	var element := str(damage.get("element", "physical"))
+	var target_id := _id_of(target)
+	var dots := status_book.distinct_dots(target_id)
 	var amount := 0.0
 	if damage.has("amount"):
 		amount = float(damage["amount"])
 	else:
 		var stat := str(damage.get("stat", "atk"))
 		var guard_stat := "def" if stat == "atk" else "res"
-		amount = float(attacker[stat]) * float(damage.get("power", 1.0)) \
-				- float(target[guard_stat]) * rules.get_float("rules.defense_factor", 0.5)
+		var power := float(damage.get("power", 1.0)) + float(damage.get("per_dot", 0.0)) * dots
+		var pierce := clampf(float(damage.get("pierce", 0.0)), 0.0, 1.0)
+		amount = float(attacker[stat]) * power \
+				- float(target[guard_stat]) * rules.get_float("rules.defense_factor", 0.5) * (1.0 - pierce)
 		amount = maxf(1.0, amount)
 		var variance := rules.get_float("rules.damage_variance", 0.1)
 		amount *= run.rng.randf_range(1.0 - variance, 1.0 + variance)
@@ -470,7 +639,9 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary,
 	var weak: bool = target.get("weakness", []).has(element)
 	if weak:
 		amount *= rules.get_float("rules.weakness_multiplier", 1.5)
-	var target_id := _id_of(target)
+	var passive := _passive(run, source)
+	if passive.has("dot_bonus"):
+		amount *= minf(float(passive.get("dot_bonus_cap", 1.4)), 1.0 + float(passive["dot_bonus"]) * dots)
 	if defending.has(target_id):
 		amount *= rules.get_float("rules.defend_multiplier", 0.5)
 	if target_id.begins_with(PARTY_PREFIX):
@@ -537,6 +708,7 @@ func _after_action(run: MatchRun) -> void:
 
 func _finish(run: MatchRun, outcome: String) -> void:
 	result = outcome
+	status_book.clear()
 	actor = ""
 	deadline = -1.0
 	act_at = -1.0
@@ -619,9 +791,11 @@ func _enemy_views() -> Array:
 			"name": enemy["name"],
 			"hp": enemy["hp"],
 			"max_hp": enemy["max_hp"],
+			"spd": enemy["spd"],
 			"row": enemy["row"],
 			"weakness": enemy["weakness"],
 			"description": enemy["description"],
+			"statuses": status_book.view(enemy["id"]) if status_book != null else [],
 		})
 	return out
 

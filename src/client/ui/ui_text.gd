@@ -22,6 +22,7 @@ const ERRORS := {
 	"item_unavailable": "The Party has none of that Item left.",
 	"skill_unavailable": "No Skill yet. Find a Class at a Class Encounter first.",
 	"skill_on_cooldown": "That Skill is still cooling down.",
+	"not_enough_energy": "Not enough Energy. Attack, Defend or wait a turn to regain it.",
 	"invalid_option": "That choice does not exist.",
 	"already_voted": "You already voted.",
 	"ai_cannot_vote": "AI-controlled characters do not vote.",
@@ -62,9 +63,11 @@ const TYPE_HELP := {
 const HINTS := {
 	"vote": "Path Voting: every player has one vote and AI never votes. The most votes wins; ties are broken at random. Press 1-3 to vote.",
 	"combat": "Your turn! [A] Attack, [S] Skill (needs a Class), [D] Defend halves damage until your next turn, [I] Item uses the Party's shared bag. You have 15 seconds; if time runs out you Defend.",
-	"skill": "You have a Class now. [S] opens your Skills; each Skill has a cooldown counted in your own turns.",
+	"skill": "You have a Class now. [S] opens your Skills; each Skill costs Energy and has a cooldown counted in your own turns.",
 	"class_offer": "Accept [Y] to take this Class, or Decline [N] to stay Classless and wait for another. Several characters can share a Class.",
 	"merchant": "Anyone can buy with the Party's shared Gold. Press [R] when you are done; the shop closes when everyone is ready.",
+	"energy": "Energy (the blue bar) pays for Skills: you start each Combat with 1 and regain 1 every later turn, up to 6. Attack, Defend and Items are free.",
+	"dot": "DoTs (Bleed BLD, Poison PSN, Toxin TOX) hurt at the start of each of their holder's turns, ignoring armour. The badge shows stacks (x) and turns left (t).",
 	"boss": "Watch the warnings: the Guardian announces its heaviest blows a turn early. Defend, Protect or raise Shield Wall before they land.",
 }
 

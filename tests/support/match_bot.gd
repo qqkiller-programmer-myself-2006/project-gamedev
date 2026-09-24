@@ -203,9 +203,13 @@ func _fight(session: int, slot: int, view: Dictionary, encounter: Dictionary) ->
 				_act(session, slot, {"action": "item", "item": item, "target": hurt})
 				return
 	var enemies: Array = encounter["enemies"]
+	var mine: Array = encounter.get("statuses", {}).get(me, [])
+	if _skill_ready(skills, "prep_time") and mine.filter(func(s): return s["status"] == "venom_coat").is_empty():
+		_act(session, slot, {"action": "skill", "skill": "prep_time", "target": me})
+		return
 	for skill in skills:
 		var info: Dictionary = skills[skill]
-		if info["cooldown"] > 0 or info["targets"].is_empty():
+		if info["cooldown"] > 0 or not info.get("affordable", true) or info["targets"].is_empty():
 			continue
 		match str(info["target"]):
 			"all_enemies":
@@ -236,7 +240,8 @@ func _send(session: int, cmd: Dictionary) -> void:
 
 
 static func _skill_ready(skills: Dictionary, skill: String) -> bool:
-	return skills.has(skill) and skills[skill]["cooldown"] == 0 and not skills[skill]["targets"].is_empty()
+	return skills.has(skill) and skills[skill]["cooldown"] == 0 \
+			and bool(skills[skill].get("affordable", true)) and not skills[skill]["targets"].is_empty()
 
 
 ## Living ally id with the lowest HP share under `limit`, skipping `exclude`.

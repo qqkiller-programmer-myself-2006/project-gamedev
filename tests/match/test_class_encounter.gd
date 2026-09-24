@@ -230,24 +230,37 @@ func test_passing_with_nobody_classless_grants_mastery_exp() -> void:
 
 
 func test_swordsman_power_slash_hits_hard_then_cools_down() -> void:
-	_start(1)
+	_start(1, MatchHarness.merge([WEAK_TRAINER,
+			{"classes": {"swordsman": {"stats": {"crit": 0}}}}]))
 	_take_route("class")
 	_fight_trial()
 	h.server.command(sessions[0], {"type": "class_choice", "accept": true})
 	_take_route("combat")
 	var skills: Dictionary = _encounter()["choices"]["skills"]
 	assert_eq(skills["power_slash"]["cooldown"], 0)
+	assert_eq(skills["power_slash"]["energy"], 2)
+	assert_rejected(h.server.command(sessions[0], {"type": "action", "action": "skill",
+			"skill": "power_slash", "target": "e0"}), "not_enough_energy",
+			"Power Slash needs 2 Energy first")
+	h.server.command(sessions[0], {"type": "action", "action": "defend"})
+	_until_my_turn()
 	h.server.take_events(sessions[0])
 	assert_ok(h.server.command(sessions[0], {"type": "action", "action": "skill", "skill": "power_slash", "target": "e0"}))
 	var hit: Dictionary = _events(sessions[0], "action_resolved")[0]
 	assert_eq(hit["skill"], "power_slash")
+	assert_eq(hit["energy_spent"], 2)
 	assert_eq(hit["results"][0]["damage"], 21, "12 ATK x 1.8 - 2 DEF x 0.5")
-	for turn in 2:
-		_until_my_turn()
-		assert_eq(_encounter()["choices"]["skills"]["power_slash"]["cooldown"], 2 - turn)
-		assert_rejected(h.server.command(sessions[0], {"type": "action", "action": "skill",
-				"skill": "power_slash", "target": "e0"}), "skill_on_cooldown")
-		h.server.command(sessions[0], {"type": "action", "action": "defend"})
+	_until_my_turn()
+	assert_eq(_encounter()["choices"]["skills"]["power_slash"]["cooldown"], 2)
+	assert_eq(_encounter()["choices"]["skills"]["power_slash"]["affordable"], false)
+	assert_rejected(h.server.command(sessions[0], {"type": "action", "action": "skill",
+			"skill": "power_slash", "target": "e0"}), "not_enough_energy")
+	h.server.command(sessions[0], {"type": "action", "action": "defend"})
+	_until_my_turn()
+	assert_eq(_encounter()["choices"]["skills"]["power_slash"]["cooldown"], 1)
+	assert_rejected(h.server.command(sessions[0], {"type": "action", "action": "skill",
+			"skill": "power_slash", "target": "e0"}), "skill_on_cooldown")
+	h.server.command(sessions[0], {"type": "action", "action": "defend"})
 	_until_my_turn()
 	assert_ok(h.server.command(sessions[0], {"type": "action", "action": "skill", "skill": "power_slash", "target": "e0"}),
 			"ready again after two turns")
@@ -283,9 +296,11 @@ func test_swordsman_ai_uses_power_slash_when_ready() -> void:
 		for event in h.server.take_events(sessions[0]):
 			if event["type"] == "action_resolved" and event["actor"] == "p1":
 				p1.append(event)
-	assert_eq(p1[0]["action"], "skill", "opens with Power Slash")
-	assert_eq(p1[0]["skill"], "power_slash")
-	assert_eq([p1[1]["action"], p1[2]["action"]], ["attack", "attack"], "attacks while it cools down")
+	assert_eq(p1[0]["action"], "attack", "saves Energy on the first turn")
+	assert_eq(p1[1]["action"], "skill", "slashes once it can afford it")
+	assert_eq(p1[1]["skill"], "power_slash")
+	assert_eq(p1[1]["energy_spent"], 2)
+	assert_eq(p1[2]["action"], "attack", "attacks while it cools down")
 
 
 func test_class_encounter_reachable_early_on_every_seed() -> void:

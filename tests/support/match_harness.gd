@@ -14,6 +14,7 @@ const EASY := {
 		"archer": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
 		"mage": {"stats": {"max_hp": 999, "atk": 120, "mag": 120, "def": 60, "spd": 40}},
 		"guardian": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
+		"rogue": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
 	},
 }
 
@@ -112,7 +113,7 @@ func enter_first_encounter(sessions: Array[int]) -> void:
 static func class_and_combat(class_id: String) -> Dictionary:
 	var trainer: String = {
 		"swordsman": "old_swordsman", "archer": "veteran_hunter",
-		"mage": "shrine_spirit", "guardian": "stone_sentinel",
+		"mage": "shrine_spirit", "guardian": "stone_sentinel", "rogue": "masked_outlaw",
 	}[class_id]
 	return {
 		"journey": {

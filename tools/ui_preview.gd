@@ -8,6 +8,7 @@ extends SceneTree
 ##
 ## Options: --out=DIR  --seed=N  --speed=X (game seconds per real second)
 ##          --scale=1.2 (text size)  --reduced-motion
+##          --class=rogue (every Class Encounter teaches that Class)
 
 var out_dir := "build/ui"
 var speed := 4.0
@@ -27,6 +28,7 @@ func _initialize() -> void:
 	var seed_value := 7
 	var scale := 1.0
 	var reduced := false
+	var only_class := ""
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out_dir = arg.trim_prefix("--out=")
@@ -38,8 +40,15 @@ func _initialize() -> void:
 			scale = float(arg.trim_prefix("--scale="))
 		elif arg == "--reduced-motion":
 			reduced = true
+		elif arg.begins_with("--class="):
+			only_class = arg.trim_prefix("--class=")
 	DirAccess.make_dir_recursive_absolute(out_dir)
-	harness = MatchHarness.new(seed_value)
+	var overrides := {}
+	if not only_class.is_empty():
+		overrides = {"journey": {"sites": {"class": [{"id": "only", "name": "Training Ground",
+				"hint": "Someone waits to teach you.", "classes": {only_class: 1}}]}},
+				"rules": {"ai_class_cap": 5}}
+	harness = MatchHarness.new(seed_value, overrides)
 	app = ClientApp.new()
 	app.configure({"name": "Ann"})
 	root.add_child(app)
@@ -123,7 +132,9 @@ func _situation(view: Dictionary) -> String:
 				return "07_boss_warning"
 			if encounter["your_turn"]:
 				var mode := _screen().combat_mode if _screen() != null else ""
-				return prefix + ("_targets" if mode == "attack" else "_turn")
+				if mode == "skills":
+					return prefix + "_skills"
+				return prefix + ("_targets" if mode == "attack" or mode.begins_with("skill:") else "_turn")
 			return ""
 		"class":
 			if encounter["stage"] == "challenge":
@@ -156,6 +167,17 @@ func _act(key: String, view: Dictionary) -> void:
 			_press(KEY_S)
 		else:
 			_press(KEY_A)
+	elif key.ends_with("_skills"):
+		# Cards: 1 Attack, 2 Defend, then Skills; pick the first ready Skill.
+		var skills: Dictionary = MatchScreen.combat_of(view["encounter"])["choices"]["skills"]
+		var number := 3
+		var picked := 1
+		for skill in skills:
+			if skills[skill]["cooldown"] == 0 and skills[skill].get("affordable", true) and not skills[skill]["targets"].is_empty():
+				picked = number
+				break
+			number += 1
+		_press(KEY_1 + picked - 1)
 	elif key.ends_with("_targets"):
 		_press(KEY_1)
 	elif key == "05_class_offer":

@@ -96,12 +96,20 @@ func test_protection_ends_on_the_guardians_next_turn() -> void:
 
 
 func test_shield_wall_reduces_damage_for_the_whole_party() -> void:
-	_start(["grey_wolf", "grey_wolf"], {"grey_wolf": {"max_hp": 500, "spd": 5, "atk": 60, "crit": 0}})
+	_start(["grey_wolf", "grey_wolf"], {"grey_wolf": {"max_hp": 500, "spd": 5, "atk": 20, "crit": 0}})
+	h.server.take_events(sessions[0])
+	assert_rejected(h.server.command(sessions[0], {"type": "action", "action": "skill",
+			"skill": "shield_wall", "target": "p0"}), "not_enough_energy")
+	h.server.command(sessions[0], {"type": "action", "action": "defend"})
+	var waited := 0.0
+	while not _encounter().get("your_turn", false) and waited < 20.0:
+		h.advance(0.1, 0.1)
+		waited += 0.1
 	h.server.take_events(sessions[0])
 	assert_ok(h.server.command(sessions[0], {"type": "action", "action": "skill", "skill": "shield_wall", "target": "p0"}))
 	assert_eq(_encounter()["shielded"], true)
 	var bites := _by("e0", _actions(6.0))
-	assert_eq(bites[0]["results"][0]["damage"], 33, "(60 - 4.5) x 0.6 instead of 56")
+	assert_eq(bites[0]["results"][0]["damage"], 9, "(20 - 4.5) x 0.6 instead of 16")
 
 
 func test_guardian_ai_protects_the_most_wounded_ally() -> void:
