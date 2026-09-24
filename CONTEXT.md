@@ -52,6 +52,10 @@ _Avoid_: game API, backend
 
 ## Characters and progression
 
+**Wren**:
+ตัวละครลำดับที่ 5 ของ Party: ลูกศิษย์และผู้ร่วมทางเก่าของพ่อ ที่กลับมาคนเดียวโดยจำเรื่องหลังออกจาก Forest ไม่ได้ (ADR-0006); อีกสี่คนคือพี่น้อง Arin, Bram, Cora และ Dain
+_Avoid_: fifth sibling, mercenary
+
 **Classless**:
 สถานะเริ่มต้นของตัวละครที่ยังไม่มีความสามารถเฉพาะ Class
 _Avoid_: default class, novice class
@@ -101,6 +105,14 @@ _Avoid_: coins, money (ในเอกสารระบบ)
 **Reward**:
 สิ่งที่ Party ได้หลังชนะ Combat หรือจาก Treasure: EXP ให้ตัวละครทุกตัว, Gold และ Item เข้าคลังร่วม
 _Avoid_: loot (เมื่อหมายถึงผลรวมหลัง Encounter)
+
+**Story Event**:
+Encounter ที่เล่าเบาะแสการเดินทางของพ่อและเพิ่ม Story Clue; ถ้ามีตัวเลือก ผู้เล่นจริงโหวตด้วยกติกาเดียวกับ Path Voting
+_Avoid_: cutscene, dialogue node
+
+**Story Clue**:
+เบาะแสเกี่ยวกับพ่อที่ Party เก็บได้จาก Story Event (และบางครั้งจาก Combat) บันทึกใน clue log ของ Match ที่เปิดดูได้ตลอด และนับในหน้าสรุปตอนจบ
+_Avoid_: lore item, collectible
 
 **Guardian Boss**:
 ศัตรูหลักที่ปิดท้าย Forest vertical slice และเป็นเกณฑ์จบการเดินทางของ Match

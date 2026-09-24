@@ -538,13 +538,30 @@ func _grant_rewards(run: MatchRun) -> Dictionary:
 	run.add_gold(gold)
 	for item in items:
 		run.add_item(item, items[item])
+	var clue := _roll_clue(run)
 	var ratio := run.content.get_float("rules.revive_hp_ratio", 0.3)
 	for character in run.party:
 		if character["hp"] <= 0:
 			character["hp"] = maxi(1, int(round(character["max_hp"] * ratio)))
 	for character in run.party:
 		run.grant_exp(character["slot"], exp)
-	return {"exp": exp, "gold": gold, "items": items}
+	var granted := {"exp": exp, "gold": gold, "items": items}
+	if not clue.is_empty():
+		granted["clue"] = run.clue_view(clue)
+	return granted
+
+
+## Sometimes a won fight turns up a Story Clue nobody has found yet.
+func _roll_clue(run: MatchRun) -> String:
+	var unfound: Array = []
+	for id in run.content.get_array("story.combat_clues.pool"):
+		if not run.has_clue(str(id)):
+			unfound.append(str(id))
+	if unfound.is_empty() or not run.rng.chance(run.content.get_float("story.combat_clues.chance", 0.0)):
+		return ""
+	var id: String = run.rng.pick(unfound)
+	run.add_clue(id, "combat")
+	return id
 
 
 # --- Helpers ----------------------------------------------------------------

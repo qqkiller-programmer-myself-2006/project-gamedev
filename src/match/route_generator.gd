@@ -30,10 +30,11 @@ static func generate(rng: GameRng, content: ForestContent) -> Array:
 		_force(rng, layers, "merchant", rng.randi_range(first, layer_count - 1))
 
 	var routes: Array = []
+	var used_story_sites := {}
 	for types in layers:
 		var options: Array = []
 		for type in types:
-			options.append(_make_option(rng, content, type))
+			options.append(_make_option(rng, content, type, used_story_sites))
 		routes.append(options)
 	return routes
 
@@ -75,10 +76,17 @@ static func _force(rng: GameRng, layers: Array, type: String, index: int) -> voi
 		types[rng.pick(replaceable)] = type
 
 
-static func _make_option(rng: GameRng, content: ForestContent, type: String) -> Dictionary:
+static func _make_option(rng: GameRng, content: ForestContent, type: String, used_story_sites: Dictionary) -> Dictionary:
 	var sites := content.get_array("journey.sites.%s" % type)
 	if type == "class":
 		sites = _class_sites(content, sites)
+	if type == "story":
+		var fresh: Array = []
+		for site in sites:
+			if not used_story_sites.has(site.get("id")):
+				fresh.append(site)
+		if not fresh.is_empty():
+			sites = fresh
 	var site: Dictionary = rng.pick(sites) if not sites.is_empty() else {"id": type, "name": type.capitalize()}
 	var option := {
 		"type": type,
@@ -86,6 +94,8 @@ static func _make_option(rng: GameRng, content: ForestContent, type: String) -> 
 		"name": str(site.get("name", type.capitalize())),
 		"hint": str(site.get("hint", "")),
 	}
+	if type == "story":
+		used_story_sites[option["site"]] = true
 	if type == "class":
 		var offers: Dictionary = site.get("classes", {})
 		var ids := offers.keys()

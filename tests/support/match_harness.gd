@@ -33,6 +33,7 @@ const WOLF_PAIR := {
 ## Removes randomness from damage so tests can expect exact numbers.
 const EXACT_DAMAGE := {
 	"rules": {"damage_variance": 0},
+	"story": {"combat_clues": {"chance": 0}},
 	"classes": {"classless": {"stats": {"crit": 0}}},
 	"enemies": {"grey_wolf": {"stats": {"crit": 0}, "rewards": {"drops": []}}},
 }

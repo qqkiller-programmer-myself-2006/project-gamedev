@@ -67,6 +67,11 @@ func act(session: int) -> void:
 				"combat":
 					if encounter["your_turn"]:
 						_fight(session, slot, view, encounter)
+				"story":
+					if encounter["stage"] == "choosing" and not encounter["vote"]["voted_slots"].has(slot):
+						harness.server.command(session, {"type": "vote", "option": 0})
+					elif encounter["stage"] == "outcome" and not encounter["you_are_ready"]:
+						harness.server.command(session, {"type": "ready"})
 				"merchant":
 					if not encounter["you_are_ready"]:
 						_shop(session, encounter)

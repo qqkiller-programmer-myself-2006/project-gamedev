@@ -16,29 +16,41 @@
     "weakness_multiplier": 1.5,
     "revive_hp_ratio": 0.3,
     "class_offer_seconds": 20,
-    "ai_class_cap": 2
+    "ai_class_cap": 2,
+    "story_read_seconds": 25,
+    "story_vote_seconds": 20
   },
   "party": {
     "members": [
       {
         "id": "arin",
-        "name": "Arin"
+        "name": "Arin",
+        "role": "Eldest sibling",
+        "bio": "The eldest. Promised Mother she would bring everyone home."
       },
       {
         "id": "bram",
-        "name": "Bram"
+        "name": "Bram",
+        "role": "Second sibling",
+        "bio": "Quiet and stubborn. Carries Father's old map."
       },
       {
         "id": "cora",
-        "name": "Cora"
+        "name": "Cora",
+        "role": "Third sibling",
+        "bio": "Reads every page of Father's journal twice."
       },
       {
         "id": "dain",
-        "name": "Dain"
+        "name": "Dain",
+        "role": "Youngest sibling",
+        "bio": "Too young to remember Father's face, old enough to follow his road."
       },
       {
         "id": "wren",
-        "name": "Wren"
+        "name": "Wren",
+        "role": "Father's apprentice",
+        "bio": "Travelled with Father three years ago and came back alone, remembering nothing past the Forest."
       }
     ],
     "starting_gold": 0,
@@ -316,7 +328,7 @@
         {
           "id": "old_campfire",
           "name": "Old Campfire",
-          "hint": "Cold ashes and a familiar knot in the rope. Father was here?"
+          "hint": "Cold ashes and a familiar knot in the rope. Was Father here?"
         },
         {
           "id": "carved_stone",
@@ -327,6 +339,11 @@
           "id": "ranger_hut",
           "name": "Ranger's Hut",
           "hint": "Someone who remembers travellers lives here."
+        },
+        {
+          "id": "hollow_tree",
+          "name": "Hollow Tree",
+          "hint": "Something is tucked deep inside a lightning-split tree."
         }
       ],
       "class": [
@@ -931,5 +948,122 @@
   },
   "class_encounters": {
     "mastery_exp": 15
+  },
+  "story": {
+    "events": {
+      "old_campfire": {
+        "title": "The Old Campfire",
+        "text": "A ring of blackened stones sits under a pine. The rope still tied to a branch uses Father's double knot, the one he taught all of you. Two bedrolls were pressed into the moss here long ago.",
+        "choices": [
+          {
+            "label": "Search the ashes",
+            "hint": "Look for anything he left behind.",
+            "outcome": {
+              "text": "Under the ashes lies a scorched page from Father's journal: 'West along the stream. W. keeps up better than I do.'",
+              "clue": "journal_page",
+              "items": {
+                "firebomb": 1
+              }
+            }
+          },
+          {
+            "label": "Rest by the old fire",
+            "hint": "Take a moment to recover here.",
+            "outcome": {
+              "text": "You rekindle the fire and rest where Father once rested. Tucked under a stone you find his tin cup, engraved with Mother's name.",
+              "clue": "tin_cup",
+              "heal_ratio": 0.3
+            }
+          }
+        ]
+      },
+      "carved_stone": {
+        "title": "The Carved Stone",
+        "text": "Deep marks are cut into a standing stone: a wave, a lighthouse, and a cup drawn upside down. Beneath them, a single letter: E. Father's initial.",
+        "outcome": {
+          "text": "Father marked the way west: past the sea, past the last lighthouse. But why would he draw the Chalice upside down?",
+          "clue": "carved_map"
+        }
+      },
+      "ranger_hut": {
+        "title": "The Ranger's Hut",
+        "text": "An old ranger squints at the Party, then at Wren. \"You. You were with him, the man with the map. Three winters ago. You were half dead when you came back through here.\" Wren has no memory of it.",
+        "choices": [
+          {
+            "label": "Ask about Father",
+            "hint": "Learn where he went.",
+            "outcome": {
+              "text": "\"He asked about the Guardian of the Forest. Said he had to get past it, whatever it cost. I never saw him come back.\"",
+              "clue": "ranger_account",
+              "exp": 10
+            }
+          },
+          {
+            "label": "Ask about Wren",
+            "hint": "Learn what happened to Wren.",
+            "outcome": {
+              "text": "\"You were carrying his journal, lad, and shaking. You kept saying: it asks for a life. Then you slept for three days.\"",
+              "clue": "wren_return",
+              "exp": 10
+            }
+          }
+        ]
+      },
+      "hollow_tree": {
+        "title": "The Hollow Tree",
+        "text": "Inside a lightning-split oak, wrapped in oilcloth, is a letter addressed to Mother in Father's hand. It was never sent.",
+        "outcome": {
+          "text": "'If the Chalice asks a price, I will pay it. Not you. Not the children. Never the children.'",
+          "clue": "unsent_letter",
+          "gold": 15
+        }
+      }
+    },
+    "clues": {
+      "journal_page": {
+        "title": "Scorched Journal Page",
+        "text": "Father followed the stream west with a companion he called 'W.'"
+      },
+      "tin_cup": {
+        "title": "Father's Tin Cup",
+        "text": "Engraved with Mother's name. He carried it the whole way."
+      },
+      "carved_map": {
+        "title": "The Carved Stone",
+        "text": "A wave, a lighthouse and an upside-down cup: the road leads past the last lighthouse, beyond the sea."
+      },
+      "ranger_account": {
+        "title": "The Ranger's Account",
+        "text": "Father meant to get past the Guardian of the Forest, whatever it cost."
+      },
+      "wren_return": {
+        "title": "Wren's Return",
+        "text": "Wren came back half dead, carrying Father's journal and repeating: 'It asks for a life.'"
+      },
+      "unsent_letter": {
+        "title": "The Unsent Letter",
+        "text": "Father was ready to pay the Chalice's price himself: 'Never the children.'"
+      },
+      "wolf_collar": {
+        "title": "Traveller's Token",
+        "text": "A brass token from the western port, found among the wolves' leavings. Father bought passage there once."
+      },
+      "torn_cloak": {
+        "title": "Torn Grey Cloak",
+        "text": "A scrap of Father's grey cloak caught on thorns, heading deeper into the Forest."
+      },
+      "guardian_mark": {
+        "title": "Claw-Marked Shield",
+        "text": "A traveller's shield scored by huge claws. The Guardian has stopped others before you."
+      }
+    },
+    "combat_clues": {
+      "chance": 0.2,
+      "pool": [
+        "wolf_collar",
+        "torn_cloak",
+        "guardian_mark"
+      ]
+    }
   }
 }

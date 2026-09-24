@@ -12,6 +12,7 @@ extends RefCounted
 ##   action {slot, action, target, item, skill}   (combat, see CombatEncounter)
 ##   class_choice {accept}                        (Class Encounter offer)
 ##   buy {item}, ready                            (Merchant)
+##   vote {option}, ready                         (Story Event choice / reading)
 
 const PARTY_SIZE := 5
 ## In-Match command types (routed here by MatchServer during a Match).
@@ -34,6 +35,8 @@ var summary: Dictionary = {}
 var enemies_defeated := 0
 ## Class ids taken by at least one character during this Match.
 var classes_discovered: Array[String] = []
+## Story Clues found, oldest first: {"id", "title", "text", "layer", "source"}
+var clues: Array[Dictionary] = []
 
 var rng: GameRng
 var clock
@@ -92,7 +95,7 @@ func set_human(slot: int, human: bool) -> void:
 
 func handle(slot: int, cmd: Dictionary) -> Dictionary:
 	var kind := str(cmd.get("type", ""))
-	if kind == "vote":
+	if kind == "vote" and phase != "encounter":
 		return _handle_vote(slot, cmd)
 	if phase == "encounter" and encounter != null:
 		var result := encounter.handle(self, slot, cmd)
@@ -137,6 +140,7 @@ func snapshot(viewer_slot: int) -> Dictionary:
 		"encounter": _encounter_view(viewer_slot),
 		"gold": gold,
 		"inventory": inventory_view(),
+		"clues": clues.duplicate(true),
 		"summary": summary,
 		"elapsed": clock.now() - _started_at,
 	}
@@ -166,6 +170,31 @@ func add_item(item: String, count: int = 1) -> void:
 	if count <= 0:
 		return
 	inventory[item] = int(inventory.get(item, 0)) + count
+
+
+## Records a Story Clue once. Returns false if it was already found.
+func add_clue(id: String, source: String) -> bool:
+	for clue in clues:
+		if clue["id"] == id:
+			return false
+	var clue := clue_view(id)
+	clue["layer"] = layer
+	clue["source"] = source
+	clues.append(clue)
+	emit({"type": "clue_found", "clue": clue})
+	return true
+
+
+func clue_view(id: String) -> Dictionary:
+	var data := content.get_dict("story.clues.%s" % id)
+	return {"id": id, "title": str(data.get("title", id)), "text": str(data.get("text", ""))}
+
+
+func has_clue(id: String) -> bool:
+	for clue in clues:
+		if clue["id"] == id:
+			return true
+	return false
 
 
 ## Gives a character a new Class: stats are rebuilt from the Class at the
@@ -324,6 +353,8 @@ func _make_encounter(option: Dictionary) -> Encounter:
 			return RestEncounter.new(option)
 		"treasure":
 			return TreasureEncounter.new(option)
+		"story":
+			return StoryEncounter.new(option)
 	return PlaceholderEncounter.new(option)
 
 
@@ -360,6 +391,8 @@ func _end_match(outcome: String) -> void:
 		"elapsed": clock.now() - _started_at,
 		"enemies_defeated": enemies_defeated,
 		"classes_discovered": classes_discovered.duplicate(),
+		"clues_found": clues.size(),
+		"clues": clues.duplicate(true),
 		"gold": gold,
 		"party": party_view(),
 	}
