@@ -92,6 +92,13 @@ func server_url() -> String:
 		return str(options["url"])
 	if not settings.server_url.is_empty():
 		return settings.server_url
+	if OS.has_feature("web"):
+		# Staging serves the page and the server behind one reverse proxy,
+		# with the server on /ws of the same host (see deploy/Caddyfile).
+		var https = JavaScriptBridge.eval("window.location.protocol === 'https:'", true)
+		var host = JavaScriptBridge.eval("window.location.host", true)
+		if typeof(host) == TYPE_STRING and not str(host).is_empty():
+			return "%s://%s/ws" % ["wss" if https else "ws", host]
 	return DEFAULT_URL
 
 

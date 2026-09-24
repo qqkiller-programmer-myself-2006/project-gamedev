@@ -10,6 +10,9 @@ The current goal is the Forest vertical slice described in
 - Testing guide: [`docs/testing.md`](docs/testing.md)
 - Running server and clients: [`docs/running.md`](docs/running.md)
 - Balance and pacing: [`docs/balance.md`](docs/balance.md)
+- Browser build: [`docs/web.md`](docs/web.md)
+- Accessibility checklist: [`docs/accessibility.md`](docs/accessibility.md)
+- Staging and QA checklist: [`docs/staging.md`](docs/staging.md)
 
 ## Project layout
 
@@ -23,7 +26,8 @@ src/server/            Headless server node (GameServer)
 src/client/            Client UI: screens, per-phase panels, theme, settings, sounds
 src/app/               Entry point: --server starts the server, otherwise the client
 tests/                 Headless tests (runner, Match tests, regression, network)
-tools/                 simulate.gd (balance), ui_preview.gd (screenshots)
+tools/                 simulate.gd (balance), ui_preview.gd (screenshots), web_smoke.mjs
+deploy/                Staging: server container, Caddy (HTTPS + wss proxy), compose
 scripts/               Command-line helpers
 ```
 

@@ -92,3 +92,11 @@ func test_rooms_on_one_server_are_isolated() -> void:
 	rig.pump(func() -> bool: return zed.snapshot.get("match") != null)
 	assert_eq(ann.room()["state"], "lobby")
 	assert_eq(ann.snapshot["match"], null)
+
+
+func test_server_accepts_connections_on_a_proxy_path() -> void:
+	var client := NetClient.new()
+	client.connect_to(rig.url() + "/ws")
+	var probe := NetRig.Probe.new(client)
+	rig.probes.append(probe)
+	assert_true(rig.pump(func() -> bool: return probe.session != 0), "wss://host/ws behind Caddy reaches the server")
