@@ -4,11 +4,11 @@
   "rules": {
     "empty_room_grace_seconds": 30,
     "vote_seconds": 20,
-    "travel_seconds": 2.5,
+    "travel_seconds": 3,
     "action_window_seconds": 15,
-    "ai_turn_seconds": 0.8,
-    "enemy_turn_seconds": 0.9,
-    "combat_end_seconds": 3,
+    "ai_turn_seconds": 2.0,
+    "enemy_turn_seconds": 2.2,
+    "combat_end_seconds": 4,
     "defend_multiplier": 0.5,
     "defense_factor": 0.5,
     "damage_variance": 0.1,
@@ -225,18 +225,18 @@
   },
   "leveling": {
     "exp_to_next": [
-      20,
-      35,
-      55,
-      80,
-      110,
-      150
+      18,
+      30,
+      45,
+      65,
+      90,
+      120
     ],
     "growth": {
-      "max_hp": 5,
-      "atk": 1,
+      "max_hp": 6,
+      "atk": 2,
       "def": 1,
-      "mag": 1,
+      "mag": 2,
       "res": 1,
       "spd": 0
     }
@@ -431,8 +431,8 @@
       "behavior": "hunt_weakest",
       "description": "Fast and relentless. Always goes for whoever is weakest.",
       "stats": {
-        "max_hp": 26,
-        "atk": 9,
+        "max_hp": 64,
+        "atk": 10,
         "def": 2,
         "mag": 0,
         "res": 1,
@@ -449,8 +449,8 @@
       },
       "weakness": [],
       "rewards": {
-        "exp": 8,
-        "gold": 5,
+        "exp": 14,
+        "gold": 6,
         "drops": [
           {
             "item": "herb",
@@ -465,8 +465,8 @@
       "behavior": "charge_strongest",
       "description": "Slow and armoured. Charges whoever looks the strongest. Fears fire.",
       "stats": {
-        "max_hp": 48,
-        "atk": 12,
+        "max_hp": 120,
+        "atk": 13,
         "def": 5,
         "mag": 0,
         "res": 1,
@@ -485,8 +485,8 @@
         "fire"
       ],
       "rewards": {
-        "exp": 14,
-        "gold": 9,
+        "exp": 20,
+        "gold": 10,
         "drops": [
           {
             "item": "herb",
@@ -501,8 +501,8 @@
       "behavior": "random",
       "description": "Shoots from the back row at anyone in sight. Melee cannot reach it while the front row stands.",
       "stats": {
-        "max_hp": 20,
-        "atk": 10,
+        "max_hp": 52,
+        "atk": 11,
         "def": 2,
         "mag": 0,
         "res": 2,
@@ -522,7 +522,7 @@
         "fire"
       ],
       "rewards": {
-        "exp": 10,
+        "exp": 16,
         "gold": 12,
         "drops": [
           {
@@ -538,10 +538,10 @@
       "behavior": "healer",
       "description": "Mends wounded allies. Hurls spirit fire when nobody needs healing.",
       "stats": {
-        "max_hp": 18,
+        "max_hp": 46,
         "atk": 3,
         "def": 1,
-        "mag": 9,
+        "mag": 10,
         "res": 6,
         "spd": 12,
         "crit": 0.0
@@ -563,8 +563,8 @@
       },
       "weakness": [],
       "rewards": {
-        "exp": 12,
-        "gold": 8,
+        "exp": 18,
+        "gold": 9,
         "drops": [
           {
             "item": "tonic",
@@ -681,7 +681,7 @@
       "behavior": "boss",
       "description": "The Guardian of the Forest: ancient bark and thorn. Watch for its warnings; its heaviest blows come one turn later.",
       "stats": {
-        "max_hp": 480,
+        "max_hp": 900,
         "atk": 17,
         "def": 6,
         "mag": 14,
@@ -725,7 +725,7 @@
           ],
           "layers": [
             1,
-            2
+            1
           ],
           "weight": 2
         },
@@ -737,6 +737,18 @@
           ],
           "layers": [
             1,
+            2
+          ],
+          "weight": 2
+        },
+        {
+          "id": "boar_and_wolf",
+          "enemies": [
+            "thornback_boar",
+            "grey_wolf"
+          ],
+          "layers": [
+            2,
             3
           ],
           "weight": 2
@@ -793,7 +805,7 @@
             "bramble_archer"
           ],
           "layers": [
-            2,
+            3,
             5
           ],
           "weight": 2
@@ -850,7 +862,7 @@
     },
     "rest": {
       "seconds": 4,
-      "heal_ratio": 0.6,
+      "heal_ratio": 0.7,
       "text": "The Party rests. Wounds are cleaned and bandaged."
     },
     "treasure": {
@@ -974,7 +986,8 @@
     }
   },
   "class_encounters": {
-    "mastery_exp": 15
+    "mastery_exp": 15,
+    "pass_exp": 12
   },
   "story": {
     "events": {
@@ -1112,11 +1125,11 @@
       },
       {
         "name": "Wrathful Bloom",
-        "below_ratio": 0.5,
+        "below_ratio": 0.66,
         "boost": {
-          "atk": 4,
-          "mag": 4,
-          "spd": 4
+          "atk": 2,
+          "mag": 2,
+          "spd": 3
         },
         "pattern": [
           "bramble_lash",
@@ -1125,6 +1138,21 @@
           "telegraph:crushing_root"
         ],
         "text": "The Thornwarden roars. Its bark splits and blood-red blossoms burst open. It moves faster now!"
+      },
+      {
+        "name": "Heartwood Fury",
+        "below_ratio": 0.33,
+        "boost": {
+          "atk": 2,
+          "mag": 2
+        },
+        "pattern": [
+          "telegraph:thorn_storm",
+          "bramble_lash",
+          "telegraph:crushing_root",
+          "bramble_lash"
+        ],
+        "text": "Its glowing heart is laid bare. The Thornwarden fights with everything it has left!"
       }
     ],
     "moves": {
@@ -1148,7 +1176,7 @@
           "target": "enemy",
           "damage": {
             "stat": "atk",
-            "power": 2.6,
+            "power": 2.3,
             "element": "physical"
           }
         }
@@ -1161,7 +1189,7 @@
           "target": "all_enemies",
           "damage": {
             "stat": "mag",
-            "power": 1.5,
+            "power": 1.15,
             "element": "nature"
           }
         }

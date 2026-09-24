@@ -44,7 +44,7 @@ func _take_route(type: String) -> void:
 		if option["type"] == type:
 			for session in sessions:
 				h.server.command(session, {"type": "vote", "option": option["index"]})
-	h.advance(2.6, 0.1)
+	h.advance(h.content.get_float("rules.travel_seconds") + 0.1, 0.1)
 
 
 ## Humans attack the trainer until the Challenge is decided.
@@ -140,6 +140,14 @@ func test_accepting_gives_swordsman_stats_from_content() -> void:
 	assert_eq(me["hp"], 52, "HP grows with the new max HP")
 
 
+func test_passing_the_challenge_grants_a_little_exp_to_everyone() -> void:
+	_start(1, MatchHarness.merge([WEAK_TRAINER, {"class_encounters": {"pass_exp": 12}}]))
+	_take_route("class")
+	_fight_trial()
+	for character in _view()["party"]:
+		assert_eq(character["exp"], 12)
+
+
 func test_several_characters_can_take_the_same_class() -> void:
 	_start(2)
 	_take_route("class")
@@ -211,7 +219,7 @@ func test_answering_twice_is_rejected_while_others_decide() -> void:
 
 
 func test_passing_with_nobody_classless_grants_mastery_exp() -> void:
-	_start(1, WEAK_TRAINER_WHOLE_PARTY)
+	_start(1, MatchHarness.merge([WEAK_TRAINER_WHOLE_PARTY, {"class_encounters": {"pass_exp": 0}}]))
 	_take_route("class")
 	_fight_trial()
 	h.server.command(sessions[0], {"type": "class_choice", "accept": true})
@@ -284,7 +292,7 @@ func test_class_encounter_reachable_early_on_every_seed() -> void:
 	for seed_value in 40:
 		var harness := MatchHarness.new(seed_value, MatchHarness.EASY)
 		var bot := MatchBot.new(harness, harness.start_with_humans(1))
-		bot.choose_route = func(options: Array, _slot: int) -> int:
+		bot.choose_route = func(options: Array, _slot: int, _view: Dictionary) -> int:
 			for option in options:
 				if option["type"] == "class":
 					return option["index"]

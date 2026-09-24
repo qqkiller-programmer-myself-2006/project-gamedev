@@ -30,12 +30,38 @@ const WOLF_PAIR := {
 		{"id": "wolf_pair", "enemies": ["grey_wolf", "grey_wolf"], "layers": [1, 5], "weight": 1},
 	]}},
 }
-## Removes randomness from damage so tests can expect exact numbers.
+## Removes randomness from damage and pins pacing and a reference balance,
+## so mechanics tests can expect exact numbers whatever the real balance in
+## content/forest.json says (balance is covered by tests/regression).
 const EXACT_DAMAGE := {
-	"rules": {"damage_variance": 0},
+	"rules": {"damage_variance": 0, "ai_turn_seconds": 0.8, "enemy_turn_seconds": 0.9, "combat_end_seconds": 3},
 	"story": {"combat_clues": {"chance": 0}},
+	"leveling": {
+		"exp_to_next": [20, 35, 55, 80, 110, 150],
+		"growth": {"max_hp": 5, "atk": 1, "def": 1, "mag": 1, "res": 1, "spd": 0},
+	},
+	"class_encounters": {"pass_exp": 0, "mastery_exp": 15},
+	"encounters": {"rest": {"heal_ratio": 0.6}},
 	"classes": {"classless": {"stats": {"crit": 0}}},
-	"enemies": {"grey_wolf": {"stats": {"crit": 0}, "rewards": {"drops": []}}},
+	"enemies": {
+		"grey_wolf": {"stats": {"max_hp": 26, "atk": 9, "crit": 0}, "rewards": {"exp": 8, "gold": 5, "drops": []}},
+		"thornback_boar": {"stats": {"max_hp": 48, "atk": 12}, "rewards": {"exp": 14, "gold": 9}},
+		"bramble_archer": {"stats": {"max_hp": 20, "atk": 10}, "rewards": {"exp": 10, "gold": 12}},
+		"forest_wisp": {"stats": {"max_hp": 18, "mag": 9}, "rewards": {"exp": 12, "gold": 8}},
+		"elder_thornwarden": {"stats": {"max_hp": 480}},
+	},
+	"boss": {
+		"phases": [
+			{"name": "Rooted Sentinel", "below_ratio": 1.0, "pattern": ["bramble_lash", "bramble_lash", "telegraph:crushing_root"]},
+			{"name": "Wrathful Bloom", "below_ratio": 0.5, "boost": {"atk": 4, "mag": 4, "spd": 4},
+				"pattern": ["bramble_lash", "telegraph:thorn_storm", "bramble_lash", "telegraph:crushing_root"],
+				"text": "The Thornwarden roars."},
+		],
+		"moves": {
+			"crushing_root": {"use": {"damage": {"power": 2.6}}},
+			"thorn_storm": {"use": {"damage": {"power": 1.5}}},
+		},
+	},
 }
 
 var clock := ManualClock.new()

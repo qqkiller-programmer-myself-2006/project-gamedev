@@ -47,3 +47,12 @@ func test_host_gets_a_room_code() -> void:
 - ห้าม mock collaborator ภายใน และห้าม assert จำนวนครั้งที่เรียก function
 - `tests/core/test_no_engine_randomness.gd` ตรวจว่า game logic ไม่เรียก random หรือเวลา
   ของ engine ตรง ๆ: ใช้ `GameRng` และ clock ที่ inject เท่านั้น
+- test กลไก (`tests/match/`) ใส่ `MatchHarness.EXACT_DAMAGE` ซึ่ง pin damage variance,
+  pacing และ balance อ้างอิงไว้ เพื่อให้ปรับ balance ใน content ได้โดย test กลไกไม่พัง
+- test ที่ใช้ balance จริงอยู่ใน `tests/regression/` (full-run หลาย seed ด้วย `MatchBot`)
+  ดูผลและวิธีวัดใน [balance.md](balance.md)
+
+## เครื่องมือช่วย
+
+- `MatchBot` (`tests/support/match_bot.gd`): ผู้เล่นจำลองที่เล่นทั้ง Match ผ่าน Match interface
+- `tools/simulate.gd`: เล่นหลาย seed แล้วพิมพ์ win rate, เลเวล และเวลาจำลอง

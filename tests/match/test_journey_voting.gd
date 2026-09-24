@@ -168,7 +168,7 @@ func test_chosen_route_leads_to_encounter_of_advertised_type() -> void:
 	var options: Array = h.match_view(solo)["vote"]["options"]
 	h.server.command(solo, {"type": "vote", "option": options.size() - 1})
 	h.server.take_events(solo)
-	h.advance(3.0)
+	h.advance(h.content.get_float("rules.travel_seconds") + 0.5)
 	var started := _events(h, solo, "encounter_started")
 	assert_eq(started.size(), 1)
 	assert_eq(started[0]["encounter_type"], options[-1]["type"])

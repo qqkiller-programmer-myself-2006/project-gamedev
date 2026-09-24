@@ -3,8 +3,9 @@ extends Encounter
 ## Class Encounter: a Challenge that can offer a Tier 1 Class.
 ##
 ## 1. challenge: a non-lethal trial fight against the Class's trainer with a
-##    round limit. Beating the trainer in time passes; otherwise it fails and
-##    no Class is offered. HP returns to what it was before the trial.
+##    round limit. Beating the trainer in time passes (and grants a little
+##    EXP to everyone); otherwise it fails and no Class is offered. HP returns
+##    to what it was before the trial.
 ## 2. offer: every Classless character may take the Class. Humans answer
 ##    with class_choice {accept} before the deadline (no answer = decline).
 ##    AI-controlled characters decide on their own, in slot order: they
@@ -150,6 +151,9 @@ func _advance(run: MatchRun) -> void:
 		stage = "result"
 		done = true
 		return
+	var pass_exp := run.content.get_int("class_encounters.pass_exp", 0)
+	for character in run.party:
+		run.grant_exp(character["slot"], pass_exp)
 	for character in run.party:
 		if character["class"] == "classless":
 			eligible.append(character["slot"])

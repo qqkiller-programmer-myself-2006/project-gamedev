@@ -67,11 +67,12 @@ func test_boss_appears_after_the_fifth_layer() -> void:
 	assert_eq(encounter["kind"], "boss")
 	assert_eq(encounter["boss"]["name"], "Elder Thornwarden")
 	assert_eq(encounter["boss"]["title"], "Guardian of the Forest")
-	assert_eq(encounter["enemies"][0]["max_hp"], 480, "Boss numbers come from content")
+	assert_eq(encounter["enemies"][0]["max_hp"], h.content.get_int("enemies.elder_thornwarden.stats.max_hp"),
+			"Boss numbers come from content")
 	assert_eq(bot.events_of_type("boss_started").size(), 1)
 
 
-func test_boss_changes_phase_at_half_hp_and_announces_it() -> void:
+func test_boss_changes_phase_at_its_threshold_and_announces_it() -> void:
 	_to_boss(1, {"enemies": {"elder_thornwarden": {"stats": {"max_hp": 120, "atk": 1, "mag": 1}}}})
 	assert_eq(_boss_view()["boss"]["phase"], 1)
 	assert_eq(_boss_view()["boss"]["phases_total"], 2)

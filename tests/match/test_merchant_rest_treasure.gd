@@ -181,7 +181,7 @@ func test_every_seed_can_reach_a_real_merchant_before_the_boss() -> void:
 	for seed_value in 40:
 		var harness := MatchHarness.new(seed_value, MatchHarness.EASY)
 		var bot := MatchBot.new(harness, harness.start_with_humans(1))
-		bot.choose_route = func(options: Array, _slot: int) -> int:
+		bot.choose_route = func(options: Array, _slot: int, _view: Dictionary) -> int:
 			for option in options:
 				if option["type"] == "merchant":
 					return option["index"]
