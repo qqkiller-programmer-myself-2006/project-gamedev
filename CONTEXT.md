@@ -39,18 +39,38 @@ server ที่เป็นผู้ตัดสินผลของ combat, v
 _Avoid_: client-authoritative, peer host
 
 **Room code**:
-รหัสยาว 6 ตัวอักษรที่ Host ใช้สร้างห้อง และผู้เล่นอื่นใช้เข้าร่วม Match
+รหัสยาว 6 ตัวอักษรที่ Host ใช้สร้างห้อง และผู้เล่นอื่นใช้เข้าร่วม Match; ป้อนแบบไม่สนตัวพิมพ์เล็กใหญ่ และไม่มีตัวอักษรที่สับสนง่าย (0/O, 1/I/L)
 _Avoid_: invite link, lobby ID
 
+**Host**:
+ผู้เล่นที่สร้างห้อง และเป็นคนเดียวที่เริ่ม Match ได้; ถ้า Host ออกจากห้อง สิทธิ์ Host ส่งต่อให้ผู้เล่นจริงใน slot ลำดับต่ำสุดที่เหลืออยู่
+_Avoid_: owner, admin, leader
+
+**Match interface**:
+seam เดียวของ game logic (`MatchServer`): รับ command จาก session แล้วคืน event และ snapshot โดยรับ seed, clock และข้อมูล content ของ Forest จากภายนอก; test และ transport adapter คุยกับเกมผ่าน interface นี้เท่านั้น
+_Avoid_: game API, backend
+
 ## Characters and progression
+
+**Wren**:
+ตัวละครลำดับที่ 5 ของ Party: ลูกศิษย์และผู้ร่วมทางเก่าของพ่อ ที่กลับมาคนเดียวโดยจำเรื่องหลังออกจาก Forest ไม่ได้ (ADR-0006); อีกสี่คนคือพี่น้อง Arin, Bram, Cora และ Dain
+_Avoid_: fifth sibling, mercenary
 
 **Classless**:
 สถานะเริ่มต้นของตัวละครที่ยังไม่มีความสามารถเฉพาะ Class
 _Avoid_: default class, novice class
 
 **Class Encounter**:
-Encounter ที่เปิดโอกาสให้ตัวละครค้นพบหรือยืนยันการเปลี่ยนไปใช้ Class
+Encounter ที่เปิดโอกาสให้ตัวละครค้นพบหรือยืนยันการเปลี่ยนไปใช้ Class: เริ่มด้วย Challenge (การประลองแบบไม่ถึงตายกับผู้ฝึกสอนภายในจำนวน round ที่กำหนด) ถ้าผ่าน ตัวละคร Classless ทุกตัวเลือกรับหรือไม่รับ Class นั้นได้
 _Avoid_: class menu, class selection screen
+
+**Challenge**:
+การประลองใน Class Encounter ที่ต้องเอาชนะผู้ฝึกสอนให้ได้ภายใน round ที่กำหนด; ไม่มีใครล้ม ไม่มี reward และ HP กลับเป็นเหมือนก่อนประลอง
+_Avoid_: trial boss, mini-boss
+
+**Skill**:
+action เฉพาะ Class ที่ถูกจำกัดด้วย cooldown นับเป็น turn ของตัวละครนั้นเอง (ADR-0005); ตัวละคร Classless ไม่มี Skill
+_Avoid_: ability, spell (เมื่อหมายถึง action ในระบบ)
 
 **Tier 1 Class**:
 Class ระดับแรกของ Forest vertical slice ได้แก่ Swordsman, Archer, Mage และ Guardian
@@ -73,6 +93,26 @@ _Avoid_: route selection (เมื่อหมายถึงกระบวน
 **Encounter**:
 เหตุการณ์หนึ่งระหว่างการเดินทาง ซึ่งใน vertical slice อาจเป็น Combat, Merchant, Rest, Treasure, Story Event หรือ Class Encounter
 _Avoid_: quest node, random event (เว้นแต่กำลังพูดถึง implementation randomness)
+
+**Merchant**:
+Encounter ที่ผู้เล่นจริงคนใดก็ได้ซื้อ Item ด้วย Gold ร่วมของ Party; ร้านปิดเมื่อผู้เล่นจริงทุกคนกดพร้อมไปต่อหรือหมดเวลา; ไม่มีการขายของ และ AI ไม่ซื้อ
+_Avoid_: shop screen, store
+
+**Gold**:
+เงินร่วมของทั้ง Party (ไม่ใช่ของผู้เล่นแต่ละคน) ได้จาก Combat และ Treasure ใช้ที่ Merchant
+_Avoid_: coins, money (ในเอกสารระบบ)
+
+**Reward**:
+สิ่งที่ Party ได้หลังชนะ Combat หรือจาก Treasure: EXP ให้ตัวละครทุกตัว, Gold และ Item เข้าคลังร่วม
+_Avoid_: loot (เมื่อหมายถึงผลรวมหลัง Encounter)
+
+**Story Event**:
+Encounter ที่เล่าเบาะแสการเดินทางของพ่อและเพิ่ม Story Clue; ถ้ามีตัวเลือก ผู้เล่นจริงโหวตด้วยกติกาเดียวกับ Path Voting
+_Avoid_: cutscene, dialogue node
+
+**Story Clue**:
+เบาะแสเกี่ยวกับพ่อที่ Party เก็บได้จาก Story Event (และบางครั้งจาก Combat) บันทึกใน clue log ของ Match ที่เปิดดูได้ตลอด และนับในหน้าสรุปตอนจบ
+_Avoid_: lore item, collectible
 
 **Guardian Boss**:
 ศัตรูหลักที่ปิดท้าย Forest vertical slice และเป็นเกณฑ์จบการเดินทางของ Match

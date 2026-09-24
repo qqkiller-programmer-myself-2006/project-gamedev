@@ -1,0 +1,14 @@
+# One host serves the browser build and proxies the game server on /ws,
+# with automatic HTTPS so browsers can use wss:// (ADR-0008).
+{$DOMAIN} {
+	encode zstd gzip
+
+	handle /ws* {
+		reverse_proxy game-server:8910
+	}
+
+	handle {
+		root * /srv/web
+		file_server
+	}
+}

@@ -1,0 +1,1209 @@
+{
+  "version": 1,
+  "region": "forest",
+  "rules": {
+    "empty_room_grace_seconds": 30,
+    "vote_seconds": 20,
+    "travel_seconds": 3,
+    "action_window_seconds": 15,
+    "ai_turn_seconds": 2.0,
+    "enemy_turn_seconds": 2.2,
+    "combat_end_seconds": 4,
+    "defend_multiplier": 0.5,
+    "defense_factor": 0.5,
+    "damage_variance": 0.1,
+    "crit_multiplier": 1.5,
+    "weakness_multiplier": 1.5,
+    "revive_hp_ratio": 0.3,
+    "class_offer_seconds": 20,
+    "ai_class_cap": 2,
+    "story_read_seconds": 25,
+    "story_vote_seconds": 20
+  },
+  "party": {
+    "members": [
+      {
+        "id": "arin",
+        "name": "Arin",
+        "role": "Eldest sibling",
+        "bio": "The eldest. Promised Mother she would bring everyone home."
+      },
+      {
+        "id": "bram",
+        "name": "Bram",
+        "role": "Second sibling",
+        "bio": "Quiet and stubborn. Carries Father's old map."
+      },
+      {
+        "id": "cora",
+        "name": "Cora",
+        "role": "Third sibling",
+        "bio": "Reads every page of Father's journal twice."
+      },
+      {
+        "id": "dain",
+        "name": "Dain",
+        "role": "Youngest sibling",
+        "bio": "Too young to remember Father's face, old enough to follow his road."
+      },
+      {
+        "id": "wren",
+        "name": "Wren",
+        "role": "Father's apprentice",
+        "bio": "Travelled with Father three years ago and came back alone, remembering nothing past the Forest."
+      }
+    ],
+    "starting_gold": 0,
+    "starting_inventory": {
+      "herb": 3
+    }
+  },
+  "classes": {
+    "classless": {
+      "name": "Classless",
+      "stats": {
+        "max_hp": 40,
+        "atk": 8,
+        "def": 3,
+        "mag": 4,
+        "res": 3,
+        "spd": 10,
+        "crit": 0.05
+      },
+      "skills": [],
+      "attack": {
+        "target": "enemy",
+        "range": "melee",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "role": "Beginner",
+      "description": "No special training yet. Can Attack, Defend and use Items.",
+      "ai": "classless"
+    },
+    "swordsman": {
+      "name": "Swordsman",
+      "role": "Melee DPS",
+      "description": "Balanced and dependable. Strong melee strikes, solid health.",
+      "stats": {
+        "max_hp": 52,
+        "atk": 12,
+        "def": 5,
+        "mag": 3,
+        "res": 3,
+        "spd": 10,
+        "crit": 0.08
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "melee",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "skills": [
+        "power_slash"
+      ],
+      "ai": "swordsman",
+      "challenge": {
+        "trainer": "old_swordsman",
+        "rounds": 3,
+        "intro": "An old man lowers his practice blade. \"Land enough blows before I tire of you, and I will teach you the sword.\"",
+        "pass": "The old man laughs and bows. \"You have the spirit of the blade.\"",
+        "fail": "The old man sheathes his sword. \"Not yet. Come back when your arms are stronger.\""
+      }
+    },
+    "archer": {
+      "name": "Archer",
+      "role": "Ranged DPS",
+      "description": "The fastest of the Party. Shoots any enemy, even in the back row, and often lands critical hits.",
+      "stats": {
+        "max_hp": 44,
+        "atk": 11,
+        "def": 3,
+        "mag": 3,
+        "res": 3,
+        "spd": 15,
+        "crit": 0.25
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "skills": [
+        "aimed_shot"
+      ],
+      "ai": "archer",
+      "challenge": {
+        "trainer": "veteran_hunter",
+        "rounds": 3,
+        "intro": "A veteran hunter strings her bow. \"Hunters strike first and never miss twice. Show me you can keep up.\"",
+        "pass": "She lowers her bow with a grin. \"Fast hands. Take this bow, it has waited for someone like you.\"",
+        "fail": "\"Too slow. The forest does not wait for anyone.\""
+      }
+    },
+    "mage": {
+      "name": "Mage",
+      "role": "Magic DPS / AoE",
+      "description": "Fragile but devastating. Magic ignores armour and Fireball strikes every enemy at once.",
+      "stats": {
+        "max_hp": 38,
+        "atk": 5,
+        "def": 2,
+        "mag": 14,
+        "res": 6,
+        "spd": 9,
+        "crit": 0.05
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "mag",
+          "power": 1.0,
+          "element": "arcane"
+        }
+      },
+      "skills": [
+        "fireball",
+        "frost_lance"
+      ],
+      "ai": "mage",
+      "challenge": {
+        "trainer": "shrine_spirit",
+        "rounds": 3,
+        "intro": "Blue fire gathers into a figure between the pillars. \"Words of power answer only to a steady mind. Prove yours.\"",
+        "pass": "The flames bow low. \"The old words are yours now. Use them gently.\"",
+        "fail": "The fire gutters out. \"Your mind wanders. Return when it is still.\""
+      }
+    },
+    "guardian": {
+      "name": "Guardian",
+      "role": "Tank / Defense",
+      "description": "The Party's shield. The most HP and Defense of any Class; protects allies and blunts incoming damage.",
+      "stats": {
+        "max_hp": 70,
+        "atk": 9,
+        "def": 9,
+        "mag": 2,
+        "res": 6,
+        "spd": 7,
+        "crit": 0.05
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "melee",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "skills": [
+        "protect",
+        "shield_wall"
+      ],
+      "ai": "guardian",
+      "challenge": {
+        "trainer": "stone_sentinel",
+        "rounds": 3,
+        "intro": "The stone knight raises its shield. \"None pass who cannot stand firm. Strike me, and endure my answer.\"",
+        "pass": "The sentinel kneels and offers its shield. \"Stand before those you love. That is the Guardian's oath.\"",
+        "fail": "The sentinel does not move. \"You are not yet a wall. Return when you are.\""
+      }
+    }
+  },
+  "leveling": {
+    "exp_to_next": [
+      18,
+      30,
+      45,
+      65,
+      90,
+      120
+    ],
+    "growth": {
+      "max_hp": 6,
+      "atk": 2,
+      "def": 1,
+      "mag": 2,
+      "res": 1,
+      "spd": 0
+    }
+  },
+  "journey": {
+    "layers": 5,
+    "options_min": 2,
+    "options_max": 3,
+    "type_weights": {
+      "combat": 5,
+      "merchant": 2,
+      "rest": 2,
+      "treasure": 2,
+      "story": 2,
+      "class": 3
+    },
+    "guarantees": {
+      "class_by_layer": 2,
+      "merchant_before_boss": true
+    },
+    "type_labels": {
+      "combat": "Combat",
+      "merchant": "Merchant",
+      "rest": "Rest",
+      "treasure": "Treasure",
+      "story": "Story Event",
+      "class": "Class Encounter"
+    },
+    "sites": {
+      "combat": [
+        {
+          "id": "follow_the_stream",
+          "name": "Follow the Stream",
+          "hint": "Fresh tracks in the mud. Something hunts along the water."
+        },
+        {
+          "id": "dark_thicket",
+          "name": "Dark Thicket",
+          "hint": "Branches rustle where there is no wind."
+        },
+        {
+          "id": "wolf_trail",
+          "name": "Wolf Trail",
+          "hint": "Howling close by. A fight is certain."
+        },
+        {
+          "id": "bandit_road",
+          "name": "Overgrown Road",
+          "hint": "Arrows stuck in the trees. Someone guards this road."
+        }
+      ],
+      "merchant": [
+        {
+          "id": "travelling_merchant",
+          "name": "Travelling Merchant",
+          "hint": "A cart with a lantern. Gold can buy help here."
+        },
+        {
+          "id": "hunter_trader",
+          "name": "Trapper's Stall",
+          "hint": "Herbs and tonics traded for coin."
+        }
+      ],
+      "rest": [
+        {
+          "id": "quiet_glade",
+          "name": "Quiet Glade",
+          "hint": "Soft moss and clean water. A place to recover."
+        },
+        {
+          "id": "hollow_oak",
+          "name": "Hollow Oak",
+          "hint": "A dry shelter inside a giant tree."
+        }
+      ],
+      "treasure": [
+        {
+          "id": "abandoned_cabin",
+          "name": "Abandoned Cabin",
+          "hint": "Nobody has lived here for years. Maybe something was left behind."
+        },
+        {
+          "id": "fallen_cart",
+          "name": "Fallen Cart",
+          "hint": "An overturned cart half-buried in leaves."
+        }
+      ],
+      "story": [
+        {
+          "id": "old_campfire",
+          "name": "Old Campfire",
+          "hint": "Cold ashes and a familiar knot in the rope. Was Father here?"
+        },
+        {
+          "id": "carved_stone",
+          "name": "Carved Stone",
+          "hint": "Marks cut into a stone by a careful hand."
+        },
+        {
+          "id": "ranger_hut",
+          "name": "Ranger's Hut",
+          "hint": "Someone who remembers travellers lives here."
+        },
+        {
+          "id": "hollow_tree",
+          "name": "Hollow Tree",
+          "hint": "Something is tucked deep inside a lightning-split tree."
+        }
+      ],
+      "class": [
+        {
+          "id": "old_swordsman",
+          "name": "Old Swordsman's Hut",
+          "hint": "An old man practises forms outside his hut.",
+          "classes": {
+            "swordsman": 1
+          }
+        },
+        {
+          "id": "hunter_camp",
+          "name": "Hunter Camp",
+          "hint": "Hunters test newcomers with bow and blade.",
+          "classes": {
+            "archer": 3,
+            "swordsman": 1
+          }
+        },
+        {
+          "id": "ruined_shrine",
+          "name": "Ruined Shrine",
+          "hint": "Blue fire flickers between the broken pillars.",
+          "classes": {
+            "mage": 1
+          }
+        },
+        {
+          "id": "stone_sentinel",
+          "name": "Stone Sentinel",
+          "hint": "A moss-covered knight of stone blocks the path.",
+          "classes": {
+            "guardian": 1
+          }
+        }
+      ]
+    }
+  },
+  "items": {
+    "herb": {
+      "name": "Healing Herb",
+      "description": "Restores 30 HP to one ally.",
+      "use": {
+        "target": "ally",
+        "heal": 30
+      },
+      "price": 12
+    },
+    "tonic": {
+      "name": "Forest Tonic",
+      "description": "Restores 70 HP to one ally.",
+      "use": {
+        "target": "ally",
+        "heal": 70
+      },
+      "price": 28
+    },
+    "spirit_bloom": {
+      "name": "Spirit Bloom",
+      "description": "Revives a fallen ally with 40% HP.",
+      "use": {
+        "target": "fallen_ally",
+        "revive_ratio": 0.4
+      },
+      "price": 40
+    },
+    "firebomb": {
+      "name": "Firebomb",
+      "description": "Deals 18 fire damage to every enemy.",
+      "use": {
+        "target": "all_enemies",
+        "damage": {
+          "amount": 18,
+          "element": "fire"
+        }
+      },
+      "price": 24
+    }
+  },
+  "enemies": {
+    "grey_wolf": {
+      "name": "Grey Wolf",
+      "row": "front",
+      "behavior": "hunt_weakest",
+      "description": "Fast and relentless. Always goes for whoever is weakest.",
+      "stats": {
+        "max_hp": 64,
+        "atk": 10,
+        "def": 2,
+        "mag": 0,
+        "res": 1,
+        "spd": 13,
+        "crit": 0.05
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [],
+      "rewards": {
+        "exp": 14,
+        "gold": 6,
+        "drops": [
+          {
+            "item": "herb",
+            "chance": 0.15
+          }
+        ]
+      }
+    },
+    "thornback_boar": {
+      "name": "Thornback Boar",
+      "row": "front",
+      "behavior": "charge_strongest",
+      "description": "Slow and armoured. Charges whoever looks the strongest. Fears fire.",
+      "stats": {
+        "max_hp": 120,
+        "atk": 13,
+        "def": 5,
+        "mag": 0,
+        "res": 1,
+        "spd": 7,
+        "crit": 0.05
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [
+        "fire"
+      ],
+      "rewards": {
+        "exp": 20,
+        "gold": 10,
+        "drops": [
+          {
+            "item": "herb",
+            "chance": 0.25
+          }
+        ]
+      }
+    },
+    "bramble_archer": {
+      "name": "Bramble Archer",
+      "row": "back",
+      "behavior": "random",
+      "description": "Shoots from the back row at anyone in sight. Melee cannot reach it while the front row stands.",
+      "stats": {
+        "max_hp": 52,
+        "atk": 11,
+        "def": 2,
+        "mag": 0,
+        "res": 2,
+        "spd": 11,
+        "crit": 0.1
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [
+        "fire"
+      ],
+      "rewards": {
+        "exp": 16,
+        "gold": 12,
+        "drops": [
+          {
+            "item": "firebomb",
+            "chance": 0.1
+          }
+        ]
+      }
+    },
+    "forest_wisp": {
+      "name": "Forest Wisp",
+      "row": "back",
+      "behavior": "healer",
+      "description": "Mends wounded allies. Hurls spirit fire when nobody needs healing.",
+      "stats": {
+        "max_hp": 46,
+        "atk": 3,
+        "def": 1,
+        "mag": 10,
+        "res": 6,
+        "spd": 12,
+        "crit": 0.0
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "mag",
+          "power": 1.0,
+          "element": "spirit"
+        }
+      },
+      "support": {
+        "name": "Mend",
+        "target": "ally",
+        "heal": 18,
+        "below_ratio": 0.6
+      },
+      "weakness": [],
+      "rewards": {
+        "exp": 18,
+        "gold": 9,
+        "drops": [
+          {
+            "item": "tonic",
+            "chance": 0.15
+          }
+        ]
+      }
+    },
+    "old_swordsman": {
+      "name": "Old Swordsman",
+      "row": "front",
+      "behavior": "charge_strongest",
+      "description": "A retired blade master testing your resolve. He will not truly hurt you.",
+      "stats": {
+        "max_hp": 70,
+        "atk": 9,
+        "def": 4,
+        "mag": 0,
+        "res": 2,
+        "spd": 11,
+        "crit": 0.0
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [],
+      "rewards": {}
+    },
+    "veteran_hunter": {
+      "name": "Veteran Hunter",
+      "row": "front",
+      "behavior": "random",
+      "description": "A seasoned hunter testing your speed. Her blunt arrows sting but will not truly hurt you.",
+      "stats": {
+        "max_hp": 64,
+        "atk": 9,
+        "def": 3,
+        "mag": 0,
+        "res": 2,
+        "spd": 14,
+        "crit": 0.1
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [],
+      "rewards": {}
+    },
+    "shrine_spirit": {
+      "name": "Shrine Spirit",
+      "row": "front",
+      "behavior": "random",
+      "description": "An old guardian flame. It tests the mind, not the body, and will not truly hurt you.",
+      "stats": {
+        "max_hp": 58,
+        "atk": 3,
+        "def": 6,
+        "mag": 9,
+        "res": 2,
+        "spd": 10,
+        "crit": 0.0
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "mag",
+          "power": 1.0,
+          "element": "spirit"
+        }
+      },
+      "weakness": [],
+      "rewards": {}
+    },
+    "stone_sentinel": {
+      "name": "Stone Sentinel",
+      "row": "front",
+      "behavior": "charge_strongest",
+      "description": "A living statue testing your endurance. Its blows are heavy but will not truly hurt you.",
+      "stats": {
+        "max_hp": 66,
+        "atk": 11,
+        "def": 4,
+        "mag": 0,
+        "res": 4,
+        "spd": 6,
+        "crit": 0.0
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [],
+      "rewards": {}
+    },
+    "elder_thornwarden": {
+      "name": "Elder Thornwarden",
+      "row": "front",
+      "behavior": "boss",
+      "description": "The Guardian of the Forest: ancient bark and thorn. Watch for its warnings; its heaviest blows come one turn later.",
+      "stats": {
+        "max_hp": 900,
+        "atk": 17,
+        "def": 6,
+        "mag": 14,
+        "res": 5,
+        "spd": 9,
+        "crit": 0.05
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [
+        "fire"
+      ],
+      "rewards": {}
+    }
+  },
+  "encounters": {
+    "combat": {
+      "groups": [
+        {
+          "id": "wolf_pair",
+          "enemies": [
+            "grey_wolf",
+            "grey_wolf"
+          ],
+          "layers": [
+            1,
+            2
+          ],
+          "weight": 3
+        },
+        {
+          "id": "lone_boar",
+          "enemies": [
+            "thornback_boar"
+          ],
+          "layers": [
+            1,
+            1
+          ],
+          "weight": 2
+        },
+        {
+          "id": "wolf_and_archer",
+          "enemies": [
+            "grey_wolf",
+            "bramble_archer"
+          ],
+          "layers": [
+            1,
+            2
+          ],
+          "weight": 2
+        },
+        {
+          "id": "boar_and_wolf",
+          "enemies": [
+            "thornback_boar",
+            "grey_wolf"
+          ],
+          "layers": [
+            2,
+            3
+          ],
+          "weight": 2
+        },
+        {
+          "id": "wolf_pack",
+          "enemies": [
+            "grey_wolf",
+            "grey_wolf",
+            "grey_wolf"
+          ],
+          "layers": [
+            2,
+            5
+          ],
+          "weight": 2,
+          "sites": [
+            "wolf_trail"
+          ]
+        },
+        {
+          "id": "ambush",
+          "enemies": [
+            "grey_wolf",
+            "bramble_archer",
+            "bramble_archer"
+          ],
+          "layers": [
+            2,
+            5
+          ],
+          "weight": 2,
+          "sites": [
+            "bandit_road"
+          ]
+        },
+        {
+          "id": "boar_and_wisp",
+          "enemies": [
+            "thornback_boar",
+            "forest_wisp"
+          ],
+          "layers": [
+            2,
+            4
+          ],
+          "weight": 2
+        },
+        {
+          "id": "wolves_and_archer",
+          "enemies": [
+            "grey_wolf",
+            "grey_wolf",
+            "bramble_archer"
+          ],
+          "layers": [
+            3,
+            5
+          ],
+          "weight": 2
+        },
+        {
+          "id": "thicket_guard",
+          "enemies": [
+            "thornback_boar",
+            "grey_wolf",
+            "forest_wisp"
+          ],
+          "layers": [
+            3,
+            5
+          ],
+          "weight": 2
+        },
+        {
+          "id": "archer_nest",
+          "enemies": [
+            "thornback_boar",
+            "bramble_archer",
+            "forest_wisp"
+          ],
+          "layers": [
+            4,
+            5
+          ],
+          "weight": 2
+        }
+      ]
+    },
+    "merchant": {
+      "seconds": 45,
+      "greeting": "\"Herbs, tonics, a little fire in a jar. Coin first, friends.\"",
+      "stock": [
+        {
+          "item": "herb",
+          "quantity": 5
+        },
+        {
+          "item": "tonic",
+          "quantity": 2
+        },
+        {
+          "item": "spirit_bloom",
+          "quantity": 1
+        },
+        {
+          "item": "firebomb",
+          "quantity": 2
+        }
+      ]
+    },
+    "rest": {
+      "seconds": 4,
+      "heal_ratio": 0.7,
+      "text": "The Party rests. Wounds are cleaned and bandaged."
+    },
+    "treasure": {
+      "seconds": 4,
+      "rolls": 2,
+      "text": "Among the dust and leaves, something useful catches the light.",
+      "loot": [
+        {
+          "gold": [
+            12,
+            25
+          ],
+          "weight": 4
+        },
+        {
+          "item": "herb",
+          "count": 2,
+          "weight": 3
+        },
+        {
+          "item": "tonic",
+          "count": 1,
+          "weight": 2
+        },
+        {
+          "item": "spirit_bloom",
+          "count": 1,
+          "weight": 1
+        },
+        {
+          "item": "firebomb",
+          "count": 1,
+          "weight": 2
+        }
+      ]
+    }
+  },
+  "skills": {
+    "power_slash": {
+      "name": "Power Slash",
+      "class": "swordsman",
+      "description": "A heavy melee strike dealing 180% ATK damage to one enemy. Cooldown: 2 turns.",
+      "cooldown": 2,
+      "use": {
+        "target": "enemy",
+        "range": "melee",
+        "damage": {
+          "stat": "atk",
+          "power": 1.8,
+          "element": "physical"
+        }
+      }
+    },
+    "aimed_shot": {
+      "name": "Aimed Shot",
+      "class": "archer",
+      "description": "A careful ranged shot at 140% ATK that always lands a critical hit. Reaches the back row. Cooldown: 2 turns.",
+      "cooldown": 2,
+      "use": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "atk",
+          "power": 1.4,
+          "element": "physical",
+          "always_crit": true
+        }
+      }
+    },
+    "fireball": {
+      "name": "Fireball",
+      "class": "mage",
+      "description": "Fire magic at 110% MAG that hits every enemy, front and back row. Burns enemies weak to fire harder. Cooldown: 2 turns.",
+      "cooldown": 2,
+      "use": {
+        "target": "all_enemies",
+        "range": "ranged",
+        "damage": {
+          "stat": "mag",
+          "power": 1.1,
+          "element": "fire"
+        }
+      }
+    },
+    "frost_lance": {
+      "name": "Frost Lance",
+      "class": "mage",
+      "description": "An ice spear at 160% MAG against one enemy anywhere on the field. Cooldown: 1 turn.",
+      "cooldown": 1,
+      "use": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "mag",
+          "power": 1.6,
+          "element": "ice"
+        }
+      }
+    },
+    "protect": {
+      "name": "Protect",
+      "class": "guardian",
+      "description": "Guard one ally until your next turn: attacks aimed at them hit you instead, with 30% less damage.",
+      "cooldown": 0,
+      "use": {
+        "target": "other_ally",
+        "status": "protect",
+        "multiplier": 0.7
+      }
+    },
+    "shield_wall": {
+      "name": "Shield Wall",
+      "class": "guardian",
+      "description": "Raise your shield for everyone: the whole Party takes 40% less damage until your next turn. Cooldown: 3 turns.",
+      "cooldown": 3,
+      "use": {
+        "target": "self",
+        "status": "shield_wall",
+        "multiplier": 0.6
+      }
+    }
+  },
+  "class_encounters": {
+    "mastery_exp": 15,
+    "pass_exp": 12
+  },
+  "story": {
+    "events": {
+      "old_campfire": {
+        "title": "The Old Campfire",
+        "text": "A ring of blackened stones sits under a pine. The rope still tied to a branch uses Father's double knot, the one he taught all of you. Two bedrolls were pressed into the moss here long ago.",
+        "choices": [
+          {
+            "label": "Search the ashes",
+            "hint": "Look for anything he left behind.",
+            "outcome": {
+              "text": "Under the ashes lies a scorched page from Father's journal: 'West along the stream. W. keeps up better than I do.'",
+              "clue": "journal_page",
+              "items": {
+                "firebomb": 1
+              }
+            }
+          },
+          {
+            "label": "Rest by the old fire",
+            "hint": "Take a moment to recover here.",
+            "outcome": {
+              "text": "You rekindle the fire and rest where Father once rested. Tucked under a stone you find his tin cup, engraved with Mother's name.",
+              "clue": "tin_cup",
+              "heal_ratio": 0.3
+            }
+          }
+        ]
+      },
+      "carved_stone": {
+        "title": "The Carved Stone",
+        "text": "Deep marks are cut into a standing stone: a wave, a lighthouse, and a cup drawn upside down. Beneath them, a single letter: E. Father's initial.",
+        "outcome": {
+          "text": "Father marked the way west: past the sea, past the last lighthouse. But why would he draw the Chalice upside down?",
+          "clue": "carved_map"
+        }
+      },
+      "ranger_hut": {
+        "title": "The Ranger's Hut",
+        "text": "An old ranger squints at the Party, then at Wren. \"You. You were with him, the man with the map. Three winters ago. You were half dead when you came back through here.\" Wren has no memory of it.",
+        "choices": [
+          {
+            "label": "Ask about Father",
+            "hint": "Learn where he went.",
+            "outcome": {
+              "text": "\"He asked about the Guardian of the Forest. Said he had to get past it, whatever it cost. I never saw him come back.\"",
+              "clue": "ranger_account",
+              "exp": 10
+            }
+          },
+          {
+            "label": "Ask about Wren",
+            "hint": "Learn what happened to Wren.",
+            "outcome": {
+              "text": "\"You were carrying his journal, lad, and shaking. You kept saying: it asks for a life. Then you slept for three days.\"",
+              "clue": "wren_return",
+              "exp": 10
+            }
+          }
+        ]
+      },
+      "hollow_tree": {
+        "title": "The Hollow Tree",
+        "text": "Inside a lightning-split oak, wrapped in oilcloth, is a letter addressed to Mother in Father's hand. It was never sent.",
+        "outcome": {
+          "text": "'If the Chalice asks a price, I will pay it. Not you. Not the children. Never the children.'",
+          "clue": "unsent_letter",
+          "gold": 15
+        }
+      }
+    },
+    "clues": {
+      "journal_page": {
+        "title": "Scorched Journal Page",
+        "text": "Father followed the stream west with a companion he called 'W.'"
+      },
+      "tin_cup": {
+        "title": "Father's Tin Cup",
+        "text": "Engraved with Mother's name. He carried it the whole way."
+      },
+      "carved_map": {
+        "title": "The Carved Stone",
+        "text": "A wave, a lighthouse and an upside-down cup: the road leads past the last lighthouse, beyond the sea."
+      },
+      "ranger_account": {
+        "title": "The Ranger's Account",
+        "text": "Father meant to get past the Guardian of the Forest, whatever it cost."
+      },
+      "wren_return": {
+        "title": "Wren's Return",
+        "text": "Wren came back half dead, carrying Father's journal and repeating: 'It asks for a life.'"
+      },
+      "unsent_letter": {
+        "title": "The Unsent Letter",
+        "text": "Father was ready to pay the Chalice's price himself: 'Never the children.'"
+      },
+      "wolf_collar": {
+        "title": "Traveller's Token",
+        "text": "A brass token from the western port, found among the wolves' leavings. Father bought passage there once."
+      },
+      "torn_cloak": {
+        "title": "Torn Grey Cloak",
+        "text": "A scrap of Father's grey cloak caught on thorns, heading deeper into the Forest."
+      },
+      "guardian_mark": {
+        "title": "Claw-Marked Shield",
+        "text": "A traveller's shield scored by huge claws. The Guardian has stopped others before you."
+      }
+    },
+    "combat_clues": {
+      "chance": 0.2,
+      "pool": [
+        "wolf_collar",
+        "torn_cloak",
+        "guardian_mark"
+      ]
+    }
+  },
+  "boss": {
+    "name": "Elder Thornwarden",
+    "title": "Guardian of the Forest",
+    "intro": "The trees part. A figure of bark and thorn rises, taller than the pines, eyes glowing green. \"Many have come seeking the sea. Few have passed. None have returned.\"",
+    "enemies": [
+      "elder_thornwarden"
+    ],
+    "phases": [
+      {
+        "name": "Rooted Sentinel",
+        "below_ratio": 1.0,
+        "pattern": [
+          "bramble_lash",
+          "bramble_lash",
+          "telegraph:crushing_root"
+        ]
+      },
+      {
+        "name": "Wrathful Bloom",
+        "below_ratio": 0.66,
+        "boost": {
+          "atk": 2,
+          "mag": 2,
+          "spd": 3
+        },
+        "pattern": [
+          "bramble_lash",
+          "telegraph:thorn_storm",
+          "bramble_lash",
+          "telegraph:crushing_root"
+        ],
+        "text": "The Thornwarden roars. Its bark splits and blood-red blossoms burst open. It moves faster now!"
+      },
+      {
+        "name": "Heartwood Fury",
+        "below_ratio": 0.33,
+        "boost": {
+          "atk": 2,
+          "mag": 2
+        },
+        "pattern": [
+          "telegraph:thorn_storm",
+          "bramble_lash",
+          "telegraph:crushing_root",
+          "bramble_lash"
+        ],
+        "text": "Its glowing heart is laid bare. The Thornwarden fights with everything it has left!"
+      }
+    ],
+    "moves": {
+      "bramble_lash": {
+        "name": "Bramble Lash",
+        "targeting": "random",
+        "use": {
+          "target": "enemy",
+          "damage": {
+            "stat": "atk",
+            "power": 1.0,
+            "element": "physical"
+          }
+        }
+      },
+      "crushing_root": {
+        "name": "Crushing Root",
+        "targeting": "strongest",
+        "telegraph": "Roots coil beneath {target}. Something huge is coming next turn!",
+        "use": {
+          "target": "enemy",
+          "damage": {
+            "stat": "atk",
+            "power": 2.3,
+            "element": "physical"
+          }
+        }
+      },
+      "thorn_storm": {
+        "name": "Thorn Storm",
+        "targeting": "all",
+        "telegraph": "Thorns rise around the whole Party. Brace yourselves before its next turn!",
+        "use": {
+          "target": "all_enemies",
+          "damage": {
+            "stat": "mag",
+            "power": 1.15,
+            "element": "nature"
+          }
+        }
+      }
+    }
+  },
+  "ending": {
+    "victory": {
+      "title": "The Forest Falls Silent",
+      "text": "The Thornwarden sinks to its knees and becomes an old tree once more. In the roots lies a rusted compass with Father's initials, still pointing west, toward the sea. Wren holds it and, for a moment, remembers a voice: \"Keep going. Don't wait for me.\" The road beyond the Forest is open."
+    },
+    "defeat": {
+      "title": "Lost in the Forest",
+      "text": "The Forest closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
+    }
+  }
+}

@@ -1,0 +1,30 @@
+# Staging: game server + Caddy (HTTPS, browser build, wss:// proxy).
+#   DOMAIN=forest.example.com docker compose up -d --build
+services:
+  game-server:
+    build:
+      context: ./server
+      dockerfile: ../Dockerfile.server
+    restart: unless-stopped
+    expose:
+      - "8910"
+
+  web:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - game-server
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN to the staging host name}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./web:/srv/web:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data: {}
+  caddy_config: {}

@@ -1,0 +1,12 @@
+# Godot 4
+.godot/
+/android/
+*.import
+export_credentials.cfg
+
+# Build output
+/build/
+
+# Staging bundle filled by deploy/prepare.sh
+/deploy/server/
+/deploy/web/

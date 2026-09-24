@@ -1,0 +1,12 @@
+# Headless authoritative server for staging. Build context: deploy/server
+# containing forest-server.x86_64 (from the "Linux Server" export or the
+# linux-server CI artifact). The binary only needs glibc.
+FROM debian:bookworm-slim
+RUN useradd --system --create-home forest
+WORKDIR /home/forest
+COPY forest-server.x86_64 ./forest-server
+RUN chmod +x ./forest-server
+USER forest
+EXPOSE 8910
+ENTRYPOINT ["./forest-server", "--headless", "--"]
+CMD ["--server", "--port=8910"]
