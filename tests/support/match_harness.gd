@@ -3,6 +3,14 @@ extends RefCounted
 ## Test helper that owns a MatchServer wired to a seed, a ManualClock and
 ## Forest content. Tests talk to `server` only through the Match interface.
 
+## Content overrides that make the Party practically unbeatable, for tests
+## that need to walk the whole journey without testing combat balance.
+## They never touch journey data, so routes are the same as with real content.
+const EASY := {
+	"leveling": {"growth": {"max_hp": 400, "atk": 60}},
+	"classes": {"classless": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}}},
+}
+
 var clock := ManualClock.new()
 var content: ForestContent
 var server: MatchServer

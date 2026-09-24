@@ -2,26 +2,202 @@
   "version": 1,
   "region": "forest",
   "rules": {
-    "empty_room_grace_seconds": 30
+    "empty_room_grace_seconds": 30,
+    "vote_seconds": 20,
+    "travel_seconds": 2.5
   },
   "party": {
     "members": [
-      {"id": "arin", "name": "Arin"},
-      {"id": "bram", "name": "Bram"},
-      {"id": "cora", "name": "Cora"},
-      {"id": "dain", "name": "Dain"},
-      {"id": "wren", "name": "Wren"}
+      {
+        "id": "arin",
+        "name": "Arin"
+      },
+      {
+        "id": "bram",
+        "name": "Bram"
+      },
+      {
+        "id": "cora",
+        "name": "Cora"
+      },
+      {
+        "id": "dain",
+        "name": "Dain"
+      },
+      {
+        "id": "wren",
+        "name": "Wren"
+      }
     ]
   },
   "classes": {
     "classless": {
       "name": "Classless",
-      "stats": {"max_hp": 40, "atk": 8, "def": 3, "mag": 4, "res": 3, "spd": 10, "crit": 0.05},
+      "stats": {
+        "max_hp": 40,
+        "atk": 8,
+        "def": 3,
+        "mag": 4,
+        "res": 3,
+        "spd": 10,
+        "crit": 0.05
+      },
       "skills": []
     }
   },
   "leveling": {
-    "exp_to_next": [20, 35, 55, 80, 110, 150],
-    "growth": {"max_hp": 5, "atk": 1, "def": 1, "mag": 1, "res": 1, "spd": 0}
+    "exp_to_next": [
+      20,
+      35,
+      55,
+      80,
+      110,
+      150
+    ],
+    "growth": {
+      "max_hp": 5,
+      "atk": 1,
+      "def": 1,
+      "mag": 1,
+      "res": 1,
+      "spd": 0
+    }
+  },
+  "journey": {
+    "layers": 5,
+    "options_min": 2,
+    "options_max": 3,
+    "type_weights": {
+      "combat": 5,
+      "merchant": 2,
+      "rest": 2,
+      "treasure": 2,
+      "story": 2,
+      "class": 3
+    },
+    "guarantees": {
+      "class_by_layer": 2,
+      "merchant_before_boss": true
+    },
+    "type_labels": {
+      "combat": "Combat",
+      "merchant": "Merchant",
+      "rest": "Rest",
+      "treasure": "Treasure",
+      "story": "Story Event",
+      "class": "Class Encounter"
+    },
+    "sites": {
+      "combat": [
+        {
+          "id": "follow_the_stream",
+          "name": "Follow the Stream",
+          "hint": "Fresh tracks in the mud. Something hunts along the water."
+        },
+        {
+          "id": "dark_thicket",
+          "name": "Dark Thicket",
+          "hint": "Branches rustle where there is no wind."
+        },
+        {
+          "id": "wolf_trail",
+          "name": "Wolf Trail",
+          "hint": "Howling close by. A fight is certain."
+        },
+        {
+          "id": "bandit_road",
+          "name": "Overgrown Road",
+          "hint": "Arrows stuck in the trees. Someone guards this road."
+        }
+      ],
+      "merchant": [
+        {
+          "id": "travelling_merchant",
+          "name": "Travelling Merchant",
+          "hint": "A cart with a lantern. Gold can buy help here."
+        },
+        {
+          "id": "hunter_trader",
+          "name": "Trapper's Stall",
+          "hint": "Herbs and tonics traded for coin."
+        }
+      ],
+      "rest": [
+        {
+          "id": "quiet_glade",
+          "name": "Quiet Glade",
+          "hint": "Soft moss and clean water. A place to recover."
+        },
+        {
+          "id": "hollow_oak",
+          "name": "Hollow Oak",
+          "hint": "A dry shelter inside a giant tree."
+        }
+      ],
+      "treasure": [
+        {
+          "id": "abandoned_cabin",
+          "name": "Abandoned Cabin",
+          "hint": "Nobody has lived here for years. Maybe something was left behind."
+        },
+        {
+          "id": "fallen_cart",
+          "name": "Fallen Cart",
+          "hint": "An overturned cart half-buried in leaves."
+        }
+      ],
+      "story": [
+        {
+          "id": "old_campfire",
+          "name": "Old Campfire",
+          "hint": "Cold ashes and a familiar knot in the rope. Father was here?"
+        },
+        {
+          "id": "carved_stone",
+          "name": "Carved Stone",
+          "hint": "Marks cut into a stone by a careful hand."
+        },
+        {
+          "id": "ranger_hut",
+          "name": "Ranger's Hut",
+          "hint": "Someone who remembers travellers lives here."
+        }
+      ],
+      "class": [
+        {
+          "id": "old_swordsman",
+          "name": "Old Swordsman's Hut",
+          "hint": "An old man practises forms outside his hut.",
+          "classes": {
+            "swordsman": 1
+          }
+        },
+        {
+          "id": "hunter_camp",
+          "name": "Hunter Camp",
+          "hint": "Hunters test newcomers with bow and blade.",
+          "classes": {
+            "archer": 3,
+            "swordsman": 1
+          }
+        },
+        {
+          "id": "ruined_shrine",
+          "name": "Ruined Shrine",
+          "hint": "Blue fire flickers between the broken pillars.",
+          "classes": {
+            "mage": 1
+          }
+        },
+        {
+          "id": "stone_sentinel",
+          "name": "Stone Sentinel",
+          "hint": "A moss-covered knight of stone blocks the path.",
+          "classes": {
+            "guardian": 1
+          }
+        }
+      ]
+    }
   }
 }
