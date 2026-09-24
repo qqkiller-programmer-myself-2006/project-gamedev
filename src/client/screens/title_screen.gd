@@ -40,7 +40,7 @@ func setup(app: ClientApp) -> void:
 	form.add_child(HSeparator.new())
 	form.add_child(UiKit.para("Have a Room code? Letters and numbers, case does not matter.", "dim"))
 	var join_row := UiKit.hbox(8)
-	_code = _line_edit("", "Room code", 12)
+	_code = _line_edit(str(app.options.get("join", "")) if app.options.get("join") is String else "", "Room code", 12)
 	_code.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_code.text_submitted.connect(func(_t: String) -> void: _join())
 	join_row.add_child(_code)
@@ -55,6 +55,9 @@ func setup(app: ClientApp) -> void:
 	footer.add_child(UiKit.button("Settings [F2]", app.open_settings))
 	column.add_child(footer)
 	(_name if _name.text.is_empty() else create).grab_focus.call_deferred()
+	if app.options.has("auto") and not _name.text.is_empty() and not app.options.has("auto_done"):
+		app.options["auto_done"] = true
+		(_join if not _code.text.is_empty() else _create).call_deferred()
 
 
 func show_error(message: String) -> void:

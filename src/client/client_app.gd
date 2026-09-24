@@ -5,7 +5,8 @@ extends Control
 ## from the latest snapshot, and events drive feedback (log lines, floating
 ## numbers, sounds and banners).
 ##
-## Command-line / URL options: --url=ws://host:port --name=Ann
+## Command-line / URL options: --url=ws://host:port --name=Ann --join=CODE
+## (--auto joins right away, or creates a room when no code is given).
 
 signal snapshot_changed
 
@@ -163,6 +164,7 @@ func _on_update(events: Array, snap: Dictionary) -> void:
 		_snapshot_server_time = float(snap["time"])
 		_snapshot_local_time = _local_now()
 	snapshot = snap
+	_publish_for_web(snap)
 	var wanted := _screen_for(snap)
 	if wanted != _current_name:
 		_show_screen(wanted)
@@ -322,6 +324,28 @@ func _build_banner() -> void:
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_banner.visible = false
 	add_child(_banner)
+
+
+## Browser builds expose a small summary of the client state as
+## window.__forest so automated cross-platform smoke tests can follow along.
+func _publish_for_web(snap: Dictionary) -> void:
+	if not OS.has_feature("web"):
+		return
+	var room = snap.get("room")
+	var run = snap.get("match")
+	var controllers := []
+	if room != null:
+		for slot in room.get("slots", []):
+			controllers.append(slot["controller"])
+	var state := {
+		"session": snap.get("session", 0),
+		"code": room.get("code", "") if room != null else "",
+		"room_state": room.get("state", "") if room != null else "",
+		"your_slot": room.get("your_slot", -1) if room != null else -1,
+		"controllers": controllers,
+		"phase": run.get("phase", "") if run != null else "",
+	}
+	JavaScriptBridge.eval("window.__forest = %s;" % JSON.stringify(state), true)
 
 
 static func _local_now() -> float:

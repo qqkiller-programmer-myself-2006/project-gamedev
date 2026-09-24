@@ -1,0 +1,94 @@
+name: builds
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: 4.7.2
+
+jobs:
+  export:
+    name: Export PC, browser and server builds + cross-platform smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot and export templates
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot
+            ~/.local/share/godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}-export-templates-v1
+
+      - name: Install Godot and export templates
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot
+          curl -fsSL -o /tmp/godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d ~/godot
+          mv ~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+          templates=~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          mkdir -p "$templates"
+          curl -fsSL -o /tmp/templates.tpz \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -q -j /tmp/templates.tpz -d "$templates" \
+            templates/version.txt \
+            templates/web_nothreads_release.zip templates/web_nothreads_debug.zip \
+            templates/linux_release.x86_64 templates/linux_debug.x86_64 \
+            templates/windows_release_x86_64.exe templates/windows_debug_x86_64.exe \
+            templates/windows_release_x86_64_console.exe templates/windows_debug_x86_64_console.exe
+          rm /tmp/templates.tpz
+
+      - name: Export builds
+        run: |
+          ~/godot/godot --headless --path . --import >/dev/null 2>&1 || true
+          mkdir -p build/web build/windows build/server
+          ~/godot/godot --headless --path . --export-release "Web" build/web/index.html
+          ~/godot/godot --headless --path . --export-release "Windows" build/windows/BeyondTheWorldsEnd.exe
+          ~/godot/godot --headless --path . --export-release "Linux Server" build/server/forest-server.x86_64
+          ls -la build/web build/windows build/server
+
+      - name: Cross-platform smoke test (headless server + browser build + PC client)
+        run: |
+          mkdir -p /tmp/pw && cd /tmp/pw && npm init -y >/dev/null && npm install --silent playwright@1.56.1
+          npx --prefix /tmp/pw playwright install --with-deps chromium
+          cd "$GITHUB_WORKSPACE"
+          GODOT=~/godot/godot NODE_PATH=/tmp/pw/node_modules node tools/web_smoke.mjs
+
+      - name: Upload browser build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+          retention-days: 14
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: build/windows/BeyondTheWorldsEnd.exe
+          retention-days: 14
+
+      - name: Upload Linux server build
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-server
+          path: build/server/forest-server.x86_64
+          retention-days: 14
+
+      - name: Upload smoke test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-screenshots
+          path: build/*.png
+          retention-days: 14
+          if-no-files-found: ignore
