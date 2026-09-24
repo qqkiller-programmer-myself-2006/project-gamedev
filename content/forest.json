@@ -674,6 +674,33 @@
       },
       "weakness": [],
       "rewards": {}
+    },
+    "elder_thornwarden": {
+      "name": "Elder Thornwarden",
+      "row": "front",
+      "behavior": "boss",
+      "description": "The Guardian of the Forest: ancient bark and thorn. Watch for its warnings; its heaviest blows come one turn later.",
+      "stats": {
+        "max_hp": 480,
+        "atk": 17,
+        "def": 6,
+        "mag": 14,
+        "res": 5,
+        "spd": 9,
+        "crit": 0.05
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1.0,
+          "element": "physical"
+        }
+      },
+      "weakness": [
+        "fire"
+      ],
+      "rewards": {}
     }
   },
   "encounters": {
@@ -1064,6 +1091,91 @@
         "torn_cloak",
         "guardian_mark"
       ]
+    }
+  },
+  "boss": {
+    "name": "Elder Thornwarden",
+    "title": "Guardian of the Forest",
+    "intro": "The trees part. A figure of bark and thorn rises, taller than the pines, eyes glowing green. \"Many have come seeking the sea. Few have passed. None have returned.\"",
+    "enemies": [
+      "elder_thornwarden"
+    ],
+    "phases": [
+      {
+        "name": "Rooted Sentinel",
+        "below_ratio": 1.0,
+        "pattern": [
+          "bramble_lash",
+          "bramble_lash",
+          "telegraph:crushing_root"
+        ]
+      },
+      {
+        "name": "Wrathful Bloom",
+        "below_ratio": 0.5,
+        "boost": {
+          "atk": 4,
+          "mag": 4,
+          "spd": 4
+        },
+        "pattern": [
+          "bramble_lash",
+          "telegraph:thorn_storm",
+          "bramble_lash",
+          "telegraph:crushing_root"
+        ],
+        "text": "The Thornwarden roars. Its bark splits and blood-red blossoms burst open. It moves faster now!"
+      }
+    ],
+    "moves": {
+      "bramble_lash": {
+        "name": "Bramble Lash",
+        "targeting": "random",
+        "use": {
+          "target": "enemy",
+          "damage": {
+            "stat": "atk",
+            "power": 1.0,
+            "element": "physical"
+          }
+        }
+      },
+      "crushing_root": {
+        "name": "Crushing Root",
+        "targeting": "strongest",
+        "telegraph": "Roots coil beneath {target}. Something huge is coming next turn!",
+        "use": {
+          "target": "enemy",
+          "damage": {
+            "stat": "atk",
+            "power": 2.6,
+            "element": "physical"
+          }
+        }
+      },
+      "thorn_storm": {
+        "name": "Thorn Storm",
+        "targeting": "all",
+        "telegraph": "Thorns rise around the whole Party. Brace yourselves before its next turn!",
+        "use": {
+          "target": "all_enemies",
+          "damage": {
+            "stat": "mag",
+            "power": 1.5,
+            "element": "nature"
+          }
+        }
+      }
+    }
+  },
+  "ending": {
+    "victory": {
+      "title": "The Forest Falls Silent",
+      "text": "The Thornwarden sinks to its knees and becomes an old tree once more. In the roots lies a rusted compass with Father's initials, still pointing west, toward the sea. Wren holds it and, for a moment, remembers a voice: \"Keep going. Don't wait for me.\" The road beyond the Forest is open."
+    },
+    "defeat": {
+      "title": "Lost in the Forest",
+      "text": "The Forest closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
     }
   }
 }

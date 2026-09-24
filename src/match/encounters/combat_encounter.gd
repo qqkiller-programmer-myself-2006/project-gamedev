@@ -218,7 +218,7 @@ func _begin_turn(run: MatchRun, id: String) -> void:
 
 func _act_automatically(run: MatchRun) -> void:
 	if actor.begins_with(ENEMY_PREFIX):
-		_perform(run, EnemyAi.decide(run, self, _unit(run, actor)), false)
+		_perform(run, _enemy_plan(run, _unit(run, actor)), false)
 	else:
 		_perform(run, PartyAi.decide(run, self, int(actor.substr(1))), false)
 
@@ -388,12 +388,18 @@ func _perform(run: MatchRun, plan: Dictionary, automatic: bool) -> void:
 	match plan["action"]:
 		"defend":
 			defending[id] = true
+		"charge":
+			event["move"] = plan["move"]
+			event["move_name"] = plan.get("move_name", plan["move"])
 		"attack", "skill", "item":
 			if plan.has("item"):
 				event["item"] = plan["item"]
 				run.inventory[plan["item"]] = int(run.inventory[plan["item"]]) - 1
 				if int(run.inventory[plan["item"]]) <= 0:
 					run.inventory.erase(plan["item"])
+			if plan.has("move"):
+				event["move"] = plan["move"]
+				event["move_name"] = plan.get("move_name", plan["move"])
 			if plan.has("skill"):
 				event["skill"] = plan["skill"]
 				if id.begins_with(PARTY_PREFIX):
@@ -503,7 +509,24 @@ func _protector_of(run: MatchRun, target: String) -> String:
 	return guard
 
 
+## What an enemy does on its turn. Subclasses (the Guardian Boss) override.
+func _enemy_plan(run: MatchRun, enemy: Dictionary) -> Dictionary:
+	return EnemyAi.decide(run, self, enemy)
+
+
+## Called after every action, before checking for the end of the fight.
+func _on_action_resolved(_run: MatchRun) -> void:
+	pass
+
+
+## A dangerous attack an enemy has announced and will unleash on its next
+## turn: {"move", "name", "target": pid or "all"}, or {} when none.
+func pending_threat() -> Dictionary:
+	return {}
+
+
 func _after_action(run: MatchRun) -> void:
+	_on_action_resolved(run)
 	if _all_down(enemies):
 		_finish(run, "victory")
 	elif _all_down(run.party):

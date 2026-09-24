@@ -5,7 +5,10 @@ extends RefCounted
 ## chance use the Match's GameRng so a Match replays exactly from its seed.
 ##
 ## Every preset first looks after itself: heal with an Item when HP is low,
-## Defend when HP is critical and no Item is left. Then:
+## Defend when HP is critical and no Item is left. When an enemy has
+## telegraphed a dangerous move, Guardians Shield Wall (Party-wide threat) or
+## Protect the target, the targeted character Defends, and anyone at or
+## below half HP braces for a Party-wide blow. Then:
 ##   classless  attack (usually the weakest enemy it can reach)
 ##   swordsman  Power Slash the toughest enemy in reach whenever it is ready,
 ##              otherwise attack like Classless
@@ -33,7 +36,13 @@ static func decide(run: MatchRun, combat: CombatEncounter, slot: int) -> Diction
 					"profile": run.content.get_dict("items.%s.use" % item), "targets": [id]}
 		if ratio < CRITICAL_HP:
 			return {"actor": id, "action": "defend"}
-	match str(run.content.get_value("classes.%s.ai" % me["class"], "classless")):
+	var preset := str(run.content.get_value("classes.%s.ai" % me["class"], "classless"))
+	var threat := combat.pending_threat()
+	if not threat.is_empty():
+		var reaction := _react_to_threat(run, combat, id, preset, threat, ratio)
+		if not reaction.is_empty():
+			return reaction
+	match preset:
 		"swordsman":
 			var slash := _ready_skill(run, combat, id, "power_slash")
 			if not slash.is_empty():
@@ -55,6 +64,20 @@ static func decide(run: MatchRun, combat: CombatEncounter, slot: int) -> Diction
 		"guardian":
 			return _guard(run, combat, id)
 	return _basic_attack(run, combat, id)
+
+
+static func _react_to_threat(run: MatchRun, combat: CombatEncounter, id: String, preset: String,
+		threat: Dictionary, ratio: float) -> Dictionary:
+	var target := str(threat.get("target", ""))
+	if preset == "guardian":
+		if target == "all" and not _ready_skill(run, combat, id, "shield_wall").is_empty():
+			return _skill_on(run, combat, id, "shield_wall", id)
+		if target != "all" and target != id and _ready_skill(run, combat, id, "protect").has(target) \
+				and not combat.protected.has(target):
+			return _skill_on(run, combat, id, "protect", target)
+	if target == id or (target == "all" and ratio <= 0.5):
+		return {"actor": id, "action": "defend"}
+	return {}
 
 
 static func _guard(run: MatchRun, combat: CombatEncounter, id: String) -> Dictionary:

@@ -64,7 +64,7 @@ func act(session: int) -> void:
 			if encounter == null:
 				return
 			match str(encounter.get("kind", "")):
-				"combat":
+				"combat", "boss":
 					if encounter["your_turn"]:
 						_fight(session, slot, view, encounter)
 				"story":
@@ -93,10 +93,15 @@ func _shop(session: int, encounter: Dictionary) -> void:
 				return
 
 
-## Combat policy: heal the most hurt ally below 40% HP when an Item allows
-## it, otherwise attack the weakest enemy in reach.
+## Combat policy: Defend when the Boss has telegraphed a blow at you, heal
+## the most hurt ally below 40% HP when an Item allows it, otherwise attack
+## the weakest enemy in reach.
 func _fight(session: int, slot: int, view: Dictionary, encounter: Dictionary) -> void:
 	var choices: Dictionary = encounter["choices"]
+	var threat: Dictionary = encounter.get("boss", {}).get("telegraph", {})
+	if threat.get("target", "") == "p%d" % slot:
+		harness.server.command(session, {"type": "action", "slot": slot, "action": "defend"})
+		return
 	var hurt := ""
 	var hurt_ratio := 0.4
 	for character in view["party"]:

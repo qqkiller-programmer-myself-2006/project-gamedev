@@ -88,7 +88,7 @@ func set_human(slot: int, human: bool) -> void:
 		vote.forget(slot)
 		if vote.everyone_voted(_humans):
 			_resolve_vote()
-	elif phase == "encounter" and encounter != null:
+	elif phase in ["encounter", "boss"] and encounter != null:
 		encounter.on_control_changed(self, slot)
 		_after_encounter_step()
 
@@ -97,7 +97,7 @@ func handle(slot: int, cmd: Dictionary) -> Dictionary:
 	var kind := str(cmd.get("type", ""))
 	if kind == "vote" and phase != "encounter":
 		return _handle_vote(slot, cmd)
-	if phase == "encounter" and encounter != null:
+	if phase in ["encounter", "boss"] and encounter != null:
 		var result := encounter.handle(self, slot, cmd)
 		_after_encounter_step()
 		return result
@@ -113,7 +113,7 @@ func update() -> void:
 		"travel":
 			if now >= _phase_deadline:
 				_enter_encounter()
-		"encounter":
+		"encounter", "boss":
 			encounter.update(self)
 			_after_encounter_step()
 
@@ -360,13 +360,16 @@ func _make_encounter(option: Dictionary) -> Encounter:
 
 ## Moves the journey on once the current Encounter has finished.
 func _after_encounter_step() -> void:
-	if phase != "encounter" or encounter == null or not encounter.done:
+	if phase not in ["encounter", "boss"] or encounter == null or not encounter.done:
 		return
 	if encounter is CombatEncounter:
 		enemies_defeated += encounter.defeated_kinds.size()
 		if encounter.result == "defeat":
 			_end_match("defeat")
 			return
+	if phase == "boss":
+		_end_match("victory")
+		return
 	emit({"type": "encounter_completed", "layer": layer, "encounter_type": encounter.option["type"]})
 	if layer < routes.size():
 		_begin_layer(layer + 1)
@@ -376,16 +379,23 @@ func _after_encounter_step() -> void:
 
 func _reach_boss() -> void:
 	phase = "boss"
-	encounter = null
+	var boss := content.get_dict("boss")
+	encounter = BossEncounter.new({"type": "boss", "site": "guardian", "name": str(boss.get("name", "Guardian"))},
+			content.get_array("boss.enemies"))
 	emit({"type": "boss_reached", "layer": layer})
+	encounter.start(self)
+	_after_encounter_step()
 
 
 func _end_match(outcome: String) -> void:
 	phase = outcome
 	encounter = null
 	vote = null
+	var ending := content.get_dict("ending.%s" % outcome)
 	summary = {
 		"result": outcome,
+		"title": str(ending.get("title", "")),
+		"text": str(ending.get("text", "")),
 		"layer": layer,
 		"layers_total": routes.size(),
 		"elapsed": clock.now() - _started_at,
@@ -400,7 +410,7 @@ func _end_match(outcome: String) -> void:
 
 
 func _encounter_view(viewer_slot: int) -> Variant:
-	if phase != "encounter" or encounter == null:
+	if phase not in ["encounter", "boss"] or encounter == null:
 		return null
 	var view := encounter.view(self, viewer_slot)
 	view["type"] = encounter.option["type"]
