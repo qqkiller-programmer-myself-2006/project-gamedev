@@ -15,7 +15,9 @@ func _to_boss(humans: int = 1, extra: Dictionary = {}, seed_value: int = 3) -> v
 			MatchHarness.EXACT_DAMAGE, EXACT_BOSS, extra]))
 	sessions = h.start_with_humans(humans)
 	h.take_route(sessions, "rest")
-	h.advance(4.0)
+	for session in sessions:
+		h.server.command(session, {"type": "ready"})
+	h.advance(0.5)
 
 
 func _view(session: int = -1) -> Dictionary:

@@ -32,6 +32,7 @@ godot --headless --path . -s tools/simulate.gd -- --seeds=100 --humans=1,2 --pac
 | Forest Wisp | HP 46, MAG 10, RES 6 (แถวหลัง, heal 18) — 18 EXP, 9 Gold |
 | Guardian Boss | HP 900, ATK 17, MAG 14; 3 phase ที่ 100% / 66% / 33% (+2 ATK/MAG ต่อ phase, +3 SPD ใน phase 2); Crushing Root ×2.3 ATK, Thorn Storm ×1.15 MAG ทั้ง Party |
 | Class Encounter | Challenge 3 round, ผ่านได้ 12 EXP ทุกคน; AI รับ Class เดียวกันได้ไม่เกิน 2 ตัว |
+| Rest camp (ADR-0011) | material ดรอป 50% ต่อศัตรู 1 ตัว; gear +1–2 stat (Charm/Quiver/Boots/Robe); 1 stat point ต่อ level (+5 Max HP หรือ +1 stat อื่น); แคมป์เปิดสูงสุด 60 วินาที |
 | Rest / ร้านค้า | Rest ฟื้น 70% ของ max HP; Herb 12, Tonic 28, Spirit Bloom 40, Firebomb 24 Gold |
 | Energy (issue #22) | เริ่ม Combat ที่ 1, +1 ต่อเทิร์นของตัวเอง, สูงสุด 6; Power Slash 2, Aimed Shot 2, Fireball 2, Frost Lance 1, Protect 1, Shield Wall 2 |
 
@@ -39,12 +40,15 @@ godot --headless --path . -s tools/simulate.gd -- --seeds=100 --humans=1,2 --pac
 
 | | Single-player | Duo co-op |
 | --- | --- | --- |
-| Win rate | 86% | 81% |
-| แพ้ที่ | Boss 11, ระหว่างทาง 3 | Boss 12, ระหว่างทาง 7 |
-| เลเวลเฉลี่ยตอนจบ | 3.55 | 3.64 |
-| Combat rounds (รวม Challenge) / Boss rounds | 26.6 / 14.5 | 27.3 / 13.9 |
-| เวลาจำลองเฉลี่ย (min–max) | 9.6 นาที (6.4–20.8) | 12.7 นาที (7.8–29.0) |
-| เวลาตามส่วน (นาที) | Boss 4.3, Combat 2.6, Class 1.3, โหวต 0.9 | Boss 5.4, Combat 4.6, Class 1.2, โหวต 0.9 |
+| Win rate | 88% | 82% |
+| แพ้ที่ | Boss 10, ระหว่างทาง 2 | Boss 17, ระหว่างทาง 1 |
+| เลเวลเฉลี่ยตอนจบ | 3.70 | 3.77 |
+| Combat rounds (รวม Challenge) / Boss rounds | 24.8 / 12.4 | 26.1 / 13.9 |
+| เวลาจำลองเฉลี่ย (min–max) | 9.2 นาที (6.5–16.6) | 12.2 นาที (8.4–32.7) |
+| เวลาตามส่วน (นาที) | Boss 3.6, Combat 2.8, Class 1.3, โหวต 0.9 | Boss 5.3, Combat 4.1, Class 1.2, โหวต 0.9, Rest 0.1 |
+
+วัดใหม่หลัง ADR-0011 (material drop, crafting, gear และ stat point ที่ Rest camp): win rate และเวลา
+ใกล้เดิม เพราะ bot เลือก Rest เฉพาะตอน HP ต่ำ; ผลของ gear จึงยังเล็ก ต้องดูจากการเล่นจริงอีกครั้ง
 
 ทั้งสองโหมดชนะเป็นส่วนใหญ่ แต่ Boss ยังชนะ Party ได้ราว 1 ใน 8 Match
 และความยากไม่ต่างกันตามจำนวนผู้เล่นจริง (Party 5 ตัวเสมอ ตาม ADR-0002)

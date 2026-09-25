@@ -65,8 +65,11 @@ func setup(data: Dictionary) -> void:
 	_badges.size = Vector2(width, BADGE_HEIGHT)
 	_badges.alignment = BoxContainer.ALIGNMENT_CENTER
 	_badges.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for entry in data.get("statuses", []):
-		_badges.add_child(UiKit.status_badge(entry))
+	var statuses: Array = data.get("statuses", [])
+	var compact := statuses.size() > (3 if side == "boss" else 2)
+	_badges.add_theme_constant_override("separation", 1 if compact else 3)
+	for entry in statuses:
+		_badges.add_child(UiKit.status_badge(entry, compact))
 	add_child(_badges)
 
 	var plate_box := UiKit.vbox(2)

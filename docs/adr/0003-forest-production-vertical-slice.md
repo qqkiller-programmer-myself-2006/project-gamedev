@@ -1,5 +1,5 @@
 ---
-status: accepted (Tier 1 Classes amended to 5 by ADR-0010)
+status: accepted (Tier 1 Classes amended to 5 by ADR-0010; Equipment and crafting added at Rest by ADR-0011)
 ---
 
 # จำกัด production vertical slice ไว้ที่ Forest 5 Layers

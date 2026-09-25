@@ -31,6 +31,14 @@ const ERRORS := {
 	"invalid_item": "The merchant does not sell that.",
 	"already_ready": "You are already marked as ready.",
 	"not_eligible": "Your character cannot take this Class.",
+	"item_unusable": "That is not something you can use in a fight.",
+	"invalid_recipe": "There is no such recipe.",
+	"missing_materials": "The shared bag does not hold enough materials for that.",
+	"not_gear": "That is not gear.",
+	"wrong_gear_slot": "That gear does not go in that slot.",
+	"nothing_equipped": "Nothing is worn there.",
+	"no_points": "No stat points left to spend.",
+	"invalid_stat": "Points cannot go into that stat.",
 	"already_decided": "You already answered.",
 	"unknown_command": "The server did not understand that.",
 	"unknown_session": "Your session expired. Please reconnect.",
@@ -54,7 +62,7 @@ const TYPE_TAGS := {
 const TYPE_HELP := {
 	"combat": "A fight for EXP, Gold and maybe Items.",
 	"merchant": "Spend the Party's shared Gold on Items.",
-	"rest": "Recover HP before harder fights.",
+	"rest": "Recover HP, craft gear and spend stat points.",
 	"treasure": "Free Gold or Items.",
 	"story": "A clue about Father's journey.",
 	"class": "A Challenge that can teach a new Class.",
@@ -68,6 +76,7 @@ const HINTS := {
 	"merchant": "Anyone can buy with the Party's shared Gold. Press [R] when you are done; the shop closes when everyone is ready.",
 	"energy": "Energy (the blue bar) pays for Skills: you start each Combat with 1 and regain 1 every later turn, up to 6. Attack, Defend and Items are free.",
 	"dot": "DoTs (Bleed BLD, Poison PSN, Toxin TOX) hurt at the start of each of their holder's turns, ignoring armour. The badge shows stacks (x) and turns left (t).",
+	"rest": "Camp: craft from materials on the left, equip gear from the shared bag in the middle, and spend stat points on the right. Press [R] when you are done; the camp moves on when every player is Ready.",
 	"boss": "Watch the warnings: the Guardian announces its heaviest blows a turn early. Defend, Protect or raise Shield Wall before they land.",
 }
 

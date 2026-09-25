@@ -85,7 +85,8 @@
       },
       "role": "Beginner",
       "description": "No special training yet. Can Attack, Defend and use Items.",
-      "ai": "classless"
+      "ai": "classless",
+      "invest_focus": "max_hp"
     },
     "swordsman": {
       "name": "Swordsman",
@@ -119,7 +120,8 @@
         "intro": "An old man lowers his practice blade. \"Land enough blows before I tire of you, and I will teach you the sword.\"",
         "pass": "The old man laughs and bows. \"You have the spirit of the blade.\"",
         "fail": "The old man sheathes his sword. \"Not yet. Come back when your arms are stronger.\""
-      }
+      },
+      "invest_focus": "atk"
     },
     "archer": {
       "name": "Archer",
@@ -153,7 +155,8 @@
         "intro": "A veteran hunter strings her bow. \"Hunters strike first and never miss twice. Show me you can keep up.\"",
         "pass": "She lowers her bow with a grin. \"Fast hands. Take this bow, it has waited for someone like you.\"",
         "fail": "\"Too slow. The forest does not wait for anyone.\""
-      }
+      },
+      "invest_focus": "atk"
     },
     "mage": {
       "name": "Mage",
@@ -188,7 +191,8 @@
         "intro": "Blue fire gathers into a figure between the pillars. \"Words of power answer only to a steady mind. Prove yours.\"",
         "pass": "The flames bow low. \"The old words are yours now. Use them gently.\"",
         "fail": "The fire gutters out. \"Your mind wanders. Return when it is still.\""
-      }
+      },
+      "invest_focus": "mag"
     },
     "guardian": {
       "name": "Guardian",
@@ -223,7 +227,8 @@
         "intro": "The stone knight raises its shield. \"None pass who cannot stand firm. Strike me, and endure my answer.\"",
         "pass": "The sentinel kneels and offers its shield. \"Stand before those you love. That is the Guardian's oath.\"",
         "fail": "The sentinel does not move. \"You are not yet a wall. Return when you are.\""
-      }
+      },
+      "invest_focus": "def"
     },
     "rogue": {
       "name": "Rogue",
@@ -268,7 +273,8 @@
         "intro": "A masked outlaw drops from a branch, dagger already spinning. \"Quick hands, quiet feet. Cut me before I tire of this, and I'll show you the rest.\"",
         "pass": "The outlaw pulls down the mask and grins. \"Not bad. Take these vials, and never fight fair.\"",
         "fail": "The outlaw vanishes into the ferns. \"Too slow. Find me when you've learned to strike first.\""
-      }
+      },
+      "invest_focus": "atk"
     }
   },
   "leveling": {
@@ -287,6 +293,15 @@
       "mag": 2,
       "res": 1,
       "spd": 0
+    },
+    "points_per_level": 1,
+    "invest": {
+      "max_hp": 5,
+      "atk": 1,
+      "def": 1,
+      "mag": 1,
+      "res": 1,
+      "spd": 1
     }
   },
   "journey": {
@@ -303,7 +318,8 @@
     },
     "guarantees": {
       "class_by_layer": 2,
-      "merchant_before_boss": true
+      "merchant_before_boss": true,
+      "class_last_layer": 4
     },
     "type_labels": {
       "combat": "Combat",
@@ -447,7 +463,9 @@
         "target": "ally",
         "heal": 30
       },
-      "price": 12
+      "price": 12,
+      "kind": "consumable",
+      "category": "Vials"
     },
     "tonic": {
       "name": "Forest Tonic",
@@ -456,7 +474,9 @@
         "target": "ally",
         "heal": 70
       },
-      "price": 28
+      "price": 28,
+      "kind": "consumable",
+      "category": "Vials"
     },
     "spirit_bloom": {
       "name": "Spirit Bloom",
@@ -465,7 +485,9 @@
         "target": "fallen_ally",
         "revive_ratio": 0.4
       },
-      "price": 40
+      "price": 40,
+      "kind": "consumable",
+      "category": "Vials"
     },
     "firebomb": {
       "name": "Firebomb",
@@ -477,7 +499,109 @@
           "element": "fire"
         }
       },
-      "price": 24
+      "price": 24,
+      "kind": "consumable",
+      "category": "Bombs"
+    },
+    "wolf_pelt": {
+      "name": "Wolf Pelt",
+      "kind": "material",
+      "category": "Materials",
+      "description": "A thick grey pelt. Crafting material."
+    },
+    "boar_tusk": {
+      "name": "Boar Tusk",
+      "kind": "material",
+      "category": "Materials",
+      "description": "A curved, heavy tusk. Crafting material."
+    },
+    "bramble_wood": {
+      "name": "Bramble Wood",
+      "kind": "material",
+      "category": "Materials",
+      "description": "Springy, thorny wood. Crafting material."
+    },
+    "wisp_dust": {
+      "name": "Wisp Dust",
+      "kind": "material",
+      "category": "Materials",
+      "description": "Faintly glowing dust. Crafting material."
+    },
+    "pelt_boots": {
+      "name": "Pelt Boots",
+      "kind": "gear",
+      "category": "Boots",
+      "description": "Boots gear: +1 SPD, +1 DEF.",
+      "gear": {
+        "slot": "boots",
+        "stats": {
+          "spd": 1,
+          "def": 1
+        }
+      }
+    },
+    "hide_jerkin": {
+      "name": "Hide Jerkin",
+      "kind": "gear",
+      "category": "Robes",
+      "description": "Chest gear: +2 DEF, +8 Max HP.",
+      "gear": {
+        "slot": "chest",
+        "stats": {
+          "def": 2,
+          "max_hp": 8
+        }
+      }
+    },
+    "wisp_robe": {
+      "name": "Wisp-thread Robe",
+      "kind": "gear",
+      "category": "Robes",
+      "description": "Chest gear: +2 MAG, +2 RES.",
+      "gear": {
+        "slot": "chest",
+        "stats": {
+          "mag": 2,
+          "res": 2
+        }
+      }
+    },
+    "tusk_charm": {
+      "name": "Tusk Charm",
+      "kind": "gear",
+      "category": "Charms",
+      "description": "Charm gear: +2 ATK.",
+      "gear": {
+        "slot": "charm",
+        "stats": {
+          "atk": 2
+        }
+      }
+    },
+    "wisp_charm": {
+      "name": "Wisp Charm",
+      "kind": "gear",
+      "category": "Charms",
+      "description": "Charm gear: +2 MAG.",
+      "gear": {
+        "slot": "charm",
+        "stats": {
+          "mag": 2
+        }
+      }
+    },
+    "bramble_quiver": {
+      "name": "Bramble Quiver",
+      "kind": "gear",
+      "category": "Quivers",
+      "description": "Weapon gear: +1 SPD, +5% Crit.",
+      "gear": {
+        "slot": "weapon",
+        "stats": {
+          "spd": 1,
+          "crit": 0.05
+        }
+      }
     }
   },
   "enemies": {
@@ -511,6 +635,10 @@
           {
             "item": "herb",
             "chance": 0.15
+          },
+          {
+            "item": "wolf_pelt",
+            "chance": 0.5
           }
         ]
       }
@@ -547,6 +675,10 @@
           {
             "item": "herb",
             "chance": 0.25
+          },
+          {
+            "item": "boar_tusk",
+            "chance": 0.5
           }
         ]
       }
@@ -584,6 +716,10 @@
           {
             "item": "firebomb",
             "chance": 0.1
+          },
+          {
+            "item": "bramble_wood",
+            "chance": 0.5
           }
         ]
       }
@@ -625,6 +761,10 @@
           {
             "item": "tonic",
             "chance": 0.15
+          },
+          {
+            "item": "wisp_dust",
+            "chance": 0.5
           }
         ]
       }
@@ -942,9 +1082,9 @@
       ]
     },
     "rest": {
-      "seconds": 4,
+      "seconds": 60,
       "heal_ratio": 0.7,
-      "text": "The Party rests. Wounds are cleaned and bandaged."
+      "text": "The Party makes camp. Wounds are bandaged; there is time to craft, change gear and train before moving on."
     },
     "treasure": {
       "seconds": 4,
@@ -1165,7 +1305,9 @@
       "damage": 3,
       "turns": 3,
       "max_stacks": 5,
-      "description": "Loses 3 HP per stack at the start of each of its turns, ignoring armour. Lasts 3 turns; stacks up to 5."
+      "description": "Loses 3 HP per stack at the start of each of its turns, ignoring armour. Lasts 3 turns; stacks up to 5.",
+      "color": "#ef5245",
+      "tick_every": 1
     },
     "poison": {
       "name": "Poison",
@@ -1173,7 +1315,9 @@
       "damage": 2,
       "turns": 4,
       "max_stacks": 5,
-      "description": "Loses 2 HP per stack at the start of each of its turns, ignoring armour. Lasts 4 turns; stacks up to 5."
+      "description": "Loses 2 HP per stack at the start of each of its turns, ignoring armour. Lasts 4 turns; stacks up to 5.",
+      "color": "#62d65e",
+      "tick_every": 1
     },
     "toxin": {
       "name": "Toxin",
@@ -1181,7 +1325,9 @@
       "damage": 5,
       "turns": 2,
       "max_stacks": 3,
-      "description": "Loses 5 HP per stack at the start of each of its turns, ignoring armour. Lasts 2 turns; stacks up to 3."
+      "description": "Loses 5 HP per stack at the start of each of its turns, ignoring armour. Lasts 2 turns; stacks up to 3.",
+      "color": "#b574ee",
+      "tick_every": 1
     },
     "venom_coat": {
       "name": "Prep Time",
@@ -1193,7 +1339,9 @@
         "status": "poison",
         "stacks": 1
       },
-      "description": "Weapon coated: the next 3 damaging actions also apply Poison."
+      "description": "Weapon coated: the next 3 damaging actions also apply Poison.",
+      "color": "#4fc3d9",
+      "tick_every": 1
     }
   },
   "class_encounters": {
@@ -1415,6 +1563,86 @@
     "defeat": {
       "title": "Lost in the Forest",
       "text": "The Forest closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
+    }
+  },
+  "crafting": {
+    "categories": [
+      "Boots",
+      "Robes",
+      "Charms",
+      "Vials",
+      "Quivers"
+    ],
+    "gear_slots": [
+      "helmet",
+      "chest",
+      "legs",
+      "boots",
+      "weapon",
+      "charm1",
+      "charm2",
+      "charm3"
+    ],
+    "recipes": {
+      "pelt_boots": {
+        "makes": "pelt_boots",
+        "count": 1,
+        "materials": {
+          "wolf_pelt": 2
+        }
+      },
+      "hide_jerkin": {
+        "makes": "hide_jerkin",
+        "count": 1,
+        "materials": {
+          "wolf_pelt": 2,
+          "boar_tusk": 1
+        }
+      },
+      "wisp_robe": {
+        "makes": "wisp_robe",
+        "count": 1,
+        "materials": {
+          "wisp_dust": 2,
+          "wolf_pelt": 1
+        }
+      },
+      "tusk_charm": {
+        "makes": "tusk_charm",
+        "count": 1,
+        "materials": {
+          "boar_tusk": 2
+        }
+      },
+      "wisp_charm": {
+        "makes": "wisp_charm",
+        "count": 1,
+        "materials": {
+          "wisp_dust": 2
+        }
+      },
+      "bramble_quiver": {
+        "makes": "bramble_quiver",
+        "count": 1,
+        "materials": {
+          "bramble_wood": 2
+        }
+      },
+      "tonic": {
+        "makes": "tonic",
+        "count": 1,
+        "materials": {
+          "herb": 2
+        }
+      },
+      "spirit_bloom": {
+        "makes": "spirit_bloom",
+        "count": 1,
+        "materials": {
+          "wisp_dust": 2,
+          "herb": 1
+        }
+      }
     }
   }
 }

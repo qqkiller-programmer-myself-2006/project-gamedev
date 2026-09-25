@@ -49,6 +49,7 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 		"greeting": str(run.content.get_value("encounters.merchant.greeting", "")),
 		"stock": _stock_view(run),
 		"ready": ready_slots.duplicate(),
+		"humans": _human_count(run),
 		"you_are_ready": ready_slots.has(viewer_slot),
 		"deadline": deadline,
 	}
@@ -70,6 +71,14 @@ func _buy(run: MatchRun, slot: int, item: String) -> Dictionary:
 	run.add_item(item, 1)
 	run.emit({"type": "purchase", "slot": slot, "item": item, "price": entry["price"], "gold": run.gold})
 	return {"ok": true, "gold": run.gold}
+
+
+func _human_count(run: MatchRun) -> int:
+	var count := 0
+	for slot in run.humans().size():
+		if run.is_human(slot):
+			count += 1
+	return count
 
 
 func _close_if_everyone_ready(run: MatchRun) -> void:

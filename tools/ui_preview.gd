@@ -146,8 +146,10 @@ func _situation(view: Dictionary) -> String:
 			if encounter["stage"] == "choosing":
 				return "09_story_choice" if not encounter["vote"]["voted_slots"].has(0) else ""
 			return "09_story_outcome" if not encounter["you_are_ready"] else ""
-		"rest", "treasure":
-			return "10_" + str(encounter["kind"]) if not shots.has("10_" + str(encounter["kind"])) else ""
+		"rest":
+			return "10_rest" if not encounter["you_are_ready"] else ""
+		"treasure":
+			return "10_treasure" if not shots.has("10_treasure") else ""
 	return ""
 
 
@@ -156,7 +158,13 @@ func _act(key: String, view: Dictionary) -> void:
 		_done_at = frame + 30
 	elif key == "03_vote":
 		var options: Array = view["vote"]["options"]
-		_press(KEY_1 + MatchBot.sensible_route(options, 0, view))
+		var pick := MatchBot.sensible_route(options, 0, view)
+		# Visit one Rest camp after the first fight so it gets a screenshot.
+		if not shots.has("10_rest") and shots.has("04_combat_turn"):
+			for option in options:
+				if option["type"] == "rest":
+					pick = option["index"]
+		_press(KEY_1 + pick)
 	elif key.ends_with("_turn") or key == "05_class_challenge":
 		var encounter: Dictionary = view["encounter"]
 		var combat: Dictionary = MatchScreen.combat_of(encounter)
@@ -184,6 +192,8 @@ func _act(key: String, view: Dictionary) -> void:
 		_press(KEY_Y)
 	elif key == "08_merchant":
 		_press(KEY_1)
+		_press(KEY_R)
+	elif key == "10_rest":
 		_press(KEY_R)
 	elif key == "09_story_choice":
 		_press(KEY_1)

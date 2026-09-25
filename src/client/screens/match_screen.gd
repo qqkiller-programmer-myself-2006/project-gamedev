@@ -31,6 +31,8 @@ var _list_root: Control
 var _battle: BattleView
 var _battle_mode := false
 var _camp: CampView
+## Card id -> times (ms) of recent floating numbers, to stack them.
+var _float_stack: Dictionary = {}
 var _camp_mode := false
 
 
@@ -305,8 +307,16 @@ func float_text(id: String, text: String, color: Color) -> void:
 	label.add_theme_constant_override("outline_size", 6)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(label)
+	# Numbers that land on the same card together (several DoTs ticking)
+	# stack upwards instead of drawing over each other.
+	var now := Time.get_ticks_msec()
+	var recent: Array = _float_stack.get(id, [])
+	recent = recent.filter(func(t: int) -> bool: return now - t < 700)
+	var lane := recent.size()
+	recent.append(now)
+	_float_stack[id] = recent
 	var rect := anchor.get_global_rect()
-	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, 0)
+	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -26.0 * lane)
 	var tween := create_tween()
 	if app.settings.reduced_motion:
 		tween.tween_interval(1.2)
@@ -445,12 +455,13 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 		"status_tick":
 			var status := str(event["status"])
 			float_text(str(event["target"]), "-%d %s" % [int(event["damage"]), UiKit.status_tag(status)],
-					UiKit.status_color(status))
+					UiKit.status_color(str(event.get("color", ""))))
 			client.flash(anchors.get(str(event["target"])), Color(1.4, 0.8, 1.4))
 		"status_applied":
 			if str(event.get("kind", "")) == "dot":
 				var applied := str(event["status"])
-				float_text(str(event["target"]), "+%s" % UiKit.status_tag(applied), UiKit.status_color(applied))
+				float_text(str(event["target"]), "+%s" % UiKit.status_tag(applied),
+						UiKit.status_color(str(event.get("color", ""))))
 		"action_resolved":
 			if _battle_mode:
 				var named := ""

@@ -151,6 +151,7 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 		"actor": actor,
 		"actor_controller": _controller_of(run, actor),
 		"deadline": deadline if deadline >= 0.0 else null,
+		"window_seconds": run.content.get_float("rules.action_window_seconds", 15.0),
 		"your_turn": your_turn,
 		"defending": defending_ids,
 		"protected": protected_view,
@@ -263,7 +264,7 @@ func _tick_statuses(run: MatchRun, id: String) -> bool:
 		unit["hp"] = maxi(mini(floor_hp, unit["hp"]), unit["hp"] - int(tick["damage"]))
 		var down: bool = unit["hp"] <= 0
 		run.emit({"type": "status_tick", "round": round_number, "target": id, "status": tick["status"],
-				"name": tick["name"], "damage": tick["damage"], "hp": unit["hp"], "down": down})
+				"name": tick["name"], "damage": tick["damage"], "color": tick["color"], "hp": unit["hp"], "down": down})
 		if down:
 			if id.begins_with(ENEMY_PREFIX):
 				defeated_kinds.append(str(unit["kind"]))
@@ -289,6 +290,8 @@ func _add_status(run: MatchRun, source: String, target: String, spec: Dictionary
 	var status := str(spec.get("status", ""))
 	var power := float(_passive(run, source).get("dot_out", 1.0))
 	var view := status_book.apply(target, status, int(spec.get("stacks", 1)), int(spec.get("turns", 0)), power)
+	if view.is_empty():
+		return {"status": status, "stacks": 0, "turns": 0}
 	var event := {"type": "status_applied", "target": target, "source": source}
 	event.merge(view)
 	_status_events.append(event)
@@ -322,6 +325,8 @@ func _plan_for(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 			if int(run.inventory.get(item, 0)) <= 0:
 				return {"error": "item_unavailable"}
 			var profile: Dictionary = run.content.get_dict("items.%s.use" % item)
+			if profile.is_empty():
+				return {"error": "item_unusable"}
 			var targets := _targets_for_command(run, me, profile, str(cmd.get("target", "")))
 			if targets.is_empty():
 				return {"error": "invalid_target"}
@@ -458,6 +463,8 @@ func _choices_for(run: MatchRun, slot: int) -> Dictionary:
 		if int(run.inventory[item]) <= 0:
 			continue
 		var profile: Dictionary = run.content.get_dict("items.%s.use" % item)
+		if profile.is_empty():
+			continue
 		items[item] = {
 			"count": run.inventory[item],
 			"target": str(profile.get("target", "")),

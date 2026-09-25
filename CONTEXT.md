@@ -118,12 +118,32 @@ _Avoid_: quest node, random event (เว้นแต่กำลังพูด
 Encounter ที่ผู้เล่นจริงคนใดก็ได้ซื้อ Item ด้วย Gold ร่วมของ Party; ร้านปิดเมื่อผู้เล่นจริงทุกคนกดพร้อมไปต่อหรือหมดเวลา; ไม่มีการขายของ และ AI ไม่ซื้อ
 _Avoid_: shop screen, store
 
+**Rest camp**:
+Encounter Rest: ฟื้น HP ของ Party แล้วเปิดแคมป์ให้ผู้เล่นจริงคราฟต์ของ ใส่/ถอด Gear และลง Stat point; ไปต่อเมื่อผู้เล่นจริงทุกคนกด Ready หรือหมดเวลา (ADR-0011)
+_Avoid_: campfire, inn
+
+**Ready check**:
+การที่ผู้เล่นจริงแต่ละคนกด Ready ที่ Merchant หรือ Rest camp; ตัวนับ `Ready (x/N)` นับเฉพาะผู้เล่นจริง AI ไม่ต้องกด และผู้เล่นที่หลุดนับว่า Ready
+_Avoid_: vote to continue
+
+**Crafting**:
+การเปลี่ยน material ในคลังร่วมเป็น Item หรือ Gear ตามสูตรใน content; ทำได้ที่ Rest camp เท่านั้น
+_Avoid_: forging, smithing
+
+**Gear**:
+ของสวมใส่ที่บวก stat ให้ตัวละคร มี 8 ช่อง (Helmet, Chest, Legs, Boots, Weapon, Charm ×3); อยู่ในคลังร่วมจนกว่าจะใส่ และใส่/ถอดได้ที่ Rest camp (ADR-0011)
+_Avoid_: equipment (เมื่อหมายถึงชิ้นของ), armour
+
+**Stat point**:
+แต้มที่ได้ทุก level-up ใช้เพิ่ม stat ของตัวละครที่ Rest camp; AI ลงแต้มใน stat หลักของ Class เอง
+_Avoid_: skill point, talent
+
 **Gold**:
 เงินร่วมของทั้ง Party (ไม่ใช่ของผู้เล่นแต่ละคน) ได้จาก Combat และ Treasure ใช้ที่ Merchant
 _Avoid_: coins, money (ในเอกสารระบบ)
 
 **Reward**:
-สิ่งที่ Party ได้หลังชนะ Combat หรือจาก Treasure: EXP ให้ตัวละครทุกตัว, Gold และ Item เข้าคลังร่วม
+สิ่งที่ Party ได้หลังชนะ Combat หรือจาก Treasure: EXP ให้ตัวละครทุกตัว, Gold, Item และ material เข้าคลังร่วม
 _Avoid_: loot (เมื่อหมายถึงผลรวมหลัง Encounter)
 
 **Story Event**:

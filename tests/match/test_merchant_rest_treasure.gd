@@ -148,8 +148,8 @@ func test_rest_restores_party_hp_by_content_ratio() -> void:
 	assert_eq(encounter["kind"], "rest")
 	assert_eq(encounter["healed"][0], {"slot": 0, "amount": 24, "hp": 26}, "60% of 40 max HP")
 	assert_eq(_view()["party"][1]["hp"], 40, "never above max HP")
-	h.advance(4.0)
-	assert_eq(_view()["layer"], 3, "journey continues")
+	h.server.command(sessions[0], {"type": "ready"})
+	assert_eq(_view()["layer"], 3, "journey continues once every player is Ready")
 
 
 func test_treasure_adds_seeded_gold_and_items_to_shared_pool() -> void:

@@ -38,7 +38,8 @@
 | Class offer | ✅ Y/N | ✅ สถานะของแต่ละคนเป็นข้อความ | ✅ | ✅ | ⏳ |
 | Merchant | ✅ 1–4, R | ✅ ปุ่มบอก "Need 28 Gold"/"Sold out" | ✅ | ✅ | ⏳ |
 | Story Event + clue log | ✅ 1–2, Enter, C | ✅ | ✅ | ✅ | ⏳ |
-| Rest / Treasure | – (อัตโนมัติ) | ✅ ตัวเลข HP/Gold | ✅ | ✅ | ⏳ |
+| Rest camp (Crafting / Inventory / Gear) | ✅ 1–9 คราฟต์, R, Tab/Enter ที่ปุ่ม | ✅ OK/NEED + ตัวเลข x/y ของ material, ช่อง gear มีชื่อ, "Ready (x/y)" | ✅ ทุกคอลัมน์ scroll | ✅ | ⏳ |
+| Treasure | – (อัตโนมัติ) | ✅ ตัวเลข Gold | ✅ | ✅ | ⏳ |
 | Victory / Defeat + เริ่มใหม่ | ✅ focus ที่ Start a new Match | ✅ VICTORY/DEFEAT เป็นคำ | ✅ | ✅ | ⏳ |
 | Settings | ✅ Esc ปิด | ✅ ตัวเลือกปัจจุบันมี ">" | ✅ | ✅ | ⏳ |
 
