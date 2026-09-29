@@ -36,9 +36,9 @@
 
 | งาน | ผู้ทำ | branch / worktree | issue | สถานะ |
 | --- | --- | --- | --- | --- |
-| T1 Combat UI ตามภาพ 04–07, 11 | Codex | `ai/t1-combat-ui` / `../ai-t1` | #48 | กำลังทำ |
+| T1 Combat UI ตามภาพ 04–07, 11 | Codex | `ai/t1-combat-ui` / `../ai-t1` | #48 | รอบ 1 WIP 45d0571 ไม่ผ่าน QA → รอบ 2 (`T1-r2-combat-fixes.md`) กำลังทำ |
 | T2 Attribute 7 ตัว + Focus (server) | Antigravity | `ai/t2-attributes` / `../ai-t2` | #49 | กำลังทำ |
-| T3 Camp UI ตามภาพ 08–10 | Codex | — | #50 | รอ T1 |
+| T3 Camp UI ตามภาพ 08–10 | Codex | `ai/t3-camp-ui` / `../ai-t3` | #50 | รอบ 1 WIP aad028f ไม่ผ่าน QA → รอบ 2 (`T3-r2-camp-fixes.md`) กำลังทำ; seed 3 = ได้ภาพ Rest, seed 11 = Merchant |
 | T4 Energy ศัตรู + Gold ส่วนตัว/Transfer (server) | Antigravity | — | #51 | รอ T2 |
 | T5 ADR-0013 + server: Race, Boons, Class meta/Prestige | Antigravity | — | #52 | รอ T4 |
 | T6 หน้าจอ Class/Race/Boons ตามภาพ 01–03 | Codex | — | #53 | รอ T3, T5 |
