@@ -86,3 +86,8 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - review → issues **#62–#71** (sub-issue ของ #47, milestone final build, Project #8 Todo + วันที่); label ใหม่ `priority:p2`; แผนใน `docs/review/2026-09-29-dev-plan.md`
 - เจ้าของงานแจ้ง: Codex + agy ไม่ติดลิมิตแล้ว ใช้ได้เต็มที่ → T14 (#62+#63, agy, `ai/t14-p0-server` / `../ai-t14`) และ T15 (#64, Codex, `ai/t15-d1-sender` / `../ai-t15`) กำลังทำ
 - คิว: verify+merge #59 → commit title fix + ปิด #60 → icon #61 ใหม่ (Codex) → #65 (agy) / #66 #67 → #68–#70 (UI, หลัง #60) → #71 → T10b → T7/#54
+- 2026-09-29 21:40: merged #59 balance (b058262), #60 title fix, T14 #62/#63 (58dd548), T15 #64 (a8b6e9a d913724) → integration 281/281. #63 still open: attribute forging, clue types, tests for gear/attr/clue, old saves without `version` are rejected
+- เจ้าของงานส่งภาพ 16 รูป (ฮีโร่ 5, ศัตรูป่า 5, ศัตรูถ้ำ 4, ฉาก 2) → `art_source/` (+ .gdignore). การตัดสินใจ: ช่วงท้าย+บอสเป็นถ้ำ, ศัตรูป่าเปลี่ยนชื่อตามภาพ (Grey Wolf→Wolf, Masked Outlaw→Thief, Stone Sentinel→Golem, Forest Wisp→Slime, Bramble Archer→Goblin; ค่าเดิม), Rogue→Assassin, **จัดโครงสร้างโฟลเดอร์ใหม่ก่อน** แล้วค่อยงานภาพ
+- แผน restructure: `docs/plans/2026-09-29-restructure.md` (#72); agent `.claude/agents/repo-restructurer.md`; issues #72 restructure, #73 ศัตรู+ฉาก, #74 ฮีโร่ v2 + Assassin
+- เจ้าของงาน: ใช้ Codex + agy เต็มที่ ขนานกัน, commit+push+อัปเดต issue ทุก stage, ถามเมื่อไม่แน่ใจ, คุม token อย่าติด rate limit
+- กำลังทำ (ขนาน): T17 restructure (Codex, `ai/t17-restructure` / `../ai-t17`); T18 ตัดภาพศัตรู+ฉาก (agy, `ai/t18-enemy-art` / `../ai-t18`, ไฟล์ใหม่เท่านั้น). คิวหลัง T17: T16 icons (path ใหม่ tools/art, assets/icons), #74 ฮีโร่ v2 + Rogue→Assassin, #73 step 2 (ใส่ศัตรู/ฉาก/Layer ถ้ำ + balance), #65–#71
