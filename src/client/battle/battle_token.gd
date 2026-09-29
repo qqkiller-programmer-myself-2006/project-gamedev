@@ -8,7 +8,15 @@ extends Button
 ## Enter.
 
 const BADGE_HEIGHT := 30.0
-const PLATE_HEIGHT := 58.0
+const PLATE_HEIGHT := 66.0
+
+const PARTY_OUTFITS := {
+	"Arin": {"shirt": Color("#d85b52"), "pants": Color("#3f547a"), "hair": Color("#e7c08d")},
+	"Bram": {"shirt": Color("#4d9b86"), "pants": Color("#59416f"), "hair": Color("#342a2a")},
+	"Cora": {"shirt": Color("#d28bba"), "pants": Color("#4a658c"), "hair": Color("#f0d4a7")},
+	"Dain": {"shirt": Color("#c4974d"), "pants": Color("#443f36"), "hair": Color("#7a4f32")},
+	"Wren": {"shirt": Color("#5a78c8"), "pants": Color("#31505d"), "hair": Color("#c8d4de")},
+}
 
 const CLASS_TINTS := {
 	"classless": Color("#b9a98c"), "swordsman": Color("#c3cbd9"), "archer": Color("#86c77e"),
@@ -29,6 +37,7 @@ var figure_height := 84.0
 var tint := Color.WHITE
 var glyph := "?"
 var enemy_kind := ""
+var outfit: Dictionary = {}
 var down := false
 var acting := false
 ## 1-based key shown while this token is a valid target, else 0.
@@ -51,12 +60,13 @@ func setup(data: Dictionary) -> void:
 	text = ""
 	focus_mode = Control.FOCUS_NONE
 	disabled = true
-	var width := 212.0 if side == "boss" else 150.0
-	figure_height = 150.0 if side == "boss" else 84.0
+	var width := 240.0 if side == "boss" else 174.0
+	figure_height = 190.0 if side == "boss" else 126.0
 	custom_minimum_size = Vector2(width, BADGE_HEIGHT + figure_height + PLATE_HEIGHT)
 	size = custom_minimum_size
 	if side == "party":
-		tint = CLASS_TINTS.get(kind, CLASS_TINTS["classless"])
+		outfit = PARTY_OUTFITS.get(str(data.get("name", "")), PARTY_OUTFITS["Wren"])
+		tint = outfit["shirt"]
 		glyph = str(CLASS_GLYPHS.get(kind, "?"))
 	else:
 		tint = ENEMY_TINTS.get(kind, Color("#c8a98a"))
@@ -84,7 +94,7 @@ func setup(data: Dictionary) -> void:
 	var name_label := UiKit.pixel_label(who, "small", UiKit.ACCENT if bool(data.get("you", false)) else UiKit.TEXT)
 	name_label.clip_text = true
 	plate_box.add_child(name_label)
-	var bars := UiKit.hbox(3)
+	var bars := UiKit.vbox(2)
 	var hp_bar := UiKit.stat_bar(int(data.get("hp", 0)), int(data.get("max_hp", 1)), UiKit.BAR_HP,
 			"%d/%d" % [int(data.get("hp", 0)), int(data.get("max_hp", 1))] if not down else "DOWN", 18)
 	hp_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -92,7 +102,6 @@ func setup(data: Dictionary) -> void:
 	if data.has("energy"):
 		var energy := UiKit.stat_bar(int(data["energy"]), int(data.get("energy_max", 6)), UiKit.BAR_ENERGY,
 				"%d/%d" % [int(data["energy"]), int(data.get("energy_max", 6))], 18)
-		energy.custom_minimum_size.x = 52
 		bars.add_child(energy)
 	plate_box.add_child(bars)
 	_plate = UiKit.panel(plate_box, "HudPanel")
@@ -142,11 +151,11 @@ func _draw_figure(feet: Vector2) -> void:
 	var dark := tint.darkened(0.45)
 	match side:
 		"party":
-			_draw_humanoid(feet, body, dark, 1.0)
+			_draw_humanoid(feet, outfit.get("shirt", body), dark, 1.55)
 		"enemy":
 			_draw_enemy(feet, body, dark)
 		"boss":
-			_draw_humanoid(feet, body, dark, 1.65)
+			_draw_humanoid(feet, body, dark, 2.0)
 			draw_rect(Rect2(feet.x - 46, feet.y - 132, 92, 34), dark)
 			draw_rect(Rect2(feet.x - 35, feet.y - 143, 70, 45), body.darkened(0.2))
 			draw_circle(Vector2(feet.x - 17, feet.y - 124), 5.0, Color("#b8ff7a"))
@@ -157,15 +166,24 @@ func _draw_humanoid(feet: Vector2, body: Color, dark: Color, scale: float) -> vo
 	var s := scale
 	var head := Rect2(feet.x - 13.0 * s, feet.y - 72.0 * s, 26.0 * s, 25.0 * s)
 	draw_rect(head.grow(2.0 * s), dark)
-	draw_rect(head, body.lightened(0.18))
+	var head_color: Color = outfit.get("hair", body.lightened(0.18)) if side == "party" else body.lightened(0.18)
+	draw_rect(head, head_color)
+	if side == "party":
+		draw_rect(Rect2(head.position + Vector2(0, 2.0 * s), Vector2(head.size.x, 7.0 * s)), outfit.get("hair", dark).darkened(0.1))
 	draw_rect(Rect2(feet.x - 19.0 * s, feet.y - 45.0 * s, 38.0 * s, 34.0 * s), dark)
-	draw_rect(Rect2(feet.x - 15.0 * s, feet.y - 43.0 * s, 30.0 * s, 28.0 * s), body)
+	var shirt: Color = outfit.get("shirt", body) if side == "party" else body
+	var pants: Color = outfit.get("pants", dark) if side == "party" else dark
+	draw_rect(Rect2(feet.x - 15.0 * s, feet.y - 43.0 * s, 30.0 * s, 28.0 * s), shirt)
 	draw_rect(Rect2(feet.x - 29.0 * s, feet.y - 42.0 * s, 10.0 * s, 30.0 * s), dark)
-	draw_rect(Rect2(feet.x + 19.0 * s, feet.y - 42.0 * s, 10.0 * s, 30.0 * s), body.darkened(0.12))
-	draw_rect(Rect2(feet.x - 14.0 * s, feet.y - 13.0 * s, 11.0 * s, 15.0 * s), dark)
-	draw_rect(Rect2(feet.x + 3.0 * s, feet.y - 13.0 * s, 11.0 * s, 15.0 * s), dark)
+	draw_rect(Rect2(feet.x + 19.0 * s, feet.y - 42.0 * s, 10.0 * s, 30.0 * s), shirt.darkened(0.12))
+	draw_rect(Rect2(feet.x - 14.0 * s, feet.y - 13.0 * s, 11.0 * s, 15.0 * s), pants)
+	draw_rect(Rect2(feet.x + 3.0 * s, feet.y - 13.0 * s, 11.0 * s, 15.0 * s), pants.darkened(0.12))
 	if glyph == "R":
 		draw_line(Vector2(feet.x + 25.0 * s, feet.y - 27.0 * s), Vector2(feet.x + 40.0 * s, feet.y - 8.0 * s), Color("#e7e9ed"), maxf(2.0, 3.0 * s))
+	elif glyph == "A":
+		draw_line(Vector2(feet.x + 24.0 * s, feet.y - 54.0 * s), Vector2(feet.x + 42.0 * s, feet.y - 8.0 * s), Color("#c99d5b"), maxf(2.0, 2.0 * s))
+	elif glyph == "M":
+		draw_circle(Vector2(feet.x + 28.0 * s, feet.y - 27.0 * s), 7.0 * s, Color("#8fe8f0"))
 
 
 func _draw_enemy(feet: Vector2, body: Color, dark: Color) -> void:
@@ -199,6 +217,16 @@ func _draw_enemy(feet: Vector2, body: Color, dark: Color) -> void:
 		draw_colored_polygon(PackedVector2Array([Vector2(feet.x - 45, feet.y - 20), Vector2(feet.x - 54, feet.y - 10), Vector2(feet.x - 39, feet.y - 16)]), Color("#f2e3bf"))
 		for x in [-26, -7, 13, 27]:
 			draw_rect(Rect2(feet.x + x, feet.y - 15, 8, 17), dark)
+		for x in [-24, -8, 8, 24]:
+			draw_colored_polygon(PackedVector2Array([Vector2(feet.x + x, feet.y - 43), Vector2(feet.x + x + 7, feet.y - 59), Vector2(feet.x + x + 13, feet.y - 43)]), dark)
+	elif kind.contains("wisp"):
+		for radius in [34.0, 26.0, 18.0]:
+			draw_circle(Vector2(feet.x, feet.y - 43), radius, Color(0.30, 0.90, 0.94, 0.06))
+		draw_circle(Vector2(feet.x, feet.y - 43), 18.0, Color("#8fe8f0"))
+		draw_circle(Vector2(feet.x - 6, feet.y - 49), 5.0, Color("#eaffff"))
+	elif kind.contains("outlaw") or kind.contains("bandit") or kind.contains("swordsman") or kind.contains("hunter") or kind.contains("sentinel"):
+		_draw_humanoid(feet, Color("#45494f"), Color("#20242b"), 1.0)
+		draw_rect(Rect2(feet.x - 17, feet.y - 53, 34, 9), Color("#181b22"))
 	elif kind.contains("archer"):
 		_draw_humanoid(feet, body, dark, 0.9)
 		draw_arc(Vector2(feet.x + 27, feet.y - 36), 24, -1.2, 1.2, 16, Color("#d8b36a"), 3)

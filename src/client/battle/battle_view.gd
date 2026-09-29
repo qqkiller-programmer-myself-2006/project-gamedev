@@ -43,6 +43,7 @@ var _rewards: VBoxContainer
 var _log: Label
 var _log_lines: Array[String] = []
 var _center_text: Label
+var _turn_notice: Label
 var _banner: PanelContainer
 var _banner_label: Label
 var _banner_tween: Tween = null
@@ -67,7 +68,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	left.set_anchors_preset(Control.PRESET_LEFT_WIDE)
 	left.offset_top = 52
 	left.offset_bottom = -170
-	left.custom_minimum_size = Vector2(150, 0)
+	left.custom_minimum_size = Vector2(210, 0)
 	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -140,6 +141,18 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_center_text.add_theme_color_override("font_outline_color", Color.BLACK)
 	_center_text.add_theme_constant_override("outline_size", 10)
 	add_child(_center_text)
+	_turn_notice = UiKit.pixel_label("", "body", UiKit.ACCENT)
+	_turn_notice.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_turn_notice.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_turn_notice.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_turn_notice.offset_top = -174 * _app.settings.text_scale
+	_turn_notice.offset_bottom = -144 * _app.settings.text_scale
+	_turn_notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_turn_notice.add_theme_color_override("font_outline_color", Color.BLACK)
+	_turn_notice.add_theme_constant_override("outline_size", 4)
+	_turn_notice.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_turn_notice.visible = false
+	add_child(_turn_notice)
 
 	var bottom_left := UiKit.vbox(2)
 	bottom_left.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
@@ -203,10 +216,12 @@ func build(view: Dictionary, combat: Dictionary) -> void:
 
 
 func tick() -> void:
-	# Match toasts are useful in menus, but would sit directly on top of the
-	# reference HUD during combat (especially at text scale 1.4).
-	_app._toast.visible = false
-	_app._toast_until = 0.0
+	# Keep feedback clear of the HUD: the shared toast is repositioned at the
+	# top centre while this view is active.
+	_app._toast.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_app._toast.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_app._toast.grow_vertical = Control.GROW_DIRECTION_END
+	_app._toast.position.y = 64
 	if _countdown == null or not is_instance_valid(_countdown):
 		return
 	if _deadline == null:
@@ -265,8 +280,16 @@ func handle_key(key: int) -> bool:
 
 ## The screen-wide band announcing a Skill, Item or Boss move (06).
 func announce(text: String) -> void:
+	if text == "Your turn!":
+		_turn_notice.text = text
+		_turn_notice.visible = true
+		var notice_tween := create_tween()
+		notice_tween.tween_interval(1.5 if _app.settings.reduced_motion else 1.2)
+		notice_tween.tween_callback(func() -> void: _turn_notice.visible = false)
+		return
 	_banner_label.text = text
 	_banner.visible = true
+	_banner.rotation_degrees = -1.0
 	if _bottom != null and _bottom.get_child_count() > 1:
 		_bottom.get_child(0).visible = false
 	if _banner_tween != null:
@@ -372,16 +395,21 @@ func _build_timeline(view: Dictionary) -> void:
 		var tag := _controller_tag(str(id), unit)
 		var color := UiKit.ACCENT if is_actor else (UiKit.TEXT_DIM if acted else UiKit.TEXT)
 		var name_label := UiKit.pixel_label(("> " if is_actor else "") + _screen.name_of(str(id)) + " (%d)" % int(unit.get("level", 1)), "small", color)
+		name_label.add_theme_font_size_override("font_size", int(12 * _app.settings.text_scale))
 		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		name_label.clip_text = true
 		head.add_child(name_label)
 		var hp := int(unit.get("hp", 0))
 		entry.add_child(head)
-		entry.add_child(UiKit.stat_bar(hp, int(unit.get("max_hp", 1)), UiKit.BAR_HP,
-				"DOWN" if hp <= 0 else "%d/%d" % [hp, int(unit.get("max_hp", 1))], 9, "small"))
+		var hp_bar := UiKit.stat_bar(hp, int(unit.get("max_hp", 1)), UiKit.BAR_HP,
+				"DOWN" if hp <= 0 else "%d/%d" % [hp, int(unit.get("max_hp", 1))], 10, "small")
+		hp_bar.get_child(0).add_theme_font_size_override("font_size", int(9 * _app.settings.text_scale))
+		entry.add_child(hp_bar)
 		if unit.has("energy"):
-			entry.add_child(UiKit.stat_bar(int(unit["energy"]), int(unit.get("energy_max", 6)), UiKit.BAR_ENERGY,
-					"%d/%d" % [int(unit["energy"]), int(unit.get("energy_max", 6))], 7, "small"))
+			var energy_bar := UiKit.stat_bar(int(unit["energy"]), int(unit.get("energy_max", 6)), UiKit.BAR_ENERGY,
+					"%d/%d" % [int(unit["energy"]), int(unit.get("energy_max", 6))], 10, "small")
+			energy_bar.get_child(0).add_theme_font_size_override("font_size", int(9 * _app.settings.text_scale))
+			entry.add_child(energy_bar)
 		var card := UiKit.panel(entry, "HudPanel")
 		if is_actor:
 			card.add_theme_stylebox_override("panel", UiKit.flat_box(UiKit.HUD_BG, UiKit.ACCENT, 2, 6))
@@ -416,7 +444,7 @@ func _build_stage(view: Dictionary) -> void:
 	var statuses: Dictionary = _combat.get("statuses", {})
 	var party: Array = view.get("party", [])
 	## Three staggered columns, clear of the header and the HUD.
-	var formation := {0: [0.31, 0.18], 1: [0.20, 0.25], 2: [0.31, 0.44], 3: [0.20, 0.51], 4: [0.42, 0.31]}
+	var formation := {0: [0.28, 0.04], 1: [0.20, 0.17], 2: [0.32, 0.30], 3: [0.20, 0.40], 4: [0.45, 0.17]}
 	for character in party:
 		var slot := int(character["slot"])
 		var id := "p%d" % slot
@@ -454,7 +482,7 @@ func _build_stage(view: Dictionary) -> void:
 			if not enemy.has("energy"):
 				data.erase("energy")
 			var y := 0.32 if list.size() == 1 else 0.16 + i * (0.36 / float(list.size() - 1))
-			_spots[id] = [float(group[1]) - (0.03 if boss else 0.0), 0.23 if boss else y]
+			_spots[id] = [float(group[1]) - (0.03 if boss else 0.0), 0.20 if boss else y]
 			_add_token(data)
 	var targets := _current_targets()
 	for i in targets.size():
@@ -512,19 +540,16 @@ func _build_bottom(view: Dictionary) -> void:
 	info.add_child(_countdown)
 	info.add_child(UiKit.spacer())
 	var gold := int(me.get("gold", view.get("gold", 0))) if not me.is_empty() else int(view.get("gold", 0))
-	info.add_child(UiKit.pixel_label("%d ◈" % gold, "heading", UiKit.ACCENT))
+	info.add_child(UiKit.pixel_label("%d ◉" % gold, "heading", UiKit.ACCENT))
 	hud.add_child(info)
 	_window_bar = null
-	if _deadline != null:
-		_window_bar = UiKit.stat_bar(1000, 1000, UiKit.GOOD, "", 6)
-		_window_bar.tooltip_text = "Action window: when it runs out you Defend automatically."
-		hud.add_child(_window_bar)
 	if not me.is_empty():
 		var bars := UiKit.hbox(10)
 		var hp := UiKit.stat_bar(int(me["hp"]), int(me["max_hp"]), UiKit.BAR_HP, "%d/%d" % [int(me["hp"]), int(me["max_hp"])], 24, "body")
 		hp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bars.add_child(hp)
-		var energy := UiKit.energy_segments(int(me.get("energy", 0)), int(me.get("energy_max", 6)), 24, "body")
+		var energy := UiKit.stat_bar(int(me.get("energy", 0)), int(me.get("energy_max", 6)), UiKit.BAR_ENERGY,
+				" %d/%d" % [int(me.get("energy", 0)), int(me.get("energy_max", 6))], 24, "body")
 		energy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		energy.tooltip_text = "Energy pays for Skills. You start each Combat with 1 and regain 1 every later turn (max 6)."
 		bars.add_child(energy)
