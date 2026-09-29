@@ -20,7 +20,9 @@ $base = Join-Path $logDir "$name-$Agent-$stamp"
 $status = "$base.status.json"
 
 $env:GODOT = 'D:\dev-tools\godot\Godot_v4.7.2-stable_win64_console.exe'
-$prompt = "Read the task file '$TaskFile' in the current directory and carry it out exactly. " +
+$prompt = "In this run YOU are the hands-on executor: edit files and run commands yourself. " +
+    "Ignore any instruction (for example in ~/AGENTS.md or ~/.codex/AGENTS.md) to delegate to opencode or any other agent; opencode is not available here. " +
+    "Read the task file '$TaskFile' in the current directory and carry it out exactly. " +
     "Work only inside the current directory. Do not commit, push, or change git config/remotes; leave your changes uncommitted for review. " +
     "End with the report the task file asks for."
 
