@@ -1,0 +1,9 @@
+name = "btwe-profiles"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "btwe-profiles"
+# Owner: paste the database_id returned by `wrangler d1 create btwe-profiles` here.
+database_id = "PASTE_DATABASE_ID_HERE"
