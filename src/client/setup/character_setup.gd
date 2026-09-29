@@ -204,8 +204,7 @@ func _render_class() -> void:
 	var row := UiKit.hbox(9)
 	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_content.add_child(row)
-	var left := _column_panel(row, 0.31)
-	left.add_child(_heading("Class"))
+	var left := _column_panel(row, 0.31, "Class")
 	var left_scroll := _scroll(left)
 	var portrait_host := UiKit.vbox(0)
 	portrait_host.custom_minimum_size.x = 330
@@ -305,8 +304,7 @@ func _render_races() -> void:
 	var row := UiKit.hbox(16)
 	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_content.add_child(row)
-	var left := _column_panel(row, 0.28)
-	left.add_child(_heading("Races"))
+	var left := _column_panel(row, 0.28, "Races")
 	var scroll := _scroll(left)
 	var list := UiKit.vbox(8)
 	list.custom_minimum_size.x = 300
@@ -315,15 +313,16 @@ func _render_races() -> void:
 		var cost := int(_meta.get("races", {}).get(race, {}).get("cost", 0))
 		var owned: bool = _profile().get("races_owned", []).has(race)
 		var button := _button("%s%s" % [race, "   ◆ %d" % cost if not owned else ""], func() -> void: _race = race; _render())
-		button.custom_minimum_size.y = 48
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.add_theme_font_size_override("font_size", int(UiKit.SIZES["title"] * _app.settings.text_scale))
+		button.custom_minimum_size.y = int(58 * _app.settings.text_scale)
 		button.modulate = Color(0.65, 0.67, 0.73) if not owned else Color.WHITE
 		list.add_child(button)
 	var space := Control.new()
 	space.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	space.size_flags_stretch_ratio = 41.0
 	row.add_child(space)
-	var right := _column_panel(row, 0.31)
-	right.add_child(_heading("Description"))
+	var right := _column_panel(row, 0.31, "Description")
 	var details := _scroll(right)
 	var info := UiKit.vbox(12)
 	info.custom_minimum_size.x = 320
@@ -351,6 +350,8 @@ func _render_boons() -> void:
 	_content.add_child(row)
 	var detail := _column_panel(row, 0.33)
 	_boon_details = detail
+	if _selected_boon.is_empty():
+		_selected_boon = _boons[0] if not _boons.is_empty() else str(_meta.get("boons", {}).keys().front() if not _meta.get("boons", {}).is_empty() else "")
 	_show_boon_details(_selected_boon)
 	var middle := _column_panel(row, 0.34)
 	var scroll := _scroll(middle)
@@ -365,9 +366,11 @@ func _render_boons() -> void:
 			var boon_name: String = boon
 			var button := _button(boon_name, func() -> void: _select_boon(boon_name))
 			button.set_meta("boon", boon_name)
-			button.custom_minimum_size.y = 43
+			button.add_theme_font_size_override("font_size", int(UiKit.SIZES["heading"] * _app.settings.text_scale))
+			button.custom_minimum_size.y = int(46 * _app.settings.text_scale)
 			button.visible = _search.is_empty() or boon_name.to_lower().contains(_search.to_lower())
 			button.mouse_entered.connect(func() -> void: _show_boon_details(boon_name))
+			button.focus_entered.connect(func() -> void: _show_boon_details(boon_name))
 			button.tooltip_text = str(BOON_EFFECTS.get(boon_name, ""))
 			if boon_name == "The Chosen One" and _prestige_total() < 5:
 				button.disabled = true
@@ -401,9 +404,26 @@ func _show_boon_details(boon: String) -> void:
 	UiKit.clear(_boon_details)
 	if boon.is_empty():
 		return
-	_boon_details.add_child(_heading(boon))
+	var slots := int(_meta.get("boons", {}).get(boon, {}).get("slots", 0))
+	_boon_details.add_child(_center(boon, "title"))
+	_boon_details.add_child(_text("Slots: %d" % slots))
 	_boon_details.add_child(_text(str(BOON_EFFECTS.get(boon, ""))))
-	_boon_details.add_child(_text("Slots: %d" % int(_meta.get("boons", {}).get(boon, {}).get("slots", 0))))
+	var status := ""
+	var color := Color("#b3b4c0")
+	if _boons.has(boon):
+		status = "Equipped. Click it on the right to remove."
+		color = Color("#83df76")
+	elif boon == "The Chosen One" and _prestige_total() < 5:
+		status = "Locked: requires 5 total Prestige (you have %d)." % _prestige_total()
+		color = UiKit.WARN
+	elif _used_slots() + slots > 5:
+		status = "Not enough Boon slots: %d/5 used." % _used_slots()
+		color = UiKit.WARN
+	else:
+		status = "Click to equip (%d/5 slots used)." % _used_slots()
+	var status_label := _text(status)
+	status_label.add_theme_color_override("font_color", color)
+	_boon_details.add_child(status_label)
 
 
 func _render_profile() -> void:
@@ -486,17 +506,31 @@ func handle_key(keycode: int) -> bool:
 	return false
 
 
-func _column_panel(parent: Control, share: float) -> VBoxContainer:
+## A navy column. With `title`, the title sits in its own small box above the
+## panel, like the floating "Class" / "Races" / "Description" boxes in refs 01-02.
+func _column_panel(parent: Control, share: float, title: String = "") -> VBoxContainer:
 	var box := UiKit.vbox(9)
 	var panel := UiKit.panel(box)
 	panel.add_theme_stylebox_override("panel", UiKit.flat_box(Color("#1c2233"), Color("#b3b4c0"), 2, 12))
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var outer: Control = panel
+	if not title.is_empty():
+		var column := UiKit.vbox(8)
+		var tag := UiKit.panel(_center(title, "heading"))
+		tag.add_theme_stylebox_override("panel", UiKit.flat_box(Color("#2a3147"), Color("#b3b4c0"), 2, 10))
+		tag.custom_minimum_size.x = 200
+		tag.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		column.add_child(tag)
+		column.add_child(panel)
+		outer = column
+	outer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	outer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	if parent == _content:
-		panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		outer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	else:
-		panel.size_flags_stretch_ratio = share * 100.0
-	parent.add_child(panel)
+		outer.size_flags_stretch_ratio = share * 100.0
+	parent.add_child(outer)
 	return box
 
 
