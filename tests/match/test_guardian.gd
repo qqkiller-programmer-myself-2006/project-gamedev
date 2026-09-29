@@ -56,12 +56,12 @@ func _by(actor: String, actions: Array) -> Array:
 
 func test_guardian_has_the_most_hp_and_defense() -> void:
 	var classes := ForestContent.load_default().get_dict("classes")
-	var guardian: Dictionary = classes["guardian"]["stats"]
+	var guardian: Dictionary = classes["guardian"]["base"]
 	for other in classes:
 		if other == "guardian":
 			continue
-		assert_true(int(guardian["max_hp"]) > int(classes[other]["stats"]["max_hp"]), "HP above %s" % other)
-		assert_true(int(guardian["def"]) > int(classes[other]["stats"]["def"]), "DEF above %s" % other)
+		assert_true(int(guardian["max_hp"]) > int(classes[other]["base"]["max_hp"]), "HP above %s" % other)
+		assert_true(int(guardian["def"]) > int(classes[other]["base"]["def"]), "DEF above %s" % other)
 
 
 func test_protect_redirects_damage_to_the_guardian_with_a_reduction() -> void:

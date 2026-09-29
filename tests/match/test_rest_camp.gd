@@ -152,7 +152,7 @@ func test_three_charm_slots() -> void:
 func test_gear_cannot_be_used_as_a_combat_item() -> void:
 	h = MatchHarness.new(3, MatchHarness.merge([MatchHarness.ALL_COMBAT, MatchHarness.WOLF_PAIR,
 			MatchHarness.EXACT_DAMAGE, {"party": {"starting_inventory": {"wolf_pelt": 1}},
-			"classes": {"classless": {"stats": {"spd": 99}}}}]))
+			"classes": {"classless": {"base": {"spd": 99}}}}]))
 	sessions = h.start_with_humans(1)
 	h.enter_first_encounter(sessions)
 	var combat := _encounter()
@@ -183,20 +183,21 @@ func test_level_ups_give_points_to_invest() -> void:
 	_level_up_then_camp()
 	var me: Dictionary = _view()["party"][0]
 	assert_eq(me["level"], 2)
-	assert_eq(me["points"], 1, "one point per level")
-	assert_eq(_encounter()["invest"]["atk"], 1, "the camp says what a point buys")
-	assert_ok(_cmd({"type": "invest", "stat": "atk"}))
+	assert_eq(me["points"], 2, "two points per level")
+	assert_eq(_encounter()["invest"]["str"], 1, "the camp says what a point buys")
+	assert_ok(_cmd({"type": "invest", "stat": "str"}))
 	var after: Dictionary = _view()["party"][0]
-	assert_eq(after["atk"], me["atk"] + 1)
-	assert_eq(after["points"], 0)
-	assert_eq(after["invested"], {"atk": 1})
-	assert_rejected(_cmd({"type": "invest", "stat": "atk"}), "no_points")
+	assert_eq(after["attributes"]["str"], me["attributes"]["str"] + 1)
+	assert_eq(after["points"], 1)
+	assert_eq(after["invested"], {"str": 1})
+	assert_ok(_cmd({"type": "invest", "stat": "str"}))
+	assert_rejected(_cmd({"type": "invest", "stat": "str"}), "no_points")
 
 
 func test_invalid_stat_is_rejected() -> void:
 	_level_up_then_camp()
 	assert_rejected(_cmd({"type": "invest", "stat": "luck"}), "invalid_stat")
-	assert_eq(_view()["party"][0]["points"], 1)
+	assert_eq(_view()["party"][0]["points"], 2)
 
 
 func test_ai_characters_spend_points_and_take_spare_gear_when_camp_closes() -> void:
@@ -204,10 +205,10 @@ func test_ai_characters_spend_points_and_take_spare_gear_when_camp_closes() -> v
 	assert_ok(_cmd({"type": "craft", "recipe": "pelt_boots"}))
 	var ai: Dictionary = _view()["party"][1]
 	assert_eq(ai["controller"], "ai")
-	assert_eq(ai["points"], 1)
+	assert_eq(ai["points"], 2)
 	assert_ok(_cmd({"type": "ready"}))
 	ai = _view()["party"][1]
 	assert_eq(ai["points"], 0, "Classless AI spent its point")
-	assert_eq(ai["invested"], {"max_hp": 1}, "on its Class's focus stat")
+	assert_eq(ai["invested"], {"con": 2}, "on its Class's focus stat")
 	assert_eq(ai["gear"]["boots"]["item"], "pelt_boots", "and put on the spare boots")
 	assert_eq(_count("pelt_boots"), 0)

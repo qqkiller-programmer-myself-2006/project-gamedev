@@ -27,7 +27,7 @@ func _init(content: ForestContent) -> void:
 ## Adds `stacks` of `status` to `unit_id`. `power` scales its DoT damage
 ## (the applier's outgoing DoT modifier). Returns the resulting entry view,
 ## or {} when `status` is not defined in content.
-func apply(unit_id: String, status: String, stacks: int, turns: int, power: float = 1.0) -> Dictionary:
+func apply(unit_id: String, status: String, stacks: int, turns: int, power: float = 1.0, applier: String = "") -> Dictionary:
 	var info := _content.get_dict("statuses.%s" % status)
 	if info.is_empty():
 		push_warning("StatusBook: unknown status '%s'" % status)
@@ -42,11 +42,13 @@ func apply(unit_id: String, status: String, stacks: int, turns: int, power: floa
 		turns = int(info.get("turns", 1))
 	if entry.is_empty():
 		entry = {"status": status, "stacks": 0, "turns": 0, "age": 0,
-				"charges": int(info.get("charges", 0)), "power": power}
+				"charges": int(info.get("charges", 0)), "power": power, "applier": applier}
 		list.append(entry)
 	else:
 		entry["charges"] = maxi(int(entry["charges"]), int(info.get("charges", 0)))
 		entry["power"] = maxf(float(entry["power"]), power)
+		if not applier.is_empty():
+			entry["applier"] = applier
 	entry["stacks"] = mini(max_stacks, int(entry["stacks"]) + maxi(1, stacks))
 	entry["turns"] = maxi(int(entry["turns"]), turns)
 	_on[unit_id] = list
@@ -68,7 +70,7 @@ func start_turn(unit_id: String, taken: float = 1.0) -> Dictionary:
 		if str(info.get("kind", "dot")) == "dot" and int(entry["age"]) % every == 0:
 			var amount := float(info.get("damage", 0)) * int(entry["stacks"]) * float(entry["power"]) * taken
 			ticks.append({"status": entry["status"], "name": str(info.get("name", entry["status"])),
-					"damage": maxi(1, int(round(amount))), "color": str(info.get("color", "#ffffff"))})
+					"damage": maxi(1, int(round(amount))), "color": str(info.get("color", "#ffffff")), "applier": entry.get("applier", "")})
 		entry["turns"] = int(entry["turns"]) - 1
 		if int(entry["turns"]) > 0:
 			kept.append(entry)
@@ -147,4 +149,5 @@ func _view_entry(entry: Dictionary) -> Dictionary:
 		"charges": int(entry["charges"]),
 		"tick_every": maxi(1, int(info.get("tick_every", 1))),
 		"color": str(info.get("color", "#ffffff")),
+		"applier": str(entry.get("applier", "")),
 	}

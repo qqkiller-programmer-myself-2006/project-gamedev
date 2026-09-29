@@ -9,12 +9,12 @@ extends RefCounted
 const EASY := {
 	"leveling": {"growth": {"max_hp": 400, "atk": 60, "mag": 60}},
 	"classes": {
-		"classless": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
-		"swordsman": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
-		"archer": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
-		"mage": {"stats": {"max_hp": 999, "atk": 120, "mag": 120, "def": 60, "spd": 40}},
-		"guardian": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
-		"rogue": {"stats": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
+		"classless": {"base": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
+		"swordsman": {"base": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
+		"archer": {"base": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
+		"mage": {"base": {"max_hp": 999, "atk": 120, "mag": 120, "def": 60, "spd": 40}},
+		"guardian": {"base": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
+		"rogue": {"base": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
 	},
 }
 
@@ -43,7 +43,14 @@ const EXACT_DAMAGE := {
 	},
 	"class_encounters": {"pass_exp": 0, "mastery_exp": 15},
 	"encounters": {"rest": {"heal_ratio": 0.6}},
-	"classes": {"classless": {"stats": {"crit": 0}}},
+	"classes": {
+		"classless": {"base": {"crit": -0.03}},
+		"swordsman": {"base": {"crit": -0.03}},
+		"archer": {"base": {"crit": 0.19}},
+		"mage": {"base": {"crit": -0.02}},
+		"guardian": {"base": {"crit": -0.02}},
+		"rogue": {"base": {"crit": -0.06}},
+	},
 	"enemies": {
 		"grey_wolf": {"stats": {"max_hp": 26, "atk": 9, "crit": 0}, "rewards": {"exp": 8, "gold": 5, "drops": []}},
 		"thornback_boar": {"stats": {"max_hp": 48, "atk": 12}, "rewards": {"exp": 14, "gold": 9}},

@@ -53,6 +53,8 @@ var deadline := -1.0
 var act_at := -1.0
 ## ids that Defended and take reduced damage until their next turn.
 var defending: Dictionary = {}
+## ids that used Focus and have +10% dodge until their next turn.
+var focusing: Dictionary = {}
 ## protected ally id -> {"by": protector id, "multiplier": float}
 var protected: Dictionary = {}
 ## protector id -> damage multiplier for the whole Party (Shield Wall)
@@ -61,6 +63,7 @@ var shields: Dictionary = {}
 var result := ""
 var rewards: Dictionary = {}
 var defeated_kinds: Array[String] = []
+var defeated_by: Dictionary = {}
 ## pid -> {skill id: own turns left before it can be used again}
 var cooldowns: Dictionary = {}
 ## Party ids that already had at least one turn (for first-turn Energy).
@@ -216,6 +219,7 @@ func _begin_turn(run: MatchRun, id: String) -> void:
 		return
 	actor = id
 	defending.erase(id)
+	focusing.erase(id)
 	shields.erase(id)
 	for ally in protected.keys():
 		if protected[ally]["by"] == id:
@@ -230,9 +234,10 @@ func _begin_turn(run: MatchRun, id: String) -> void:
 	if id.begins_with(PARTY_PREFIX):
 		if _had_turn.has(id):
 			var character := _unit(run, id)
+			var regen = int(character.get("derived", {}).get("energy_regen", run.content.get_int("rules.energy_regen", 1)))
 			character["energy"] = mini(int(character.get("energy_max",
 					run.content.get_int("rules.energy_max", 6))), int(character.get("energy",
-					run.content.get_int("rules.energy_start", 1))) + run.content.get_int("rules.energy_regen", 1))
+					run.content.get_int("rules.energy_start", 1))) + regen)
 		else:
 			_had_turn[id] = true
 	deadline = -1.0
@@ -266,6 +271,7 @@ func _tick_statuses(run: MatchRun, id: String) -> bool:
 		run.emit({"type": "status_tick", "round": round_number, "target": id, "status": tick["status"],
 				"name": tick["name"], "damage": tick["damage"], "color": tick["color"], "hp": unit["hp"], "down": down})
 		if down:
+			defeated_by[id] = str(tick.get("applier", ""))
 			if id.begins_with(ENEMY_PREFIX):
 				defeated_kinds.append(str(unit["kind"]))
 			status_book.clear_unit(id)
@@ -289,7 +295,7 @@ func _passive(run: MatchRun, id: String) -> Dictionary:
 func _add_status(run: MatchRun, source: String, target: String, spec: Dictionary) -> Dictionary:
 	var status := str(spec.get("status", ""))
 	var power := float(_passive(run, source).get("dot_out", 1.0))
-	var view := status_book.apply(target, status, int(spec.get("stacks", 1)), int(spec.get("turns", 0)), power)
+	var view := status_book.apply(target, status, int(spec.get("stacks", 1)), int(spec.get("turns", 0)), power, source)
 	if view.is_empty():
 		return {"status": status, "stacks": 0, "turns": 0}
 	var event := {"type": "status_applied", "target": target, "source": source}
@@ -314,6 +320,8 @@ func _plan_for(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 	match action:
 		"defend":
 			return {"actor": me, "action": "defend"}
+		"focus":
+			return {"actor": me, "action": "focus"}
 		"attack":
 			var profile := attack_profile(run, me)
 			var target := str(cmd.get("target", ""))
@@ -486,6 +494,7 @@ func _choices_for(run: MatchRun, slot: int) -> Dictionary:
 	return {
 		"attack": {"targets": valid_targets(run, me, attack_profile(run, me))},
 		"defend": true,
+		"focus": true,
 		"items": items,
 		"skills": skills,
 	}
@@ -507,6 +516,12 @@ func _perform(run: MatchRun, plan: Dictionary, automatic: bool) -> void:
 	match plan["action"]:
 		"defend":
 			defending[id] = true
+		"focus":
+			focusing[id] = true
+			if id.begins_with(PARTY_PREFIX):
+				var character := _unit(run, id)
+				character["energy"] = mini(int(character.get("energy_max", run.content.get_int("rules.energy_max", 6))), int(character.get("energy", 0)) + 1)
+				event["energy"] = character["energy"]
 		"charge":
 			event["move"] = plan["move"]
 			event["move_name"] = plan.get("move_name", plan["move"])
@@ -561,13 +576,17 @@ func _apply_profile(run: MatchRun, source: String, profile: Dictionary, targets:
 				if n == 0:
 					entry.merge(hit)
 				else:
-					entry["damage"] = int(entry["damage"]) + int(hit["damage"])
-					entry["crit"] = bool(entry["crit"]) or bool(hit["crit"])
+					entry["damage"] = int(entry["damage"]) + int(hit.get("damage", 0))
+					entry["crit"] = bool(entry.get("crit", false)) or bool(hit.get("crit", false))
+					if hit.get("dodged", false):
+						entry["dodged"] = true
+					if hit.get("blocked", false):
+						entry["blocked"] = true
 					if hit.has("down"):
 						entry["down"] = true
 				if hits > 1:
 					var each: Array = entry.get("hits", [])
-					each.append(hit["damage"])
+					each.append(hit.get("damage", 0))
 					entry["hits"] = each
 				if per_hit and struck["hp"] > 0:
 					for spec in statuses:
@@ -575,8 +594,13 @@ func _apply_profile(run: MatchRun, source: String, profile: Dictionary, targets:
 				if struck["hp"] <= 0:
 					break
 		if profile.has("heal") and unit["hp"] > 0:
+			var fth = 0.0
+			if source.begins_with(PARTY_PREFIX):
+				fth = float(_unit(run, source).get("attributes", {}).get("fth", 0))
+			var heal_amount = int(round(float(profile["heal"]) * (1.0 + 0.02 * fth)))
+			
 			var before: int = unit["hp"]
-			unit["hp"] = mini(unit["max_hp"], unit["hp"] + int(profile["heal"]))
+			unit["hp"] = mini(unit["max_hp"], unit["hp"] + heal_amount)
 			entry["heal"] = unit["hp"] - before
 		if profile.has("revive_ratio") and unit["hp"] <= 0:
 			unit["hp"] = maxi(1, int(round(unit["max_hp"] * float(profile["revive_ratio"]))))
@@ -624,6 +648,16 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary,
 	var attacker := _unit(run, source)
 	var element := str(damage.get("element", "physical"))
 	var target_id := _id_of(target)
+	
+	var target_dodge = float(target.get("derived", {}).get("dodge", 0.0))
+	if focusing.has(target_id):
+		target_dodge += 0.1
+	if run.rng.chance(target_dodge):
+		return {"dodged": true, "damage": 0}
+
+	var target_block = float(target.get("derived", {}).get("block", 0.0))
+	var blocked = run.rng.chance(target_block)
+	
 	var dots := status_book.distinct_dots(target_id)
 	var amount := 0.0
 	if damage.has("amount"):
@@ -642,7 +676,7 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary,
 	if not damage.has("amount"):
 		crit = bool(damage.get("always_crit", false)) or run.rng.chance(float(attacker.get("crit", 0.0)))
 	if crit:
-		amount *= rules.get_float("rules.crit_multiplier", 1.5)
+		amount *= float(attacker.get("derived", {}).get("crit_damage", rules.get_float("rules.crit_multiplier", 1.5)))
 	var weak: bool = target.get("weakness", []).has(element)
 	if weak:
 		amount *= rules.get_float("rules.weakness_multiplier", 1.5)
@@ -654,13 +688,25 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary,
 	if target_id.begins_with(PARTY_PREFIX):
 		for shield in shields.values():
 			amount *= float(shield)
+	if blocked:
+		amount *= float(target.get("derived", {}).get("block_reduction", 0.5))
 	amount *= multiplier
 	var dealt := maxi(1, int(round(amount)))
 	var floor_hp := 1 if trial and target_id.begins_with(PARTY_PREFIX) else 0
 	target["hp"] = maxi(mini(floor_hp, target["hp"]), target["hp"] - dealt)
+	
+	var ls = float(attacker.get("derived", {}).get("lifesteal", 0.0))
+	if ls > 0.0 and dealt > 0 and attacker["hp"] > 0:
+		var ls_amt = int(round(dealt * ls))
+		if ls_amt > 0:
+			attacker["hp"] = mini(attacker["max_hp"], attacker["hp"] + ls_amt)
+			
 	var out := {"damage": dealt, "crit": crit, "weak": weak, "element": element}
+	if blocked:
+		out["blocked"] = true
 	if target["hp"] <= 0:
 		out["down"] = true
+		defeated_by[target_id] = source
 		if target_id.begins_with(ENEMY_PREFIX):
 			defeated_kinds.append(str(target["kind"]))
 	return out
@@ -733,8 +779,13 @@ func _grant_rewards(run: MatchRun) -> Dictionary:
 		var reward: Dictionary = enemy.get("rewards", {})
 		exp += int(reward.get("exp", 0))
 		gold += int(reward.get("gold", 0))
+		var lck_bonus := 1.0
+		var killer = defeated_by.get(enemy["id"], "")
+		if killer.begins_with(PARTY_PREFIX):
+			var killer_unit = _unit(run, killer)
+			lck_bonus = 1.0 + 0.01 * float(killer_unit.get("attributes", {}).get("lck", 0))
 		for drop in reward.get("drops", []):
-			if run.rng.chance(float(drop.get("chance", 0.0))):
+			if run.rng.chance(float(drop.get("chance", 0.0)) * lck_bonus):
 				var item := str(drop["item"])
 				items[item] = int(items.get(item, 0)) + 1
 	run.add_gold(gold)
