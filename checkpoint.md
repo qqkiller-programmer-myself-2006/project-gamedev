@@ -43,7 +43,7 @@
 | T5 ADR-0013 + server: Race, Boons, Class meta/Prestige | Antigravity | — | #52 | รอ T4 |
 | T6 หน้าจอ Class/Race/Boons ตามภาพ 01–03 | Codex | — | #53 | รอ T3, T5 |
 | T7 QA รวม, 1920×1080, PR, final build | Claude | — | #54 | รอทั้งหมด |
-| T8 Cloudflare Worker + D1 เก็บ profile/Gems | Codex หรือ agy | — | #55 | รอ agent ว่าง (เจ้าของงานต้อง `wrangler login` เอง) |
+| T8 Cloudflare Worker + D1 เก็บ profile/Gems | Codex | merged 0ffd1b1 | #55 | ✅ โค้ดเสร็จ 5/5 test; รอเจ้าของงาน deploy ตาม docs/running.md |
 
 การตัดสินใจรอบ 2 (2026-09-29): เลือก Class ก่อนเริ่มแบบ AAC, Enervation เป็น Boon, Robloxian → Human, Gems เก็บบน Cloudflare D1 → ADR-0013
 ข้อควรรู้: `~/AGENTS.md` และ `~/.codex/AGENTS.md` สั่งให้ Codex โยนงานให้ opencode — runner จึงใส่คำสั่ง override ไว้ใน prompt
