@@ -538,7 +538,7 @@
       "aggro": 1.5
     },
     "assassin": {
-      "name": "assassin",
+      "name": "Assassin",
       "role": "Melee DoT",
       "recommended_stats": [
         "DEX",
@@ -811,6 +811,13 @@
           }
         }
       ]
+    },
+    "regions": {
+      "1": "Forest",
+      "2": "Forest",
+      "3": "Forest",
+      "4": "Forest",
+      "5": "Cave"
     },
     "backdrops": {
       "1": "forest",
@@ -2235,7 +2242,8 @@
         }
       }
     },
-    "backdrop": "cave"
+    "backdrop": "cave",
+    "region": "Cave"
   },
   "ending": {
     "victory": {

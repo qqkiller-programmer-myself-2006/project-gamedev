@@ -604,7 +604,7 @@ func _collect_names(view: Dictionary) -> void:
 
 func _build_top(view: Dictionary) -> void:
 	UiKit.clear(_top)
-	_top.add_child(UiKit.label("Forest", "heading", UiKit.ACCENT))
+	_top.add_child(UiKit.label(UiText.region_of(view), "heading", UiKit.ACCENT))
 	var total := int(view.get("layers_total", 5))
 	var layer := int(view.get("layer", 0))
 	var phase := str(view.get("phase", ""))

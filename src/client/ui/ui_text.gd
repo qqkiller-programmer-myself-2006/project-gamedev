@@ -88,7 +88,7 @@ const TYPE_TAGS := {
 
 const TYPE_HELP := {
 	"combat": "A fight for EXP, Gold and maybe Items.",
-	"merchant": "Spend the Party's shared Gold on Items.",
+	"merchant": "Spend your own Gold on Items; each character buys with their own.",
 	"rest": "Recover HP, craft gear and spend stat points.",
 	"treasure": "Free Gold or Items.",
 	"story": "A clue about Father's journey.",
@@ -100,7 +100,7 @@ const HINTS := {
 	"combat": "Your turn! [A] Attack, [S] Skill (needs a Class), [D] Defend halves damage until your next turn, [I] Item uses the Party's shared bag. You have 15 seconds; if time runs out you Defend.",
 	"skill": "You have a Class now. [S] opens your Skills; each Skill costs Energy and has a cooldown counted in your own turns.",
 	"class_offer": "Accept [Y] to take this Class, or Decline [N] to stay Classless and wait for another. Several characters can share a Class.",
-	"merchant": "Anyone can buy with the Party's shared Gold. Press [R] when you are done; the shop closes when everyone is ready.",
+	"merchant": "Each character buys with their own Gold, and you can Transfer Gold to a friend. Press [R] when you are done; the shop closes when everyone is ready.",
 	"energy": "Energy (the blue bar) pays for Skills: you start each Combat with 1 and regain 1 every later turn, up to 6. Attack, Defend and Items are free.",
 	"dot": "DoTs (Bleed BLD, Poison PSN, Toxin TOX) hurt at the start of each of their holder's turns, ignoring armour. The badge shows stacks (x) and turns left (t).",
 	"rest": "Camp: craft from materials on the left, equip gear from the shared bag in the middle, and spend stat points on the right. Press [R] when you are done; the camp moves on when every player is Ready.",
@@ -181,6 +181,36 @@ static func type_label(type: String) -> String:
 
 static func type_tag(type: String) -> String:
 	return str(TYPE_TAGS.get(type, type.to_upper()))
+
+
+## Region name for a Layer (or the Boss) from `journey.regions` / `boss.region`;
+## falls back to "Forest" (T29: Layer 5 and the Boss are in the Cave).
+static func region_name(content: Dictionary, layer: int, boss: bool = false) -> String:
+	if boss:
+		var boss_region := str(content.get("boss", {}).get("region", ""))
+		if not boss_region.is_empty():
+			return boss_region
+	var region := str(content.get("journey", {}).get("regions", {}).get(str(layer), ""))
+	return region if not region.is_empty() else "Forest"
+
+
+static var _content_cache: Dictionary = {}
+
+
+## Region name for a Match snapshot, read from the default Forest content.
+static func region_of(view: Dictionary) -> String:
+	if _content_cache.is_empty():
+		_content_cache = ForestContent.load_default().data
+	var encounter = view.get("encounter")
+	var boss := str(view.get("phase", "")) == "boss" or (encounter is Dictionary and str(encounter.get("kind", "")) == "boss")
+	return region_name(_content_cache, int(view.get("layer", 0)), boss)
+
+
+## Class display name: the content `name`, else the id capitalised.
+static func class_display(classes: Dictionary, class_id: String) -> String:
+	var entry = classes.get(class_id, {})
+	var display := str(entry.get("name", "")) if entry is Dictionary else ""
+	return display if not display.is_empty() else class_id.capitalize()
 
 
 static func clock(seconds: float) -> String:

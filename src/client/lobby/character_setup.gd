@@ -36,6 +36,9 @@ const NAV := ["Profile", "Races", "Class", "Boons", "Records"]
 const NAV_ICONS := ["info", "multiplayer", "weapon", "shield", "story"]
 const CLASSES := ["swordsman", "archer", "mage", "guardian", "assassin"]
 const RACE_ORDER := ["Elf", "Dwarf", "Kobold", "Lunaeia", "Withered", "Human"]
+## Skill tree node -> icon (docs/design/icons.md).
+const TREE_ICONS := {"vitality": "hp", "might": "str", "precision": "crit", "swiftness": "dex",
+		"reserves": "energy", "mastery": "skill", "stat_points": "level"}
 const TREE_ORDER := ["vitality", "might", "precision", "swiftness", "reserves", "mastery", "stat_points"]
 var _app: ClientApp
 var _finish: Callable
@@ -177,7 +180,7 @@ func _render_class() -> void:
 	portrait_host.custom_minimum_size.x = 330
 	left_scroll.add_child(portrait_host)
 	var portrait_panel := _card(portrait_host, 0)
-	portrait_panel.add_child(_center(str(_classes.get(_class_id, {}).get("name", _class_id.capitalize())), "title"))
+	portrait_panel.add_child(_center(UiText.class_display(_classes, _class_id), "title"))
 	var portrait_path := "res://assets/heroes/%s/portrait.png" % _class_id
 	if _sprite_manifest.has(_class_id) and ResourceLoader.exists(portrait_path):
 		var portrait := TextureRect.new()
@@ -225,7 +228,7 @@ func _render_class() -> void:
 	middle.add_child(upgrade)
 	var right := _column_panel(row, 0.39)
 	var prestige := int(_profile().get("prestige", {}).get(_class_id, 0))
-	right.add_child(_center("%s (%d)" % [_class_id.capitalize(), prestige], "title"))
+	right.add_child(_center("%s (%d)" % [UiText.class_display(_classes, _class_id), prestige], "title"))
 	right.add_child(_center("Prestige: %d%s" % [prestige, " (MAX)" if prestige >= 25 else ""], "body"))
 	var tree := Control.new()
 	tree.custom_minimum_size.y = 274
@@ -249,7 +252,10 @@ func _render_class() -> void:
 			grid.add_child(blank)
 			continue
 		var node_id: String = TREE_ORDER[6] if i == 7 else TREE_ORDER[i]
-		var node_button := _button("*\n%d/5" % _tree_level(node_id), func() -> void: _node = node_id; _render())
+		var node_button := _button("%d/5" % _tree_level(node_id), func() -> void: _node = node_id; _render())
+		Icons.apply_to_button(node_button, TREE_ICONS.get(node_id, "skill"), _app.settings.text_scale)
+		node_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		node_button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
 		node_button.custom_minimum_size = Vector2(82, 76)
 		node_button.tooltip_text = node_id.replace("_", " ").capitalize()
 		node_button.set_meta("focus_id", "node_" + node_id)
@@ -277,7 +283,7 @@ func _render_class() -> void:
 	var reset_cost := int(_meta.get("reset_cost", 50))
 	var reset := UiKit.button("Reset Skills\n%s" % UiText.gems(reset_cost), func() -> void:
 		_app.confirm("reset_skills", func() -> void: _app.send({"type": "reset_tree", "class": _class_id}),
-				[_class_id.capitalize(), reset_cost]), false, "danger")
+				[UiText.class_display(_classes, _class_id), reset_cost]), false, "danger")
 	Icons.apply_to_button(reset, "gems", _app.settings.text_scale)
 	reset.set_meta("focus_id", "reset")
 	UiKit.disable(reset, _gems() < reset_cost, UiText.WHY["need_gems"] % [reset_cost, _gems()])
@@ -429,7 +435,7 @@ func _render_profile() -> void:
 	panel.add_child(_text("Player: %s" % _app.settings.player_name))
 	panel.add_child(_text("ID: %s…" % _app.player_token.substr(0, 8)))
 	panel.add_child(Icons.with_text("gems", "Gems: %d" % int(_profile().get("gems", 0)), "body", _app.settings.text_scale))
-	panel.add_child(_text("Class: %s\nRace: %s\nBoons: %s" % [str(loadout.get("class", _class_id)).capitalize(), str(loadout.get("race", _race)), ", ".join(loadout.get("boons", _boons))]))
+	panel.add_child(_text("Class: %s\nRace: %s\nBoons: %s" % [UiText.class_display(_classes, str(loadout.get("class", _class_id))), str(loadout.get("race", _race)), ", ".join(loadout.get("boons", _boons))]))
 
 
 func _render_records() -> void:

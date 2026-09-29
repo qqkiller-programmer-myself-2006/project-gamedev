@@ -1,6 +1,6 @@
 class_name MerchantPanel
 extends VBoxContainer
-## Merchant: buy Items with the Party's shared Gold (keys 1-4), then say
+## Merchant: buy Items with your character's own Gold (keys 1-4), then say
 ## you are done [R]. The shop closes when every player is done.
 
 var _stock: Array = []

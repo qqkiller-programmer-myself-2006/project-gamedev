@@ -349,7 +349,7 @@ func _build_region(view: Dictionary) -> void:
 	var phase := str(view.get("phase", ""))
 	var total := int(view.get("layers_total", 5))
 	var encounter = view.get("encounter")
-	_region.text = "Forest (%d/%d)" % [int(view.get("layer", 0)), total]
+	_region.text = "%s (%d/%d)" % [UiText.region_of(view), int(view.get("layer", 0)), total]
 	var sub := "\"%s\"\nAll" % _encounter_title(view)
 	if _combat.get("trial", false):
 		sub = "Challenge  %d/%d" % [int(_combat.get("round", 1)), int(_combat.get("round_limit", 3))]

@@ -36,6 +36,8 @@ const STATUS_ICONS := {
 	"regen": "regen", "regeneration": "regen", "dodge": "dodge", "focused": "dodge", "crit": "crit",
 }
 
+const MAX_PLATE_WIDTH := 156.0
+
 var unit_id := ""
 ## "party", "enemy" or "boss".
 var side := "party"
@@ -86,7 +88,9 @@ func setup(data: Dictionary) -> void:
 	var text_factor := clampf(text_scale, 0.75, 1.5)
 	badge_height = 36.0 if text_scale >= 1.4 else BADGE_HEIGHT
 	var plate_height := PLATE_HEIGHT * text_factor
-	var width := (180.0 if side == "boss" else 140.0) * text_factor
+	# Party and enemy slots are 160 px apart on the 1280x720 field, so a plate
+	# never grows past 156 px however large the text is (T29); only the boss is wider.
+	var width := 180.0 * text_factor if side == "boss" else minf(140.0 * text_factor, MAX_PLATE_WIDTH)
 	figure_height = 150.0 if side == "boss" else 110.0
 	if sprite_set != null and sprite_set.is_enemy:
 		figure_height = sprite_set.size_px() * 1.65

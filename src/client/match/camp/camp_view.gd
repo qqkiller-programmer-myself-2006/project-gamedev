@@ -114,7 +114,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 func build(view: Dictionary, encounter: Dictionary) -> void:
 	_encounter = encounter
 	if _inspect < 0: _inspect = maxi(0, _screen.your_slot())
-	_region.text = "Forest (%d/%d)" % [int(view.get("layer", 0)), int(view.get("layers_total", 5))]
+	_region.text = "%s (%d/%d)" % [UiText.region_of(view), int(view.get("layer", 0)), int(view.get("layers_total", 5))]
 	var merchant := str(encounter.get("kind", "")) == "merchant"
 	_encounter_icon.texture = Icons.texture("merchant") if merchant else Icons.texture("rest")
 	_encounter_label.text = "\"%s\"" % str(encounter.get("name", "Merchant" if merchant else "Rest")).replace("\"", "")
@@ -404,11 +404,15 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 		var worn: Dictionary = gear.get(slot, {})
 		var slot_row := UiKit.hbox(2)
 		slot_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		slot_row.add_child(Icons.rect(_slot_icon(slot), Icons.size_for_scale(_app.settings.text_scale)))
+		var large_text := _app.settings.text_scale >= 1.4
+		# At large text the two-column cell is too narrow for icon + label, so the label wins.
+		if not large_text:
+			slot_row.add_child(Icons.rect(_slot_icon(slot), Icons.size_for_scale(_app.settings.text_scale)))
 		var slot_label := UiKit.pixel_label(_slot_name(slot) + "\n" + (str(worn.get("name", "Empty")) if not worn.is_empty() else "Empty"), "tiny",
 				UiKit.TEXT if not worn.is_empty() else UiKit.TEXT_DIM)
 		slot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		slot_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		slot_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		slot_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		slot_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		slot_label.custom_minimum_size = Vector2(0, 44)
 		slot_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
