@@ -64,15 +64,6 @@
   "classes": {
     "classless": {
       "name": "Classless",
-      "stats": {
-        "max_hp": 40,
-        "atk": 8,
-        "def": 3,
-        "mag": 4,
-        "res": 3,
-        "spd": 10,
-        "crit": 0.05
-      },
       "skills": [],
       "attack": {
         "target": "enemy",
@@ -86,21 +77,31 @@
       "role": "Beginner",
       "description": "No special training yet. Can Attack, Defend and use Items.",
       "ai": "classless",
-      "invest_focus": "max_hp"
+      "invest_focus": "con",
+      "attributes": {
+        "str": 3,
+        "dex": 3,
+        "con": 3,
+        "int": 3,
+        "fth": 3,
+        "cha": 3,
+        "lck": 3
+      },
+      "atk_attr": "str",
+      "base": {
+        "max_hp": 28,
+        "atk": 5,
+        "def": 2,
+        "mag": 1,
+        "res": 2,
+        "spd": 9,
+        "crit": 0.02
+      }
     },
     "swordsman": {
       "name": "Swordsman",
       "role": "Melee DPS",
       "description": "Balanced and dependable. Strong melee strikes, solid health.",
-      "stats": {
-        "max_hp": 52,
-        "atk": 12,
-        "def": 5,
-        "mag": 3,
-        "res": 3,
-        "spd": 10,
-        "crit": 0.08
-      },
       "attack": {
         "target": "enemy",
         "range": "melee",
@@ -121,21 +122,31 @@
         "pass": "The old man laughs and bows. \"You have the spirit of the blade.\"",
         "fail": "The old man sheathes his sword. \"Not yet. Come back when your arms are stronger.\""
       },
-      "invest_focus": "atk"
+      "invest_focus": "str",
+      "attributes": {
+        "str": 6,
+        "dex": 4,
+        "con": 6,
+        "int": 2,
+        "fth": 2,
+        "cha": 2,
+        "lck": 3
+      },
+      "atk_attr": "str",
+      "base": {
+        "max_hp": 28,
+        "atk": 6,
+        "def": 2,
+        "mag": 1,
+        "res": 2,
+        "spd": 8,
+        "crit": 0.05
+      }
     },
     "archer": {
       "name": "Archer",
       "role": "Ranged DPS",
       "description": "The fastest of the Party. Shoots any enemy, even in the back row, and often lands critical hits.",
-      "stats": {
-        "max_hp": 44,
-        "atk": 11,
-        "def": 3,
-        "mag": 3,
-        "res": 3,
-        "spd": 15,
-        "crit": 0.25
-      },
       "attack": {
         "target": "enemy",
         "range": "ranged",
@@ -156,21 +167,31 @@
         "pass": "She lowers her bow with a grin. \"Fast hands. Take this bow, it has waited for someone like you.\"",
         "fail": "\"Too slow. The forest does not wait for anyone.\""
       },
-      "invest_focus": "atk"
+      "invest_focus": "dex",
+      "attributes": {
+        "str": 3,
+        "dex": 7,
+        "con": 3,
+        "int": 2,
+        "fth": 2,
+        "cha": 2,
+        "lck": 6
+      },
+      "atk_attr": "dex",
+      "base": {
+        "max_hp": 32,
+        "atk": 4,
+        "def": 2,
+        "mag": 1,
+        "res": 2,
+        "spd": 12,
+        "crit": 0.19
+      }
     },
     "mage": {
       "name": "Mage",
       "role": "Magic DPS / AoE",
       "description": "Fragile but devastating. Magic ignores armour and Fireball strikes every enemy at once.",
-      "stats": {
-        "max_hp": 38,
-        "atk": 5,
-        "def": 2,
-        "mag": 14,
-        "res": 6,
-        "spd": 9,
-        "crit": 0.05
-      },
       "attack": {
         "target": "enemy",
         "range": "ranged",
@@ -192,21 +213,31 @@
         "pass": "The flames bow low. \"The old words are yours now. Use them gently.\"",
         "fail": "The fire gutters out. \"Your mind wanders. Return when it is still.\""
       },
-      "invest_focus": "mag"
+      "invest_focus": "int",
+      "attributes": {
+        "str": 2,
+        "dex": 3,
+        "con": 3,
+        "int": 7,
+        "fth": 6,
+        "cha": 2,
+        "lck": 2
+      },
+      "atk_attr": "int",
+      "base": {
+        "max_hp": 26,
+        "atk": -2,
+        "def": 1,
+        "mag": 7,
+        "res": 3,
+        "spd": 8,
+        "crit": 0.03
+      }
     },
     "guardian": {
       "name": "Guardian",
       "role": "Tank / Defense",
       "description": "The Party's shield. The most HP and Defense of any Class; protects allies and blunts incoming damage.",
-      "stats": {
-        "max_hp": 70,
-        "atk": 9,
-        "def": 9,
-        "mag": 2,
-        "res": 6,
-        "spd": 7,
-        "crit": 0.05
-      },
       "attack": {
         "target": "enemy",
         "range": "melee",
@@ -228,21 +259,31 @@
         "pass": "The sentinel kneels and offers its shield. \"Stand before those you love. That is the Guardian's oath.\"",
         "fail": "The sentinel does not move. \"You are not yet a wall. Return when you are.\""
       },
-      "invest_focus": "def"
+      "invest_focus": "con",
+      "attributes": {
+        "str": 4,
+        "dex": 2,
+        "con": 8,
+        "int": 2,
+        "fth": 5,
+        "cha": 2,
+        "lck": 2
+      },
+      "atk_attr": "str",
+      "base": {
+        "max_hp": 38,
+        "atk": 5,
+        "def": 5,
+        "mag": 0,
+        "res": 4,
+        "spd": 6,
+        "crit": 0.03
+      }
     },
     "rogue": {
       "name": "Rogue",
       "role": "Melee DoT",
       "description": "Daggers and poison. Stacks Bleed, Poison and Toxin on one enemy, then finishes it with Inject Venom. Fast and deadly, but fragile.",
-      "stats": {
-        "max_hp": 42,
-        "atk": 11,
-        "def": 3,
-        "mag": 3,
-        "res": 3,
-        "spd": 12,
-        "crit": 0.18
-      },
       "attack": {
         "target": "enemy",
         "range": "melee",
@@ -274,7 +315,26 @@
         "pass": "The outlaw pulls down the mask and grins. \"Not bad. Take these vials, and never fight fair.\"",
         "fail": "The outlaw vanishes into the ferns. \"Too slow. Find me when you've learned to strike first.\""
       },
-      "invest_focus": "atk"
+      "invest_focus": "dex",
+      "attributes": {
+        "str": 3,
+        "dex": 6,
+        "con": 3,
+        "int": 2,
+        "fth": 2,
+        "cha": 3,
+        "lck": 6
+      },
+      "atk_attr": "dex",
+      "base": {
+        "max_hp": 30,
+        "atk": 5,
+        "def": 2,
+        "mag": 1,
+        "res": 2,
+        "spd": 9,
+        "crit": 0.12
+      }
     }
   },
   "leveling": {
@@ -294,14 +354,15 @@
       "res": 1,
       "spd": 0
     },
-    "points_per_level": 1,
+    "points_per_level": 2,
     "invest": {
-      "max_hp": 5,
-      "atk": 1,
-      "def": 1,
-      "mag": 1,
-      "res": 1,
-      "spd": 1
+      "str": 1,
+      "dex": 1,
+      "con": 1,
+      "int": 1,
+      "fth": 1,
+      "cha": 1,
+      "lck": 1
     }
   },
   "journey": {

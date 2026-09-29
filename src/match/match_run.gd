@@ -258,6 +258,8 @@ func party_view() -> Array:
 			"crit": c.get("crit", 0.0),
 			"points": int(c.get("points", 0)),
 			"invested": c.get("invested", {}).duplicate(),
+			"attributes": c.get("attributes", {}).duplicate(),
+			"derived": c.get("derived", {}).duplicate(),
 			"gear": _gear_view(c),
 			"controller": "human" if _humans[c["slot"]] else "ai",
 		})
@@ -294,22 +296,7 @@ func _create_party() -> void:
 ## Recomputes a character's stats from its class and level, invested stat
 ## points and equipped gear (content data).
 func _apply_stats(character: Dictionary) -> void:
-	var base := content.get_dict("classes.%s.stats" % character["class"])
-	var growth := content.get_dict("leveling.growth")
-	var invest := content.get_dict("leveling.invest")
-	var invested: Dictionary = character.get("invested", {})
-	var levels: int = character["level"] - 1
-	for stat in STATS:
-		character[stat] = int(base.get(stat, 0)) + int(growth.get(stat, 0)) * levels \
-				+ int(invest.get(stat, 0)) * int(invested.get(stat, 0))
-	character["crit"] = float(base.get("crit", 0.0))
-	for item in character.get("gear", {}).values():
-		var bonus := content.get_dict("items.%s.gear.stats" % item)
-		for stat in bonus:
-			if stat == "crit":
-				character["crit"] = float(character["crit"]) + float(bonus[stat])
-			elif STATS.has(stat):
-				character[stat] = int(character[stat]) + int(bonus[stat])
+	Attributes.recalculate(character, content)
 
 
 # --- Camp: crafting, gear and stat points (ADR-0011) --------------------------

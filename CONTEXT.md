@@ -135,8 +135,28 @@ _Avoid_: forging, smithing
 _Avoid_: equipment (เมื่อหมายถึงชิ้นของ), armour
 
 **Stat point**:
-แต้มที่ได้ทุก level-up ใช้เพิ่ม stat ของตัวละครที่ Rest camp; AI ลงแต้มใน stat หลักของ Class เอง
+แต้มที่ได้ทุก level-up ใช้เพิ่ม Attribute ของตัวละครที่ Rest camp; AI ลงแต้มใน stat หลักของ Class เอง
 _Avoid_: skill point, talent
+
+**Attribute**:
+ค่าพื้นฐานของตัวละคร (str, dex, con, int, fth, cha, lck) ที่ใช้คำนวณเป็น Derived stat และเพิ่มด้วย Stat point
+_Avoid_: primary stat, base stat
+
+**Derived stat**:
+ค่าที่คำนวณจาก Attribute และ Gear นำมาใช้ใน combat เช่น max_hp, atk, dodge, crit_damage
+_Avoid_: secondary stat, combat stat
+
+**Focus**:
+คำสั่งใน Combat ที่ให้ Energy +1 ทันที และ Dodge +10% 1 turn โดยไม่ใช้ Energy
+_Avoid_: wait, skip turn
+
+**Strike**:
+คำสั่งโจมตีปกติด้วยอาวุธ (ชื่อระบบยังเป็น attack)
+_Avoid_: attack (เมื่อหมายถึงชื่อบนจอ)
+
+**Guard**:
+คำสั่งป้องกัน (ชื่อระบบยังเป็น defend)
+_Avoid_: defend (เมื่อหมายถึงชื่อบนจอ)
 
 **Gold**:
 เงินร่วมของทั้ง Party (ไม่ใช่ของผู้เล่นแต่ละคน) ได้จาก Combat และ Treasure ใช้ที่ Merchant

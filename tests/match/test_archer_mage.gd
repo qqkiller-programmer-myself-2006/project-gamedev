@@ -84,7 +84,7 @@ func test_archer_is_noticeably_faster_than_other_classes() -> void:
 	var classes := h.content.get_dict("classes")
 	for other in classes:
 		if other != "archer":
-			assert_true(int(classes[other]["stats"]["spd"]) <= 12, "%s is at least 3 slower" % other)
+			assert_true(int(classes[other]["base"]["spd"]) <= 12, "%s is at least 3 slower" % other)
 
 
 func test_archer_shoots_into_the_back_row() -> void:
@@ -100,7 +100,7 @@ func test_archer_critical_hits_come_from_the_seed() -> void:
 		var crits := []
 		for action in _actions(20.0):
 			if action["action"] == "attack" and action["actor"] != "p0":
-				crits.append(action["results"][0]["crit"])
+				crits.append(action["results"][0].get("crit", false))
 		patterns.append(crits)
 	assert_eq(patterns[0], patterns[1], "same seed, same critical hits")
 	assert_has(patterns[0], true)
@@ -115,7 +115,7 @@ func test_aimed_shot_always_lands_a_critical_hit() -> void:
 	assert_ok(_act({"action": "skill", "skill": "aimed_shot", "target": "e0"}))
 	var action := _last_action()
 	assert_eq(action["results"][0]["crit"], true)
-	assert_eq(action["results"][0]["damage"], 22, "(11 x 1.4 - 1) x 1.5")
+	assert_eq(action["results"][0]["damage"], 23, "(11 x 1.4 - 1) x 1.62")
 
 
 func test_mage_attack_deals_magic_damage() -> void:
@@ -172,7 +172,7 @@ func test_ruined_shrine_offers_mage() -> void:
 
 
 func test_archer_ai_picks_off_the_weakest_enemy() -> void:
-	_start("archer")
+	_start("archer", ["grey_wolf", "grey_wolf"], {"rules": {"energy_start": 2}})
 	h.server.command(sessions[0], {"type": "action", "action": "attack", "target": "e1"})
 	var round_one := []
 	for action in _actions(5.0):
