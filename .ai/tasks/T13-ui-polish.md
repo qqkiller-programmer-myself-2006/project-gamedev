@@ -14,7 +14,9 @@ Compare against `docs/references/aac_rogue/` and capture screenshots at 1280×72
 6. The Seed field belongs in a small Playtest options popup (gear button next to Playtest), not in the main menu; the Playtest
    button gets a distinct orange border + small "DEV" tag.
 7. **Bug**: the embedded Playtest server does not fall back when port 8911 is busy (log: "cannot listen on port 8911 (error 22)").
-   Try 8911..8920 and use the first free one; show an error in the panel if none.
+   Try 8911..8920 and use the first free one; show an error in the panel if none — never quit the app.
+   Also stop and free the embedded server whenever the player returns to the home page (owner hit this: second Playtest
+   after returning home failed with "cannot listen on port 8911" and the game exited with code 1).
 
 ## Character setup (#53) — `src/client/setup/`
 8. Boons: the left detail panel stays empty for the selected/hovered Boon — show name, slot cost, effect text, lock reason.
