@@ -621,6 +621,8 @@ func _build_bottom(view: Dictionary) -> void:
 	if your_turn:
 		var actions := UiKit.hbox(8)
 		actions.set_meta("combat_action_row", true)
+		# A rebuild during an action banner must keep the HUD collapsed under it.
+		actions.visible = not (_banner != null and _banner.visible)
 		var has_skills: bool = not choices.get("skills", {}).is_empty()
 		actions.add_child(_action_button("Fight [F]", "fight", func() -> void: _set_mode("skills"), mode == "skills" or mode == "attack" or mode.begins_with("skill:")))
 		var item := _action_button("Items [I]", "items", func() -> void: _set_mode("items"), mode == "items" or mode.begins_with("item:"))

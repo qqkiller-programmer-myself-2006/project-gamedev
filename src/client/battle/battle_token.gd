@@ -113,11 +113,15 @@ func setup(data: Dictionary) -> void:
 	var hp_bar := UiKit.stat_bar(int(data.get("hp", 0)), int(data.get("max_hp", 1)), UiKit.BAR_HP,
 			"%d/%d" % [int(data.get("hp", 0)), int(data.get("max_hp", 1))] if not down else "DOWN", 14, "small")
 	hp_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hp_bar.size_flags_stretch_ratio = 6.0
+	_fit_bar_caption(hp_bar)
 	bars.add_child(hp_bar)
 	if data.has("energy"):
 		var energy := UiKit.stat_bar(int(data["energy"]), int(data.get("energy_max", 6)), UiKit.BAR_ENERGY,
 				"%d/%d" % [int(data["energy"]), int(data.get("energy_max", 6))], 14, "small")
 		energy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		energy.size_flags_stretch_ratio = 4.0
+		_fit_bar_caption(energy)
 		bars.add_child(energy)
 	plate_box.add_child(bars)
 	_plate = UiKit.panel(plate_box, "HudPanel")
@@ -227,13 +231,40 @@ func _draw() -> void:
 		draw_string(font, Vector2(size.x - 34, BADGE_HEIGHT + 18), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, UiKit.ACCENT)
 
 
+## Plate bars are only 14 px tall: keep their numbers at 10 px whatever the text
+## scale so "hp/max" never spills into the Energy bar (the tooltip has the details).
+func _fit_bar_caption(bar: Control) -> void:
+	for child in bar.get_children():
+		if child is Label:
+			child.add_theme_font_size_override("font_size", 10)
+			child.add_theme_constant_override("outline_size", 3)
+
+
+## Height of the character's body (not the whole canvas) for an animation. The
+## owner's sheets draw each row at a different size, and attack canvases also hold
+## arrows/slashes/orbs, so attack borrows the run row and dead the hurt row; the
+## character then keeps one size while effects reach past it.
+func _body_height(anim: String) -> float:
+	match anim:
+		"attack":
+			for reference in ["run", "walk", "idle"]:
+				var h: float = sprite_set.canvas(reference).y
+				if h > 1.0:
+					return h
+		"dead":
+			var hurt_h: float = sprite_set.canvas("hurt").y
+			if hurt_h > 1.0:
+				return hurt_h
+	return sprite_set.canvas(anim).y
+
+
 ## Compact block figures keep the stage readable at 1280x720. The silhouettes
 ## deliberately use rectangles like the reference's Roblox-style avatars.
 func _draw_figure(feet: Vector2) -> void:
 	if sprite_set != null and not animation_frames.is_empty():
 		var canvas: Vector2 = sprite_set.canvas(animation)
 		var target_height := 110.0
-		var scale := target_height / maxf(1.0, canvas.y)
+		var scale := target_height / maxf(1.0, _body_height(animation))
 		var bob := 0.0 if reduced_motion or animation != "idle" else sin(_bob_time * TAU) * 2.0
 		var top_left := Vector2(roundf(feet.x - canvas.x * scale * 0.5),
 				roundf(feet.y - sprite_set.baseline(animation) * scale + bob))
