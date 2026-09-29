@@ -12,6 +12,9 @@ Do NOT change `src/client/**` (another agent owns the client).
 
 ## What to build
 
+0. **Review fixes from T2 first** (in `src/match/attributes.gd`): move the per-Class aggro numbers out of code into
+   `classes.<id>.aggro` in `content/forest.json` (default 1.0); remove the leftover musing comment on the
+   `derived["initiative"]` line; do not leave scratch files (e.g. `scratch_*.py`, `run_*.sh`) in the repo.
 1. **Enemy Energy** (§3): every enemy and the Guardian Boss has Energy — starts 0, +1 at the start of each of its turns,
    capped at `enemies.<id>.energy_max` (default `rules.enemy_energy_max = 4`; boss 6).
    Add `enemies.<id>.special` = `{name, energy, ...same shape as an attack profile...}` to at least 3 Forest enemies
