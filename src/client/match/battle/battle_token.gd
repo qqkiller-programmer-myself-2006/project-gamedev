@@ -23,7 +23,7 @@ const CLASS_TINTS := {
 	"mage": Color("#6fa9f2"), "guardian": Color("#d9b65f"), "assassin": Color("#a584de"),
 }
 const CLASS_GLYPHS := {
-	"classless": "-", "swordsman": "S", "archer": "A", "mage": "M", "guardian": "G", "assassin": "R",
+	"classless": "-", "swordsman": "S", "archer": "A", "mage": "M", "guardian": "G", "assassin": "As",
 }
 const ENEMY_TINTS := {
 	"grey_wolf": Color("#9aa3ad"), "thornback_boar": Color("#a5714f"), "bramble_archer": Color("#79a150"),
@@ -316,7 +316,7 @@ func _draw_humanoid(feet: Vector2, body: Color, dark: Color, scale: float) -> vo
 	draw_rect(Rect2(feet.x + 19.0 * s, feet.y - 42.0 * s, 10.0 * s, 30.0 * s), shirt.darkened(0.12))
 	draw_rect(Rect2(feet.x - 14.0 * s, feet.y - 13.0 * s, 11.0 * s, 15.0 * s), pants)
 	draw_rect(Rect2(feet.x + 3.0 * s, feet.y - 13.0 * s, 11.0 * s, 15.0 * s), pants.darkened(0.12))
-	if glyph == "R":
+	if glyph == "As":
 		draw_line(Vector2(feet.x + 25.0 * s, feet.y - 27.0 * s), Vector2(feet.x + 40.0 * s, feet.y - 8.0 * s), Color("#e7e9ed"), maxf(2.0, 3.0 * s))
 	elif glyph == "A":
 		draw_line(Vector2(feet.x + 24.0 * s, feet.y - 54.0 * s), Vector2(feet.x + 42.0 * s, feet.y - 8.0 * s), Color("#c99d5b"), maxf(2.0, 2.0 * s))

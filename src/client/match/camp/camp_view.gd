@@ -27,12 +27,19 @@ var _inventory_search := ""
 var _left_mode := "craft"
 var _inventory_mode := "inventory"
 var _invest_panel: PanelContainer
+var _content: Dictionary = {}
 const SLOTS := ["helmet", "chest", "legs", "boots", "weapon", "charm1", "charm2", "charm3"]
 const ATTRIBUTES := ["str", "dex", "con", "int", "fth", "cha", "lck"]
+const PERCENT_STATS := ["crit", "crit_damage", "block", "block_reduction", "dodge", "aggro", "lifesteal", "status_resist"]
 
 func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_screen = screen
 	_app = app
+	var content_file := FileAccess.open("res://content/forest.json", FileAccess.READ)
+	if content_file != null:
+		var parsed = JSON.parse_string(content_file.get_as_text())
+		if parsed is Dictionary:
+			_content = parsed
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var backdrop := BattleBackdrop.new()
 	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -145,11 +152,14 @@ func _vertical_tabs(labels: Array, left: bool, view: Dictionary = {}) -> Control
 		var button := _button(label, func() -> void:
 			if label == "Stash": _left_mode = "stash"
 			elif label == "Craft" or label == "Shop": _left_mode = "craft"
-			elif label == "Inventory": _inventory_mode = "inventory"
+			elif label == "Inventory":
+				_inventory_mode = "inventory"
+				_close_invest_panel()
 			elif label == "Abilities":
 				_inventory_mode = "abilities"
-				_show_abilities(view)
-			_screen.refresh(_app, true))
+			_screen.refresh(_app, true)
+			if label == "Abilities":
+				_show_abilities(view))
 		button.custom_minimum_size = Vector2(tab_width, 52)
 		button.clip_text = true
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -194,15 +204,20 @@ func _empty(key: String, query: String = "") -> Label:
 
 func _left_panel(view: Dictionary, merchant: bool) -> Control:
 	var root := UiKit.vbox(6)
+	var body := UiKit.vbox(5)
 	root.add_child(_search_box(_left_search, func(value: String) -> void:
 		_left_search = value
-		_screen.refresh(_app, true)))
-	var body := UiKit.vbox(5)
+		_populate_left(view, merchant, body)))
 	root.add_child(_scroll_body(body))
+	_populate_left(view, merchant, body)
+	return root
+
+
+func _populate_left(view: Dictionary, merchant: bool, body: VBoxContainer) -> void:
+	UiKit.clear(body)
 	if _left_mode == "stash": _build_stash(view, body)
 	elif merchant: _build_shop(view, body)
 	else: _build_crafting(body)
-	return root
 
 func _build_shop(view: Dictionary, body: VBoxContainer) -> void:
 	for i in _stock.size():
@@ -287,15 +302,12 @@ func _build_stash(view: Dictionary, body: VBoxContainer) -> void:
 
 func _inventory_panel(view: Dictionary) -> Control:
 	var root := UiKit.vbox(6)
+	var body := UiKit.vbox(5)
 	root.add_child(_search_box(_inventory_search, func(value: String) -> void:
 		_inventory_search = value
-		_screen.refresh(_app, true)))
-	var body := UiKit.vbox(5)
+		_populate_inventory(view, body)))
 	root.add_child(_scroll_body(body))
-	for entry in view.get("inventory", []):
-		if _matches(str(entry.get("name", "")), _inventory_search): body.add_child(_item_row(entry, true))
-	if body.get_child_count() == 0:
-		body.add_child(_empty("inventory", _inventory_search))
+	_populate_inventory(view, body)
 	var you := _character(view, _acting_slot())
 	var gold := int(you.get("gold", view.get("gold", 0)))
 	var gold_row := UiKit.hbox(4)
@@ -307,6 +319,14 @@ func _inventory_panel(view: Dictionary) -> Control:
 	root.add_child(UiKit.panel(gold_row, "HudCard"))
 	return root
 
+
+func _populate_inventory(view: Dictionary, body: VBoxContainer) -> void:
+	UiKit.clear(body)
+	for entry in view.get("inventory", []):
+		if _matches(str(entry.get("name", "")), _inventory_search): body.add_child(_item_row(entry, true))
+	if body.get_child_count() == 0:
+		body.add_child(_empty("inventory", _inventory_search))
+
 func _item_row(entry: Dictionary, with_transfer: bool) -> Control:
 	var card := _row_card()
 	var text := UiKit.vbox(1)
@@ -317,7 +337,10 @@ func _item_row(entry: Dictionary, with_transfer: bool) -> Control:
 	card.get_child(0).add_child(text)
 	var actions := UiKit.vbox(2)
 	if with_transfer: actions.add_child(_button("Transfer", func() -> void: _open_item_picker(str(entry.get("item", "")))))
-	if str(entry.get("kind", "")) == "gear": actions.add_child(_button("Equip", func() -> void: _app.send({"type": "equip", "slot": _acting_slot(), "item": entry.get("item", "")})))
+	if str(entry.get("kind", "")) == "gear":
+		var equip := _button("Equip", func() -> void: _app.send({"type": "equip", "slot": _acting_slot(), "item": entry.get("item", "")}))
+		UiKit.disable(equip, not _can_manage_inspected(), UiText.WHY["equip_not_yours"])
+		actions.add_child(equip)
 	actions.add_child(_button("Inspect", func() -> void: _show_info(entry)))
 	card.get_child(0).add_child(actions)
 	return card
@@ -364,6 +387,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 		if not worn.is_empty():
 			var off := _button("–", func() -> void: _app.send({"type": "unequip", "slot": _acting_slot(), "gear_slot": slot}))
 			off.tooltip_text = "Unequip"
+			UiKit.disable(off, not _can_manage_inspected(), UiText.WHY["equip_not_yours"])
 			controls.add_child(off)
 			var info := _button("?", func() -> void: _show_info(worn))
 			info.tooltip_text = "Inspect"
@@ -383,19 +407,19 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	separator_one.custom_minimum_size = Vector2(0, 8)
 	stats.add_child(separator_one)
 	for key in ATTRIBUTES:
-		stats.add_child(_stat(key.to_upper(), str(attrs.get(key, _fallback_attr(character, key)))))
+		stats.add_child(_stat(key.to_upper(), str(int(attrs[key])) if attrs.has(key) else "\u2014"))
 	var separator_two := Control.new()
 	separator_two.custom_minimum_size = Vector2(0, 8)
 	stats.add_child(separator_two)
-	stats.add_child(_stat("Initiative", _range_text(derived.get("initiative", character.get("spd", 0)))))
-	stats.add_child(_stat("Crit Chance", _percent(derived.get("crit", character.get("crit", 0)))))
-	stats.add_child(_stat("Crit Damage", _percent(derived.get("crit_damage", 1.5))))
-	stats.add_child(_stat("Block Chance", _percent(derived.get("block", 0))))
-	stats.add_child(_stat("Block Damage Reduction", _percent(derived.get("block_reduction", 0.5))))
-	stats.add_child(_stat("Dodge Chance", _percent(derived.get("dodge", 0))))
-	stats.add_child(_stat("Aggro", _percent(derived.get("aggro", 1.0))))
-	stats.add_child(_stat("Lifesteal", _percent(derived.get("lifesteal", 0))))
-	stats.add_child(_stat("Energy Regen", str(derived.get("energy_regen", 1))))
+	stats.add_child(_stat("Initiative", str(int(derived["initiative"])) if derived.has("initiative") else "\u2014"))
+	stats.add_child(_stat("Crit Chance", _percent(derived.get("crit"))))
+	stats.add_child(_stat("Crit Damage", _percent(derived.get("crit_damage"))))
+	stats.add_child(_stat("Block Chance", _percent(derived.get("block"))))
+	stats.add_child(_stat("Block Damage Reduction", _percent(derived.get("block_reduction"))))
+	stats.add_child(_stat("Dodge Chance", _percent(derived.get("dodge"))))
+	stats.add_child(_stat("Aggro", _percent(derived.get("aggro"))))
+	stats.add_child(_stat("Lifesteal", _percent(derived.get("lifesteal"))))
+	stats.add_child(_stat("Energy Regen", str(int(derived["energy_regen"])) if derived.has("energy_regen") else "\u2014"))
 	var stat_scroll := _scroll_body(stats)
 	var stat_panel := UiKit.panel(stat_scroll, "HudCard")
 	stat_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -437,6 +461,12 @@ func tick() -> void:
 	_countdown.add_theme_color_override("font_color", UiKit.WARN if left <= 5.0 else UiKit.TEXT)
 
 func handle_key(key: int) -> bool:
+	var focused := get_viewport().gui_get_focus_owner()
+	if focused is LineEdit:
+		if key == KEY_ESCAPE:
+			focused.release_focus()
+			focus_default()
+		return true
 	if key == KEY_ESCAPE:
 		if is_instance_valid(_invest_panel):
 			_close_invest_panel()
@@ -493,6 +523,9 @@ func _character(view: Dictionary, slot: int) -> Dictionary:
 func _acting_slot() -> int:
 	return _inspect if _screen.room_view().get("story", false) else _screen.your_slot()
 
+func _can_manage_inspected() -> bool:
+	return bool(_screen.room_view().get("story", false)) or _inspect == _screen.your_slot()
+
 func _move_inspect(delta: int, party: Array) -> void:
 	if party.is_empty(): return
 	var index := 0
@@ -505,22 +538,95 @@ func _slot_name(slot: String) -> String:
 	if slot.begins_with("charm"): return "Charm " + slot.trim_prefix("charm")
 	return slot.capitalize()
 
-func _fallback_attr(character: Dictionary, key: String) -> int:
-	var map := {"str": "atk", "dex": "spd", "con": "max_hp", "int": "mag", "fth": "res", "cha": "crit", "lck": "crit"}
-	return int(character.get(map.get(key, key), 0))
-
-func _range_text(value: Variant) -> String:
-	if value is Array and value.size() >= 2: return "%s - %s" % [value[0], value[1]]
-	return "%s - %s" % [value, int(value) + 5]
-
 func _percent(value: Variant) -> String:
-	var number := float(value)
-	if number <= 1.0: number *= 100.0
-	return "%.1f%%" % number
+	if value == null:
+		return "\u2014"
+	return "%d%%" % roundi(float(value) * 100.0)
 
-func _show_info(data: Dictionary) -> void: _app.hint(str(data.get("description", "")))
+func _show_info(data: Dictionary) -> void:
+	_close_invest_panel()
+	var item_id := str(data.get("item", ""))
+	var item: Dictionary = _content.get("items", {}).get(item_id, {}).duplicate(true)
+	for key in data:
+		item[key] = data[key]
+	var body := UiKit.vbox(8)
+	body.add_child(UiKit.pixel_label(str(item.get("name", item_id.capitalize())), "heading", UiKit.ACCENT))
+	var kind := str(item.get("kind", "Item")).capitalize()
+	var category := str(item.get("category", ""))
+	body.add_child(UiKit.label(kind + (" | " + category if not category.is_empty() else ""), "dim"))
+	var description := str(item.get("description", ""))
+	if not description.is_empty():
+		body.add_child(UiKit.para(description, "small", UiKit.TEXT, 400))
+	if item.has("count"):
+		body.add_child(UiKit.pixel_label("Quantity: %d" % int(item["count"]), "small"))
+	if item.has("price"):
+		body.add_child(UiKit.pixel_label("Price: %d Gold" % int(item["price"]), "small"))
+	if item.has("remaining"):
+		body.add_child(UiKit.pixel_label("Merchant stock: %d" % int(item["remaining"]), "small"))
+	var gear: Dictionary = item.get("gear", {})
+	if not gear.is_empty():
+		body.add_child(UiKit.pixel_label("Slot: %s" % _slot_name(str(gear.get("slot", ""))), "small"))
+		var bonuses: Dictionary = gear.get("stats", {})
+		if not bonuses.is_empty():
+			body.add_child(UiKit.pixel_label("Bonuses", "small", UiKit.ACCENT))
+			var bonus_keys := bonuses.keys()
+			bonus_keys.sort()
+			for key in bonus_keys:
+				body.add_child(UiKit.pixel_label("%s %s" % [_bonus_text(str(key), bonuses[key]), str(key).to_upper()], "small"))
+	_add_use_stats(body, item.get("use", {}))
+	body.add_child(UiKit.button("Close [Esc]", _close_invest_panel, false, "primary"))
+	_open_popup(body, 440)
+	_invest_panel.name = "ItemInfoPanel"
 
-func _show_abilities(view: Dictionary) -> void: _app.hint("Skills: " + str(_character(view, _inspect).get("skills", "None")))
+
+func _add_use_stats(body: VBoxContainer, use: Dictionary) -> void:
+	if use.is_empty():
+		return
+	body.add_child(UiKit.pixel_label("Use", "small", UiKit.ACCENT))
+	if use.has("target"):
+		body.add_child(UiKit.pixel_label("Target: %s" % str(use["target"]).replace("_", " ").capitalize(), "small"))
+	if use.has("heal"):
+		body.add_child(UiKit.pixel_label("Healing: %d HP" % int(use["heal"]), "small"))
+	if use.has("revive_ratio"):
+		body.add_child(UiKit.pixel_label("Revive HP: %s" % _percent(use["revive_ratio"]), "small"))
+	var damage: Dictionary = use.get("damage", {})
+	if not damage.is_empty():
+		body.add_child(UiKit.pixel_label("Damage: %d %s" % [int(damage.get("amount", 0)), str(damage.get("element", "")).capitalize()], "small"))
+
+
+func _bonus_text(key: String, value: Variant) -> String:
+	if PERCENT_STATS.has(key):
+		var amount := roundi(float(value) * 100.0)
+		return ("+" if amount >= 0 else "") + str(amount) + "%"
+	var amount := int(value)
+	return ("+" if amount >= 0 else "") + str(amount)
+
+
+func _show_abilities(view: Dictionary) -> void:
+	_close_invest_panel()
+	var character := _character(view, _inspect)
+	var class_id := str(character.get("class", "classless"))
+	var class_data: Dictionary = _content.get("classes", {}).get(class_id, {})
+	var body := UiKit.vbox(8)
+	body.add_child(UiKit.pixel_label("%s Skills" % str(class_data.get("name", class_id.capitalize())), "heading", UiKit.ACCENT))
+	var list := UiKit.vbox(6)
+	var skill_ids: Array = class_data.get("skills", [])
+	if skill_ids.is_empty():
+		list.add_child(UiKit.para("This character has no Class Skills.", "small", UiKit.TEXT_DIM, 420))
+	else:
+		for skill_id in skill_ids:
+			var skill: Dictionary = _content.get("skills", {}).get(str(skill_id), {})
+			var card_body := UiKit.vbox(3)
+			card_body.add_child(UiKit.pixel_label(str(skill.get("name", skill_id)), "small", UiKit.ACCENT))
+			card_body.add_child(UiKit.pixel_label("Energy: %d | Cooldown: %d turn(s)" % [int(skill.get("energy", 0)), int(skill.get("cooldown", 0))], "tiny"))
+			card_body.add_child(UiKit.para(str(skill.get("description", "")), "small", UiKit.TEXT, 410))
+			list.add_child(UiKit.panel(card_body, "HudCard"))
+	var scroll := _scroll_body(list)
+	scroll.custom_minimum_size = Vector2(0, 360)
+	body.add_child(scroll)
+	body.add_child(UiKit.button("Close [Esc]", _close_invest_panel, false, "primary"))
+	_open_popup(body, 470)
+	_invest_panel.name = "AbilitiesPanel"
 
 func _open_item_picker(item: String) -> void:
 	_open_transfer_picker("transfer_item", item)

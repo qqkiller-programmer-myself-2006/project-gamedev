@@ -126,6 +126,7 @@ const WHY := {
 	"invest_merchant": "Spend stat points at a Rest camp.",
 	"invest_none": "No stat points to spend. Level up to earn more.",
 	"invest_not_yours": "You can only spend your own character's points.",
+	"equip_not_yours": "You can only change your own character's gear.",
 	"sold_out": "Sold out.",
 	"need_gold": "Not enough Gold: this costs %d.",
 }

@@ -131,10 +131,12 @@ func restore_story(data: Dictionary) -> bool:
 ## Routes an in-Match command from the human in `slot`.
 func handle_match_command(slot: int, cmd: Dictionary) -> Dictionary:
 	var acting := slot
+	var kind := str(cmd.get("type", ""))
+	if not story and kind in ["equip", "unequip"] and cmd.has("slot") and int(cmd["slot"]) != slot:
+		return {"ok": false, "error": "not_your_slot"}
 	if story:
 		if slot != host_slot:
 			return {"ok": false, "error": "not_your_slot"}
-		var kind := str(cmd.get("type", ""))
 		if kind == "action":
 			var actor_id := ""
 			if run.encounter is CombatEncounter:

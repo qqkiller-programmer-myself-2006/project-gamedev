@@ -149,6 +149,16 @@ func test_three_charm_slots() -> void:
 	assert_rejected(_cmd({"type": "unequip", "gear_slot": "legs"}), "nothing_equipped")
 
 
+func test_player_cannot_equip_or_unequip_another_players_character() -> void:
+	_camp(2, {"party": {"starting_inventory": {"hide_jerkin": 1}}})
+	assert_rejected(_cmd({"type": "equip", "slot": 1, "item": "hide_jerkin"}), "not_your_slot")
+	assert_eq(_view()["party"][1]["gear"], {}, "the other character is unchanged")
+	assert_eq(_count("hide_jerkin"), 1, "rejected equip leaves the Item in the Stash")
+	assert_ok(_cmd({"type": "equip", "item": "hide_jerkin"}, sessions[1]))
+	assert_rejected(_cmd({"type": "unequip", "slot": 1, "gear_slot": "chest"}), "not_your_slot")
+	assert_true(_view()["party"][1]["gear"].has("chest"), "rejected unequip leaves the gear worn")
+
+
 func test_gear_cannot_be_used_as_a_combat_item() -> void:
 	h = MatchHarness.new(3, MatchHarness.merge([MatchHarness.ALL_COMBAT, MatchHarness.WOLF_PAIR,
 			MatchHarness.EXACT_DAMAGE, {"party": {"starting_inventory": {"wolf_pelt": 1}},
