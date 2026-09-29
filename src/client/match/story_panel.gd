@@ -21,7 +21,9 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 		_vote = encounter["vote"]
 		var me := screen.your_slot()
 		var voted: bool = _vote["voted_slots"].has(me)
-		add_child(UiKit.label("What does the Party do? (one vote each; ties are broken at random)", "heading"))
+		# Story mode: one player controls the whole Party, so there is no shared vote or timer (#67).
+		var solo := _deadline == null or float(_deadline) < 0.0
+		add_child(UiKit.label("What do you do?" if solo else "What does the Party do? (one vote each; ties are broken at random)", "heading"))
 		for option in _vote["options"]:
 			var index := int(option["index"])
 			var box := UiKit.hbox(10)
@@ -35,7 +37,8 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 			button.set_meta("focus_id", "story_vote_%d" % index)
 			box.add_child(button)
 			add_child(UiKit.panel(box, "CardPanel"))
-		add_child(UiKit.label("Voted so far: %d" % _vote["voted_slots"].size(), "dim"))
+		if not solo:
+			add_child(UiKit.label("Voted so far: %d" % _vote["voted_slots"].size(), "dim"))
 	else:
 		var outcome: Dictionary = encounter.get("outcome", {})
 		_ready = encounter.get("you_are_ready", false)
@@ -65,6 +68,9 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 
 
 func tick(_screen: MatchScreen, app: ClientApp) -> void:
+	if _deadline == null or float(_deadline) < 0.0:
+		_countdown.text = ""  # no timer (Story mode)
+		return
 	var left := ceili(app.seconds_left(_deadline))
 	_countdown.text = ("Vote closes in %ds" if _stage == "choosing" else "The journey continues in %ds") % left
 
