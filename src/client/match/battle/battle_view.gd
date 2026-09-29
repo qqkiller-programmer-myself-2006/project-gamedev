@@ -260,7 +260,7 @@ func handle_key(key: int) -> bool:
 			if choices.get("focus", false):
 				_send({"action": "focus"})
 			else:
-				_app.toast("Focus arrives with the next server update")
+				_app.toast(UiText.WHY["focus_unavailable"])
 			return true
 		KEY_ESCAPE, KEY_BACKSPACE:
 			if not _screen.combat_mode.is_empty():
@@ -534,6 +534,7 @@ func _build_stage(view: Dictionary) -> void:
 
 func _add_token(data: Dictionary) -> void:
 	var token := BattleToken.new()
+	token.text_scale = _app.settings.text_scale
 	token.setup(data)
 	var previous: BattleToken = _previous_tokens.get(data["id"])
 	if previous != null:
@@ -590,7 +591,7 @@ func _build_bottom(view: Dictionary) -> void:
 	info.add_child(_countdown)
 	info.add_child(UiKit.spacer())
 	var gold := int(me.get("gold", view.get("gold", 0))) if not me.is_empty() else int(view.get("gold", 0))
-	info.add_child(UiKit.pixel_label("%d ◉" % gold, "heading", UiKit.ACCENT))
+	info.add_child(UiKit.pixel_label(UiText.gold(gold), "heading", UiKit.ACCENT))
 	hud.add_child(info)
 	if not me.is_empty():
 		var bars := UiKit.hbox(10)
@@ -615,7 +616,7 @@ func _build_bottom(view: Dictionary) -> void:
 		actions.add_child(item)
 		var focus := _action_button("Focus [O]", "focus", func() -> void: _send({"action": "focus"}), false)
 		focus.disabled = not choices.get("focus", false)
-		focus.tooltip_text = "Focus arrives with the next server update" if focus.disabled else "Gain Energy and Dodge this turn."
+		focus.tooltip_text = UiText.WHY["focus_unavailable"] if focus.disabled else UiText.WHY["focus_ready"]
 		actions.add_child(focus)
 		hud.add_child(actions)
 		_app.hint("combat")
@@ -633,9 +634,9 @@ func _build_bottom(view: Dictionary) -> void:
 	if your_turn and not choices.get("skills", {}).is_empty():
 		var squares := UiKit.hbox(4)
 		squares.size_flags_vertical = Control.SIZE_SHRINK_END
-		var hourglass := UiKit.panel(UiKit.pixel_label("⌛", "heading", UiKit.TEXT_DIM), "HudPanel")
+		var hourglass := UiKit.panel(UiKit.pixel_label("...", "heading", UiKit.TEXT_DIM), "HudPanel")
 		hourglass.custom_minimum_size = Vector2(38, 42)
-		hourglass.tooltip_text = "Action window"
+		hourglass.tooltip_text = UiText.LABELS["action_window"]
 		squares.add_child(hourglass)
 		for skill_id in choices["skills"]:
 			var info_skill: Dictionary = choices["skills"][skill_id]
@@ -677,9 +678,9 @@ func _card_grid(mode: String, choices: Dictionary) -> Control:
 	grid.add_theme_constant_override("h_separation", 6)
 	grid.add_theme_constant_override("v_separation", 6)
 	if mode == "skills":
-		grid.add_child(_card("Strike", "Cost: 0 | Cooldown: 0", "⚔", UiKit.TEXT, true,
+		grid.add_child(_card("Strike", "Cost: 0 | Cooldown: 0", "S", UiKit.TEXT, true,
 				"A basic attack.", func() -> void: _set_mode("attack")))
-		grid.add_child(_card("Guard", "Cost: 0 | Cooldown: 0", "▣", UiKit.TEXT, true,
+		grid.add_child(_card("Guard", "Cost: 0 | Cooldown: 0", "G", UiKit.TEXT, true,
 				"Halve damage until your next turn.", func() -> void: _send({"action": "defend"})))
 		for skill_id in choices.get("skills", {}):
 			var info: Dictionary = choices["skills"][skill_id]

@@ -48,6 +48,8 @@ var animation_frames: Array[Texture2D] = []
 var animation_frame := 0
 var animation_elapsed := 0.0
 var reduced_motion := false
+## The player's text-size setting; nameplate names and bar captions follow it.
+var text_scale := 1.0
 var _bob_time := 0.0
 ## 1-based key shown while this token is a valid target, else 0.
 var target_number := 0
@@ -74,11 +76,13 @@ func setup(data: Dictionary) -> void:
 	text = ""
 	focus_mode = Control.FOCUS_NONE
 	disabled = true
-	var width := 180.0 if side == "boss" else 140.0
+	var text_factor := clampf(text_scale, 0.75, 1.5)
+	var plate_height := PLATE_HEIGHT * text_factor
+	var width := (180.0 if side == "boss" else 140.0) * text_factor
 	figure_height = 150.0 if side == "boss" else 110.0
 	if sprite_set != null and sprite_set.is_enemy:
 		figure_height = sprite_set.size_px() * 1.65
-	custom_minimum_size = Vector2(width, BADGE_HEIGHT + figure_height + PLATE_HEIGHT)
+	custom_minimum_size = Vector2(width, BADGE_HEIGHT + figure_height + plate_height)
 	size = custom_minimum_size
 	if side == "party":
 		outfit = PARTY_OUTFITS.get(str(data.get("name", "")), PARTY_OUTFITS["Wren"])
@@ -109,30 +113,30 @@ func setup(data: Dictionary) -> void:
 		who += " (AI)"
 	var name_color := tint if side == "party" else (UiKit.ACCENT if bool(data.get("you", false)) else UiKit.TEXT)
 	var name_label := UiKit.pixel_label(who, "small", name_color)
-	name_label.add_theme_font_size_override("font_size", int(10 * (0.9 if side == "boss" else 1.0)))
+	name_label.add_theme_font_size_override("font_size", int(10 * (0.9 if side == "boss" else 1.0) * text_factor))
 	name_label.clip_text = false
 	plate_box.add_child(name_label)
 	var bars := UiKit.hbox(0)
 	bars.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var hp_bar := UiKit.stat_bar(int(data.get("hp", 0)), int(data.get("max_hp", 1)), UiKit.BAR_HP,
-			"%d/%d" % [int(data.get("hp", 0)), int(data.get("max_hp", 1))] if not down else "DOWN", 14, "small")
+			"%d/%d" % [int(data.get("hp", 0)), int(data.get("max_hp", 1))] if not down else "DOWN", 14 * text_factor, "small")
 	hp_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hp_bar.size_flags_stretch_ratio = 6.0
-	_fit_bar_caption(hp_bar)
+	_fit_bar_caption(hp_bar, text_factor)
 	bars.add_child(hp_bar)
 	if data.has("energy"):
 		var energy := UiKit.stat_bar(int(data["energy"]), int(data.get("energy_max", 6)), UiKit.BAR_ENERGY,
-				"%d/%d" % [int(data["energy"]), int(data.get("energy_max", 6))], 14, "small")
+				"%d/%d" % [int(data["energy"]), int(data.get("energy_max", 6))], 14 * text_factor, "small")
 		energy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		energy.size_flags_stretch_ratio = 4.0
-		_fit_bar_caption(energy)
+		_fit_bar_caption(energy, text_factor)
 		bars.add_child(energy)
 	plate_box.add_child(bars)
 	_plate = UiKit.panel(plate_box, "HudPanel")
 	_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_plate.position = Vector2(0, BADGE_HEIGHT + figure_height + 2)
 	_plate.custom_minimum_size = Vector2(width, 0)
-	_plate.size = Vector2(width, PLATE_HEIGHT)
+	_plate.size = Vector2(width, plate_height)
 	add_child(_plate)
 	tooltip_text = str(data.get("tooltip", ""))
 	modulate = Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
@@ -238,12 +242,12 @@ func _draw() -> void:
 		draw_string(font, Vector2(size.x - 34, BADGE_HEIGHT + 18), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, UiKit.ACCENT)
 
 
-## Plate bars are only 14 px tall: keep their numbers at 10 px whatever the text
-## scale so "hp/max" never spills into the Energy bar (the tooltip has the details).
-func _fit_bar_caption(bar: Control) -> void:
+## Plate bars are 14 px tall at the default text size and grow with the text-size
+## setting, so their numbers scale too without spilling out of the bar.
+func _fit_bar_caption(bar: Control, factor: float) -> void:
 	for child in bar.get_children():
 		if child is Label:
-			child.add_theme_font_size_override("font_size", 10)
+			child.add_theme_font_size_override("font_size", int(10 * factor))
 			child.add_theme_constant_override("outline_size", 3)
 
 

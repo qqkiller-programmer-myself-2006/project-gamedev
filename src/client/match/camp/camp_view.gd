@@ -311,10 +311,10 @@ func _inventory_panel(view: Dictionary) -> Control:
 	var you := _character(view, _acting_slot())
 	var gold := int(you.get("gold", view.get("gold", 0)))
 	var gold_row := UiKit.hbox(4)
-	gold_row.add_child(UiKit.pixel_label("%d Gold" % gold, "heading", UiKit.ACCENT))
+	gold_row.add_child(UiKit.pixel_label(UiText.gold(gold), "heading", UiKit.ACCENT))
 	gold_row.add_child(UiKit.spacer())
 	var transfer := _button("Transfer Gold", func() -> void: _open_gold_picker())
-	UiKit.disable(transfer, not you.has("gold"), "Arrives with the next server update")
+	UiKit.disable(transfer, not you.has("gold"), UiText.WHY["transfer_unavailable"])
 	gold_row.add_child(transfer)
 	root.add_child(UiKit.panel(gold_row, "HudCard"))
 	return root

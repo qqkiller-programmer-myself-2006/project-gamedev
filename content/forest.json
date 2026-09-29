@@ -114,21 +114,76 @@
         ]
       }
     },
+    "passives": {
+      "adaptable": {
+        "name": "Adaptable",
+        "text": "+1 attribute point at every even level."
+      },
+      "versatile": {
+        "name": "Versatile",
+        "text": "+1 to every attribute."
+      },
+      "keen_eyes": {
+        "name": "Keen Eyes",
+        "text": "+5% critical chance."
+      },
+      "grace": {
+        "name": "Grace",
+        "text": "+2 DEX."
+      },
+      "scrappy": {
+        "name": "Scrappy",
+        "text": "+10% Gold from rewards."
+      },
+      "small_target": {
+        "name": "Small Target",
+        "text": "+5% Dodge."
+      },
+      "undying": {
+        "name": "Undying",
+        "text": "5% Lifesteal."
+      },
+      "frail": {
+        "name": "Frail",
+        "text": "-10% max HP."
+      },
+      "dwarven_resilience": {
+        "name": "Dwarven Resilience",
+        "text": "+10% max HP and +10% Status resistance."
+      },
+      "masterwork": {
+        "name": "Masterwork",
+        "text": "Crafted gear gains +0.75% stats per current level."
+      },
+      "moonlit": {
+        "name": "Moonlit",
+        "text": "+10% magic damage."
+      },
+      "tidal": {
+        "name": "Tidal",
+        "text": "+1 starting Energy in Combat."
+      }
+    },
     "boons": {
       "Potential: Bunny": {
-        "slots": 5
+        "slots": 5,
+        "text": "+3 Initiative and +15% Dodge."
       },
       "The Chosen One": {
-        "slots": 4
+        "slots": 4,
+        "text": "+2 to every attribute. Requires 5 total Prestige."
       },
       "Daredevil Impulse": {
-        "slots": 3
+        "slots": 3,
+        "text": "+25% damage while HP is 30% or lower."
       },
       "Critical Healing": {
-        "slots": 3
+        "slots": 3,
+        "text": "Critical hits heal you for 20% of damage dealt."
       },
       "Energy Conserver": {
-        "slots": 2
+        "slots": 2,
+        "text": "15% chance to gain one extra Energy at turn start."
       },
       "Enervation": {
         "slots": 2,
@@ -137,13 +192,16 @@
           "dot_bonus_cap": 1.4,
           "dot_out": 1.15,
           "dot_in": 1.15
-        }
+        },
+        "text": "More direct damage per DoT type; stronger outgoing DoTs, but more incoming DoT damage."
       },
       "Alert": {
-        "slots": 1
+        "slots": 1,
+        "text": "+3 Initiative; +5% Block and Dodge for the first two turns."
       },
       "Will of Thiacdemo": {
-        "slots": 1
+        "slots": 1,
+        "text": "Once per Combat, survive a lethal hit at 1 HP."
       }
     },
     "class_tree": {
@@ -155,7 +213,8 @@
           0
         ],
         "effect": "max_hp_percent",
-        "per_level": 2
+        "per_level": 2,
+        "text": "+2% max HP per level."
       },
       "might": {
         "cost": 10,
@@ -165,7 +224,8 @@
           0
         ],
         "effect": "damage_percent",
-        "per_level": 2
+        "per_level": 2,
+        "text": "+2% direct damage per level."
       },
       "precision": {
         "cost": 10,
@@ -175,7 +235,8 @@
           0
         ],
         "effect": "crit_percent",
-        "per_level": 1
+        "per_level": 1,
+        "text": "+1% critical chance per level."
       },
       "swiftness": {
         "cost": 10,
@@ -185,7 +246,8 @@
           1
         ],
         "effect": "initiative",
-        "per_level": 1
+        "per_level": 1,
+        "text": "+1 Initiative per two levels."
       },
       "reserves": {
         "cost": 10,
@@ -195,7 +257,8 @@
           1
         ],
         "effect": "energy_start",
-        "per_level": 1
+        "per_level": 1,
+        "text": "+1 starting Energy at level 5."
       },
       "mastery": {
         "cost": 10,
@@ -205,7 +268,8 @@
           1
         ],
         "effect": "cooldown",
-        "per_level": -1
+        "per_level": -1,
+        "text": "Class Skill cooldown -1 at level 5."
       },
       "stat_points": {
         "cost": 10,
@@ -215,7 +279,8 @@
           2
         ],
         "effect": "attribute_points",
-        "per_level": 1
+        "per_level": 1,
+        "text": "+1 starting attribute point per level."
       }
     },
     "reset_cost": 50,

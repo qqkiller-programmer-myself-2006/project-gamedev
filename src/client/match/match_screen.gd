@@ -314,8 +314,8 @@ func toggle_clues() -> void:
 	close.grab_focus()
 
 
-## The ≡ and ? corner buttons of the battle and camp views, and the menu the
-## ≡ button opens (Clues, Settings, Leave). Returns the menu so Esc can toggle it.
+## The = and ? corner buttons of the battle and camp views, and the menu the
+## = button opens (Clues, Settings, Leave). Returns the menu so Esc can toggle it.
 func build_corner_menu(host: Control) -> PanelContainer:
 	var menu := UiKit.panel(UiKit.vbox(6), "HudPanel")
 	menu.position = Vector2(10, 58)
@@ -338,7 +338,7 @@ func build_corner_menu(host: Control) -> PanelContainer:
 		menu.visible = not menu.visible
 		if menu.visible:
 			UiKit.focus_first(menu)
-	for entry in [["≡", "Menu [Esc]", toggle_menu], ["?", "Clues [C]", toggle_clues]]:
+	for entry in [["=", UiText.LABELS["menu_tip"], toggle_menu], ["?", UiText.LABELS["clues_tip"], toggle_clues]]:
 		var button := Button.new()
 		button.text = str(entry[0])
 		button.tooltip_text = str(entry[1])

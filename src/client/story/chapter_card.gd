@@ -17,7 +17,7 @@ func _init(data: Dictionary = {}, reduced: bool = false) -> void:
 	if _font == null:
 		_font = ThemeDB.fallback_font
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_title.text = "Chapter %d\n%s" % [int(chapter.get("number", 0)), chapter.get("title", "")]
+	_title.text = "%s\n%s" % [UiText.LABELS["chapter"] % int(chapter.get("number", 0)), chapter.get("title", "")]
 	_subtitle.text = str(chapter.get("subtitle", ""))
 	for label in [_title, _subtitle]:
 		label.add_theme_font_override("font", _font)
@@ -43,7 +43,7 @@ func _init(data: Dictionary = {}, reduced: bool = false) -> void:
 	if reduced_motion:
 		# Without motion the card waits for a key: say which.
 		var hint := Label.new()
-		hint.text = "Continue [Enter]"
+		hint.text = UiText.LABELS["continue"]
 		hint.add_theme_font_override("font", _font)
 		hint.add_theme_font_size_override("font_size", UiKit.SIZES["small"])
 		hint.add_theme_color_override("font_color", UiKit.TEXT_DIM)
