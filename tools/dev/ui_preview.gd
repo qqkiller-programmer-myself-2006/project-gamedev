@@ -61,6 +61,9 @@ func _initialize() -> void:
 	harness = MatchHarness.new(seed_value, overrides)
 	app = ClientApp.new()
 	app.configure({"name": "Ann"})
+	app.set_meta("preview_enemy_sprites", {"grey_wolf": "wolf", "thornback_boar": "golem",
+			"bramble_archer": "goblin", "forest_wisp": "slime", "elder_thornwarden": "minotaur"})
+	app.set_meta("preview_backdrops", {"1": "forest", "5": "cave", "boss": "cave"})
 	root.add_child(app)
 	set_meta("scale", scale)
 	set_meta("reduced", reduced)

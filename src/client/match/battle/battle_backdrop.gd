@@ -11,6 +11,15 @@ const GRASS_LIGHT := Color("#3f6049")
 const TREE := Color("#0f1a14")
 const ROCK := Color("#4a524f")
 const CAP := Color("#b8433f")
+const BACKGROUND_ROOT := "res://assets/backgrounds/"
+
+var backdrop_name := ""
+var _texture: Texture2D
+
+func set_backdrop(name: String) -> void:
+	backdrop_name = name
+	_texture = load(BACKGROUND_ROOT + name + ".png") as Texture2D if not name.is_empty() else null
+	queue_redraw()
 
 
 func _ready() -> void:
@@ -21,6 +30,13 @@ func _ready() -> void:
 func _draw() -> void:
 	var w := size.x
 	var h := size.y
+	if _texture != null:
+		var texture_size := Vector2(_texture.get_width(), _texture.get_height())
+		var scale := maxf(w / texture_size.x, h / texture_size.y)
+		var draw_size := texture_size * scale
+		draw_texture_rect(_texture, Rect2((size - draw_size) * 0.5, draw_size), false)
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0, 0, 0, 0.22))
+		return
 	var horizon := h * 0.34
 	draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, horizon), Vector2(0, horizon)]),
 			PackedColorArray([SKY_TOP, SKY_TOP, SKY_BOTTOM, SKY_BOTTOM]))

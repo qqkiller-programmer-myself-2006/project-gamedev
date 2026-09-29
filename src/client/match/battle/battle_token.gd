@@ -42,6 +42,7 @@ var down := false
 var acting := false
 var class_id := ""
 var sprite_set: SpriteSet
+var enemy_sprite := false
 var animation := "idle"
 var animation_frames: Array[Texture2D] = []
 var animation_frame := 0
@@ -63,7 +64,8 @@ func setup(data: Dictionary) -> void:
 	side = str(data.get("side", "party"))
 	var kind := str(data.get("kind", ""))
 	class_id = kind.to_lower()
-	sprite_set = SpriteSet.for_class(class_id) if side == "party" else null
+	enemy_sprite = side != "party" and not str(data.get("sprite", "")).is_empty()
+	sprite_set = SpriteSet.for_class(class_id) if side == "party" else SpriteSet.for_enemy(str(data.get("sprite", "")), str(data.get("sprite_variant", ""))) if enemy_sprite else null
 	reduced_motion = bool(data.get("reduced_motion", false))
 	enemy_kind = kind
 	down = int(data.get("hp", 0)) <= 0
@@ -74,6 +76,8 @@ func setup(data: Dictionary) -> void:
 	disabled = true
 	var width := 180.0 if side == "boss" else 140.0
 	figure_height = 150.0 if side == "boss" else 110.0
+	if sprite_set != null and sprite_set.is_enemy:
+		figure_height = sprite_set.size_px() * 1.65
 	custom_minimum_size = Vector2(width, BADGE_HEIGHT + figure_height + PLATE_HEIGHT)
 	size = custom_minimum_size
 	if side == "party":
@@ -152,7 +156,7 @@ func play_animation(kind: String) -> void:
 func continue_animation(previous: BattleToken) -> void:
 	if sprite_set == null or previous == null or previous.sprite_set == null:
 		return
-	if previous.class_id != class_id or previous.down != down:
+	if previous.class_id != class_id or previous.enemy_sprite != enemy_sprite or previous.down != down:
 		return
 	if previous.animation == "idle":
 		_bob_time = previous._bob_time
@@ -180,7 +184,8 @@ func _process(delta: float) -> void:
 	if animation == "idle":
 		if not reduced_motion:
 			queue_redraw()
-		return
+		if reduced_motion or animation_frames.size() <= 1:
+			return
 	if animation_frames.is_empty():
 		_set_animation("idle")
 		return
@@ -190,6 +195,8 @@ func _process(delta: float) -> void:
 		animation_elapsed -= frame_time
 		if animation == "dead":
 			animation_frame = mini(animation_frame + 1, animation_frames.size() - 1)
+		elif animation == "idle":
+			animation_frame = (animation_frame + 1) % animation_frames.size()
 		else:
 			animation_frame += 1
 			if animation_frame >= animation_frames.size():
@@ -264,6 +271,8 @@ func _draw_figure(feet: Vector2) -> void:
 	if sprite_set != null and not animation_frames.is_empty():
 		var canvas: Vector2 = sprite_set.canvas(animation)
 		var target_height := 110.0
+		if sprite_set.is_enemy:
+			target_height = sprite_set.size_px() * 1.65
 		var scale := target_height / maxf(1.0, _body_height(animation))
 		var bob := 0.0 if reduced_motion or animation != "idle" else sin(_bob_time * TAU) * 2.0
 		var top_left := Vector2(roundf(feet.x - canvas.x * scale * 0.5),
