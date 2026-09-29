@@ -55,10 +55,24 @@ func _simulate(humans: int, start: int, seeds: int, pace: bool, use_loadout: boo
 			sessions = [h.create_room("P1")]
 			for i in range(1, humans):
 				sessions.append(h.join("P%d" % (i + 1)))
-			var loadout_classes := ["archer", "guardian"]
+			# Rotate through available starter choices instead of giving every run
+			# the same high-survival Archer/Guardian + Bunny loadout.
+			var loadout_classes := ["archer", "guardian", "swordsman", "mage", "rogue"]
+			var loadout_races := ["Elf", "Human", "Kobold", "Withered"]
+			var loadout_boons := [
+				["Potential: Bunny"],
+				["Critical Healing", "Energy Conserver"],
+				["Enervation", "Alert", "Energy Conserver"],
+				["Daredevil Impulse", "Energy Conserver"],
+				["Alert", "Will of Thiacdemo", "Energy Conserver"],
+			]
+			var sample := seed_value - start
 			for i in humans:
-				h.server.command(sessions[i], {"type": "set_loadout", "class": loadout_classes[i % loadout_classes.size()],
-					"race": "Elf" if i % 2 == 0 else "Human", "boons": ["Potential: Bunny"]})
+				var choice := {"type": "set_loadout", "class": loadout_classes[(sample + i * 2) % loadout_classes.size()],
+					"race": loadout_races[((sample / 5) + i) % loadout_races.size()],
+					"boons": loadout_boons[((sample / 20) + i) % loadout_boons.size()]}
+				var result: Dictionary = h.server.command(sessions[i], choice)
+				assert(result.get("ok", false), "invalid simulated loadout: %s" % result)
 			h.start(sessions[0])
 		else:
 			sessions = h.start_with_humans(humans)
