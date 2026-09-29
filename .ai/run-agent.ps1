@@ -46,14 +46,19 @@ if ($Agent -eq 'codex') {
 
 $argLine = ($argv | ForEach-Object { Quote $_ }) -join ' '
 $started = Get-Date
+# Empty stdin: codex exec otherwise blocks forever on "Reading additional input from stdin..."
+$emptyIn = "$base.stdin"
+Set-Content -Path $emptyIn -Value $null -NoNewline
 $p = Start-Process -FilePath $exe -ArgumentList $argLine -WorkingDirectory $Worktree -NoNewWindow -PassThru `
-    -RedirectStandardOutput "$base.out.log" -RedirectStandardError "$base.err.log"
+    -RedirectStandardInput $emptyIn -RedirectStandardOutput "$base.out.log" -RedirectStandardError "$base.err.log"
 $null = $p.Handle  # cache the handle, otherwise ExitCode is null after exit
 @{ agent = $Agent; task = $TaskFile; worktree = $Worktree; pid = $p.Id; started = $started.ToString('s'); state = 'running' } |
     ConvertTo-Json | Set-Content -Encoding utf8 $status
 
-$finished = $p.WaitForExit($TimeoutMin * 60 * 1000)
-if (-not $finished) {
+# Poll instead of WaitForExit(ms), which did not fire on a hung run.
+$deadline = $started.AddMinutes($TimeoutMin)
+while (-not $p.HasExited -and (Get-Date) -lt $deadline) { Start-Sleep -Seconds 5 }
+if (-not $p.HasExited) {
     & taskkill.exe /PID $p.Id /T /F | Out-Null
     $state = 'timeout-killed'; $code = -1
 } else {
