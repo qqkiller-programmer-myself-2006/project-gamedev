@@ -1,0 +1,65 @@
+{
+  "prologue": [
+    {"speaker":"narrator","text":"The Forest has kept Father's trail for three long winters.","mood":"quiet"},
+    {"speaker":"arin","text":"Arin, Bram, Cora, Dain—stay close. We find his path, then we find him.","mood":"determined"},
+    {"speaker":"bram","text":"He went west with a map and a stubborn plan. That sounds like him.","mood":"wry"},
+    {"speaker":"cora","text":"And Wren went with him. Wren came back alone, carrying the journal but no memory of the road.","mood":"concerned"},
+    {"speaker":"dain","text":"Then we search every Layer until the Forest gives us an answer.","mood":"hopeful"},
+    {"speaker":"wren","text":"I remember leaving with him. After that… only trees, thorns, and a voice asking for a life.","mood":"haunted"},
+    {"speaker":"narrator","text":"Together, the Party steps beneath the ancient boughs.","mood":"resolute"}
+  ],
+  "chapters": [
+    {"number":1,"title":"The First Trees","subtitle":"A trail of old ash leads into the Forest."},
+    {"number":2,"title":"Marks in the Bark","subtitle":"Father left signs, but something followed them."},
+    {"number":3,"title":"The Forgotten Road","subtitle":"Wren's missing memories begin to stir."},
+    {"number":4,"title":"Past the Last Light","subtitle":"The way west narrows beneath thorn and shadow."},
+    {"number":5,"title":"The Guardian's Gate","subtitle":"The Forest will not yield its secrets freely."},
+    {"number":6,"title":"Guardian of the Forest","subtitle":"Face the Elder Thornwarden and open the road west."}
+  ],
+  "scenes": {
+    "first_combat_won": [
+      {"speaker":"bram","text":"One fight down. The Forest is testing us already.","mood":"steady"},
+      {"speaker":"cora","text":"Look at those tracks. They point deeper in, toward the stream.","mood":"alert"},
+      {"speaker":"wren","text":"Father always followed water west. I can almost see his lantern.","mood":"distant"},
+      {"speaker":"arin","text":"Then we follow it too. Nobody gets left behind this time.","mood":"determined"}
+    ],
+    "class_gained": [
+      {"speaker":"dain","text":"That power answered you. It is yours now.","mood":"impressed"},
+      {"speaker":"wren","text":"Father said a Class was a promise: to choose how you protect the people beside you.","mood":"remembering"},
+      {"speaker":"cora","text":"A useful promise. We still have a long road ahead.","mood":"focused"}
+    ],
+    "story_clue": [
+      {"speaker":"cora","text":"Another mark from Father. A wave, a lighthouse, and an upside-down cup.","mood":"curious"},
+      {"speaker":"bram","text":"He was pointing beyond the Forest. Past the last lighthouse.","mood":"thoughtful"},
+      {"speaker":"wren","text":"The cup… I remember him saying the Chalice asks a price.","mood":"haunted"},
+      {"speaker":"arin","text":"We learn the price before anyone pays it. Keep moving.","mood":"firm"}
+    ],
+    "merchant_first": [
+      {"speaker":"bram","text":"A merchant in a forest this deep? I am not asking questions.","mood":"relieved"},
+      {"speaker":"dain","text":"Spend the Party's Gold carefully. We may not see another stall.","mood":"practical"},
+      {"speaker":"wren","text":"Father traded for supplies before the Guardian. He knew the way would be hard.","mood":"remembering"}
+    ],
+    "rest_first": [
+      {"speaker":"cora","text":"A quiet camp at last. Let the wounds close before we go on.","mood":"gentle"},
+      {"speaker":"wren","text":"This feels familiar. Two bedrolls beneath a pine… and Father's knot in the rope.","mood":"uneasy"},
+      {"speaker":"arin","text":"Rest while we can. Tomorrow, the trail climbs.","mood":"calm"}
+    ],
+    "before_boss": [
+      {"speaker":"narrator","text":"The trees part, revealing roots blackened by old fire.","mood":"ominous"},
+      {"speaker":"wren","text":"I came this far before. I remember the green eyes. I remember running.","mood":"afraid"},
+      {"speaker":"bram","text":"Then this time we stand together.","mood":"bold"},
+      {"speaker":"arin","text":"Father crossed this gate—or tried to. We finish what he began.","mood":"resolute"}
+    ],
+    "boss_won": [
+      {"speaker":"narrator","text":"The Elder Thornwarden sinks into the earth, becoming an old tree once more.","mood":"solemn"},
+      {"speaker":"cora","text":"There—in the roots. A compass, still pointing west.","mood":"hopeful"},
+      {"speaker":"wren","text":"I remember his voice now: Keep going. Don't wait for me.","mood":"bittersweet"},
+      {"speaker":"arin","text":"We will find him. The road beyond the Forest is open.","mood":"determined"}
+    ],
+    "party_defeated": [
+      {"speaker":"narrator","text":"The Forest closes around the fallen Party, and the trail disappears beneath the moss.","mood":"somber"},
+      {"speaker":"wren","text":"Father waited three winters. We can gather our strength and try again.","mood":"hopeful"},
+      {"speaker":"arin","text":"Next time, we reach the Guardian together.","mood":"determined"}
+    ]
+  }
+}
