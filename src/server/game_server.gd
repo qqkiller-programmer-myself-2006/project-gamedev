@@ -13,6 +13,9 @@ var port := NetProtocol.DEFAULT_PORT
 var _clock := SystemClock.new()
 var _last_report := 0.0
 var profile_store: ProfileStore
+## Set by listen_embedded(): the in-client Playtest server must never quit the game.
+var _embedded := false
+var _listening := false
 
 
 func configure(options: Dictionary) -> void:
@@ -25,7 +28,22 @@ func configure(options: Dictionary) -> void:
 	transport = WsServerTransport.new(match_server, _clock)
 
 
+## Listens on 127.0.0.1 for a Playtest inside the client. Returns false instead of
+## quitting when the port is taken, so the caller can try the next one.
+func listen_embedded(local_port: int) -> bool:
+	if match_server == null:
+		configure({})
+	_embedded = true
+	port = local_port
+	_listening = transport.listen(port, "127.0.0.1") == OK
+	if _listening:
+		print("GameServer: listening on ws://127.0.0.1:%d (embedded)" % port)
+	return _listening
+
+
 func _ready() -> void:
+	if _embedded:
+		return
 	if match_server == null:
 		configure({})
 	var error := transport.listen(port)
@@ -33,10 +51,13 @@ func _ready() -> void:
 		printerr("GameServer: cannot listen on port %d (error %d)" % [port, error])
 		get_tree().quit(1)
 		return
+	_listening = true
 	print("GameServer: listening on ws://0.0.0.0:%d" % port)
 
 
 func _process(_delta: float) -> void:
+	if not _listening:
+		return
 	transport.poll()
 	match_server.update()
 	transport.flush()

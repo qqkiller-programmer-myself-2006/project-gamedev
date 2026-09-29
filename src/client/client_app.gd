@@ -174,18 +174,25 @@ func can_playtest() -> bool:
 
 
 func start_dev_playtest(seed_text: String = "") -> void:
-	if not can_playtest() or _embedded_server != null:
+	if not can_playtest():
 		return
-	var port := _free_local_port()
-	if port < 0:
-		toast("No local port available for DEV PLAYTEST")
-		return
-	var server := GameServer.new()
-	server.name = "EmbeddedGameServer"
-	var server_options := {"port": port}
+	if connection != null or _embedded_server != null:
+		disconnect_from_server()
+	var server_options := {}
 	if not seed_text.strip_edges().is_empty() and seed_text.is_valid_int():
 		server_options["seed"] = int(seed_text)
+	var server := GameServer.new()
+	server.name = "EmbeddedGameServer"
 	server.configure(server_options)
+	var port := -1
+	for candidate in range(8911, 8931):
+		if server.listen_embedded(candidate):
+			port = candidate
+			break
+	if port < 0:
+		server.free()
+		toast("DEV PLAYTEST: ports 8911-8930 are all busy. Close other game windows and try again.")
+		return
 	_embedded_server = server
 	_dev_playtest = true
 	_dev_tag.visible = true
@@ -199,6 +206,8 @@ func stop_dev_playtest() -> void:
 	if _dev_tag != null:
 		_dev_tag.visible = false
 	if _embedded_server != null:
+		# Release the port now, not at the end of the frame, so a new Playtest can reuse it at once.
+		_embedded_server.transport.stop()
 		_embedded_server.queue_free()
 		_embedded_server = null
 
@@ -211,15 +220,6 @@ func start_story(classes: Array = [], restore: Dictionary = {}, seed_value: int 
 	story_launcher = StoryLauncher.new()
 	story_launcher.start(self, seed_value if seed_value != 0 else int(restore.get("seed", 0)))
 	send({"type": "create_room", "name": settings.player_name if not settings.player_name.is_empty() else "Traveller", "story": true})
-
-
-func _free_local_port() -> int:
-	for port in range(8911, 8931):
-		var probe := TCPServer.new()
-		if probe.listen(port, "127.0.0.1") == OK:
-			probe.stop()
-			return port
-	return -1
 
 
 func _use_connection(new_connection: ServerConnection) -> void:
