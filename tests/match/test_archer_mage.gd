@@ -115,16 +115,16 @@ func test_aimed_shot_always_lands_a_critical_hit() -> void:
 	assert_ok(_act({"action": "skill", "skill": "aimed_shot", "target": "e0"}))
 	var action := _last_action()
 	assert_eq(action["results"][0]["crit"], true)
-	assert_eq(action["results"][0]["damage"], 21, "(10 x 1.4 - 1) x 1.62")
+	assert_eq(action["results"][0]["damage"], 19, "(9 x 1.4 - 1) x 1.62 = 18.79 -> 19")
 
 
 func test_mage_attack_deals_magic_damage() -> void:
 	_start("mage")
 	var me: Dictionary = h.match_view(sessions[0])["party"][0]
-	assert_eq([me["class"], me["mag"]], ["mage", 13])
+	assert_eq([me["class"], me["mag"]], ["mage", 12])
 	assert_ok(_act({"action": "attack", "target": "e0"}))
 	var result: Dictionary = _last_action()["results"][0]
-	assert_eq([result["damage"], result["element"]], [13, "arcane"], "13 MAG - 1 RES x 0.5")
+	assert_eq([result["damage"], result["element"]], [12, "arcane"], "12 MAG - 1 RES x 0.5")
 
 
 func test_fireball_hits_every_enemy_and_burns_the_fire_weak_harder() -> void:
@@ -134,7 +134,7 @@ func test_fireball_hits_every_enemy_and_burns_the_fire_weak_harder() -> void:
 	assert_ok(_act({"action": "skill", "skill": "fireball"}))
 	var action := _last_action()
 	assert_eq(_targets(action), ["e0", "e1", "e2"], "front and back row")
-	assert_eq(_damages(action), [21, 14, 20], "boar and archer are weak to fire")
+	assert_eq(_damages(action), [19, 13, 18], "boar and archer are weak to fire")
 	assert_eq(action["results"][0]["weak"], true)
 	assert_eq(action["results"][1]["weak"], false)
 	assert_eq(action["results"][2]["element"], "fire")
@@ -145,7 +145,7 @@ func test_frost_lance_is_a_single_target_elemental_skill_with_short_cooldown() -
 			{"enemies": {"grey_wolf": {"stats": {"atk": 0}}}}]))
 	assert_ok(_act({"action": "skill", "skill": "frost_lance", "target": "e1"}))
 	var result: Dictionary = _last_action()["results"][0]
-	assert_eq([result["target"], result["damage"], result["element"]], ["e1", 20, "ice"])
+	assert_eq([result["target"], result["damage"], result["element"]], ["e1", 19, "ice"])
 	_until_my_turn()
 	assert_rejected(_act({"action": "skill", "skill": "frost_lance", "target": "e1"}), "skill_on_cooldown")
 	assert_rejected(_act({"action": "skill", "skill": "fireball"}), "not_enough_energy",

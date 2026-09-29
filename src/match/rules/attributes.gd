@@ -12,6 +12,8 @@ static func recalculate(character: Dictionary, content: ForestContent) -> void:
 	var invest := content.get_dict("leveling.invest")
 	var invested: Dictionary = character.get("invested", {})
 	var levels: int = character["level"] - 1
+	var race := str(character.get("race", ""))
+	var boons: Array = character.get("boons", [])
 
 	if not character.has("attributes"):
 		character["attributes"] = {}
@@ -22,6 +24,14 @@ static func recalculate(character: Dictionary, content: ForestContent) -> void:
 	for attr in ATTRS:
 		var val = int(base_attrs.get(attr, 0)) + int(invest.get(attr, 0)) * int(invested.get(attr, 0))
 		character["attributes"][attr] = val
+	if race == "Human":
+		for attr in ATTRS:
+			character["attributes"][attr] += 1
+	if race == "Elf":
+		character["attributes"]["dex"] += 2
+	if boons.has("The Chosen One"):
+		for attr in ATTRS:
+			character["attributes"][attr] += 2
 
 	# Include gear attributes if they exist
 	for item in character.get("gear", {}).values():
@@ -50,23 +60,15 @@ static func recalculate(character: Dictionary, content: ForestContent) -> void:
 		var bonus := content.get_dict("items.%s.gear.stats" % item)
 		for stat in bonus:
 			if stat == "crit":
-				character["crit"] = float(character["crit"]) + float(bonus[stat])
+				character["crit"] = float(character["crit"]) + _gear_stat_bonus(
+						float(bonus[stat]), str(item), character, content)
 			elif STATS.has(stat):
-				character[stat] = int(character[stat]) + int(bonus[stat])
+				character[stat] = float(character[stat]) + _gear_stat_bonus(
+						float(bonus[stat]), str(item), character, content)
 				
 	# 3. Calculate Derived Stats
 	var derived: Dictionary = character["derived"]
-	var race := str(character.get("race", ""))
-	var race_data := content.get_dict("meta.races.%s" % race)
-	var boons: Array = character.get("boons", [])
-	if race == "Human":
-		for attr in ATTRS:
-			character["attributes"][attr] += 1
-	if boons.has("The Chosen One"):
-		for attr in ATTRS:
-			character["attributes"][attr] += 2
 	if race == "Elf": character["crit"] += 0.05
-	if race == "Elf": character["attributes"]["dex"] += 2
 	if race == "Withered": character["max_hp"] = int(character["max_hp"] * 0.9)
 	if race == "Dwarf": character["max_hp"] = int(character["max_hp"] * 1.1)
 	if race == "Lunaeia": character["mag"] = int(character["mag"] * 1.1)
@@ -94,6 +96,23 @@ static func recalculate(character: Dictionary, content: ForestContent) -> void:
 	if boons.has("Potential: Bunny"):
 		derived["initiative"] += 3
 		derived["dodge"] += 0.15
+	if race == "Kobold":
+		derived["dodge"] += 0.05
 	if boons.has("Alert"):
 		derived["initiative"] += 3
-		derived["dodge"] += 0.05
+
+
+## Dwarf Masterwork improves the stats of gear which appears as the output
+## of a crafting recipe by 0.75% per current character level.
+static func _gear_stat_bonus(value: float, item: String, character: Dictionary,
+		content: ForestContent) -> float:
+	if str(character.get("race", "")) != "Dwarf":
+		return value
+	var crafted := false
+	for recipe in content.get_dict("crafting.recipes").values():
+		if recipe is Dictionary and str(recipe.get("makes", "")) == item:
+			crafted = true
+			break
+	if not crafted:
+		return value
+	return value * (1.0 + 0.0075 * int(character.get("level", 1)))

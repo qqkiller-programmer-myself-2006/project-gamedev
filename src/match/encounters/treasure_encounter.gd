@@ -23,7 +23,7 @@ func start(run: MatchRun) -> void:
 		if entry.has("item"):
 			var item := str(entry["item"])
 			found["items"][item] = int(found["items"].get(item, 0)) + int(entry.get("count", 1))
-	run.add_gold(found["gold"])
+	run.add_gold(found["gold"], true)
 	for item in found["items"]:
 		run.add_item(item, found["items"][item])
 	ends_at = run.clock.now() + run.content.get_float("encounters.treasure.seconds", 4.0)

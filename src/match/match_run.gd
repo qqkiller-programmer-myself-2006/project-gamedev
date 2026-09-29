@@ -190,16 +190,20 @@ func inventory_view() -> Array:
 	return out
 
 
-func add_gold(amount: int) -> void:
+func add_gold(amount: int, reward: bool = false) -> void:
 	gold += amount
 	if amount <= 0 or party.is_empty():
 		return
 	var split = amount / party.size()
 	var remainder = amount % party.size()
-	for character in party:
-		character["gold"] = int(character.get("gold", 0)) + split
-	if remainder > 0:
-		party[0]["gold"] = int(party[0].get("gold", 0)) + remainder
+	for i in party.size():
+		var character: Dictionary = party[i]
+		var share: int = split + (remainder if i == 0 else 0)
+		var bonus := 0
+		if reward and str(character.get("race", "")) == "Kobold":
+			bonus = int(round(share * 0.1))
+		character["gold"] = int(character.get("gold", 0)) + share + bonus
+		gold += bonus
 
 
 func collect_ai_gold() -> void:
@@ -301,6 +305,8 @@ func grant_exp(slot: int, amount: int) -> void:
 		character["level"] += 1
 		character["points"] = int(character.get("points", 0)) + content.get_int("leveling.points_per_level", 0)
 		character["points"] += _tree_level(character, "stat_points")
+		if str(character.get("race", "")) == "Human" and int(character["level"]) % 2 == 0:
+			character["points"] += 1
 		_apply_stats(character)
 		if character["hp"] > 0:
 			character["hp"] = mini(character["max_hp"], character["hp"] + character["max_hp"] - old_max)

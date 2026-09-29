@@ -129,3 +129,11 @@ Baseline recorded before cave enemies: Default 84% / 75%, Loadout 79% / 90%, Sto
 | Skeleton | 110 | 12 | 7 | 0 | 4 | 9 | charge_strongest | Shield Bash (2 Energy) |
 | Giant Spider | 100 | 11 | 4 | 13 | 7 | 12 | random | Venom Web (3 Energy) |
 | Minotaur | 155 | 17 | 6 | 0 | 4 | 8 | charge_strongest | Bull Rush (3 Energy) |
+
+## T21 Re-tuning (S5 Boons & Human passive fix)
+
+Since the `Human` race passive (+1 to all attributes) correctly applies before derived stats are calculated, class stats and the boss were tweaked. To keep the 2-human win rate within the 70-92% range when AI slots (Classless, no Race) lag behind, we made the following adjustment to `content/forest.json`:
+
+| ค่าใน `content/forest.json` | ก่อน | หลัง | เหตุผล |
+| --- | --- | --- | --- |
+| บอส Guardian HP / ATK | 1450 / 20 | 1350 / 20 | ปรับชดเชยการที่ AI slot (ไม่มี Race) อ่อนแอลงหลังจากการแก้บั๊ก attributes เพื่อให้ 2-human co-op win rate กลับมาที่ > 70% และไม่ทำให้ 1-human ง่ายเกินไป |

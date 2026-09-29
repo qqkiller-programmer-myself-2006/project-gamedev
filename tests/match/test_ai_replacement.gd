@@ -85,10 +85,10 @@ func test_ai_heals_itself_with_an_item_when_hp_is_low() -> void:
 
 
 func test_ai_defends_when_hp_is_critical_and_no_item_is_left() -> void:
-	_combat(1, _two_boars(52, {"herb": 0}))
+	_combat(1, _two_boars(55, {"herb": 0}))
 	var events := _play(12.0)
 	var p1 := _actions_of(events, "p1")
-	assert_eq(p1[1]["action"], "defend", "critical HP and nothing to heal with")
+	assert_eq(p1[1]["action"], "defend", "critical HP (62 max, 55 atk - 3 def = 52 dmg -> 10 hp < 20%) and nothing to heal with")
 
 
 func test_ai_decisions_replay_from_the_seed() -> void:
