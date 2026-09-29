@@ -381,6 +381,8 @@ func float_text(id: String, text: String, color: Color) -> void:
 
 func describe(event: Dictionary) -> String:
 	match str(event["type"]):
+		"profile_unavailable":
+			return UiText.error("profile_unavailable")
 		"player_joined":
 			return "%s joined (slot %d)." % [event["name"], int(event["slot"]) + 1]
 		"player_left":
@@ -551,6 +553,8 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 		"player_joined":
 			client.toast("%s joined." % event["name"])
 			client.sounds.play("click")
+		"profile_unavailable":
+			client.toast(UiText.error("profile_unavailable"), 6.0)
 		"treasure_found":
 			client.banner("Treasure! +%d Gold" % int(event["gold"]), 2.0, "good")
 		"clue_found":

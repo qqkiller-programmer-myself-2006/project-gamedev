@@ -23,7 +23,7 @@ func configure(options: Dictionary) -> void:
 	var seed_value := int(options.get("seed", Time.get_unix_time_from_system() * 1000.0))
 	var profile_url := str(options.get("profile-url", OS.get_environment("PROFILE_URL")))
 	var profile_secret := str(options.get("profile-secret", OS.get_environment("PROFILE_SECRET")))
-	profile_store = D1ProfileStore.new(profile_url, profile_secret) if not profile_url.is_empty() else FileProfileStore.new("user://profiles")
+	profile_store = D1ProfileStore.new(profile_url, profile_secret, HttpProfileSender.new()) if not profile_url.is_empty() else FileProfileStore.new("user://profiles")
 	match_server = MatchServer.new(GameRng.new(seed_value), _clock, ForestContent.load_default(), profile_store)
 	transport = WsServerTransport.new(match_server, _clock)
 
@@ -69,3 +69,5 @@ func _process(_delta: float) -> void:
 func _exit_tree() -> void:
 	if transport != null:
 		transport.stop()
+	if profile_store is D1ProfileStore and profile_store.sender is HttpProfileSender:
+		profile_store.sender.stop()

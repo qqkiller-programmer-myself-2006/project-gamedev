@@ -5,6 +5,7 @@ extends TestCase
 const GAME_LOGIC_DIRS := ["res://src/match", "res://src/core"]
 const RNG_SOURCE := "res://src/core/game_rng.gd"
 const CLOCK_SOURCE := "res://src/core/system_clock.gd"
+const NON_GAME_IO_SOURCE := "res://src/core/http_profile_sender.gd"
 
 
 func test_game_logic_uses_only_injected_randomness() -> void:
@@ -21,7 +22,7 @@ func test_game_logic_uses_only_injected_randomness() -> void:
 func test_game_logic_uses_only_injected_clock() -> void:
 	var forbidden := RegEx.create_from_string("Time\\.get_(ticks|unix|datetime|time)|OS\\.get_ticks")
 	for path in _game_logic_files():
-		if path == CLOCK_SOURCE:
+		if path in [CLOCK_SOURCE, NON_GAME_IO_SOURCE]:
 			continue
 		for hit in _matches(path, forbidden):
 			fail("%s reads the wall clock: %s" % [path, hit])

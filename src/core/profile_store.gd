@@ -7,6 +7,7 @@ const EMPTY_PROFILE := {
 	"class_trees": {},
 	"prestige": {},
 	"last_loadout": {},
+	"version": 0,
 }
 
 func load_profile(_token: String) -> Dictionary:

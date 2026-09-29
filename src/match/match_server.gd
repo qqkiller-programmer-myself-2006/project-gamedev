@@ -242,10 +242,13 @@ func _set_session_profile(session_id: int, room: Room, slot: int, cmd: Dictionar
 	var token := str(cmd.get("token", ""))
 	if not token.is_empty() and not _valid_token(token):
 		return
+	token = token.to_lower()
 	_sessions[session_id]["token"] = token
 	var profile := _profiles.load_profile(token) if not token.is_empty() else ProfileStore.normalize({})
 	_sessions[session_id]["profile"] = profile
 	room.set_profile(slot, profile, token)
+	if bool(profile.get("_unavailable", false)):
+		_sessions[session_id]["events"].append({"type": "profile_unavailable"})
 
 static func _valid_token(token: String) -> bool:
 	if token.length() != 32:

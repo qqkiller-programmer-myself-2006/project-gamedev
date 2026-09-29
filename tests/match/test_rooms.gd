@@ -3,6 +3,12 @@ extends TestCase
 
 const CONFUSABLE := ["0", "O", "1", "I", "L"]
 
+class TokenProfileStore extends ProfileStore:
+	var loaded_tokens: Array[String] = []
+	func load_profile(token: String) -> Dictionary:
+		loaded_tokens.append(token)
+		return ProfileStore.normalize({})
+
 
 func test_host_receives_six_character_room_code() -> void:
 	var h := MatchHarness.new(11)
@@ -46,6 +52,17 @@ func test_join_code_is_case_insensitive_and_ignores_spaces() -> void:
 	assert_ok(result)
 	assert_eq(result["code"], h.code)
 	assert_eq(result["slot"], 1)
+
+
+func test_uppercase_profile_token_is_normalized_before_store_access() -> void:
+	var store := TokenProfileStore.new()
+	var h := MatchHarness.new(17, {}, store)
+	var session := h.server.open_session()
+	var token := "ABCDEFABCDEFABCDEFABCDEFABCDEFAB"
+	var result := h.server.command(session, {"type": "create_room", "name": "Ann", "token": token})
+	assert_ok(result)
+	assert_eq(store.loaded_tokens, [token.to_lower()])
+	assert_true(h.server.take_events(session).any(func(event: Dictionary) -> bool: return event.get("type") == "player_joined"))
 
 
 func test_joining_player_takes_lowest_free_slot() -> void:
