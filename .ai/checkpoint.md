@@ -109,3 +109,6 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - คิวต่อไป: #65 (effects: bonus/initiative/dodge/boons), #66 connection lifecycle, #67 story pacing, #68 camp, #69 hints, #70 text/fonts, #71 tidy+tests, #63 ที่เหลือ, icons redraw (#61 phase 1b) + phase 2 (ใส่ไอคอนทุกหน้า), badge "R"→"A", T10b playtest jump, #54 QA/PR
 - 2026-09-30 02:45: merged T22 (#66 #69, 5c32652) + T23 (#68, c07a068) + crit display fix → **297/297**; ปิด #66 #68 #69. Codex ติดลิมิตถึง 03:23. กำลังทำ: T21 #65 (agy→fallback codex, ai-t21), #70 text/fonts (Claude sonnet subagent, isolated worktree)
 - คิว: #67 story pacing (หลัง #65 เพราะแตะ src/match), #71 tidy+tests, #63 ที่เหลือ, icons redraw + phase 2, T10b, #54 QA/PR
+- 2026-09-30 03:25: merged #65 (T21 + fixes: story gold indent, Critical Healing ตาม ADR), icons redraw (d80f0cd, 55 ตัวไม่ซ้ำ), #70 (0d4000d) → **317/317**; ปิด #65 #70. balance: default 87/79, loadout 87/93 (เกิน 1 จุด อยู่ใน noise; ลอง boss 1400 แล้วแย่ลง → คงไว้ 1350), story 77
+- กำลังทำ: T24 #67 story pacing (agy, ai-t24), T25 icons phase 2 (Codex, ai-t25; ห้ามแตะ story/ + match_screen.gd)
+- เหลือ: #71 tidy+tests, #63 ที่เหลือ (attr forging, clue types, tests, clear broken save), T10b playtest jump, #54 QA/PR/final build, #75 รอภาพบอส
