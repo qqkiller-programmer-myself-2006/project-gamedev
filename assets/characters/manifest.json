@@ -14,7 +14,7 @@
         80
       ],
       "attack": [
-        156,
+        132,
         102
       ],
       "hurt": [
@@ -110,7 +110,8 @@
         "right": [
           "attack_right_0.png",
           "attack_right_1.png",
-          "attack_right_2.png"
+          "attack_right_2.png",
+          "attack_right_3.png"
         ],
         "up": [
           "attack_up_0.png",
@@ -154,7 +155,7 @@
         78
       ],
       "attack": [
-        171,
+        128,
         124
       ],
       "hurt": [
@@ -250,7 +251,8 @@
         "right": [
           "attack_right_0.png",
           "attack_right_1.png",
-          "attack_right_2.png"
+          "attack_right_2.png",
+          "attack_right_3.png"
         ],
         "up": [
           "attack_up_0.png",
@@ -295,7 +297,7 @@
         74
       ],
       "attack": [
-        151,
+        112,
         98
       ],
       "hurt": [
@@ -391,7 +393,8 @@
         "right": [
           "attack_right_0.png",
           "attack_right_1.png",
-          "attack_right_2.png"
+          "attack_right_2.png",
+          "attack_right_3.png"
         ],
         "up": [
           "attack_up_0.png",

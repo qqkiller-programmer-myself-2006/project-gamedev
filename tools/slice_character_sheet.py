@@ -33,7 +33,7 @@ CONFIG = {
         # centres.  Effects may cross a midpoint, so the crop is widened by
         # the effect allowance below only when it remains in the same group.
         "attack_centres": ((74, 145, 220, 290), (378, 455, 535),
-                            (668, 752, 830), (1024, 1103, 1180)),
+                            (668, 752, 830, 910), (1024, 1103, 1180)),
     },
     "mage": {
         "sheet": "mage_sheet.jpg", "idle_y": (71, 178), "walk_y": (275, 351),
@@ -47,7 +47,7 @@ CONFIG = {
                    (660, 925, 725, 1000), (725, 925, 790, 1000),
                    (790, 925, 860, 1000)],
         "attack_centres": ((62, 145, 215, 278), (375, 455, 535),
-                            (666, 745, 812), (995, 1080, 1158)),
+                            (666, 745, 812, 900), (995, 1080, 1158)),
     },
     "swordsman": {
         "sheet": "swordsman_sheet.jpg", "idle_y": (74, 181), "walk_y": (291, 366),
@@ -56,7 +56,7 @@ CONFIG = {
         "portrait": (0, 0, 335, 560), "weapon": (30, 995, 220, 1175),
         "splash": (535, 940, 1254, 1254), "skills": [],
         "attack_centres": ((68, 150, 215, 285), (370, 450, 525),
-                            (675, 740, 820), (1000, 1090, 1175)),
+                            (675, 740, 820, 890), (1000, 1090, 1175)),
     },
 }
 GROUPS = (350, 555, 783, 1013, 1230)
@@ -207,6 +207,7 @@ def process(class_name: str, cfg: dict) -> dict:
             manifest["baseline"][animation] = baseline
             offset += frame_count
 
+    attack_counts = (4, 3, 4, 3)
     raw = [trim(source, mask, box)
            for box in attack_boxes(cfg["attack_centres"], cfg["attack_y"])]
     manifest["animations"]["attack"] = {direction: [] for direction in DIRECTIONS}
@@ -218,7 +219,7 @@ def process(class_name: str, cfg: dict) -> dict:
     manifest["baseline"]["attack"] = baseline
     offset = 0
     for di, direction in enumerate(DIRECTIONS):
-        frame_count = direction_counts[di]
+        frame_count = attack_counts[di]
         for i, frame in enumerate(frames[offset:offset + frame_count]):
             name = f"attack_{direction}_{i}"
             save(name, frame)
