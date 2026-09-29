@@ -19,8 +19,10 @@ function database() {
           return rows.has(parameters[0]) ? { data: rows.get(parameters[0]).data } : null;
         },
         async run() {
-          rows.set(parameters[0], { data: parameters[1], updated_at: parameters[2] });
-          return { success: true };
+          const existing = rows.get(parameters[0]);
+          if (existing && parameters[2] <= existing.version) return { success: true, meta: { changes: 0 } };
+          rows.set(parameters[0], { data: parameters[1], version: parameters[2], updated_at: parameters[3] });
+          return { success: true, meta: { changes: 1 } };
         },
       };
     },
@@ -49,12 +51,12 @@ describe("profile worker", () => {
 
   it("stores and retrieves JSON profiles", async () => {
     const env = { SERVER_SECRET: secret, DB: database() };
-    const put = await worker.fetch(request("PUT", `/profiles/${token}`, { gems: 42, prestige: 3 }), env);
+    const put = await worker.fetch(request("PUT", `/profiles/${token}`, { gems: 42, prestige: 3, version: 1 }), env);
     expect(put.status).toBe(204);
 
     const get = await worker.fetch(request("GET", `/profiles/${token}`, undefined), env);
     expect(get.status).toBe(200);
-    expect(await get.json()).toEqual({ gems: 42, prestige: 3 });
+    expect(await get.json()).toEqual({ gems: 42, prestige: 3, version: 1 });
   });
 
   it("rejects invalid tokens and non-object JSON", async () => {
@@ -76,5 +78,14 @@ describe("profile worker", () => {
       DB: database(),
     });
     expect(response.status).toBe(404);
+  });
+
+  it("rejects stale and equal profile versions", async () => {
+    const env = { SERVER_SECRET: secret, DB: database() };
+    expect((await worker.fetch(request("PUT", `/profiles/${token}`, { gems: 1, version: 4 }), env)).status).toBe(204);
+    expect((await worker.fetch(request("PUT", `/profiles/${token}`, { gems: 99, version: 4 }), env)).status).toBe(409);
+    expect((await worker.fetch(request("PUT", `/profiles/${token}`, { gems: 0, version: 3 }), env)).status).toBe(409);
+    const get = await worker.fetch(request("GET", `/profiles/${token}`, undefined), env);
+    expect(await get.json()).toEqual({ gems: 1, version: 4 });
   });
 });

@@ -69,10 +69,16 @@ export default {
       if (profile === null || typeof profile !== "object" || Array.isArray(profile)) {
         return json({ error: "JSON object required" }, 400);
       }
+      if (!Number.isSafeInteger(profile.version) || profile.version < 0) {
+        return json({ error: "A non-negative integer version is required" }, 400);
+      }
 
-      await env.DB.prepare(
-        "INSERT INTO profiles (token, data, updated_at) VALUES (?, ?, ?) ON CONFLICT(token) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at",
-      ).bind(token, JSON.stringify(profile), Math.floor(Date.now() / 1000)).run();
+      const result = await env.DB.prepare(
+        "INSERT INTO profiles (token, data, version, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(token) DO UPDATE SET data = excluded.data, version = excluded.version, updated_at = excluded.updated_at WHERE excluded.version > profiles.version",
+      ).bind(token, JSON.stringify(profile), profile.version, Math.floor(Date.now() / 1000)).run();
+      if (result.meta?.changes === 0) {
+        return json({ error: "Profile version is stale" }, 409);
+      }
       return new Response(null, { status: 204 });
     }
 
