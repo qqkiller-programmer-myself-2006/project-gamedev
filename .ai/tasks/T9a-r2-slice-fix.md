@@ -5,6 +5,8 @@ Python and produced broken frames: QA's view of `assets/characters/archer/_conta
 only a sliver of the character. **Delete every generated PNG and `manifest.json` under `assets/characters/<class>/`** (keep
 `assets/characters/source/`) and regenerate with `python tools/slice_character_sheet.py` — Python 3.13 and Pillow 12 are
 installed on this machine (`python -c "import PIL"` works; numpy is NOT installed, use Pillow only). Fix the script as needed.
+If `python` is not found, use the full path `C:\Users\qqkiller2006\AppData\Local\Programs\Python\Python313\python.exe`.
+If Python still cannot run, STOP and report the exact error — do not fall back to a Godot script again.
 
 ## Measured layout (QA measured foreground rows in x ≥ 345, background RGB (22,27,33), colour-distance > 60)
 
