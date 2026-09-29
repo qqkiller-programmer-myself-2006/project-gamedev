@@ -83,7 +83,6 @@ func test_kobold_scrappy_adds_ten_percent_to_its_reward_share() -> void:
 	var run := _run("Kobold")
 	for character in run.party:
 		character["gold"] = 0
-	run.gold = 0
 	run.add_gold(50, true)
 	assert_eq(run.party[0]["gold"], 11)
 	assert_eq(run.party[1]["gold"], 10)
