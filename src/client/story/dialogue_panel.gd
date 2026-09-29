@@ -21,10 +21,13 @@ var _text_label := Label.new()
 var _hint_label := Label.new()
 var _box: StyleBox = UiKit.navy_box()
 
-func _init(dialogue: Array = [], scale: float = 1.0, reduced: bool = false) -> void:
+var class_map: Dictionary = {}
+
+func _init(dialogue: Array = [], scale: float = 1.0, reduced: bool = false, classes: Dictionary = {}) -> void:
 	lines = dialogue
 	text_scale = scale
 	reduced_motion = reduced
+	class_map = classes
 	_font = load(FONT_PATH)
 	if _font == null:
 		_font = ThemeDB.fallback_font
@@ -116,7 +119,10 @@ func _show_line() -> void:
 	queue_redraw()
 
 func _find_portrait(speaker: String) -> Texture2D:
-	var path := PORTRAIT_ROOT + speaker + "/portrait.png"
+	var lower := speaker.to_lower()
+	var class_id: String = class_map.get(lower, lower)
+	if class_id == "classless": class_id = lower
+	var path: String = PORTRAIT_ROOT + class_id + "/portrait.png"
 	if ResourceLoader.exists(path):
 		return load(path)
 	return null
