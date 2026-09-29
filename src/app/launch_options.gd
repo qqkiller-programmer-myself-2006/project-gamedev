@@ -1,6 +1,7 @@
 class_name LaunchOptions
 extends RefCounted
-## Options after "--" on the command line (--server, --port=8910,
+## Options after "--" on the command line (--server, --dev, --playtest,
+## --port=8910,
 ## --url=ws://host:8910, --name=Ann) or, in a browser build, from the page
 ## URL (?server=wss://host&name=Ann).
 

@@ -66,10 +66,11 @@ func _process(delta: float) -> bool:
 		app.apply_settings()
 	if frame == 15:
 		_shot("01_title")
-		# Already "connected" in-process; Enter on the focused Create button
-		# sends create_room just like a real player would.
+		# The home menu opens the Play form first; the second Enter preserves the
+		# old preview automation by activating Create in the same frame.
 		app.use_connection(local)
 		local.start()
+		_press(KEY_ENTER)
 		_press(KEY_ENTER)
 		return false
 	if frame == 25:
