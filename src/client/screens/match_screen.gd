@@ -473,6 +473,7 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 						UiKit.status_color(str(event.get("color", ""))))
 		"action_resolved":
 			if _battle_mode:
+				_battle.handle_event(event)
 				var named := ""
 				if event.has("move_name"):
 					named = str(event["move_name"])
