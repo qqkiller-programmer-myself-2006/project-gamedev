@@ -1,13 +1,13 @@
 # T16 — Pixel icon set, phase 1 (#61)
 
-Read first: `AGENTS.md`, `docs/ui-style.md` (Navy + Gold design system, colour tokens), `src/client/ui/ui_kit.gd`,
+Read first: `AGENTS.md`, `docs/design/ui-style.md` (Navy + Gold design system, colour tokens), `src/client/ui/ui_kit.gd`,
 `.claude/agents/icon-designer.md` (icon rules — follow them exactly), `gh issue view 61`, and the AAC reference images in
 `docs/references/aac_rogue/` (look at how small icons sit next to text there).
 
-## Build (NEW files only — do not edit any existing file except `docs/ui-style.md` to add a short "Icons" section)
-1. `tools/make_icons.py` (Python 3 + Pillow; numpy is NOT installed): every icon is drawn from a hand-written 16x16 pixel grid
+## Build (NEW files only — do not edit any existing file except `docs/design/ui-style.md` to add a short "Icons" section)
+1. `tools/art/make_icons.py` (Python 3 + Pillow; numpy is NOT installed): every icon is drawn from a hand-written 16x16 pixel grid
    (string rows + a palette dict), 1-px dark outline `#0a1020`, light from top-left, at most ~5 colours taken from the theme
-   tokens in `docs/ui-style.md` plus the HP/Energy/Gold bar colours. No downloaded or third-party art, no AI images.
+   tokens in `docs/design/ui-style.md` plus the HP/Energy/Gold bar colours. No downloaded or third-party art, no AI images.
    Writes `assets/icons/<name>.png` (16x16) and `assets/icons/_contact.png` (every icon at 3x on navy with its name).
 2. About 50 icons, names in snake_case:
    - actions: fight, items, focus, strike, guard, defend, flee, skill, ready, transfer
@@ -24,13 +24,13 @@ Read first: `AGENTS.md`, `docs/ui-style.md` (Navy + Gold design system, colour t
    `"$GODOT" --headless --path . --import`, and commit the generated `.import` files).
 4. `tests/client/test_icons.gd` (follow the existing test style in `tests/`): every name in a list returns a real texture of
    size 16x16; an unknown name returns the placeholder without crashing.
-5. `docs/icons.md`: the icon list with one line each (meaning, where it will be used in phase 2), and how to regenerate.
+5. `docs/design/icons.md`: the icon list with one line each (meaning, where it will be used in phase 2), and how to regenerate.
 
 ## Rules
 - Phase 2 (putting icons into screens) is NOT part of this task.
 - Commit in small steps with messages like `feat: pixel icon set generator (#61)`, each ending with
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. Use explicit `git add <paths>`, never `git add -A`.
-- Verify: `python tools/make_icons.py` runs clean; open `assets/icons/_contact.png` and look at it yourself (all readable,
-  consistent outline); `GODOT=/d/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe bash scripts/run_tests.sh` -> exact
+- Verify: `python tools/art/make_icons.py` runs clean; open `assets/icons/_contact.png` and look at it yourself (all readable,
+  consistent outline); `GODOT=/d/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe bash tools/run_tests.sh` -> exact
   summary line, 0 failed. ONE Godot process at a time (low RAM).
 - Report in English: icon list, contact sheet path, test line, commit hashes.

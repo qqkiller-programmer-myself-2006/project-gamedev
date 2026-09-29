@@ -8,7 +8,7 @@ You design and implement the icon set of BEYOND THE WORLD'S END. Read `docs/desi
 `src/client/ui/ui_kit.gd`, `CONTEXT.md` and `docs/references/aac_rogue/` first.
 
 ## Icon rules
-- Authored in code: `tools/make_icons.py` (Python 3 + Pillow; numpy is not installed) draws every icon from a small pixel grid
+- Authored in code: `tools/art/make_icons.py` (Python 3 + Pillow; numpy is not installed) draws every icon from a small pixel grid
   (16x16, a 1-px dark outline #0a1020, max ~5 colours from the theme palette + bar colours) and writes
   `assets/icons/<name>.png` plus `assets/icons/_contact.png` (all icons on navy, labelled). No downloaded or third-party art.
 - One visual language: same outline weight, light from top-left, readable at 16 px and at 2x/3x nearest-neighbour scale.
