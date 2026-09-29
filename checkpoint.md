@@ -39,8 +39,8 @@
 | T1 Combat UI ตามภาพ 04–07, 11 | Codex | `ai/t1-combat-ui` / `../ai-t1` | #48 | รอบ 2 WIP d34a47a (ตัวละครดีขึ้น) ยังซ้อนกัน → รอบ 3 (`T1-r3-combat-layout.md` พิกัดตายตัว) กำลังทำ |
 | T2 Attribute 7 ตัว + Focus (server) | Antigravity | merged 50a6fa7 | #49 | ✅ เสร็จ 251/251, win 87/88% |
 | T3 Camp UI ตามภาพ 08–10 | Codex | `ai/t3-camp-ui` / `../ai-t3` | #50 | ✅ merged 35e7767 (3 รอบ QA); seed 3 = ได้ภาพ Rest, seed 11 = Merchant |
-| T4 Energy ศัตรู + Gold ส่วนตัว/Transfer (server) | Antigravity | `ai/t4-energy-gold` / `../ai-t4` | #51 | รอบ 1 WIP c2c5a18 (Claude รันเองพัง 7 ข้อ) → รอบ 2 บน agy claude-opus-4-6-thinking กำลังทำ |
-| T5 ADR-0013 + server: Race, Boons, Class meta/Prestige | Antigravity | — | #52 | รอ T4 |
+| T4 Energy ศัตรู + Gold ส่วนตัว/Transfer (server) | Antigravity+Codex | merged | #51 | ✅ merged b3aaa02, 254/254, win 88/83% |
+| T5 ADR-0013 + server: Race, Boons, Class meta/Prestige | Codex (agy หมดโควตา) | `ai/t5-loadout` / `../ai-t5` | #52 | กำลังทำ (Codex, ai/t5-loadout) |
 | T6 หน้าจอ Class/Race/Boons ตามภาพ 01–03 | Codex | — | #53 | รอ T3, T5 |
 | T7 QA รวม, 1920×1080, PR, final build | Claude | — | #54 | รอทั้งหมด |
 | T8 Cloudflare Worker + D1 เก็บ profile/Gems | Codex | merged 0ffd1b1 | #55 | ✅ โค้ดเสร็จ 5/5 test; รอเจ้าของงาน deploy ตาม docs/running.md |
@@ -59,3 +59,5 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 
 - 2026-09-29: ตรวจเครื่องมือ (Codex 0.155.0 ✅, agy 1.2.10 ✅, Godot 4.7.2 ✅), baseline test 248/248, เขียน ADR-0012, `.ai/run-agent.ps1`, T1, T2
 - เหลือขัดเกลา (#54): กล่อง region ชนหัวข้อ Equipment ที่ 1.4×
+- 2026-09-29 12:35: บั๊ก runner — Codex ค้างที่ "Reading additional input from stdin" 2 ชม. (T1-r3 เสียเวลาฟรี) แก้แล้ว: stdin ว่าง + watchdog poll; relaunch T1-r3 และ T9a-r2 (-NoSandbox เพราะ sandbox รัน Python ไม่ได้)
+- เหลือขัดเกลา (#54): บอสเติม Energy แต่ไม่เคยใช้
