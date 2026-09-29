@@ -36,7 +36,7 @@
 
 | งาน | ผู้ทำ | branch / worktree | issue | สถานะ |
 | --- | --- | --- | --- | --- |
-| T1 Combat UI ตามภาพ 04–07, 11 | Codex | `ai/t1-combat-ui` / `../ai-t1` | #48 | รอบ 2 WIP d34a47a (ตัวละครดีขึ้น) ยังซ้อนกัน → รอบ 3 (`T1-r3-combat-layout.md` พิกัดตายตัว) กำลังทำ |
+| T1 Combat UI ตามภาพ 04–07, 11 | Codex | `ai/t1-combat-ui` / `../ai-t1` | #48 | รอบ 3 (`T1-r3-combat-layout.md`) รันผ่าน subagent background (general-purpose ทำหน้าที่ codex-executor) timeout 60 นาที |
 | T2 Attribute 7 ตัว + Focus (server) | Antigravity | merged 50a6fa7 | #49 | ✅ เสร็จ 251/251, win 87/88% |
 | T3 Camp UI ตามภาพ 08–10 | Codex | `ai/t3-camp-ui` / `../ai-t3` | #50 | ✅ merged 35e7767 (3 รอบ QA); seed 3 = ได้ภาพ Rest, seed 11 = Merchant |
 | T4 Energy ศัตรู + Gold ส่วนตัว/Transfer (server) | Antigravity+Codex | merged | #51 | ✅ merged b3aaa02, 254/254, win 88/83% |
@@ -61,3 +61,4 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - เหลือขัดเกลา (#54): กล่อง region ชนหัวข้อ Equipment ที่ 1.4×
 - 2026-09-29 12:35: บั๊ก runner — Codex ค้างที่ "Reading additional input from stdin" 2 ชม. (T1-r3 เสียเวลาฟรี) แก้แล้ว: stdin ว่าง + watchdog poll; relaunch T1-r3 และ T9a-r2 (-NoSandbox เพราะ sandbox รัน Python ไม่ได้)
 - เหลือขัดเกลา (#54): บอสเติม Energy แต่ไม่เคยใช้
+- 2026-09-29 12:50: เจ้าของงานสั่งให้ใช้ subagent codex-executor แบบ background; ชนิดนี้ยังไม่โหลดใน session นี้ จึงใช้ general-purpose + คำสั่งเดียวกันแทน (session ใหม่เรียก codex-executor / agy-executor ได้ตรงๆ). T9b spec พร้อม (รอ #48 + T9a)
