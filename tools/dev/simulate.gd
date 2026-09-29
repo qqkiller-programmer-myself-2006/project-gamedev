@@ -60,6 +60,7 @@ func _simulate(humans: int, start: int, seeds: int, pace: bool, use_loadout: boo
 		var sessions: Array[int]
 		if use_loadout:
 			if story_mode:
+				h.server.allow_story = true  # offline, like StoryLauncher (#63)
 				var session := h.server.open_session()
 				h.server.command(session, {"type": "create_room", "name": "Story", "story": true})
 				sessions = [session]
