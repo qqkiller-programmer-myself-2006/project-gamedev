@@ -13,8 +13,8 @@
     {"number":2,"title":"Marks in the Bark","subtitle":"Father left signs, but something followed them."},
     {"number":3,"title":"The Forgotten Road","subtitle":"Wren's missing memories begin to stir."},
     {"number":4,"title":"Past the Last Light","subtitle":"The way west narrows beneath thorn and shadow."},
-    {"number":5,"title":"The Guardian's Gate","subtitle":"The Forest will not yield its secrets freely."},
-    {"number":6,"title":"Guardian of the Forest","subtitle":"Face the Elder Thornwarden and open the road west."}
+    {"number":5,"title":"The Guardian's Gate","subtitle":"The cave beneath the Forest will not yield its secrets freely."},
+    {"number":6,"title":"Guardian Beneath the Forest","subtitle":"Face the Elder Thornwarden in the cave beneath the Forest."}
   ],
   "scenes": {
     "first_combat_won": [
@@ -45,7 +45,7 @@
       {"speaker":"arin","text":"Rest while we can. Tomorrow, the trail climbs.","mood":"calm"}
     ],
     "before_boss": [
-      {"speaker":"narrator","text":"The trees part, revealing roots blackened by old fire.","mood":"ominous"},
+      {"speaker":"narrator","text":"The roots part, revealing a cave blackened by old fire.","mood":"ominous"},
       {"speaker":"wren","text":"I came this far before. I remember the green eyes. I remember running.","mood":"afraid"},
       {"speaker":"bram","text":"Then this time we stand together.","mood":"bold"},
       {"speaker":"arin","text":"Father crossed this gate—or tried to. We finish what he began.","mood":"resolute"}
@@ -57,9 +57,9 @@
       {"speaker":"arin","text":"We will find him. The road beyond the Forest is open.","mood":"determined"}
     ],
     "party_defeated": [
-      {"speaker":"narrator","text":"The Forest closes around the fallen Party, and the trail disappears beneath the moss.","mood":"somber"},
+      {"speaker":"narrator","text":"The cave beneath the Forest closes around the fallen Party.","mood":"somber"},
       {"speaker":"wren","text":"Father waited three winters. We can gather our strength and try again.","mood":"hopeful"},
-      {"speaker":"arin","text":"Next time, we reach the Guardian together.","mood":"determined"}
+      {"speaker":"arin","text":"Next time, we reach the Guardian in the cave together.","mood":"determined"}
     ]
   }
 }

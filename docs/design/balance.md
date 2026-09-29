@@ -118,3 +118,14 @@ win rate แทบไม่เปลี่ยนจากก่อนมี Ener
 | Story (`--story`, คุม 5 ตัว) | 75% | — |
 
 ทุกโหมดอยู่ในช่วง 70–92% แพ้ที่บอสทั้งหมด; Story มีคำสั่งถูกปฏิเสธ 4 ครั้งจากบอท (ติดตามใน #67)
+
+## Layer 5 Cave pass (T20b, 100 seeds from 1000)
+
+Baseline recorded before cave enemies: Default 84% / 75%, Loadout 79% / 90%, Story 75% (single-player). After adding the cave groups and tuning their stats: Default 85% / 77%, Loadout 84% / 92%. All four measured modes are within the target 70-92%. Story mode could not be re-measured: `simulate.gd --story` attempts `set_loadout` before enabling `MatchServer.allow_story`, so the first loadout command returns `not_in_room`; the task scope excludes edits to `tools/dev/simulate.gd`.
+
+| Cave enemy | HP | ATK | DEF | MAG | RES | SPD | Behaviour | Special |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| Kobold | 80 | 11 | 3 | 0 | 2 | 18 | random | Spear Rush (2 Energy) |
+| Skeleton | 110 | 12 | 7 | 0 | 4 | 9 | charge_strongest | Shield Bash (2 Energy) |
+| Giant Spider | 100 | 11 | 4 | 13 | 7 | 12 | random | Venom Web (3 Energy) |
+| Minotaur | 155 | 17 | 6 | 0 | 4 | 8 | charge_strongest | Bull Rush (3 Energy) |

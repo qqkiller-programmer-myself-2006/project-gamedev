@@ -6,7 +6,7 @@
     "vote_seconds": 20,
     "travel_seconds": 3,
     "action_window_seconds": 15,
-    "ai_turn_seconds": 2.0,
+    "ai_turn_seconds": 2,
     "enemy_turn_seconds": 2.2,
     "combat_end_seconds": 4,
     "defend_multiplier": 0.5,
@@ -61,39 +61,178 @@
     "starting_inventory": {
       "herb": 3
     },
-    "ai_class_order": ["guardian", "swordsman", "archer", "mage", "assassin"]
+    "ai_class_order": [
+      "guardian",
+      "swordsman",
+      "archer",
+      "mage",
+      "assassin"
+    ]
   },
   "meta": {
     "races": {
-      "Human": {"cost": 0, "passives": ["adaptable", "versatile"]},
-      "Elf": {"cost": 0, "passives": ["keen_eyes", "grace"]},
-      "Kobold": {"cost": 0, "passives": ["scrappy", "small_target"]},
-      "Withered": {"cost": 0, "passives": ["undying", "frail"]},
-      "Dwarf": {"cost": 50, "passives": ["dwarven_resilience", "masterwork"]},
-      "Lunaeia": {"cost": 100, "passives": ["moonlit", "tidal"]}
+      "Human": {
+        "cost": 0,
+        "passives": [
+          "adaptable",
+          "versatile"
+        ]
+      },
+      "Elf": {
+        "cost": 0,
+        "passives": [
+          "keen_eyes",
+          "grace"
+        ]
+      },
+      "Kobold": {
+        "cost": 0,
+        "passives": [
+          "scrappy",
+          "small_target"
+        ]
+      },
+      "Withered": {
+        "cost": 0,
+        "passives": [
+          "undying",
+          "frail"
+        ]
+      },
+      "Dwarf": {
+        "cost": 50,
+        "passives": [
+          "dwarven_resilience",
+          "masterwork"
+        ]
+      },
+      "Lunaeia": {
+        "cost": 100,
+        "passives": [
+          "moonlit",
+          "tidal"
+        ]
+      }
     },
     "boons": {
-      "Potential: Bunny": {"slots": 5},
-      "The Chosen One": {"slots": 4},
-      "Daredevil Impulse": {"slots": 3},
-      "Critical Healing": {"slots": 3},
-      "Energy Conserver": {"slots": 2},
-      "Enervation": {"slots": 2, "effect": {"dot_bonus": 0.05, "dot_bonus_cap": 1.4, "dot_out": 1.15, "dot_in": 1.15}},
-      "Alert": {"slots": 1},
-      "Will of Thiacdemo": {"slots": 1}
+      "Potential: Bunny": {
+        "slots": 5
+      },
+      "The Chosen One": {
+        "slots": 4
+      },
+      "Daredevil Impulse": {
+        "slots": 3
+      },
+      "Critical Healing": {
+        "slots": 3
+      },
+      "Energy Conserver": {
+        "slots": 2
+      },
+      "Enervation": {
+        "slots": 2,
+        "effect": {
+          "dot_bonus": 0.05,
+          "dot_bonus_cap": 1.4,
+          "dot_out": 1.15,
+          "dot_in": 1.15
+        }
+      },
+      "Alert": {
+        "slots": 1
+      },
+      "Will of Thiacdemo": {
+        "slots": 1
+      }
     },
     "class_tree": {
-      "vitality": {"cost": 10, "max_level": 5, "position": [0, 0], "effect": "max_hp_percent", "per_level": 2},
-      "might": {"cost": 10, "max_level": 5, "position": [1, 0], "effect": "damage_percent", "per_level": 2},
-      "precision": {"cost": 10, "max_level": 5, "position": [2, 0], "effect": "crit_percent", "per_level": 1},
-      "swiftness": {"cost": 10, "max_level": 5, "position": [0, 1], "effect": "initiative", "per_level": 1},
-      "reserves": {"cost": 10, "max_level": 5, "position": [1, 1], "effect": "energy_start", "per_level": 1},
-      "mastery": {"cost": 10, "max_level": 5, "position": [2, 1], "effect": "cooldown", "per_level": -1},
-      "stat_points": {"cost": 10, "max_level": 5, "position": [1, 2], "effect": "attribute_points", "per_level": 1}
+      "vitality": {
+        "cost": 10,
+        "max_level": 5,
+        "position": [
+          0,
+          0
+        ],
+        "effect": "max_hp_percent",
+        "per_level": 2
+      },
+      "might": {
+        "cost": 10,
+        "max_level": 5,
+        "position": [
+          1,
+          0
+        ],
+        "effect": "damage_percent",
+        "per_level": 2
+      },
+      "precision": {
+        "cost": 10,
+        "max_level": 5,
+        "position": [
+          2,
+          0
+        ],
+        "effect": "crit_percent",
+        "per_level": 1
+      },
+      "swiftness": {
+        "cost": 10,
+        "max_level": 5,
+        "position": [
+          0,
+          1
+        ],
+        "effect": "initiative",
+        "per_level": 1
+      },
+      "reserves": {
+        "cost": 10,
+        "max_level": 5,
+        "position": [
+          1,
+          1
+        ],
+        "effect": "energy_start",
+        "per_level": 1
+      },
+      "mastery": {
+        "cost": 10,
+        "max_level": 5,
+        "position": [
+          2,
+          1
+        ],
+        "effect": "cooldown",
+        "per_level": -1
+      },
+      "stat_points": {
+        "cost": 10,
+        "max_level": 5,
+        "position": [
+          1,
+          2
+        ],
+        "effect": "attribute_points",
+        "per_level": 1
+      }
     },
     "reset_cost": 50,
-    "prestige": {"cost": 100, "max": 25, "bonus": {"max_hp_percent": 1, "damage_percent": 1}},
-    "gems": {"layer": 10, "boss": 50, "story_clue": 5, "class_encounter": 15}
+    "prestige": {
+      "cost": 100,
+      "max": 25,
+      "bonus": {
+        "max_hp_percent": 1,
+        "damage_percent": 1
+      }
+    },
+    "gems": {
+      "layer": 10,
+      "boss": 50,
+      "story_clue": 5,
+      "class_encounter": 15
+    }
   },
   "classes": {
     "classless": {
@@ -104,7 +243,7 @@
         "range": "melee",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "element": "physical"
         }
       },
@@ -135,14 +274,17 @@
     "swordsman": {
       "name": "Swordsman",
       "role": "Melee DPS",
-      "recommended_stats": ["STR", "CON"],
+      "recommended_stats": [
+        "STR",
+        "CON"
+      ],
       "description": "Balanced and dependable. Strong melee strikes, solid health.",
       "attack": {
         "target": "enemy",
         "range": "melee",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "element": "physical"
         }
       },
@@ -182,14 +324,17 @@
     "archer": {
       "name": "Archer",
       "role": "Ranged DPS",
-      "recommended_stats": ["DEX", "LCK"],
+      "recommended_stats": [
+        "DEX",
+        "LCK"
+      ],
       "description": "The fastest of the Party. Shoots any enemy, even in the back row, and often lands critical hits.",
       "attack": {
         "target": "enemy",
         "range": "ranged",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "element": "physical"
         }
       },
@@ -228,14 +373,17 @@
     "mage": {
       "name": "Mage",
       "role": "Magic DPS / AoE",
-      "recommended_stats": ["INT", "FTH"],
+      "recommended_stats": [
+        "INT",
+        "FTH"
+      ],
       "description": "Fragile but devastating. Magic ignores armour and Fireball strikes every enemy at once.",
       "attack": {
         "target": "enemy",
         "range": "ranged",
         "damage": {
           "stat": "mag",
-          "power": 1.0,
+          "power": 1,
           "element": "arcane"
         }
       },
@@ -275,14 +423,17 @@
     "guardian": {
       "name": "Guardian",
       "role": "Tank / Defense",
-      "recommended_stats": ["CON", "FTH"],
+      "recommended_stats": [
+        "CON",
+        "FTH"
+      ],
       "description": "The Party's shield. The most HP and Defense of any Class; protects allies and blunts incoming damage.",
       "attack": {
         "target": "enemy",
         "range": "melee",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "element": "physical"
         }
       },
@@ -323,14 +474,17 @@
     "assassin": {
       "name": "assassin",
       "role": "Melee DoT",
-      "recommended_stats": ["DEX", "LCK"],
+      "recommended_stats": [
+        "DEX",
+        "LCK"
+      ],
       "description": "Daggers and poison. Stacks Bleed, Poison and Toxin on one enemy, then finishes it with Inject Venom. Fast and deadly, but fragile.",
       "attack": {
         "target": "enemy",
         "range": "melee",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "element": "physical"
         }
       },
@@ -429,22 +583,65 @@
         {
           "id": "follow_the_stream",
           "name": "Follow the Stream",
-          "hint": "Fresh tracks in the mud. Something hunts along the water."
+          "hint": "Fresh tracks in the mud. Something hunts along the water.",
+          "layers": [
+            1,
+            4
+          ]
         },
         {
           "id": "dark_thicket",
           "name": "Dark Thicket",
-          "hint": "Branches rustle where there is no wind."
+          "hint": "Branches rustle where there is no wind.",
+          "layers": [
+            1,
+            4
+          ]
         },
         {
           "id": "wolf_trail",
           "name": "Wolf Trail",
-          "hint": "Howling close by. A fight is certain."
+          "hint": "Howling close by. A fight is certain.",
+          "layers": [
+            1,
+            4
+          ]
         },
         {
           "id": "bandit_road",
           "name": "Overgrown Road",
-          "hint": "Arrows stuck in the trees. Someone guards this road."
+          "hint": "Arrows stuck in the trees. Someone guards this road.",
+          "layers": [
+            1,
+            4
+          ]
+        },
+        {
+          "id": "cave_mouth",
+          "name": "Cave Mouth",
+          "hint": "Cold air rises from a cavern beneath the roots.",
+          "layers": [
+            5,
+            5
+          ]
+        },
+        {
+          "id": "bone_pit",
+          "name": "Bone Pit",
+          "hint": "Old bones crunch beneath your feet in the dark.",
+          "layers": [
+            5,
+            5
+          ]
+        },
+        {
+          "id": "spider_hollow",
+          "name": "Spider Hollow",
+          "hint": "Silken strands tremble across the cave passage.",
+          "layers": [
+            5,
+            5
+          ]
         }
       ],
       "merchant": [
@@ -533,21 +730,28 @@
         },
         {
           "id": "stone_sentinel",
-          "name": "Stone Sentinel",
-          "hint": "A moss-covered knight of stone blocks the path.",
+          "name": "Golem Watch",
+          "hint": "A moss-covered golem blocks the path.",
           "classes": {
             "guardian": 1
           }
         },
         {
           "id": "bandit_hideout",
-          "name": "Bandit Hideout",
-          "hint": "A masked figure watches from the ferns, twirling a dagger.",
+          "name": "Thief Hideout",
+          "hint": "A thief watches from the ferns, twirling a dagger.",
           "classes": {
             "assassin": 1
           }
         }
       ]
+    },
+    "backdrops": {
+      "1": "forest",
+      "2": "forest",
+      "3": "forest",
+      "4": "forest",
+      "5": "cave"
     }
   },
   "items": {
@@ -701,7 +905,7 @@
   },
   "enemies": {
     "grey_wolf": {
-      "name": "Grey Wolf",
+      "name": "Wolf",
       "row": "front",
       "behavior": "hunt_weakest",
       "description": "Fast and relentless. Always goes for whoever is weakest.",
@@ -718,7 +922,7 @@
         "target": "enemy",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "element": "physical"
         }
       },
@@ -754,7 +958,8 @@
             }
           ]
         }
-      }
+      },
+      "sprite": "wolf"
     },
     "thornback_boar": {
       "name": "Thornback Boar",
@@ -774,7 +979,7 @@
         "target": "enemy",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "element": "physical"
         }
       },
@@ -809,10 +1014,10 @@
       }
     },
     "bramble_archer": {
-      "name": "Bramble Archer",
+      "name": "Goblin",
       "row": "back",
       "behavior": "random",
-      "description": "Shoots from the back row at anyone in sight. Melee cannot reach it while the front row stands.",
+      "description": "Shoots from the back row; melee cannot reach it while the front row stands.",
       "stats": {
         "max_hp": 52,
         "atk": 11,
@@ -827,7 +1032,7 @@
         "range": "ranged",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "element": "physical"
         }
       },
@@ -847,13 +1052,14 @@
             "chance": 0.5
           }
         ]
-      }
+      },
+      "sprite": "goblin"
     },
     "forest_wisp": {
-      "name": "Forest Wisp",
+      "name": "Slime",
       "row": "back",
       "behavior": "healer",
-      "description": "Mends wounded allies. Hurls spirit fire when nobody needs healing.",
+      "description": "Mends wounded allies and hurls spirit fire when none need healing.",
       "stats": {
         "max_hp": 46,
         "atk": 3,
@@ -861,14 +1067,14 @@
         "mag": 10,
         "res": 6,
         "spd": 12,
-        "crit": 0.0
+        "crit": 0
       },
       "attack": {
         "target": "enemy",
         "range": "ranged",
         "damage": {
           "stat": "mag",
-          "power": 1.0,
+          "power": 1,
           "element": "spirit"
         }
       },
@@ -892,7 +1098,8 @@
             "chance": 0.5
           }
         ]
-      }
+      },
+      "sprite": "slime"
     },
     "old_swordsman": {
       "name": "Old Swordsman",
@@ -906,13 +1113,13 @@
         "mag": 0,
         "res": 2,
         "spd": 11,
-        "crit": 0.0
+        "crit": 0
       },
       "attack": {
         "target": "enemy",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "element": "physical"
         }
       },
@@ -938,7 +1145,7 @@
         "range": "ranged",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "element": "physical"
         }
       },
@@ -957,14 +1164,14 @@
         "mag": 9,
         "res": 2,
         "spd": 10,
-        "crit": 0.0
+        "crit": 0
       },
       "attack": {
         "target": "enemy",
         "range": "ranged",
         "damage": {
           "stat": "mag",
-          "power": 1.0,
+          "power": 1,
           "element": "spirit"
         }
       },
@@ -972,10 +1179,10 @@
       "rewards": {}
     },
     "stone_sentinel": {
-      "name": "Stone Sentinel",
+      "name": "Golem",
       "row": "front",
       "behavior": "charge_strongest",
-      "description": "A living statue testing your endurance. Its blows are heavy but will not truly hurt you.",
+      "description": "A living statue with a slow, crushing blow.",
       "stats": {
         "max_hp": 66,
         "atk": 11,
@@ -983,18 +1190,19 @@
         "mag": 0,
         "res": 4,
         "spd": 6,
-        "crit": 0.0
+        "crit": 0
       },
       "attack": {
         "target": "enemy",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "element": "physical"
         }
       },
       "weakness": [],
-      "rewards": {}
+      "rewards": {},
+      "sprite": "golem"
     },
     "elder_thornwarden": {
       "name": "Elder Thornwarden",
@@ -1014,7 +1222,7 @@
         "target": "enemy",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "element": "physical"
         }
       },
@@ -1025,10 +1233,10 @@
       "energy_max": 6
     },
     "masked_outlaw": {
-      "name": "Masked Outlaw",
+      "name": "Thief",
       "row": "front",
       "behavior": "random",
-      "description": "A bandit who fights dirty to test you. The blade is dulled; it will not truly hurt you.",
+      "description": "A quick blade that strikes twice when its Energy is full.",
       "stats": {
         "max_hp": 60,
         "atk": 9,
@@ -1042,7 +1250,7 @@
         "target": "enemy",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "element": "physical"
         }
       },
@@ -1059,6 +1267,213 @@
             "power": 0.7,
             "element": "physical"
           }
+        }
+      },
+      "sprite": "thief"
+    },
+    "kobold": {
+      "name": "Kobold",
+      "sprite": "kobold",
+      "row": "front",
+      "behavior": "random",
+      "description": "A fast spear skirmisher that darts in before foes can react.",
+      "stats": {
+        "max_hp": 80,
+        "atk": 11,
+        "def": 3,
+        "mag": 0,
+        "res": 2,
+        "spd": 18,
+        "crit": 0.1
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1,
+          "element": "physical"
+        }
+      },
+      "weakness": [],
+      "rewards": {
+        "exp": 28,
+        "gold": 16,
+        "drops": [
+          {
+            "item": "herb",
+            "chance": 0.15
+          }
+        ]
+      },
+      "special": {
+        "name": "Spear Rush",
+        "energy": 2,
+        "use": {
+          "target": "enemy",
+          "damage": {
+            "stat": "atk",
+            "power": 1.3,
+            "element": "physical"
+          }
+        }
+      }
+    },
+    "skeleton": {
+      "name": "Skeleton",
+      "sprite": "skeleton",
+      "row": "front",
+      "behavior": "charge_strongest",
+      "description": "A shielded swordsman whose bones blunt physical blows.",
+      "stats": {
+        "max_hp": 110,
+        "atk": 12,
+        "def": 7,
+        "mag": 0,
+        "res": 4,
+        "spd": 9,
+        "crit": 0.05
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1,
+          "element": "physical"
+        }
+      },
+      "weakness": [],
+      "resistances": {
+        "physical": 0.2
+      },
+      "rewards": {
+        "exp": 32,
+        "gold": 18,
+        "drops": [
+          {
+            "item": "tonic",
+            "chance": 0.15
+          }
+        ]
+      },
+      "special": {
+        "name": "Shield Bash",
+        "energy": 2,
+        "use": {
+          "target": "enemy",
+          "damage": {
+            "stat": "atk",
+            "power": 1.25,
+            "element": "physical"
+          }
+        }
+      }
+    },
+    "minotaur": {
+      "name": "Minotaur",
+      "sprite": "minotaur",
+      "row": "front",
+      "behavior": "charge_strongest",
+      "description": "A towering brute that charges the strongest foe with crushing force.",
+      "stats": {
+        "max_hp": 155,
+        "atk": 17,
+        "def": 6,
+        "mag": 0,
+        "res": 4,
+        "spd": 8,
+        "crit": 0.08
+      },
+      "attack": {
+        "target": "enemy",
+        "damage": {
+          "stat": "atk",
+          "power": 1,
+          "element": "physical"
+        }
+      },
+      "weakness": [],
+      "rewards": {
+        "exp": 42,
+        "gold": 24,
+        "drops": [
+          {
+            "item": "firebomb",
+            "chance": 0.15
+          }
+        ]
+      },
+      "special": {
+        "name": "Bull Rush",
+        "energy": 3,
+        "use": {
+          "target": "enemy",
+          "damage": {
+            "stat": "atk",
+            "power": 1.65,
+            "element": "physical"
+          }
+        }
+      }
+    },
+    "giant_spider": {
+      "name": "Giant Spider",
+      "sprite": "giant_spider",
+      "row": "back",
+      "behavior": "random",
+      "description": "A cavern spider that weakens its prey with venomous webs.",
+      "stats": {
+        "max_hp": 100,
+        "atk": 11,
+        "def": 4,
+        "mag": 13,
+        "res": 7,
+        "spd": 12,
+        "crit": 0.08
+      },
+      "attack": {
+        "target": "enemy",
+        "range": "ranged",
+        "damage": {
+          "stat": "mag",
+          "power": 1,
+          "element": "nature"
+        },
+        "apply_status": [
+          {
+            "status": "poison",
+            "stacks": 1
+          }
+        ]
+      },
+      "weakness": [
+        "fire"
+      ],
+      "rewards": {
+        "exp": 34,
+        "gold": 20,
+        "drops": [
+          {
+            "item": "tonic",
+            "chance": 0.2
+          }
+        ]
+      },
+      "special": {
+        "name": "Venom Web",
+        "energy": 3,
+        "use": {
+          "target": "enemy",
+          "damage": {
+            "stat": "mag",
+            "power": 1.2,
+            "element": "nature"
+          },
+          "apply_status": [
+            {
+              "status": "poison",
+              "stacks": 2
+            }
+          ]
         }
       }
     }
@@ -1122,7 +1537,7 @@
           ],
           "layers": [
             2,
-            5
+            4
           ],
           "weight": 2,
           "sites": [
@@ -1138,7 +1553,7 @@
           ],
           "layers": [
             2,
-            5
+            4
           ],
           "weight": 2,
           "sites": [
@@ -1166,7 +1581,7 @@
           ],
           "layers": [
             3,
-            5
+            4
           ],
           "weight": 2
         },
@@ -1179,7 +1594,7 @@
           ],
           "layers": [
             3,
-            5
+            4
           ],
           "weight": 2
         },
@@ -1192,9 +1607,70 @@
           ],
           "layers": [
             4,
+            4
+          ],
+          "weight": 2
+        },
+        {
+          "id": "cave_kobolds",
+          "enemies": [
+            "kobold",
+            "kobold"
+          ],
+          "layers": [
+            5,
+            5
+          ],
+          "weight": 3
+        },
+        {
+          "id": "bone_patrol",
+          "enemies": [
+            "skeleton",
+            "kobold"
+          ],
+          "layers": [
+            5,
+            5
+          ],
+          "weight": 3
+        },
+        {
+          "id": "spider_hollow",
+          "enemies": [
+            "giant_spider",
+            "skeleton"
+          ],
+          "layers": [
+            5,
             5
           ],
           "weight": 2
+        },
+        {
+          "id": "cave_brute",
+          "enemies": [
+            "minotaur",
+            "kobold"
+          ],
+          "layers": [
+            5,
+            5
+          ],
+          "weight": 1
+        },
+        {
+          "id": "deep_cavern",
+          "enemies": [
+            "minotaur",
+            "giant_spider",
+            "skeleton"
+          ],
+          "layers": [
+            5,
+            5
+          ],
+          "weight": 1
         }
       ]
     },
@@ -1424,7 +1900,7 @@
         "range": "melee",
         "damage": {
           "stat": "atk",
-          "power": 1.0,
+          "power": 1,
           "per_dot": 0.4,
           "element": "poison"
         },
@@ -1614,7 +2090,7 @@
     "phases": [
       {
         "name": "Rooted Sentinel",
-        "below_ratio": 1.0,
+        "below_ratio": 1,
         "pattern": [
           "bramble_lash",
           "bramble_lash",
@@ -1661,7 +2137,7 @@
           "target": "enemy",
           "damage": {
             "stat": "atk",
-            "power": 1.0,
+            "power": 1,
             "element": "physical"
           }
         }
@@ -1692,7 +2168,8 @@
           }
         }
       }
-    }
+    },
+    "backdrop": "cave"
   },
   "ending": {
     "victory": {

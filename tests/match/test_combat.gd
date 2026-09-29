@@ -65,7 +65,7 @@ func test_combat_encounter_fights_forest_enemies_from_content() -> void:
 	assert_eq(view["kind"], "combat")
 	assert_eq(view["enemies"].size(), 2)
 	for enemy in view["enemies"]:
-		assert_eq([enemy["name"], enemy["hp"], enemy["max_hp"]], ["Grey Wolf", 26, 26])
+		assert_eq([enemy["name"], enemy["hp"], enemy["max_hp"]], ["Wolf", 26, 26])
 
 
 func test_turn_order_follows_speed() -> void:

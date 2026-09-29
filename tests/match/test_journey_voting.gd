@@ -2,6 +2,7 @@ extends TestCase
 ## Journey through the Forest's Layers and Path Voting (issue #7, spec 15–26).
 
 const SLICE_TYPES := ["combat", "merchant", "rest", "treasure", "story", "class"]
+const CAVE_ENEMIES := ["kobold", "skeleton", "giant_spider", "minotaur"]
 
 
 func test_first_layer_offers_two_or_three_distinct_encounter_types() -> void:
@@ -55,6 +56,34 @@ func test_no_class_encounter_in_the_last_layer_before_the_boss() -> void:
 		var layers := _route_log(seed_value)
 		for option in layers[4]:
 			assert_ne(option["type"], "class", "seed %d: Class Encounters only in Layers 1-4" % seed_value)
+
+
+func test_layer_five_combat_sites_and_groups_are_cave_only() -> void:
+	var content := ForestContent.load_default()
+	for seed_value in 100:
+		var route := _route_log(seed_value)
+		for option in route[4]:
+			if option["type"] == "combat":
+				assert_has(["Cave Mouth", "Bone Pit", "Spider Hollow"], option["name"])
+		var group := EnemyGroups.pick(GameRng.new(seed_value), content, 5, "cave_mouth")
+		assert_between(group.size(), 2, 3)
+		for enemy in group:
+			assert_has(CAVE_ENEMIES, enemy)
+
+
+func test_enemy_sprites_exist_and_all_layers_have_backdrops() -> void:
+	var content := ForestContent.load_default()
+	var manifest_text := FileAccess.get_file_as_string("res://assets/enemies/manifest.json")
+	var manifest: Dictionary = JSON.parse_string(manifest_text)
+	for id in content.get_dict("enemies"):
+		var sprite: String = content.get_dict("enemies.%s" % id).get("sprite", "")
+		if not sprite.is_empty():
+			assert_true(manifest.has(sprite), "%s sprite %s is in the manifest" % [id, sprite])
+	var backdrops := content.get_dict("journey.backdrops")
+	for layer in range(1, 6):
+		assert_true(backdrops.has(str(layer)), "Layer %d has a backdrop" % layer)
+	assert_eq(backdrops["5"], "cave")
+	assert_eq(content.get_value("boss.backdrop"), "cave")
 
 
 func test_live_tally_shows_who_voted_for_which_path() -> void:
