@@ -37,7 +37,7 @@ func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 			if ready_slots.has(slot):
 				return {"ok": false, "error": "already_ready"}
 			ready_slots.append(slot)
-			run.emit({"type": "rest_ready", "slot": slot, "ready": ready_slots.size(),
+			run.emit({"type": "rest_ready", "slot": slot, "ready": _ready_count(run),
 					"humans": _human_count(run)})
 			_close_if_everyone_ready(run)
 			return {"ok": true}
@@ -94,6 +94,7 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 		"deadline": deadline,
 		"ends_at": deadline,
 		"ready": ready_slots.duplicate(),
+		"ready_count": _ready_count(run),
 		"humans": _human_count(run),
 		"you_are_ready": ready_slots.has(viewer_slot),
 		"recipes": _recipes_view(run),
@@ -136,6 +137,15 @@ func _recipes_view(run: MatchRun) -> Array:
 func _human_count(run: MatchRun) -> int:
 	var count := 0
 	for slot in run.humans().size():
+		if run.needs_ready(slot):
+			count += 1
+	return count
+
+
+## Humans who pressed Ready: the x of `Ready (x/N)`.
+func _ready_count(run: MatchRun) -> int:
+	var count := 0
+	for slot in ready_slots:
 		if run.needs_ready(slot):
 			count += 1
 	return count
