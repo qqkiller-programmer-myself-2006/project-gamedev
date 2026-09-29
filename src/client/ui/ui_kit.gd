@@ -1,38 +1,55 @@
 class_name UiKit
 extends RefCounted
-## Theme and small widget helpers for the client. Colours are never the
-## only carrier of meaning: every coloured element also has a text label.
+## The one client theme (Navy + Gold, docs/ui-style.md) and small widget
+## helpers. Screens pick a type variation from `make_theme`; they never build
+## their own StyleBoxes or write hex colours. Colours are never the only
+## carrier of meaning: every coloured element also has a text label.
 
-const BG := Color("#141d18")
-const PANEL := Color("#1f2c25")
-const PANEL_LIGHT := Color("#2b3c33")
-const PANEL_FOCUS := Color("#3a5244")
-const BORDER := Color("#5f8065")
-const ACCENT := Color("#f0c85c")
-const TEXT := Color("#f4f0e6")
-const TEXT_DIM := Color("#c3cbbf")
+## --- Navy + Gold tokens ------------------------------------------------------
+const BG := Color("#11162a")
+const NAVY := Color("#1c2233")
+const NAVY_RAISED := Color("#2a3147")
+const NAVY_FOCUS := Color("#333c57")
+const BORDER := Color("#b3b4c0")
+const SLATE := Color("#454b5e")
+const SLATE_HOVER := Color("#58607a")
+const GOLD := Color("#f0c85a")
+const TEXT := Color("#f2f2f5")
+const TEXT_DIM := Color("#a9abb8")
+const SUCCESS := Color("#83df76")
+const WARN := Color("#f0a040")
+const DANGER := Color("#e05a4f")
 const ALLY := Color("#8fd0f0")
 const ENEMY := Color("#f8aca0")
-const GOOD := Color("#8ad98a")
-const WARN := Color("#f5b25e")
+const DISABLED_BG := Color("#1f2536")
+const DISABLED_TEXT := Color("#8a8fa3")
+## Fill behind a Status badge; the badge text uses the colour from content.
+const STATUS_BG := Color(0.05, 0.05, 0.06, 0.92)
+
+## Older names, kept so every screen reads the same tokens.
+const PANEL := NAVY
+const PANEL_LIGHT := NAVY_RAISED
+const PANEL_FOCUS := NAVY_FOCUS
+const ACCENT := GOLD
+const GOOD := SUCCESS
 const HP_FILL := Color("#5fb563")
 const HP_LOW := Color("#d9644f")
 
-## Battle screen (after the AAC reference, docs/references/aac_rogue/):
-## dark grey translucent panels with light borders, red HP, blue Energy.
-const HUD_BG := Color(0.12, 0.12, 0.13, 0.86)
-const HUD_BG_LIGHT := Color(0.24, 0.24, 0.26, 0.92)
-const HUD_BORDER := Color(0.66, 0.68, 0.7, 0.9)
+## Battle and camp overlays: navy at 88 % so they stay readable over the field.
+const HUD_BG := Color(NAVY, 0.88)
+const HUD_BG_LIGHT := Color(NAVY_RAISED, 0.92)
+const HUD_BORDER := Color(BORDER, 0.9)
 const BAR_HP := Color("#d8453c")
 const BAR_ENERGY := Color("#3b9ae1")
 const BAR_BACK := Color(0.06, 0.06, 0.07, 0.9)
+const CLEAR := Color(0, 0, 0, 0)
 ## Status effect short tag. The colour comes from content (`statuses.<id>.color`,
 ## sent with every status view and tick); the tag is always drawn next to it
 ## so colour is never the only cue.
 const STATUS_TAGS := {"bleed": "BLD", "poison": "PSN", "toxin": "TOX", "venom_coat": "PREP"}
 
 ## Base font sizes per label style; multiplied by the text-size setting.
-const SIZES := {"small": 15, "body": 18, "heading": 23, "title": 34, "huge": 52}
+const SIZES := {"tiny": 11, "small": 15, "body": 18, "heading": 23, "title": 34, "huge": 52}
 ## Pixelify Sans (OFL, assets/fonts/OFL.txt) for headings, buttons, names
 ## and numbers; long text keeps the default font so it stays easy to read.
 const PIXEL_FONT_PATH := "res://assets/fonts/PixelifySans.ttf"
@@ -66,59 +83,179 @@ static func make_theme(scale: float) -> Theme:
 	theme.set_color("font_color", "DimLabel", TEXT_DIM)
 	theme.set_font_size("font_size", "DimLabel", int(SIZES["small"] * scale))
 
-	theme.set_stylebox("panel", "PanelContainer", box(PANEL, BORDER, 1, 10))
+	theme.set_color("default_color", "RichTextLabel", TEXT)
+
+	_panels(theme)
+	_buttons(theme, scale)
+	_inputs(theme, scale)
+	_hud(theme, scale)
+	return theme
+
+
+## Panels: navy with diamonds by default, raised cards and rows inside them.
+static func _panels(theme: Theme) -> void:
+	theme.set_stylebox("panel", "PanelContainer", navy_box())
+	theme.set_type_variation("NavyPanel", "PanelContainer")
+	theme.set_stylebox("panel", "NavyPanel", navy_box())
 	theme.set_type_variation("CardPanel", "PanelContainer")
-	theme.set_stylebox("panel", "CardPanel", box(PANEL_LIGHT, BORDER, 1, 8))
-	theme.set_type_variation("HighlightPanel", "PanelContainer")
-	theme.set_stylebox("panel", "HighlightPanel", box(PANEL_FOCUS, ACCENT, 3, 8))
+	theme.set_stylebox("panel", "CardPanel", flat_box(NAVY_RAISED, Color(BORDER, 0.35), 1, 8))
 	theme.set_type_variation("CompactPanel", "PanelContainer")
-	theme.set_stylebox("panel", "CompactPanel", box(PANEL_LIGHT, BORDER, 1, 5))
+	theme.set_stylebox("panel", "CompactPanel", flat_box(NAVY_RAISED, Color(BORDER, 0.35), 1, 5))
+	theme.set_type_variation("HighlightPanel", "PanelContainer")
+	theme.set_stylebox("panel", "HighlightPanel", flat_box(NAVY_FOCUS, GOLD, 2, 8))
 	theme.set_type_variation("CompactHighlightPanel", "PanelContainer")
-	theme.set_stylebox("panel", "CompactHighlightPanel", box(PANEL_FOCUS, ACCENT, 3, 5))
+	theme.set_stylebox("panel", "CompactHighlightPanel", flat_box(NAVY_FOCUS, GOLD, 2, 5))
+	theme.set_type_variation("TitleTag", "PanelContainer")
+	theme.set_stylebox("panel", "TitleTag", flat_box(NAVY_RAISED, BORDER, 2, 10))
+	theme.set_type_variation("ToastPanel", "PanelContainer")
+	theme.set_stylebox("panel", "ToastPanel", flat_box(NAVY, GOLD, 2, 10))
+	theme.set_type_variation("IconPanel", "PanelContainer")
+	theme.set_stylebox("panel", "IconPanel", flat_box(BG, Color(BORDER, 0.6), 2, 2))
 	theme.set_type_variation("BadgePanel", "PanelContainer")
-	var badge_box := box(Color(0, 0, 0, 0.35), TEXT_DIM, 1, 4)
+	var badge_box := flat_box(Color(0, 0, 0, 0.35), TEXT_DIM, 1, 4)
 	badge_box.content_margin_top = 0
 	badge_box.content_margin_bottom = 0
 	theme.set_stylebox("panel", "BadgePanel", badge_box)
+	var rule := StyleBoxLine.new()
+	rule.color = Color(BORDER, 0.35)
+	rule.thickness = 2
+	theme.set_stylebox("separator", "HSeparator", rule)
+	theme.set_constant("separation", "HSeparator", 10)
+	theme.set_stylebox("panel", "TooltipPanel", flat_box(NAVY, GOLD, 1, 8))
+	theme.set_color("font_color", "TooltipLabel", TEXT)
 
-	theme.set_stylebox("normal", "Button", box(PANEL_LIGHT, BORDER, 1, 8))
-	theme.set_stylebox("hover", "Button", box(PANEL_FOCUS, ACCENT, 1, 8))
-	theme.set_stylebox("pressed", "Button", box(PANEL_FOCUS, ACCENT, 2, 8))
-	theme.set_stylebox("focus", "Button", box(Color(0, 0, 0, 0), ACCENT, 3, 8))
-	theme.set_stylebox("disabled", "Button", box(Color("#1a221e"), Color("#3c4a41"), 1, 8))
-	theme.set_color("font_color", "Button", TEXT)
-	theme.set_color("font_hover_color", "Button", ACCENT)
-	theme.set_color("font_focus_color", "Button", ACCENT)
-	theme.set_color("font_pressed_color", "Button", ACCENT)
-	theme.set_color("font_disabled_color", "Button", Color("#8a948b"))
-	theme.set_type_variation("BigButton", "Button")
-	theme.set_font_size("font_size", "BigButton", int(SIZES["heading"] * scale))
 
-	theme.set_stylebox("normal", "LineEdit", box(Color("#0f1612"), BORDER, 1, 10))
-	theme.set_stylebox("focus", "LineEdit", box(Color("#0f1612"), ACCENT, 3, 10))
+## Buttons: slate secondary (the default), gold primary, red danger, a
+## selected state, round tabs. Every focus style is the same gold ring drawn
+## just outside the button, so it shows on every fill.
+static func _buttons(theme: Theme, scale: float) -> void:
+	theme.set_type_variation("SecondaryButton", "Button")
+	for type in ["Button", "SecondaryButton", "OptionButton"]:
+		_button_look(theme, type, SLATE, Color(BORDER, 0.7), SLATE_HOVER, BORDER, TEXT, GOLD)
+	theme.set_font("font", "Button", pixel_font())
+	theme.set_font("font", "OptionButton", pixel_font())
+	theme.set_type_variation("PrimaryButton", "Button")
+	_button_look(theme, "PrimaryButton", GOLD, GOLD.darkened(0.35), GOLD.lightened(0.18), GOLD.lightened(0.4), NAVY, NAVY)
+	theme.set_type_variation("DangerButton", "Button")
+	_button_look(theme, "DangerButton", DANGER.darkened(0.55), DANGER, DANGER.darkened(0.4), DANGER.lightened(0.2), TEXT, TEXT)
+	theme.set_type_variation("SelectedButton", "Button")
+	_button_look(theme, "SelectedButton", NAVY_FOCUS, GOLD, NAVY_FOCUS.lightened(0.08), GOLD, GOLD, GOLD)
+	for kind in ["", "Primary", "Danger"]:
+		var big := "Big%sButton" % kind
+		theme.set_type_variation(big, kind + "Button" if not kind.is_empty() else "Button")
+		theme.set_font_size("font_size", big, int(SIZES["heading"] * scale))
+	theme.set_type_variation("SmallButton", "Button")
+	theme.set_font_size("font_size", "SmallButton", int(SIZES["small"] * scale))
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		var small: StyleBoxFlat = theme.get_stylebox(state, "Button").duplicate()
+		small.content_margin_left = 6
+		small.content_margin_right = 6
+		small.content_margin_top = 2
+		small.content_margin_bottom = 2
+		theme.set_stylebox(state, "SmallButton", small)
+	theme.set_type_variation("TabButton", "Button")
+	_button_look(theme, "TabButton", NAVY, BORDER, SLATE_HOVER, TEXT, TEXT_DIM, TEXT)
+	theme.set_type_variation("TabButtonSelected", "TabButton")
+	_button_look(theme, "TabButtonSelected", NAVY_FOCUS, GOLD, NAVY_FOCUS.lightened(0.08), GOLD, GOLD, GOLD)
+	for type in ["TabButton", "TabButtonSelected"]:
+		for state in ["normal", "hover", "pressed", "disabled", "focus"]:
+			var round_box: StyleBoxFlat = theme.get_stylebox(state, type)
+			round_box.set_corner_radius_all(40)
+		theme.set_font_size("font_size", type, int(SIZES["title"] * scale))
+
+	for state in ["normal", "pressed", "hover_pressed", "disabled"]:
+		var empty := StyleBoxEmpty.new()
+		empty.set_content_margin_all(4)
+		theme.set_stylebox(state, "CheckButton", empty)
+	theme.set_stylebox("hover", "CheckButton", flat_box(NAVY_RAISED, CLEAR, 0, 4))
+	theme.set_stylebox("focus", "CheckButton", focus_ring())
+	for type in ["CheckButton", "CheckBox"]:
+		theme.set_color("font_color", type, TEXT)
+		theme.set_color("font_hover_color", type, GOLD)
+		theme.set_color("font_focus_color", type, GOLD)
+		theme.set_color("font_pressed_color", type, TEXT)
+		theme.set_color("font_hover_pressed_color", type, GOLD)
+		theme.set_color("font_disabled_color", type, DISABLED_TEXT)
+	theme.set_stylebox("panel", "PopupMenu", flat_box(NAVY, BORDER, 2, 6))
+	theme.set_stylebox("hover", "PopupMenu", flat_box(SLATE_HOVER, GOLD, 1, 4))
+	theme.set_color("font_color", "PopupMenu", TEXT)
+	theme.set_color("font_hover_color", "PopupMenu", GOLD)
+	theme.set_font("font", "PopupMenu", pixel_font())
+
+
+static func _button_look(theme: Theme, type: String, fill: Color, edge: Color, hover_fill: Color, hover_edge: Color,
+		font: Color, accent_font: Color) -> void:
+	theme.set_stylebox("normal", type, flat_box(fill, edge, 2, 8))
+	theme.set_stylebox("hover", type, flat_box(hover_fill, hover_edge, 2, 8))
+	theme.set_stylebox("pressed", type, flat_box(fill.darkened(0.2), GOLD, 2, 8))
+	theme.set_stylebox("hover_pressed", type, flat_box(hover_fill, GOLD, 2, 8))
+	theme.set_stylebox("focus", type, focus_ring())
+	theme.set_stylebox("disabled", type, flat_box(DISABLED_BG, Color(BORDER, 0.2), 2, 8))
+	# Hover keeps the normal text colour (gold on the lighter hover fill would
+	# be too faint); focus and pressed turn gold.
+	theme.set_color("font_color", type, font)
+	theme.set_color("font_hover_color", type, font)
+	theme.set_color("font_focus_color", type, accent_font)
+	theme.set_color("font_pressed_color", type, accent_font)
+	theme.set_color("font_hover_pressed_color", type, accent_font)
+	theme.set_color("font_disabled_color", type, DISABLED_TEXT)
+
+
+## Text fields, sliders, bars and scrollbars.
+static func _inputs(theme: Theme, _scale: float) -> void:
+	theme.set_stylebox("normal", "LineEdit", flat_box(NAVY_RAISED, Color(BORDER, 0.55), 2, 10))
+	theme.set_stylebox("focus", "LineEdit", flat_box(CLEAR, GOLD, 2, 10))
+	theme.set_stylebox("read_only", "LineEdit", flat_box(DISABLED_BG, Color(BORDER, 0.2), 2, 10))
 	theme.set_color("font_color", "LineEdit", TEXT)
-	theme.set_color("font_placeholder_color", "LineEdit", Color("#8c978d"))
+	theme.set_color("font_placeholder_color", "LineEdit", TEXT_DIM)
+	theme.set_color("caret_color", "LineEdit", GOLD)
+	theme.set_color("selection_color", "LineEdit", Color(GOLD, 0.35))
+	theme.set_color("clear_button_color", "LineEdit", TEXT_DIM)
+	theme.set_color("clear_button_color_pressed", "LineEdit", GOLD)
 
-	theme.set_stylebox("background", "ProgressBar", box(Color("#0f1612"), BORDER, 1, 0))
-	theme.set_stylebox("fill", "ProgressBar", box(HP_FILL, Color(0, 0, 0, 0), 0, 0))
+	theme.set_stylebox("background", "ProgressBar", flat_box(BG, Color(BORDER, 0.35), 1, 0))
+	theme.set_stylebox("fill", "ProgressBar", flat_box(SUCCESS, CLEAR, 0, 0))
 	theme.set_color("font_color", "ProgressBar", TEXT)
 
+	var track := flat_box(NAVY_RAISED, CLEAR, 0, 0)
+	track.content_margin_top = 3
+	track.content_margin_bottom = 3
+	theme.set_stylebox("slider", "HSlider", track)
+	theme.set_stylebox("grabber_area", "HSlider", flat_box(GOLD, CLEAR, 0, 3))
+	theme.set_stylebox("grabber_area_highlight", "HSlider", flat_box(GOLD.lightened(0.2), CLEAR, 0, 3))
+	theme.set_stylebox("focus", "HSlider", focus_ring())
+
+	for bar in ["VScrollBar", "HScrollBar"]:
+		var lane := flat_box(Color(BG, 0.7), CLEAR, 0, 4)
+		theme.set_stylebox("scroll", bar, lane)
+		theme.set_stylebox("scroll_focus", bar, lane)
+		theme.set_stylebox("grabber", bar, flat_box(SLATE, CLEAR, 0, 4))
+		theme.set_stylebox("grabber_highlight", bar, flat_box(SLATE_HOVER, CLEAR, 0, 4))
+		theme.set_stylebox("grabber_pressed", bar, flat_box(GOLD, CLEAR, 0, 4))
+
+
+## Battle and camp overlays: navy at 88 % over the field.
+static func _hud(theme: Theme, scale: float) -> void:
 	theme.set_type_variation("HudPanel", "PanelContainer")
 	theme.set_stylebox("panel", "HudPanel", flat_box(HUD_BG, HUD_BORDER, 2, 8))
+	theme.set_type_variation("HudHighlightPanel", "PanelContainer")
+	theme.set_stylebox("panel", "HudHighlightPanel", flat_box(HUD_BG, GOLD, 2, 6))
+	theme.set_type_variation("HudWarnPanel", "PanelContainer")
+	theme.set_stylebox("panel", "HudWarnPanel", flat_box(HUD_BG, WARN, 2, 8))
 	theme.set_type_variation("HudCard", "PanelContainer")
-	theme.set_stylebox("panel", "HudCard", flat_box(HUD_BG_LIGHT, Color(0, 0, 0, 0), 0, 6))
+	theme.set_stylebox("panel", "HudCard", flat_box(HUD_BG_LIGHT, CLEAR, 0, 6))
+	theme.set_type_variation("BannerPanel", "PanelContainer")
+	var band := flat_box(Color(NAVY, 0.94), GOLD, 0, 0)
+	band.border_width_top = 2
+	band.border_width_bottom = 2
+	theme.set_stylebox("panel", "BannerPanel", band)
 	theme.set_type_variation("HudButton", "Button")
-	theme.set_stylebox("normal", "HudButton", flat_box(HUD_BG_LIGHT, Color(1, 1, 1, 0.12), 1, 8))
-	theme.set_stylebox("hover", "HudButton", flat_box(Color(0.34, 0.34, 0.37, 0.95), ACCENT, 1, 8))
-	theme.set_stylebox("pressed", "HudButton", flat_box(Color(0.4, 0.4, 0.43, 0.95), ACCENT, 2, 8))
-	theme.set_stylebox("focus", "HudButton", flat_box(Color(0, 0, 0, 0), ACCENT, 3, 8))
-	theme.set_stylebox("disabled", "HudButton", flat_box(Color(0.1, 0.1, 0.11, 0.9), Color(1, 1, 1, 0.06), 1, 8))
+	_button_look(theme, "HudButton", HUD_BG_LIGHT, Color(BORDER, 0.35), Color(SLATE_HOVER, 0.95), GOLD, TEXT, GOLD)
+	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+		var hud_box: StyleBoxFlat = theme.get_stylebox(state, "HudButton")
+		hud_box.set_border_width_all(1)
+	theme.set_stylebox("disabled", "HudButton", flat_box(Color(DISABLED_BG, 0.9), Color(BORDER, 0.1), 1, 8))
 	theme.set_font_size("font_size", "HudButton", int(SIZES["heading"] * scale))
-
-	theme.set_stylebox("panel", "TooltipPanel", box(Color("#0c120e"), ACCENT, 1, 8))
-	theme.set_color("font_color", "TooltipLabel", TEXT)
-	theme.set_font_size("font_size", "TooltipLabel", int(SIZES["body"] * scale))
-	return theme
 
 
 static func box(bg: Color, border: Color, border_width: int, margin: int) -> StyleBoxFlat:
@@ -126,16 +263,49 @@ static func box(bg: Color, border: Color, border_width: int, margin: int) -> Sty
 	style.bg_color = bg
 	style.border_color = border
 	style.set_border_width_all(border_width)
-	style.set_corner_radius_all(6)
+	style.set_corner_radius_all(2)
 	style.set_content_margin_all(margin)
 	return style
 
 
-## Square-cornered box for the battle screen.
+## Square-cornered box (the whole theme is square: AAC pixel look).
 static func flat_box(bg: Color, border: Color, border_width: int, margin: int) -> StyleBoxFlat:
-	var style := box(bg, border, border_width, margin)
-	style.set_corner_radius_all(2)
+	return box(bg, border, border_width, margin)
+
+
+## The gold focus ring: 2 px, drawn 3 px outside the control.
+static func focus_ring() -> StyleBoxFlat:
+	var ring := flat_box(CLEAR, GOLD, 2, 0)
+	ring.draw_center = false
+	ring.set_expand_margin_all(3)
+	return ring
+
+
+## The navy panel look: NAVY fill, 2 px BORDER, a small diamond on each corner.
+## Also used by custom-drawn controls (the dialogue box) via draw_style_box.
+static func navy_box(margin: int = 14, fill: Color = NAVY) -> StyleBox:
+	var style := DiamondBox.new()
+	style.fill = flat_box(fill, BORDER, 2, margin)
+	style.set_content_margin_all(margin)
 	return style
+
+
+## A StyleBox that draws a flat box, then the corner diamonds of the AAC
+## panels (refs 01-03) on top, so every navy panel gets them for free.
+class DiamondBox extends StyleBox:
+	var fill: StyleBoxFlat
+	var diamond := 5.0
+	var diamond_color := BORDER
+
+	func _draw(to_canvas_item: RID, rect: Rect2) -> void:
+		fill.draw(to_canvas_item, rect)
+		var inset := Vector2(1, 1)
+		var corners := [rect.position + inset, Vector2(rect.end.x - 1, rect.position.y + 1),
+				Vector2(rect.position.x + 1, rect.end.y - 1), rect.end - inset]
+		for corner: Vector2 in corners:
+			RenderingServer.canvas_item_add_polygon(to_canvas_item, PackedVector2Array([
+					corner + Vector2(0, -diamond), corner + Vector2(diamond, 0),
+					corner + Vector2(0, diamond), corner + Vector2(-diamond, 0)]), PackedColorArray([diamond_color]))
 
 
 ## A single-line label in the pixel font.
@@ -218,7 +388,7 @@ static func status_badge(entry: Dictionary, compact: bool = false) -> PanelConta
 		count = "%d" % int(entry.get("charges", 0))
 	line.add_child(pixel_label(count, "small"))
 	var badge_panel := panel(line)
-	var style := flat_box(Color(0.05, 0.05, 0.06, 0.9), color, 2, 3)
+	var style := flat_box(STATUS_BG, color, 2, 3)
 	style.content_margin_top = 0
 	style.content_margin_bottom = 0
 	badge_panel.add_theme_stylebox_override("panel", style)
@@ -247,14 +417,39 @@ static func para(text: String, style: String = "body", color: Color = Color(0, 0
 	return node
 
 
-static func button(text: String, callback: Callable, big: bool = false) -> Button:
+## `kind`: "secondary" (default), "primary" (the one gold action of a panel),
+## "danger" (destructive, ask first) or "small" (dense rows).
+static func button(text: String, callback: Callable, big: bool = false, kind: String = "secondary") -> Button:
 	var node := Button.new()
 	node.text = text
 	node.focus_mode = Control.FOCUS_ALL
-	if big:
-		node.theme_type_variation = "BigButton"
+	node.theme_type_variation = button_variation(kind, big)
 	node.pressed.connect(callback)
 	return node
+
+
+static func button_variation(kind: String, big: bool = false) -> String:
+	match kind:
+		"primary":
+			return "BigPrimaryButton" if big else "PrimaryButton"
+		"danger":
+			return "BigDangerButton" if big else "DangerButton"
+		"small":
+			return "SmallButton"
+		"selected":
+			return "SelectedButton"
+	return "BigButton" if big else ""
+
+
+static func primary(text: String, callback: Callable, big: bool = true) -> Button:
+	return button(text, callback, big, "primary")
+
+
+## Disables `control` (when `off`) and says why in its tooltip.
+static func disable(control: BaseButton, off: bool, reason: String) -> void:
+	control.disabled = off
+	if off:
+		control.tooltip_text = reason
 
 
 static func vbox(separation: int = 8) -> VBoxContainer:

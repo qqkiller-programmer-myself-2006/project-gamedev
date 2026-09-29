@@ -7,7 +7,7 @@ const TEXT_COLORS := {
 	"TEXT": UiKit.TEXT, "TEXT_DIM": UiKit.TEXT_DIM, "ACCENT": UiKit.ACCENT, "ALLY": UiKit.ALLY,
 	"ENEMY": UiKit.ENEMY, "GOOD": UiKit.GOOD, "WARN": UiKit.WARN,
 }
-const BACKGROUNDS := {"BG": UiKit.BG, "PANEL": UiKit.PANEL, "PANEL_LIGHT": UiKit.PANEL_LIGHT, "PANEL_FOCUS": UiKit.PANEL_FOCUS}
+const BACKGROUNDS := {"BG": UiKit.BG, "NAVY": UiKit.NAVY, "NAVY_RAISED": UiKit.NAVY_RAISED, "NAVY_FOCUS": UiKit.NAVY_FOCUS}
 
 
 func test_text_colours_meet_wcag_aa_on_every_panel() -> void:
@@ -27,8 +27,32 @@ func test_status_badge_colours_from_content_are_readable() -> void:
 
 
 func test_disabled_button_text_stays_readable() -> void:
-	var ratio := contrast(Color("#8a948b"), Color("#1a221e"))
+	var ratio := contrast(UiKit.DISABLED_TEXT, UiKit.DISABLED_BG)
 	assert_true(ratio >= 3.0, "disabled text %.2f:1" % ratio)
+
+
+func test_button_text_is_readable_on_every_button_fill() -> void:
+	var pairs := {"primary": [UiKit.NAVY, UiKit.GOLD], "secondary": [UiKit.TEXT, UiKit.SLATE],
+			"secondary hover": [UiKit.TEXT, UiKit.SLATE_HOVER],
+			"secondary focus": [UiKit.GOLD, UiKit.SLATE], "selected": [UiKit.GOLD, UiKit.NAVY_FOCUS.lightened(0.08)], "danger": [UiKit.TEXT, UiKit.DANGER.darkened(0.55)]}
+	for name in pairs:
+		var ratio := contrast(pairs[name][0], pairs[name][1])
+		assert_true(ratio >= 4.5, "%s button text %.2f:1" % [name, ratio])
+
+
+func test_theme_has_the_navy_and_gold_variations() -> void:
+	var theme := UiKit.make_theme(1.0)
+	for variation in ["NavyPanel", "CardPanel", "CompactPanel", "TitleTag", "HudPanel", "ToastPanel",
+			"PrimaryButton", "SecondaryButton", "DangerButton", "BigPrimaryButton", "SelectedButton", "TabButton"]:
+		assert_true(theme.is_type_variation(variation, theme.get_type_variation_base(variation)),
+				"%s is a variation" % variation)
+	var primary: StyleBoxFlat = theme.get_stylebox("normal", "PrimaryButton")
+	assert_eq(primary.bg_color, UiKit.GOLD, "primary buttons are gold")
+	var focus: StyleBoxFlat = theme.get_stylebox("focus", "Button")
+	assert_eq(focus.border_color, UiKit.GOLD, "focus ring is gold")
+	assert_true(focus.expand_margin_left > 0.0, "focus ring sits outside the button")
+	var hud: StyleBoxFlat = theme.get_stylebox("panel", "HudPanel")
+	assert_true(is_equal_approx(hud.bg_color.a, 0.88), "battle HUD is navy at 88%")
 
 
 func test_hp_bar_text_is_outlined_on_both_fills() -> void:
