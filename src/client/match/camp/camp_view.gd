@@ -412,7 +412,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	separator_two.custom_minimum_size = Vector2(0, 8)
 	stats.add_child(separator_two)
 	stats.add_child(_stat("Initiative", str(int(derived["initiative"])) if derived.has("initiative") else "\u2014"))
-	stats.add_child(_stat("Crit Chance", _percent(derived.get("crit"))))
+	stats.add_child(_stat("Crit Chance", _percent(derived.get("crit", character.get("crit")))))
 	stats.add_child(_stat("Crit Damage", _percent(derived.get("crit_damage"))))
 	stats.add_child(_stat("Block Chance", _percent(derived.get("block"))))
 	stats.add_child(_stat("Block Damage Reduction", _percent(derived.get("block_reduction"))))
