@@ -60,7 +60,8 @@ func _show_menu() -> void:
 	body.custom_minimum_size = Vector2(340, 0)
 	var panel := UiKit.panel(body)
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	panel.position = Vector2(88, 150)
+	panel.set_meta("base_y", 150.0)
+	panel.position = Vector2(88, _top(150))
 	panel.size = Vector2(390, 0)
 	add_child(panel)
 	_content = panel
@@ -112,7 +113,8 @@ func _show_play() -> void:
 	body.custom_minimum_size = Vector2(420, 0)
 	var panel := UiKit.panel(body)
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	panel.position = Vector2(88, 175)
+	panel.set_meta("base_y", 175.0)
+	panel.position = Vector2(88, _top(175))
 	panel.size = Vector2(460, 0)
 	add_child(panel)
 	_content = panel
@@ -142,7 +144,8 @@ func _show_story_setup() -> void:
 	body.custom_minimum_size = Vector2(450, 0)
 	var panel := UiKit.panel(body)
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	panel.position = Vector2(88, 175)
+	panel.set_meta("base_y", 175.0)
+	panel.position = Vector2(88, _top(175))
 	panel.size = Vector2(490, 0)
 	add_child(panel)
 	_content = panel
@@ -178,7 +181,8 @@ func _show_multiplayer() -> void:
 	body.custom_minimum_size = Vector2(520, 0)
 	var panel := UiKit.panel(body)
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	panel.position = Vector2(88, 150)
+	panel.set_meta("base_y", 150.0)
+	panel.position = Vector2(88, _top(150))
 	panel.size = Vector2(560, 0)
 	add_child(panel)
 	_content = panel
@@ -226,7 +230,8 @@ func _show_credits() -> void:
 	body.custom_minimum_size = Vector2(420, 0)
 	var panel := UiKit.panel(body)
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	panel.position = Vector2(88, 150)
+	panel.set_meta("base_y", 150.0)
+	panel.position = Vector2(88, _top(150))
 	panel.size = Vector2(470, 0)
 	add_child(panel)
 	_content = panel
@@ -235,6 +240,15 @@ func _show_credits() -> void:
 	body.add_child(UiKit.para("Font: Pixelify Sans, OFL\nCharacter art by the project owner.", "body"))
 	body.add_child(UiKit.primary("Back [Esc]", _show_menu, false))
 	UiKit.focus_first(body)
+
+## Panels start lower with bigger text so they clear the logo's subtitle.
+func _top(y: float) -> float:
+	return y + 50.0 * maxf(0.0, _app.settings.text_scale - 1.0)
+
+func _notification(what: int) -> void:
+	# The text size can change while the title is open (Settings).
+	if what == NOTIFICATION_THEME_CHANGED and _app != null and is_instance_valid(_content):
+		_content.position.y = _top(float(_content.get_meta("base_y", 150.0)))
 
 func _clear_content() -> void:
 	if is_instance_valid(_content):
