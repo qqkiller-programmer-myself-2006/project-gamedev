@@ -14,6 +14,7 @@ var _deadline: Variant = null
 var _countdown: Label
 var _region: Label
 var _encounter_label: Label
+var _encounter_icon: TextureRect
 var _columns: HBoxContainer
 var _bottom: HBoxContainer
 var _workspace: Control
@@ -31,6 +32,12 @@ var _content: Dictionary = {}
 const SLOTS := ["helmet", "chest", "legs", "boots", "weapon", "charm1", "charm2", "charm3"]
 const ATTRIBUTES := ["str", "dex", "con", "int", "fth", "cha", "lck"]
 const PERCENT_STATS := ["crit", "crit_damage", "block", "block_reduction", "dodge", "aggro", "lifesteal", "status_resist"]
+const COLUMN_ICONS := {"Shop": "merchant", "Crafting": "rest", "Inventory": "items", "Equipment": "armor"}
+const TAB_ICONS := {"Stash": "items", "Shop": "merchant", "Craft": "rest", "Inventory": "items", "Abilities": "skill"}
+
+
+static func tab_width_for_scale(text_scale: float) -> float:
+	return 116.0 * maxf(1.0, text_scale)
 
 func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_screen = screen
@@ -59,7 +66,11 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_region.add_theme_constant_override("outline_size", 6)
 	add_child(_region)
 	_encounter_label = UiKit.pixel_label("", "small")
-	var encounter_box := UiKit.panel(_encounter_label, "HudPanel")
+	var encounter_row := UiKit.hbox(6)
+	_encounter_icon = Icons.rect("merchant", Icons.size_for_scale(_app.settings.text_scale))
+	encounter_row.add_child(_encounter_icon)
+	encounter_row.add_child(_encounter_label)
+	var encounter_box := UiKit.panel(encounter_row, "HudPanel")
 	encounter_box.name = "EncounterBox"
 	encounter_box.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	encounter_box.position = Vector2(112, 12)
@@ -105,6 +116,7 @@ func build(view: Dictionary, encounter: Dictionary) -> void:
 	if _inspect < 0: _inspect = maxi(0, _screen.your_slot())
 	_region.text = "Forest (%d/%d)" % [int(view.get("layer", 0)), int(view.get("layers_total", 5))]
 	var merchant := str(encounter.get("kind", "")) == "merchant"
+	_encounter_icon.texture = Icons.texture("merchant") if merchant else Icons.texture("rest")
 	_encounter_label.text = "\"%s\"" % str(encounter.get("name", "Merchant" if merchant else "Rest")).replace("\"", "")
 	_stock = encounter.get("stock", []) if merchant else []
 	_ready = bool(encounter.get("you_are_ready", false))
@@ -126,9 +138,13 @@ func _column(title: String, content: Control, ratio: float) -> Control:
 	var column := UiKit.vbox(6)
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.size_flags_stretch_ratio = ratio
-	var tag := UiKit.panel(UiKit.pixel_label(title, "heading"), "TitleTag")
+	var heading := UiKit.hbox(6)
+	heading.add_child(Icons.rect(str(COLUMN_ICONS.get(title, "items")), Icons.size_for_scale(_app.settings.text_scale)))
+	var heading_label := UiKit.pixel_label(title, "heading")
+	heading_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.add_child(heading_label)
+	var tag := UiKit.panel(heading, "TitleTag")
 	tag.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	(tag.get_child(0) as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	tag.custom_minimum_size = Vector2(150, 0)
 	column.add_child(tag)
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -140,7 +156,7 @@ func _column(title: String, content: Control, ratio: float) -> Control:
 
 func _vertical_tabs(labels: Array, left: bool, view: Dictionary = {}) -> Control:
 	var tabs := UiKit.vbox(6)
-	var tab_width := 104.0 * maxf(1.0, _app.settings.text_scale)
+	var tab_width := tab_width_for_scale(_app.settings.text_scale)
 	tabs.custom_minimum_size = Vector2(tab_width, 0)
 	tabs.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	for i in labels.size():
@@ -160,6 +176,7 @@ func _vertical_tabs(labels: Array, left: bool, view: Dictionary = {}) -> Control
 			_screen.refresh(_app, true)
 			if label == "Abilities":
 				_show_abilities(view))
+		Icons.apply_to_button(button, str(TAB_ICONS.get(label, "items")), _app.settings.text_scale)
 		button.custom_minimum_size = Vector2(tab_width, 52)
 		button.clip_text = true
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -172,10 +189,15 @@ func _vertical_tabs(labels: Array, left: bool, view: Dictionary = {}) -> Control
 		var you := _character(view, _acting_slot())
 		var consumable = you.get("consumable")
 		var consumable_text := str(consumable) if consumable != null and not str(consumable).is_empty() else "Empty"
+		var slot_row := UiKit.hbox(3)
+		slot_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		slot_row.add_child(Icons.rect("consumable", Icons.size_for_scale(_app.settings.text_scale)))
 		var slot_label := UiKit.pixel_label("Consumable\n" + consumable_text, "tiny")
+		slot_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		slot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		slot_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		var slot := UiKit.panel(slot_label, "HudCard")
+		slot_row.add_child(slot_label)
+		var slot := UiKit.panel(slot_row, "HudCard")
 		slot.custom_minimum_size = Vector2(tab_width, 64)
 		tabs.add_child(slot)
 	return tabs
@@ -229,7 +251,7 @@ func _build_shop(view: Dictionary, body: VBoxContainer) -> void:
 		var shop_name := UiKit.pixel_label("[%d] %s" % [i + 1, str(entry.get("name", entry.get("item", "")))], "small")
 		shop_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		text.add_child(shop_name)
-		text.add_child(UiKit.pixel_label("%d Gold   (%d left)" % [int(entry.get("price", 0)), int(entry.get("remaining", 0))], "small", UiKit.ACCENT))
+		text.add_child(Icons.with_text("gold", "%d Gold   (%d left)" % [int(entry.get("price", 0)), int(entry.get("remaining", 0))], "small", _app.settings.text_scale, UiKit.ACCENT))
 		card.get_child(0).add_child(text)
 		var actions := UiKit.vbox(2)
 		var buy := _button("Buy", func() -> void: _app.send({"type": "buy", "slot": _acting_slot(), "item": entry.get("item", "")}))
@@ -311,9 +333,10 @@ func _inventory_panel(view: Dictionary) -> Control:
 	var you := _character(view, _acting_slot())
 	var gold := int(you.get("gold", view.get("gold", 0)))
 	var gold_row := UiKit.hbox(4)
-	gold_row.add_child(UiKit.pixel_label(UiText.gold(gold), "heading", UiKit.ACCENT))
+	gold_row.add_child(Icons.with_text("gold", UiText.gold(gold), "heading", _app.settings.text_scale, UiKit.ACCENT))
 	gold_row.add_child(UiKit.spacer())
 	var transfer := _button("Transfer Gold", func() -> void: _open_gold_picker())
+	Icons.apply_to_button(transfer, "transfer", _app.settings.text_scale)
 	UiKit.disable(transfer, not you.has("gold"), UiText.WHY["transfer_unavailable"])
 	gold_row.add_child(transfer)
 	root.add_child(UiKit.panel(gold_row, "HudCard"))
@@ -336,7 +359,10 @@ func _item_row(entry: Dictionary, with_transfer: bool) -> Control:
 	text.add_child(item_name)
 	card.get_child(0).add_child(text)
 	var actions := UiKit.vbox(2)
-	if with_transfer: actions.add_child(_button("Transfer", func() -> void: _open_item_picker(str(entry.get("item", "")))))
+	if with_transfer:
+		var transfer := _button("Transfer", func() -> void: _open_item_picker(str(entry.get("item", ""))))
+		Icons.apply_to_button(transfer, "transfer", _app.settings.text_scale)
+		actions.add_child(transfer)
 	if str(entry.get("kind", "")) == "gear":
 		var equip := _button("Equip", func() -> void: _app.send({"type": "equip", "slot": _acting_slot(), "item": entry.get("item", "")}))
 		UiKit.disable(equip, not _can_manage_inspected(), UiText.WHY["equip_not_yours"])
@@ -364,16 +390,21 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	switcher.add_child(next)
 	root.add_child(switcher)
 	var grid := GridContainer.new()
-	grid.columns = 4
+	# At Extra-large text the 32 px icons and slot names need two wider cells
+	# per row; the stat sheet below already scrolls, so the extra rows are safe.
+	grid.columns = 2 if _app.settings.text_scale >= 1.4 else 4
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", 4)
 	grid.add_theme_constant_override("v_separation", 4)
 	var gear: Dictionary = character.get("gear", {})
 	for slot in SLOTS:
 		var cell := UiKit.vbox(1)
-		cell.custom_minimum_size = Vector2(0, 70)
+		cell.custom_minimum_size = Vector2(0, 82 if _app.settings.text_scale >= 1.4 else 70)
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var worn: Dictionary = gear.get(slot, {})
+		var slot_row := UiKit.hbox(2)
+		slot_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		slot_row.add_child(Icons.rect(_slot_icon(slot), Icons.size_for_scale(_app.settings.text_scale)))
 		var slot_label := UiKit.pixel_label(_slot_name(slot) + "\n" + (str(worn.get("name", "Empty")) if not worn.is_empty() else "Empty"), "tiny",
 				UiKit.TEXT if not worn.is_empty() else UiKit.TEXT_DIM)
 		slot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -381,7 +412,8 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 		slot_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		slot_label.custom_minimum_size = Vector2(0, 44)
 		slot_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		cell.add_child(slot_label)
+		slot_row.add_child(slot_label)
+		cell.add_child(slot_row)
 		var controls := UiKit.hbox(2)
 		controls.alignment = BoxContainer.ALIGNMENT_END
 		if not worn.is_empty():
@@ -400,23 +432,24 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	var stats := UiKit.vbox(1)
 	var attrs: Dictionary = character.get("attributes", {})
 	var derived: Dictionary = character.get("derived", {})
-	stats.add_child(_stat("HP", "%d/%d" % [int(character.get("hp", 0)), int(character.get("max_hp", 0))]))
-	stats.add_child(_stat("Energy", str(character.get("energy", 0))))
-	stats.add_child(_stat("Level", "%d (%d/%d)" % [int(character.get("level", 1)), int(character.get("exp", 0)), int(character.get("exp_next", 0))]))
+	stats.add_child(_stat("HP", "%d/%d" % [int(character.get("hp", 0)), int(character.get("max_hp", 0))], "hp"))
+	stats.add_child(_stat("Energy", str(character.get("energy", 0)), "energy"))
+	stats.add_child(_stat("Level", str(int(character.get("level", 1))), "level"))
+	stats.add_child(_stat("EXP", "%d/%d" % [int(character.get("exp", 0)), int(character.get("exp_next", 0))], "exp"))
 	var separator_one := Control.new()
 	separator_one.custom_minimum_size = Vector2(0, 8)
 	stats.add_child(separator_one)
 	for key in ATTRIBUTES:
-		stats.add_child(_stat(key.to_upper(), str(int(attrs[key])) if attrs.has(key) else "\u2014"))
+		stats.add_child(_stat(key.to_upper(), str(int(attrs[key])) if attrs.has(key) else "\u2014", key))
 	var separator_two := Control.new()
 	separator_two.custom_minimum_size = Vector2(0, 8)
 	stats.add_child(separator_two)
 	stats.add_child(_stat("Initiative", str(int(derived["initiative"])) if derived.has("initiative") else "\u2014"))
-	stats.add_child(_stat("Crit Chance", _percent(derived.get("crit", character.get("crit")))))
+	stats.add_child(_stat("Crit Chance", _percent(derived.get("crit", character.get("crit"))), "crit"))
 	stats.add_child(_stat("Crit Damage", _percent(derived.get("crit_damage"))))
 	stats.add_child(_stat("Block Chance", _percent(derived.get("block"))))
 	stats.add_child(_stat("Block Damage Reduction", _percent(derived.get("block_reduction"))))
-	stats.add_child(_stat("Dodge Chance", _percent(derived.get("dodge"))))
+	stats.add_child(_stat("Dodge Chance", _percent(derived.get("dodge")), "dodge"))
 	stats.add_child(_stat("Aggro", _percent(derived.get("aggro"))))
 	stats.add_child(_stat("Lifesteal", _percent(derived.get("lifesteal"))))
 	stats.add_child(_stat("Energy Regen", str(int(derived["energy_regen"])) if derived.has("energy_regen") else "\u2014"))
@@ -436,15 +469,22 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	root.add_child(invest)
 	return root
 
-func _stat(label: String, value: String) -> Control:
-	var row := UiKit.pixel_label(label + ": " + value, "small")
-	row.clip_text = false
-	row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	return row
+func _stat(label: String, value: String, icon_name: String = "") -> Control:
+	var line := UiKit.hbox(4)
+	line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if not icon_name.is_empty():
+		line.add_child(Icons.rect(icon_name, Icons.size_for_scale(_app.settings.text_scale)))
+	var text := UiKit.pixel_label(label + ": " + value, "small")
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.clip_text = false
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	line.add_child(text)
+	return line
 
 func _build_bottom() -> void:
 	UiKit.clear(_bottom)
 	var ready := UiKit.primary("Ready (%d/%d) [R]" % [int(_encounter.get("ready", []).size()), maxi(1, int(_encounter.get("humans", 1)))], func() -> void: _app.send({"type": "ready"}), false)
+	Icons.apply_to_button(ready, "ready", _app.settings.text_scale)
 	UiKit.disable(ready, _ready, UiText.WHY["ready"])
 	ready.custom_minimum_size = Vector2(280, 44)
 	ready.set_meta("focus_id", "ready")
@@ -537,6 +577,14 @@ func _move_inspect(delta: int, party: Array) -> void:
 func _slot_name(slot: String) -> String:
 	if slot.begins_with("charm"): return "Charm " + slot.trim_prefix("charm")
 	return slot.capitalize()
+
+
+func _slot_icon(slot: String) -> String:
+	if slot == "weapon":
+		return "weapon"
+	if slot.begins_with("charm"):
+		return "accessory"
+	return "armor"
 
 func _percent(value: Variant) -> String:
 	if value == null:
@@ -637,7 +685,7 @@ func _open_gold_picker() -> void:
 func _open_transfer_picker(kind: String, item: String = "") -> void:
 	_close_invest_panel()
 	var body := UiKit.vbox(6)
-	body.add_child(UiKit.pixel_label("Transfer from %s" % _character(_screen.match_view(), _acting_slot()).get("name", ""), "heading", UiKit.ACCENT))
+	body.add_child(Icons.with_text("transfer", "Transfer from %s" % _character(_screen.match_view(), _acting_slot()).get("name", ""), "heading", _app.settings.text_scale, UiKit.ACCENT))
 	var amount := LineEdit.new()
 	if kind == "transfer_gold":
 		amount.text = "1"

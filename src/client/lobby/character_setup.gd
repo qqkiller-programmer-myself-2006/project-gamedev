@@ -97,11 +97,9 @@ func _build_shell() -> void:
 	for i in NAV.size():
 		var tab_name: String = NAV[i]
 		var button := Button.new()
-		button.icon = Icons.texture(NAV_ICONS[i])
-		button.expand_icon = true
-		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		button.custom_minimum_size = Vector2(72, 72)
+		button.text = tab_name
+		Icons.apply_to_button(button, NAV_ICONS[i], _app.settings.text_scale)
+		button.custom_minimum_size = Vector2(210, 72)
 		button.focus_mode = Control.FOCUS_ALL
 		button.theme_type_variation = "TabButton"
 		button.pressed.connect(func() -> void: _switch_tab(tab_name))
@@ -125,13 +123,14 @@ func _build_shell() -> void:
 	finish_button.offset_top = -75
 	finish_button.offset_bottom = -18
 	add_child(finish_button)
-	_gems_label = UiKit.pixel_label(UiText.gems(0), "heading", UiKit.SUCCESS)
-	_gems_label.tooltip_text = "Gems: spend them on Races, the Skill Tree and Prestige."
-	_gems_label.mouse_filter = Control.MOUSE_FILTER_PASS
-	_gems_label.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	_gems_label.position = Vector2(15, -45)
-	_gems_label.size = Vector2(180, 38)
-	add_child(_gems_label)
+	var gems_row := Icons.with_text("gems", UiText.gems(0), "heading", _app.settings.text_scale, UiKit.SUCCESS)
+	_gems_label = gems_row.get_child(1) as Label
+	gems_row.tooltip_text = "Gems: spend them on Races, the Skill Tree and Prestige."
+	gems_row.mouse_filter = Control.MOUSE_FILTER_PASS
+	gems_row.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	gems_row.position = Vector2(15, -45)
+	gems_row.size = Vector2(220, 38)
+	add_child(gems_row)
 
 
 func refresh(app: ClientApp, force: bool = false) -> void:
@@ -216,6 +215,7 @@ func _render_class() -> void:
 	middle.add_child(_text("Cost: %s\nStatus: Unlocked" % ("MAX" if level >= 5 else str(int(node_data.get("cost", 10)) * (level + 1)))))
 	middle.add_child(UiKit.spacer())
 	var upgrade := UiKit.primary("Upgrade", func() -> void: _app.send({"type": "tree_upgrade", "class": _class_id, "node": _node}), false)
+	Icons.apply_to_button(upgrade, "gems", _app.settings.text_scale)
 	var upgrade_cost := int(node_data.get("cost", 10)) * (level + 1)
 	upgrade.set_meta("focus_id", "upgrade")
 	if level >= 5:
@@ -265,6 +265,7 @@ func _render_class() -> void:
 			all_max = false
 	var prestige_cost := int(_meta.get("prestige", {}).get("cost", 100))
 	var buy := _button("Buy Prestige\n%s" % UiText.gems(prestige_cost), func() -> void: _app.send({"type": "buy_prestige", "class": _class_id}))
+	Icons.apply_to_button(buy, "gems", _app.settings.text_scale)
 	if prestige >= 25:
 		UiKit.disable(buy, true, UiText.WHY["prestige_max"])
 	elif not all_max:
@@ -277,6 +278,7 @@ func _render_class() -> void:
 	var reset := UiKit.button("Reset Skills\n%s" % UiText.gems(reset_cost), func() -> void:
 		_app.confirm("reset_skills", func() -> void: _app.send({"type": "reset_tree", "class": _class_id}),
 				[_class_id.capitalize(), reset_cost]), false, "danger")
+	Icons.apply_to_button(reset, "gems", _app.settings.text_scale)
 	reset.set_meta("focus_id", "reset")
 	UiKit.disable(reset, _gems() < reset_cost, UiText.WHY["need_gems"] % [reset_cost, _gems()])
 	reset.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -297,6 +299,8 @@ func _render_races() -> void:
 		var cost := int(_meta.get("races", {}).get(race, {}).get("cost", 0))
 		var owned: bool = _profile().get("races_owned", []).has(race)
 		var button := _button("%s%s" % [race, "   %s" % UiText.gems(cost) if not owned else ""], func() -> void: _race = race; _render())
+		if not owned:
+			Icons.apply_to_button(button, "gems", _app.settings.text_scale)
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.add_theme_font_size_override("font_size", int(UiKit.SIZES["title"] * _app.settings.text_scale))
 		button.custom_minimum_size.y = int(58 * _app.settings.text_scale)
@@ -328,6 +332,8 @@ func _render_races() -> void:
 			_send_loadout()
 		else:
 			_app.send({"type": "buy_race", "race": _race}), false)
+	if not owned:
+		Icons.apply_to_button(action, "gems", _app.settings.text_scale)
 	action.set_meta("focus_id", "race_action")
 	UiKit.disable(action, not owned and _gems() < race_cost, UiText.WHY["need_gems"] % [race_cost, _gems()])
 	right.add_child(action)
@@ -422,7 +428,7 @@ func _render_profile() -> void:
 	panel.add_child(_heading("Profile"))
 	panel.add_child(_text("Player: %s" % _app.settings.player_name))
 	panel.add_child(_text("ID: %s…" % _app.player_token.substr(0, 8)))
-	panel.add_child(_text("Gems: %d" % int(_profile().get("gems", 0))))
+	panel.add_child(Icons.with_text("gems", "Gems: %d" % int(_profile().get("gems", 0)), "body", _app.settings.text_scale))
 	panel.add_child(_text("Class: %s\nRace: %s\nBoons: %s" % [str(loadout.get("class", _class_id)).capitalize(), str(loadout.get("race", _race)), ", ".join(loadout.get("boons", _boons))]))
 
 

@@ -15,9 +15,9 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	_stock = encounter["stock"]
 	_deadline = encounter["deadline"]
 	_ready = encounter["you_are_ready"]
-	add_child(UiKit.label(str(encounter["name"]), "title"))
+	add_child(Icons.with_text("merchant", str(encounter["name"]), "title", app.settings.text_scale))
 	add_child(UiKit.para(str(encounter["greeting"])))
-	add_child(UiKit.label("Party Gold: %d" % int(view["gold"]), "heading", UiKit.ACCENT))
+	add_child(Icons.with_text("gold", "Party Gold: %d" % int(view["gold"]), "heading", app.settings.text_scale, UiKit.ACCENT))
 	for i in _stock.size():
 		add_child(_row(app, i, _stock[i]))
 	var slots: Array = screen.room_view().get("slots", [])
@@ -28,6 +28,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	var actions := UiKit.flow(10)
 	var done := UiKit.primary("Waiting for the others..." if _ready else "Done shopping [R]",
 			func() -> void: app.send({"type": "ready"}))
+	Icons.apply_to_button(done, "ready", app.settings.text_scale)
 	UiKit.disable(done, _ready, UiText.WHY["ready"])
 	done.set_meta("focus_id", "ready")
 	actions.add_child(done)
@@ -66,6 +67,7 @@ func _row(app: ClientApp, index: int, entry: Dictionary) -> Control:
 	elif not entry["affordable"]:
 		label = "Need %d Gold" % int(entry["price"])
 	var buy := UiKit.button(label, func() -> void: app.send({"type": "buy", "item": entry["item"]}))
+	Icons.apply_to_button(buy, "gold", app.settings.text_scale)
 	if int(entry["remaining"]) <= 0:
 		UiKit.disable(buy, true, UiText.WHY["sold_out"])
 	else:

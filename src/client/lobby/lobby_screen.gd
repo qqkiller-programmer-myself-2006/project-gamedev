@@ -68,10 +68,12 @@ func refresh(app: ClientApp, force: bool = false) -> void:
 
 	var actions := UiKit.flow(12)
 	var setup_button := UiKit.button("Character Setup", _open_setup, true, "secondary" if is_host else "primary")
+	Icons.apply_to_button(setup_button, "settings", app.settings.text_scale)
 	setup_button.set_meta("focus_id", "setup")
 	actions.add_child(setup_button)
 	if is_host:
 		var start := UiKit.primary("Start the Match", func() -> void: app.send({"type": "start_match"}))
+		Icons.apply_to_button(start, "play", app.settings.text_scale)
 		start.set_meta("focus_id", "start")
 		actions.add_child(start)
 	else:
@@ -81,9 +83,12 @@ func refresh(app: ClientApp, force: bool = false) -> void:
 				host_name = slot["owner_name"]
 		actions.add_child(UiKit.label("Waiting for %s (Host) to start the Match..." % host_name, "heading"))
 	var leave := UiKit.button("Leave room [Esc]", app.confirm_leave, true, "danger")
+	Icons.apply_to_button(leave, "back", app.settings.text_scale)
 	leave.set_meta("focus_id", "leave")
 	actions.add_child(leave)
-	actions.add_child(UiKit.button("Settings [F2]", app.open_settings, true))
+	var settings := UiKit.button("Settings [F2]", app.open_settings, true)
+	Icons.apply_to_button(settings, "settings", app.settings.text_scale)
+	actions.add_child(settings)
 	_body.add_child(actions)
 	if not _restore_focus(focus_id) and not _restore_focus("start") and not _restore_focus("setup"):
 		UiKit.focus_first(_body)

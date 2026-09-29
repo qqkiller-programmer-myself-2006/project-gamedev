@@ -549,7 +549,7 @@ func _place_tokens() -> void:
 	for id in _tokens:
 		var token: BattleToken = _tokens[id]
 		var spot: Array = _spots.get(id, [0.5, 0.3])
-		var feet_offset := float(BattleToken.BADGE_HEIGHT + token.figure_height - 6.0)
+		var feet_offset := float(token.badge_height + token.figure_height - 6.0)
 		token.position = Vector2(area.x * float(spot[0]) - token.size.x * 0.5, area.y * float(spot[1]) - feet_offset)
 
 
@@ -591,13 +591,15 @@ func _build_bottom(view: Dictionary) -> void:
 	info.add_child(_countdown)
 	info.add_child(UiKit.spacer())
 	var gold := int(me.get("gold", view.get("gold", 0))) if not me.is_empty() else int(view.get("gold", 0))
-	info.add_child(UiKit.pixel_label(UiText.gold(gold), "heading", UiKit.ACCENT))
+	info.add_child(Icons.with_text("gold", UiText.gold(gold), "heading", _app.settings.text_scale, UiKit.ACCENT))
 	hud.add_child(info)
 	if not me.is_empty():
 		var bars := UiKit.hbox(10)
+		bars.add_child(Icons.rect("hp", Icons.size_for_scale(_app.settings.text_scale)))
 		var hp := UiKit.stat_bar(int(me["hp"]), int(me["max_hp"]), UiKit.BAR_HP, "%d/%d" % [int(me["hp"]), int(me["max_hp"])], 24, "body")
 		hp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bars.add_child(hp)
+		bars.add_child(Icons.rect("energy", Icons.size_for_scale(_app.settings.text_scale)))
 		var energy := UiKit.stat_bar(int(me.get("energy", 0)), int(me.get("energy_max", 6)), UiKit.BAR_ENERGY,
 				" %d/%d" % [int(me.get("energy", 0)), int(me.get("energy_max", 6))], 24, "body")
 		energy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -610,11 +612,15 @@ func _build_bottom(view: Dictionary) -> void:
 		# A rebuild during an action banner must keep the HUD collapsed under it.
 		actions.visible = not (_banner != null and _banner.visible)
 		var has_skills: bool = not choices.get("skills", {}).is_empty()
-		actions.add_child(_action_button("Fight [F]", "fight", func() -> void: _set_mode("skills"), mode == "skills" or mode == "attack" or mode.begins_with("skill:")))
+		var fight := _action_button("Fight [F]", "fight", func() -> void: _set_mode("skills"), mode == "skills" or mode == "attack" or mode.begins_with("skill:"))
+		Icons.apply_to_button(fight, "fight", _app.settings.text_scale)
+		actions.add_child(fight)
 		var item := _action_button("Items [I]", "items", func() -> void: _set_mode("items"), mode == "items" or mode.begins_with("item:"))
+		Icons.apply_to_button(item, "items", _app.settings.text_scale)
 		UiKit.disable(item, choices.get("items", {}).is_empty(), UiText.WHY["no_items"])
 		actions.add_child(item)
 		var focus := _action_button("Focus [O]", "focus", func() -> void: _send({"action": "focus"}), false)
+		Icons.apply_to_button(focus, "focus", _app.settings.text_scale)
 		focus.disabled = not choices.get("focus", false)
 		focus.tooltip_text = UiText.WHY["focus_unavailable"] if focus.disabled else UiText.WHY["focus_ready"]
 		actions.add_child(focus)
@@ -678,9 +684,9 @@ func _card_grid(mode: String, choices: Dictionary) -> Control:
 	grid.add_theme_constant_override("h_separation", 6)
 	grid.add_theme_constant_override("v_separation", 6)
 	if mode == "skills":
-		grid.add_child(_card("Strike", "Cost: 0 | Cooldown: 0", "S", UiKit.TEXT, true,
+		grid.add_child(_card("Strike", "Cost: 0 | Cooldown: 0", "strike", 0, true,
 				"A basic attack.", func() -> void: _set_mode("attack")))
-		grid.add_child(_card("Guard", "Cost: 0 | Cooldown: 0", "G", UiKit.TEXT, true,
+		grid.add_child(_card("Guard", "Cost: 0 | Cooldown: 0", "guard", 0, true,
 				"Halve damage until your next turn.", func() -> void: _send({"action": "defend"})))
 		for skill_id in choices.get("skills", {}):
 			var info: Dictionary = choices["skills"][skill_id]
@@ -699,20 +705,20 @@ func _card_grid(mode: String, choices: Dictionary) -> Control:
 			if not why.is_empty():
 				tip = why + "\n" + tip
 			var pick := func() -> void: _pick_skill(skill_id, info)
-			grid.add_child(_card(str(info["name"]), sub, str(info["name"]).substr(0, 1), UiKit.BAR_ENERGY, usable, tip, pick))
+			grid.add_child(_card(str(info["name"]), sub, "skill", int(info.get("energy", 0)), usable, tip, pick))
 	else:
 		for item_id in choices.get("items", {}):
 			var info: Dictionary = choices["items"][item_id]
 			var usable: bool = not info["targets"].is_empty()
 			var pretty: String = item_id.replace("_", " ").capitalize()
 			var pick := func() -> void: _pick_item(item_id, info)
-			grid.add_child(_card("%s x%d" % [pretty, int(info["count"])], _item_description(item_id), pretty.substr(0, 1),
-					UiKit.GOOD, usable, _item_description(item_id), pick))
+			grid.add_child(_card("%s x%d" % [pretty, int(info["count"])], _item_description(item_id), "items",
+					-1, usable, _item_description(item_id), pick))
 	var holder := UiKit.panel(grid, "HudPanel")
 	return _centered(holder)
 
 
-func _card(title: String, sub: String, icon: String, icon_color: Color, usable: bool, tip: String, pick: Callable) -> Button:
+func _card(title: String, sub: String, icon_name: String, energy_cost: int, usable: bool, tip: String, pick: Callable) -> Button:
 	var number := _choices.size() + 1
 	var button := Button.new()
 	button.theme_type_variation = "HudButton"
@@ -727,10 +733,8 @@ func _card(title: String, sub: String, icon: String, icon_color: Color, usable: 
 	row.offset_left = 6
 	row.offset_right = -6
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var glyph := UiKit.pixel_label(icon, "heading", icon_color)
-	glyph.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	glyph.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	var icon_box := UiKit.panel(glyph, "IconPanel")
+	var card_icon := Icons.rect(icon_name, Icons.size_for_scale(_app.settings.text_scale))
+	var icon_box := UiKit.panel(card_icon, "IconPanel")
 	icon_box.custom_minimum_size = Vector2(40, 40)
 	icon_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	icon_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -742,9 +746,13 @@ func _card(title: String, sub: String, icon: String, icon_color: Color, usable: 
 	var name_label := UiKit.pixel_label("[%d] %s" % [number, title], "body", UiKit.TEXT if usable else UiKit.TEXT_DIM)
 	name_label.clip_text = true
 	text.add_child(name_label)
+	var sub_row := UiKit.hbox(4)
+	if energy_cost >= 0:
+		sub_row.add_child(Icons.rect("energy", Icons.size_for_scale(_app.settings.text_scale)))
 	var sub_label := UiKit.pixel_label(sub, "tiny", UiKit.TEXT_DIM)
 	sub_label.clip_text = false
-	text.add_child(sub_label)
+	sub_row.add_child(sub_label)
+	text.add_child(sub_row)
 	row.add_child(text)
 	button.add_child(row)
 	_choices.append(pick if usable else func() -> void: _app.toast(tip.get_slice("\n", 0)))

@@ -68,6 +68,7 @@ func _show_menu() -> void:
 	body.add_child(UiKit.label("WELCOME, TRAVELLER", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.para("Choose your path into the forest.", "dim"))
 	var play := UiKit.primary("Play", _show_play)
+	Icons.apply_to_button(play, "play", _app.settings.text_scale)
 	play.set_meta("focus_id", "play")
 	body.add_child(play)
 	if _app.can_playtest():
@@ -91,13 +92,17 @@ func _show_menu() -> void:
 		_seed.visible = false
 		body.add_child(_seed)
 	var settings := UiKit.button("Settings [F2]", _app.open_settings)
+	Icons.apply_to_button(settings, "settings", _app.settings.text_scale)
 	settings.set_meta("focus_id", "settings")
 	body.add_child(settings)
 	var credits := UiKit.button("Credits", _show_credits)
+	Icons.apply_to_button(credits, "credits", _app.settings.text_scale)
 	credits.set_meta("focus_id", "credits")
 	body.add_child(credits)
 	if not OS.has_feature("web"):
-		body.add_child(UiKit.button("Quit", func() -> void: _app.stop_dev_playtest(); get_tree().quit()))
+		var quit := UiKit.button("Quit", func() -> void: _app.stop_dev_playtest(); get_tree().quit())
+		Icons.apply_to_button(quit, "quit", _app.settings.text_scale)
+		body.add_child(quit)
 	UiKit.focus_first(body)
 
 func _toggle_playtest_options() -> void:
@@ -123,17 +128,22 @@ func _show_play() -> void:
 	var has_save: bool = _app.story_save.has_save()
 	if has_save:
 		var resume := UiKit.primary("Continue Story", func() -> void: _app.start_story([], _app.story_save.load()))
+		Icons.apply_to_button(resume, "story_mode", _app.settings.text_scale)
 		resume.set_meta("focus_id", "continue_story")
 		body.add_child(resume)
 	var story := UiKit.button("New Story", _show_story_setup, true, "secondary" if has_save else "primary")
+	Icons.apply_to_button(story, "story_mode", _app.settings.text_scale)
 	story.set_meta("focus_id", "new_story")
 	body.add_child(story)
 	body.add_child(HSeparator.new())
 	body.add_child(UiKit.label("Multiplayer · create or join a room", "body"))
 	var multiplayer_button := UiKit.button("Multiplayer", _show_multiplayer, true)
+	Icons.apply_to_button(multiplayer_button, "multiplayer", _app.settings.text_scale)
 	multiplayer_button.set_meta("focus_id", "multiplayer")
 	body.add_child(multiplayer_button)
-	body.add_child(UiKit.button("Back [Esc]", _show_menu))
+	var back := UiKit.button("Back [Esc]", _show_menu)
+	Icons.apply_to_button(back, "back", _app.settings.text_scale)
+	body.add_child(back)
 	UiKit.focus_first(body)
 
 func _show_story_setup() -> void:
@@ -164,8 +174,12 @@ func _show_story_setup() -> void:
 		_story_picks.append(pick)
 		row.add_child(pick)
 		body.add_child(row)
-	body.add_child(UiKit.primary("Begin Story", _begin_story))
-	body.add_child(UiKit.button("Back [Esc]", _show_play))
+	var begin := UiKit.primary("Begin Story", _begin_story)
+	Icons.apply_to_button(begin, "story_mode", _app.settings.text_scale)
+	body.add_child(begin)
+	var back := UiKit.button("Back [Esc]", _show_play)
+	Icons.apply_to_button(back, "back", _app.settings.text_scale)
+	body.add_child(back)
 	UiKit.focus_first(body)
 
 func _begin_story() -> void:
@@ -191,6 +205,7 @@ func _show_multiplayer() -> void:
 	_name = _line_edit(_app.settings.player_name, "e.g. Arin", 16)
 	body.add_child(_name)
 	var create := UiKit.primary("Create a room", _create)
+	Icons.apply_to_button(create, "multiplayer", _app.settings.text_scale)
 	create.set_meta("focus_id", "create")
 	body.add_child(create)
 	body.add_child(HSeparator.new())
@@ -201,6 +216,7 @@ func _show_multiplayer() -> void:
 	_code.text_submitted.connect(func(_t: String) -> void: _join())
 	row.add_child(_code)
 	var join := UiKit.button("Join room", _join)
+	Icons.apply_to_button(join, "multiplayer", _app.settings.text_scale)
 	join.tooltip_text = "Type the Room code, then press Enter or click here"
 	join.set_meta("focus_id", "join")
 	row.add_child(join)
@@ -217,6 +233,7 @@ func _show_multiplayer() -> void:
 	_status.visible = false
 	body.add_child(_status)
 	var back := UiKit.button("Back [Esc]", _show_play)
+	Icons.apply_to_button(back, "back", _app.settings.text_scale)
 	back.set_meta("focus_id", "back")
 	body.add_child(back)
 	create.grab_focus.call_deferred()
@@ -238,7 +255,9 @@ func _show_credits() -> void:
 	body.add_child(UiKit.label("BEYOND THE WORLD'S END", "title", UiKit.ACCENT))
 	body.add_child(UiKit.label("Made with Godot 4.7", "heading"))
 	body.add_child(UiKit.para("Font: Pixelify Sans, OFL\nCharacter art by the project owner.", "body"))
-	body.add_child(UiKit.primary("Back [Esc]", _show_menu, false))
+	var back := UiKit.primary("Back [Esc]", _show_menu, false)
+	Icons.apply_to_button(back, "back", _app.settings.text_scale)
+	body.add_child(back)
 	UiKit.focus_first(body)
 
 ## Panels start lower with bigger text so they clear the logo's subtitle.
