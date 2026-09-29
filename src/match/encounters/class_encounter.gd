@@ -131,6 +131,7 @@ static func class_info(run: MatchRun, id: String) -> Dictionary:
 		"role": str(data.get("role", "")),
 		"description": str(data.get("description", "")),
 		"stats": data.get("stats", {}),
+		"recommended_stats": data.get("recommended_stats", {}),
 		"skills": skills,
 		"passive": {
 			"name": str(data.get("passive", {}).get("name", "")),
@@ -157,8 +158,11 @@ func _advance(run: MatchRun) -> void:
 		done = true
 		return
 	var pass_exp := run.content.get_int("class_encounters.pass_exp", 0)
+	var pass_gems := run.content.get_int("meta.gems.class_encounter", 15)
 	for character in run.party:
 		run.grant_exp(character["slot"], pass_exp)
+		if character["class"] != "classless":
+			run.award_gems(character["slot"], pass_gems, "class_encounter")
 	for character in run.party:
 		if character["class"] == "classless":
 			eligible.append(character["slot"])

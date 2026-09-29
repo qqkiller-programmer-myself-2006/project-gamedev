@@ -60,7 +60,40 @@
     "starting_gold": 0,
     "starting_inventory": {
       "herb": 3
-    }
+    },
+    "ai_class_order": ["guardian", "swordsman", "archer", "mage", "rogue"]
+  },
+  "meta": {
+    "races": {
+      "Human": {"cost": 0, "passives": ["adaptable", "versatile"]},
+      "Elf": {"cost": 0, "passives": ["keen_eyes", "grace"]},
+      "Kobold": {"cost": 0, "passives": ["scrappy", "small_target"]},
+      "Withered": {"cost": 0, "passives": ["undying", "frail"]},
+      "Dwarf": {"cost": 50, "passives": ["dwarven_resilience", "masterwork"]},
+      "Lunaeia": {"cost": 100, "passives": ["moonlit", "tidal"]}
+    },
+    "boons": {
+      "Potential: Bunny": {"slots": 5},
+      "The Chosen One": {"slots": 4},
+      "Daredevil Impulse": {"slots": 3},
+      "Critical Healing": {"slots": 3},
+      "Energy Conserver": {"slots": 2},
+      "Enervation": {"slots": 2, "effect": {"dot_bonus": 0.05, "dot_bonus_cap": 1.4, "dot_out": 1.15, "dot_in": 1.15}},
+      "Alert": {"slots": 1},
+      "Will of Thiacdemo": {"slots": 1}
+    },
+    "class_tree": {
+      "vitality": {"cost": 10, "max_level": 5, "position": [0, 0], "effect": "max_hp_percent", "per_level": 2},
+      "might": {"cost": 10, "max_level": 5, "position": [1, 0], "effect": "damage_percent", "per_level": 2},
+      "precision": {"cost": 10, "max_level": 5, "position": [2, 0], "effect": "crit_percent", "per_level": 1},
+      "swiftness": {"cost": 10, "max_level": 5, "position": [0, 1], "effect": "initiative", "per_level": 1},
+      "reserves": {"cost": 10, "max_level": 5, "position": [1, 1], "effect": "energy_start", "per_level": 1},
+      "mastery": {"cost": 10, "max_level": 5, "position": [2, 1], "effect": "cooldown", "per_level": -1},
+      "stat_points": {"cost": 10, "max_level": 5, "position": [1, 2], "effect": "attribute_points", "per_level": 1}
+    },
+    "reset_cost": 50,
+    "prestige": {"cost": 100, "max": 25, "bonus": {"max_hp_percent": 1, "damage_percent": 1}},
+    "gems": {"layer": 10, "boss": 50, "story_clue": 5, "class_encounter": 15}
   },
   "classes": {
     "classless": {
@@ -102,6 +135,7 @@
     "swordsman": {
       "name": "Swordsman",
       "role": "Melee DPS",
+      "recommended_stats": ["STR", "CON"],
       "description": "Balanced and dependable. Strong melee strikes, solid health.",
       "attack": {
         "target": "enemy",
@@ -148,6 +182,7 @@
     "archer": {
       "name": "Archer",
       "role": "Ranged DPS",
+      "recommended_stats": ["DEX", "LCK"],
       "description": "The fastest of the Party. Shoots any enemy, even in the back row, and often lands critical hits.",
       "attack": {
         "target": "enemy",
@@ -193,6 +228,7 @@
     "mage": {
       "name": "Mage",
       "role": "Magic DPS / AoE",
+      "recommended_stats": ["INT", "FTH"],
       "description": "Fragile but devastating. Magic ignores armour and Fireball strikes every enemy at once.",
       "attack": {
         "target": "enemy",
@@ -239,6 +275,7 @@
     "guardian": {
       "name": "Guardian",
       "role": "Tank / Defense",
+      "recommended_stats": ["CON", "FTH"],
       "description": "The Party's shield. The most HP and Defense of any Class; protects allies and blunts incoming damage.",
       "attack": {
         "target": "enemy",
@@ -286,6 +323,7 @@
     "rogue": {
       "name": "Rogue",
       "role": "Melee DoT",
+      "recommended_stats": ["DEX", "LCK"],
       "description": "Daggers and poison. Stacks Bleed, Poison and Toxin on one enemy, then finishes it with Inject Venom. Fast and deadly, but fragile.",
       "attack": {
         "target": "enemy",
@@ -303,14 +341,6 @@
         "inject_venom"
       ],
       "ai": "rogue",
-      "passive": {
-        "name": "Enervation",
-        "description": "Direct hits deal 5% more damage for each different DoT on the target (up to 40% more). DoTs you apply are 15% stronger, but DoTs hurt you 15% more.",
-        "dot_bonus": 0.05,
-        "dot_bonus_cap": 1.4,
-        "dot_out": 1.15,
-        "dot_in": 1.15
-      },
       "challenge": {
         "trainer": "masked_outlaw",
         "rounds": 3,

@@ -38,6 +38,9 @@ var inventory: Dictionary = {}
 ## Filled when the Match ends.
 var summary: Dictionary = {}
 var enemies_defeated := 0
+## Gems earned by each Party slot during this Match.
+var gems_earned: Array[int] = [0, 0, 0, 0, 0]
+var layers_passed := 0
 ## Class ids taken by at least one character during this Match.
 var classes_discovered: Array[String] = []
 ## Story Clues found, oldest first: {"id", "title", "text", "layer", "source"}
@@ -52,14 +55,16 @@ var _outbox: Array[Dictionary] = []
 var _started_at := 0.0
 var _phase_deadline := -1.0
 var _pending_option: Dictionary = {}
+var _loadouts: Array = []
 
 
-func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array[bool], match_number: int) -> void:
+func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array[bool], match_number: int, loadouts: Array = []) -> void:
 	rng = match_rng
 	clock = match_clock
 	content = forest
 	_humans = humans.duplicate()
 	number = match_number
+	_loadouts = loadouts.duplicate(true)
 	_started_at = clock.now()
 	_create_party()
 	gold = content.get_int("party.starting_gold", 0)
@@ -209,6 +214,14 @@ func add_item(item: String, count: int = 1) -> void:
 	inventory[item] = int(inventory.get(item, 0)) + count
 
 
+func award_gems(slot: int, amount: int, source: String = "") -> void:
+	if slot < 0 or slot >= gems_earned.size() or amount <= 0:
+		return
+	gems_earned[slot] += amount
+	emit({"type": "gems_earned", "slot": slot, "amount": amount, "source": source,
+			"total": gems_earned[slot]})
+
+
 ## Records a Story Clue once. Returns false if it was already found.
 func add_clue(id: String, source: String) -> bool:
 	for clue in clues:
@@ -258,6 +271,7 @@ func grant_exp(slot: int, amount: int) -> void:
 		var old_max: int = character["max_hp"]
 		character["level"] += 1
 		character["points"] = int(character.get("points", 0)) + content.get_int("leveling.points_per_level", 0)
+		character["points"] += _tree_level(character, "stat_points")
 		_apply_stats(character)
 		if character["hp"] > 0:
 			character["hp"] = mini(character["max_hp"], character["hp"] + character["max_hp"] - old_max)
@@ -286,6 +300,8 @@ func party_view() -> Array:
 			"spd": c["spd"],
 			"crit": c.get("crit", 0.0),
 			"points": int(c.get("points", 0)),
+			"race": c.get("race", "") if c.has("race") else "Human",
+			"boons": c.get("boons", []).duplicate(),
 			"invested": c.get("invested", {}).duplicate(),
 			"attributes": c.get("attributes", {}).duplicate(),
 			"derived": c.get("derived", {}).duplicate(),
@@ -305,6 +321,15 @@ func _exp_to_next(level: int) -> int:
 
 func _create_party() -> void:
 	var members := content.get_array("party.members")
+	var ai_order: Array = content.get_array("party.ai_class_order")
+	var claimed: Array = []
+	var has_human_loadout := false
+	for candidate in _loadouts:
+		var candidate_loadout: Dictionary = candidate.get("loadout", candidate) if candidate is Dictionary else {}
+		if candidate_loadout is Dictionary and not str(candidate_loadout.get("class", "")).is_empty():
+			has_human_loadout = true
+			claimed.append(str(candidate_loadout.get("class", "")))
+	var ai_index := 0
 	for i in PARTY_SIZE:
 		var member: Dictionary = members[i] if i < members.size() else {}
 		var character := {
@@ -317,9 +342,25 @@ func _create_party() -> void:
 			"invested": {},
 			"gear": {},
 		}
+		var entry: Dictionary = _loadouts[i] if i < _loadouts.size() and _loadouts[i] is Dictionary else {}
+		var loadout: Dictionary = entry.get("loadout", entry) if entry is Dictionary else {}
+		var profile: Dictionary = entry.get("profile", {}) if entry is Dictionary else {}
+		if not _humans[i] and has_human_loadout:
+			loadout = {}
+			while ai_index < ai_order.size() and claimed.has(str(ai_order[ai_index])): ai_index += 1
+			if ai_index < ai_order.size():
+				loadout = {"class": str(ai_order[ai_index]), "race": "Human", "boons": []}
+				claimed.append(str(ai_order[ai_index]))
+				ai_index += 1
+		if not loadout.is_empty():
+			character["class"] = str(loadout.get("class", "classless"))
+			character["race"] = str(loadout.get("race", "Human"))
+			character["boons"] = loadout.get("boons", []).duplicate()
+		character["_profile"] = ProfileStore.normalize(profile)
 		_apply_stats(character)
+		character["points"] = _tree_level(character, "stat_points")
 		character["hp"] = character["max_hp"]
-		character["energy"] = content.get_int("rules.energy_start", 1)
+		character["energy"] = content.get_int("rules.energy_start", 1) + _energy_bonus(character)
 		character["energy_max"] = content.get_int("rules.energy_max", 6)
 		character["gold"] = 0
 		character["consumable"] = null
@@ -330,6 +371,24 @@ func _create_party() -> void:
 ## points and equipped gear (content data).
 func _apply_stats(character: Dictionary) -> void:
 	Attributes.recalculate(character, content)
+	var tree: Dictionary = character.get("_profile", {}).get("class_trees", {}).get(character["class"], {})
+	var prestige := int(character.get("_profile", {}).get("prestige", {}).get(character["class"], 0))
+	var hp_bonus := 0.02 * int(tree.get("vitality", 0)) + 0.01 * prestige
+	character["max_hp"] = int(round(float(character["max_hp"]) * (1.0 + hp_bonus)))
+	character["damage_multiplier"] = 1.0 + 0.02 * int(tree.get("might", 0)) + 0.01 * prestige
+	character["crit"] = float(character.get("crit", 0.0)) + 0.01 * int(tree.get("precision", 0))
+	character["derived"]["initiative"] = float(character["derived"].get("initiative", character["spd"])) + floori(int(tree.get("swiftness", 0)) / 2)
+
+
+func _tree_level(character: Dictionary, node: String) -> int:
+	return int(character.get("_profile", {}).get("class_trees", {}).get(character.get("class", ""), {}).get(node, 0))
+
+
+func _energy_bonus(character: Dictionary) -> int:
+	var bonus := 1 if _tree_level(character, "reserves") >= 5 else 0
+	if str(character.get("race", "Human")) == "Lunaeia":
+		bonus += 1
+	return bonus
 
 
 # --- Camp: crafting, gear and stat points (ADR-0011) --------------------------
@@ -559,6 +618,7 @@ func _after_encounter_step() -> void:
 		if encounter.result == "defeat":
 			_end_match("defeat")
 			return
+	layers_passed += 1
 	if phase == "boss":
 		_end_match("victory")
 		return
@@ -582,6 +642,12 @@ func _reach_boss() -> void:
 func _end_match(outcome: String) -> void:
 	var reached_boss := phase == "boss"
 	phase = outcome
+	var base_gems := layers_passed * content.get_int("meta.gems.layer", 10)
+	if outcome == "victory":
+		base_gems += content.get_int("meta.gems.boss", 50)
+	base_gems += clues.size() * content.get_int("meta.gems.story_clue", 5)
+	for slot in gems_earned.size():
+		gems_earned[slot] += base_gems
 	encounter = null
 	vote = null
 	var ending := content.get_dict("ending.%s" % outcome)
@@ -599,6 +665,7 @@ func _end_match(outcome: String) -> void:
 		"clues": clues.duplicate(true),
 		"gold": gold,
 		"party": party_view(),
+		"gems_earned": gems_earned.duplicate(),
 	}
 	emit({"type": "match_ended", "result": outcome, "summary": summary})
 

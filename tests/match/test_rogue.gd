@@ -24,18 +24,25 @@ var seen: Array = []
 
 ## A lone human Rogue (ATK 11, crit 0) against two slow, harmless wolves
 ## with DEF 2 and 500 HP.
-func _start(extra: Dictionary = {}, party: Dictionary = LONE_ROGUE) -> void:
+func _start(extra: Dictionary = {}, party: Dictionary = LONE_ROGUE, equip_enervation: bool = false) -> void:
 	var group := {"encounters": {"combat": {"groups": [{"id": "test",
 			"enemies": ["grey_wolf", "grey_wolf"], "layers": [1, 5]}]}}}
 	var wolves := {"enemies": {"grey_wolf": {"stats": {"max_hp": 500, "atk": 0, "def": 2, "spd": 5, "crit": 0},
 			"rewards": {"drops": []}}}}
 	h = MatchHarness.new(5, MatchHarness.merge([MatchHarness.class_and_combat("rogue"),
 			MatchHarness.EXACT_DAMAGE, party, group, wolves, DARTS, extra]))
-	sessions = h.start_with_humans(1)
-	h.gain_class(sessions)
+	if equip_enervation:
+		sessions = [h.create_room("Rogue")]
+		h.server.command(sessions[0], {"type": "set_loadout", "class": "rogue", "race": "Human", "boons": ["Enervation"]})
+		h.start(sessions[0])
+	else:
+		sessions = h.start_with_humans(1)
+		h.gain_class(sessions)
 	h.take_route(sessions, "combat")
 	seen = []
 	_collect()
+	if equip_enervation:
+		_until_my_turn()
 
 
 func _encounter() -> Dictionary:
@@ -84,16 +91,16 @@ func _status(unit: String, status: String) -> Dictionary:
 	return {}
 
 
-func test_rogue_is_a_tier_1_class_with_four_skills_and_enervation() -> void:
+func test_rogue_is_a_tier_1_class_with_four_skills_and_enervation_boon() -> void:
 	h = MatchHarness.new(1)
 	assert_eq(h.content.get_value("classes.rogue.skills"), ["stab", "prep_time", "poke_up", "inject_venom"])
 	var costs := []
 	for skill in ["stab", "prep_time", "poke_up", "inject_venom"]:
 		costs.append([h.content.get_int("skills.%s.energy" % skill), h.content.get_int("skills.%s.cooldown" % skill)])
 	assert_eq(costs, [[1, 4], [1, 6], [2, 3], [2, 6]], "Energy/cooldown from the AAC reference")
-	var passive := h.content.get_dict("classes.rogue.passive")
-	assert_eq([passive["name"], passive["dot_bonus"], passive["dot_bonus_cap"], passive["dot_out"], passive["dot_in"]],
-			["Enervation", 0.05, 1.4, 1.15, 1.15])
+	assert_eq(h.content.get_dict("classes.rogue.passive"), {})
+	assert_eq(h.content.get_dict("meta.boons.Enervation.effect"),
+			{"dot_bonus": 0.05, "dot_bonus_cap": 1.4, "dot_out": 1.15, "dot_in": 1.15})
 
 
 func test_taking_the_rogue_class_unlocks_its_skills() -> void:
@@ -103,7 +110,7 @@ func test_taking_the_rogue_class_unlocks_its_skills() -> void:
 
 
 func test_stab_pierces_half_the_defense_and_causes_bleed() -> void:
-	_start()
+	_start({}, LONE_ROGUE, true)
 	assert_ok(_act({"action": "skill", "skill": "stab", "target": "e0"}))
 	var hit: Dictionary = _mine()["results"][0]
 	assert_eq(hit["damage"], 14, "11 x 1.3 - 2 DEF x 0.5 x half = 13.8")
@@ -111,7 +118,7 @@ func test_stab_pierces_half_the_defense_and_causes_bleed() -> void:
 
 
 func test_prep_time_coats_the_next_three_damaging_actions_with_poison() -> void:
-	_start()
+	_start({}, LONE_ROGUE, true)
 	assert_ok(_act({"action": "skill", "skill": "prep_time", "target": "p0"}))
 	var coat := _status("p0", "venom_coat")
 	assert_eq([coat["name"], coat["kind"], coat["charges"]], ["Prep Time", "buff", 3])
@@ -126,7 +133,7 @@ func test_prep_time_coats_the_next_three_damaging_actions_with_poison() -> void:
 
 
 func test_poke_up_stabs_three_times_and_bleeds_on_every_stab() -> void:
-	_start()
+	_start({}, LONE_ROGUE, true)
 	_act({"action": "defend"})
 	_until_my_turn()
 	assert_ok(_act({"action": "skill", "skill": "poke_up", "target": "e0"}))
@@ -137,7 +144,7 @@ func test_poke_up_stabs_three_times_and_bleeds_on_every_stab() -> void:
 
 
 func test_rogue_dots_are_fifteen_percent_stronger() -> void:
-	_start()
+	_start({}, LONE_ROGUE, true)
 	_act({"action": "defend"})
 	_until_my_turn()
 	_act({"action": "skill", "skill": "poke_up", "target": "e0"})
@@ -147,7 +154,7 @@ func test_rogue_dots_are_fifteen_percent_stronger() -> void:
 
 
 func test_enervation_adds_five_percent_per_dot_kind_on_the_target() -> void:
-	_start()
+	_start({}, LONE_ROGUE, true)
 	_act({"action": "item", "item": "bleed_dart", "target": "e0"})
 	_until_my_turn()
 	_act({"action": "item", "item": "poison_dart", "target": "e0"})
@@ -160,24 +167,24 @@ func test_enervation_adds_five_percent_per_dot_kind_on_the_target() -> void:
 
 
 func test_enervation_is_capped() -> void:
-	_start({"classes": {"rogue": {"passive": {"dot_bonus": 0.5}}}})
+	_start({"classes": {"rogue": {"passive": {"dot_bonus": 0.5}}}}, LONE_ROGUE, true)
 	_act({"action": "item", "item": "bleed_dart", "target": "e0"})
 	_until_my_turn()
 	_act({"action": "item", "item": "poison_dart", "target": "e0"})
 	_until_my_turn()
 	_act({"action": "attack", "target": "e0"})
-	assert_eq(_mine()["results"][0]["damage"], 14, "x2.0 capped at x1.4")
+	assert_eq(_mine()["results"][0]["damage"], 11, "the Boon's x1.4 cap is fixed in content")
 
 
 func test_inject_venom_grows_with_each_dot_kind_then_adds_toxin() -> void:
-	_start()
+	_start({}, LONE_ROGUE, true)
 	_act({"action": "defend"})
 	_until_my_turn()
 	assert_ok(_act({"action": "skill", "skill": "inject_venom", "target": "e1"}))
 	var clean: Dictionary = _mine()["results"][0]
 	assert_eq(clean["damage"], 10, "no DoT: 11 x 1.0 - 1")
 	assert_eq(clean["applied"], [{"status": "toxin", "stacks": 2, "turns": 2}])
-	_start()
+	_start({}, LONE_ROGUE, true)
 	_act({"action": "item", "item": "bleed_dart", "target": "e0"})
 	_until_my_turn()
 	_act({"action": "item", "item": "poison_dart", "target": "e0"})
@@ -190,7 +197,8 @@ func test_rogue_takes_more_damage_from_dots() -> void:
 	_start({"enemies": {"grey_wolf": {"stats": {"spd": 20}, "behavior": "charge_strongest",
 			"attack": {"target": "enemy", "damage": {"amount": 1}, "apply_status": [{"status": "poison", "stacks": 1}]}}},
 		"statuses": {"poison": {"damage": 10}},
-		"classes": {"rogue": {"stats": {"max_hp": 500}}}})
+		"party": {"ai_class_order": []},
+		"classes": {"rogue": {"stats": {"max_hp": 500}}}}, LONE_ROGUE, true)
 	_act({"action": "defend"})
 	_until_my_turn()
 	var ticks: Array = seen.filter(func(e): return e["type"] == "status_tick" and e["target"] == "p0")
