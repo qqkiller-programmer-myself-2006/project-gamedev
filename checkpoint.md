@@ -48,7 +48,7 @@
 | T9 ใช้ sprite ของเจ้าของงาน (Archer/Mage/Swordsman) | Codex | `ai/t9-sprites` / `../ai-t9` | #56 | T9a ตัดภาพกำลังทำ; T9b ใส่ใน BattleToken หลัง #48 merge |
 
 การตัดสินใจรอบ 3 (2026-09-29 12:10): ใช้ Claude Code + agy + Codex เท่านั้น ไม่ใช้ opencode (เขียนใน AGENTS.md แล้ว); มี subagent `codex-executor` / `agy-executor` ใน `.claude/agents/` (ใช้ได้ใน session ใหม่)
-โควตา: agy Gemini ทุกรุ่นหมด รีเซ็ตประมาณ 14:25 — ใช้ `-Model claude-opus-4-6-thinking` ใน agy แทนได้
+โควตา: agy Gemini หมด (รีเซ็ต ~14:25), agy Claude หมด (รีเซ็ต ~17:30) — ระหว่างนี้งานทั้งหมดไป Codex; T4-r2 และ T9a-r2 ย้ายมา Codex แล้ว
 
 การตัดสินใจรอบ 2 (2026-09-29): เลือก Class ก่อนเริ่มแบบ AAC, Enervation เป็น Boon, Robloxian → Human, Gems เก็บบน Cloudflare D1 → ADR-0013
 ข้อควรรู้: `~/AGENTS.md` และ `~/.codex/AGENTS.md` สั่งให้ Codex โยนงานให้ opencode — runner จึงใส่คำสั่ง override ไว้ใน prompt
