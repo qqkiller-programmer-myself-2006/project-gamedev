@@ -34,6 +34,7 @@ func listen_embedded(local_port: int) -> bool:
 	if match_server == null:
 		configure({})
 	_embedded = true
+	match_server.allow_dev = true  # only the in-client Playtest server; the online server never sets it
 	port = local_port
 	_listening = transport.listen(port, "127.0.0.1") == OK
 	if _listening:

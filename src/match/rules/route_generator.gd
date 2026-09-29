@@ -45,6 +45,12 @@ static func generate(rng: GameRng, content: ForestContent) -> Array:
 	return routes
 
 
+## One route option of `type` for `layer`, drawn from the same content pool as a
+## generated route. Used by the dev Playtest jump (MatchRun.dev_jump).
+static func option_for(rng: GameRng, content: ForestContent, type: String, layer: int) -> Dictionary:
+	return _make_option(rng, content, type, {}, layer)
+
+
 static func _pick_types(rng: GameRng, weights: Dictionary, count: int) -> Array:
 	var pool: Array = []
 	var pool_weights: Array = []

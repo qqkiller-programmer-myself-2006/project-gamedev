@@ -37,6 +37,7 @@ var _banner_label: Label
 var _banner_until := 0.0
 var _embedded_server: GameServer = null
 var _dev_playtest := false
+var _dev_jump: Dictionary = {}
 var _dev_tag: PanelContainer = null
 var story_launcher: StoryLauncher = null
 var story_save := StorySave.new()
@@ -187,11 +188,16 @@ func can_playtest() -> bool:
 	return not OS.has_feature("web") and (OS.is_debug_build() or options.has("dev"))
 
 
-func start_dev_playtest(seed_text: String = "") -> void:
+## Starts a single-player Playtest on an embedded server. `target` is a DevJump
+## target ("journey" = normal start); `class_id` optionally sets the player's Class.
+func start_dev_playtest(seed_text: String = "", target: String = "journey", class_id: String = "") -> void:
 	if not can_playtest():
 		return
 	if connection != null or _embedded_server != null:
 		disconnect_from_server()
+	_dev_jump = {}
+	if target != "journey" or not class_id.is_empty():
+		_dev_jump = {"type": "dev_jump", "target": target, "class": class_id}
 	var server_options := {}
 	if not seed_text.strip_edges().is_empty() and seed_text.is_valid_int():
 		server_options["seed"] = int(seed_text)
@@ -217,6 +223,7 @@ func start_dev_playtest(seed_text: String = "") -> void:
 
 func stop_dev_playtest() -> void:
 	_dev_playtest = false
+	_dev_jump = {}
 	if _dev_tag != null:
 		_dev_tag.visible = false
 	if _embedded_server != null:
@@ -335,6 +342,10 @@ func _on_result(_id: int, _cmd: Dictionary, result: Dictionary) -> void:
 			send({"type": "start_match"})
 	elif _dev_playtest and str(_cmd.get("type", "")) == "create_room":
 		send({"type": "start_match"})
+	elif _dev_playtest and str(_cmd.get("type", "")) == "start_match" and not _dev_jump.is_empty():
+		var jump := _dev_jump
+		_dev_jump = {}
+		send(jump)
 
 
 # --- Screens ------------------------------------------------------------------

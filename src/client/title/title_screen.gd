@@ -10,6 +10,13 @@ var _seed: LineEdit
 var _content: Control
 var _view := "menu"
 var _story_picks: Array[OptionButton] = []
+## DEV Playtest panel: [DevJump target, label] and the player's Class ("" = keep Classless).
+const PLAYTEST_STARTS := [
+	["journey", "Journey start"], ["combat", "Combat (Layer 1)"], ["merchant", "Merchant"],
+	["rest", "Rest camp"], ["class", "Class Encounter"], ["story", "Story event"],
+	["cave", "Cave (Layer 5 combat)"], ["boss", "Boss"],
+]
+const PLAYTEST_CLASSES := ["classless", "swordsman", "archer", "mage", "guardian", "assassin"]
 const STORY_CLASSES := ["swordsman", "archer", "mage", "guardian", "assassin"]
 const STORY_NAMES := ["Arin", "Bram", "Cora", "Dain", "Wren"]
 
@@ -24,7 +31,8 @@ func setup(app: ClientApp) -> void:
 	if _app.options.has("auto"):
 		_show_multiplayer()
 	if app.options.has("playtest") and app.can_playtest():
-		_app.start_dev_playtest("")
+		_app.start_dev_playtest(str(app.options.get("seed", "")), str(app.options.get("jump", "journey")),
+				str(app.options.get("class", "")))
 
 func _build_chrome() -> void:
 	var logo := UiKit.vbox(0)
@@ -72,25 +80,12 @@ func _show_menu() -> void:
 	play.set_meta("focus_id", "play")
 	body.add_child(play)
 	if _app.can_playtest():
-		var dev_row := UiKit.hbox(6)
-		var dev := UiKit.button("[DEV] Playtest  >", func() -> void: _app.start_dev_playtest(_seed.text if is_instance_valid(_seed) else ""), true)
+		var dev := UiKit.button("[DEV] Playtest  >", _show_playtest, true)
 		dev.set_meta("focus_id", "playtest")
 		dev.set_meta("dev", true)
-		dev.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		dev.tooltip_text = "DEV: embedded server, single-player fast path"
+		dev.tooltip_text = "DEV: embedded server, single-player; start at any scene"
 		dev.add_theme_color_override("font_color", UiKit.WARN)
-		dev_row.add_child(dev)
-		var options := UiKit.button("Seed", _toggle_playtest_options)
-		options.set_meta("dev", true)
-		options.tooltip_text = "Playtest options: fixed seed"
-		options.custom_minimum_size = Vector2(72, 0)
-		dev_row.add_child(options)
-		body.add_child(dev_row)
-		_seed = _line_edit("", "Playtest seed (optional number)", 12)
-		_seed.custom_minimum_size.y = 34
-		_seed.tooltip_text = "Same seed = same route and fights"
-		_seed.visible = false
-		body.add_child(_seed)
+		body.add_child(dev)
 	var settings := UiKit.button("Settings [F2]", _app.open_settings)
 	Icons.apply_to_button(settings, "settings", _app.settings.text_scale)
 	settings.set_meta("focus_id", "settings")
@@ -105,11 +100,43 @@ func _show_menu() -> void:
 		body.add_child(quit)
 	UiKit.focus_first(body)
 
-func _toggle_playtest_options() -> void:
-	if is_instance_valid(_seed):
-		_seed.visible = not _seed.visible
-		if _seed.visible:
-			_seed.grab_focus()
+## DEV panel: pick the scene to start at, the player's Class and a fixed seed.
+func _show_playtest() -> void:
+	_view = "playtest"
+	_clear_content()
+	var body := UiKit.vbox(8)
+	body.custom_minimum_size = Vector2(420, 0)
+	var panel := UiKit.panel(body)
+	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	panel.set_meta("base_y", 150.0)
+	panel.position = Vector2(88, _top(150))
+	panel.size = Vector2(460, 0)
+	add_child(panel)
+	_content = panel
+	body.add_child(UiKit.label("[DEV] PLAYTEST", "heading", UiKit.WARN))
+	body.add_child(UiKit.para("Single-player match on a local server. Same seed = same route and fights.", "dim"))
+	body.add_child(UiKit.label("Start at", "dim"))
+	var start_at := OptionButton.new()
+	for i in PLAYTEST_STARTS.size():
+		start_at.add_item(PLAYTEST_STARTS[i][1])
+	body.add_child(start_at)
+	body.add_child(UiKit.label("Class", "dim"))
+	var class_pick := OptionButton.new()
+	for entry in PLAYTEST_CLASSES:
+		class_pick.add_item(entry.capitalize())
+	body.add_child(class_pick)
+	body.add_child(UiKit.label("Seed (optional number)", "dim"))
+	_seed = _line_edit("", "e.g. 7", 12)
+	_seed.custom_minimum_size.y = 34
+	body.add_child(_seed)
+	var go := UiKit.primary("Start Playtest", func() -> void:
+		_app.start_dev_playtest(_seed.text, PLAYTEST_STARTS[start_at.selected][0], PLAYTEST_CLASSES[class_pick.selected]))
+	go.set_meta("focus_id", "playtest_start")
+	body.add_child(go)
+	var back := UiKit.button("Back [Esc]", _show_menu)
+	Icons.apply_to_button(back, "back", _app.settings.text_scale)
+	body.add_child(back)
+	UiKit.focus_first(body)
 
 func _show_play() -> void:
 	_view = "play"
@@ -316,7 +343,7 @@ func handle_key(app: ClientApp, keycode: int) -> bool:
 		match _view:
 			"story_setup", "multiplayer":
 				_show_play()
-			"play", "credits":
+			"play", "credits", "playtest":
 				_show_menu()
 			_:
 				app.stop_dev_playtest()

@@ -43,6 +43,8 @@ const ERRORS := {
 	"already_decided": "You already answered.",
 	"unknown_command": "The server did not understand that.",
 	"unknown_session": "Your session expired. Please reconnect.",
+	"dev_offline_only": "Developer shortcuts only work in the local Playtest.",
+	"invalid_jump": "That Playtest jump does not exist.",
 	"story_offline_only": "Story mode is an offline journey. Play alone or over Local Network.",
 	"invalid_save": "This story save file is broken or from a different version.",
 	"old_save": "This save is from an older build.",
