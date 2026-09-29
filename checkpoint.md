@@ -62,3 +62,5 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - 2026-09-29 12:35: บั๊ก runner — Codex ค้างที่ "Reading additional input from stdin" 2 ชม. (T1-r3 เสียเวลาฟรี) แก้แล้ว: stdin ว่าง + watchdog poll; relaunch T1-r3 และ T9a-r2 (-NoSandbox เพราะ sandbox รัน Python ไม่ได้)
 - เหลือขัดเกลา (#54): บอสเติม Energy แต่ไม่เคยใช้
 - 2026-09-29 12:50: เจ้าของงานสั่งให้ใช้ subagent codex-executor แบบ background; ชนิดนี้ยังไม่โหลดใน session นี้ จึงใช้ general-purpose + คำสั่งเดียวกันแทน (session ใหม่เรียก codex-executor / agy-executor ได้ตรงๆ). T9b spec พร้อม (รอ #48 + T9a)
+- 2026-09-29 13:00: เจ้าของงานขอหน้าแรกใหม่ + ปุ่ม bypass เล่นทดสอบ → #57; T10a (Codex, `ai/t10-home` / `../ai-t10`) กำลังทำ: หน้าแรก animated + Playtest ▶ (debug/--dev เท่านั้น, embedded GameServer, `--dev --playtest`); T10b (หลัง #52): กระโดดไปฉากที่ต้องการ + เลือก Class/seed
+- T9a ตัดภาพเสร็จ merged 6a62ac5; T9b รอ #48
