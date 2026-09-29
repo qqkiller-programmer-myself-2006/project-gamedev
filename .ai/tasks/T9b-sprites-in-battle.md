@@ -35,3 +35,14 @@ Do NOT touch `src/match/**`, `content/**`, `tests/**` (except a UI-only test), o
   nothing covering nameplates, no black halo around sprites.
 
 Report in English: files changed, items 1–5 done/partial, test summary line, screenshot paths.
+
+## Also fix these combat leftovers from #48 QA (same files)
+
+6. Skill/Fight cards cut their text ("Cost: 0 | Cooldo…"): widen the grid or use a smaller font for the cost line so the full
+   "Cost: x | Cooldown: y" fits at scale 1.0 and 1.4.
+7. The big green "Victory!" text overlaps a nameplate: place it in the top-centre area, clear of every nameplate.
+8. Reward text bottom-left ("+18 Gold", "30 EXP", clue) overlaps the combat log: move the log up or the rewards above it so
+   they never overlap.
+9. Long enemy names are truncated in the nameplate ("Elder Thornwarde…"): allow the boss plate to be wider or shrink the font.
+10. Focus must be enabled when `choices.focus` is true (the server supports it now) and enemies must show their blue Energy bar
+    (`enemies[].energy` exists now). Check both in screenshots.
