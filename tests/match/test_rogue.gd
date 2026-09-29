@@ -113,7 +113,7 @@ func test_stab_pierces_half_the_defense_and_causes_bleed() -> void:
 	_start({}, LONE_ROGUE, true)
 	assert_ok(_act({"action": "skill", "skill": "stab", "target": "e0"}))
 	var hit: Dictionary = _mine()["results"][0]
-	assert_eq(hit["damage"], 14, "11 x 1.3 - 2 DEF x 0.5 x half = 13.8")
+	assert_eq(hit["damage"], 13, "10 x 1.3 - 2 DEF x 0.5 x half = 12.5 -> 13")
 	assert_eq(hit["applied"], [{"status": "bleed", "stacks": 1, "turns": 3}])
 
 
@@ -160,20 +160,20 @@ func test_enervation_adds_five_percent_per_dot_kind_on_the_target() -> void:
 	_act({"action": "item", "item": "poison_dart", "target": "e0"})
 	_until_my_turn()
 	_act({"action": "attack", "target": "e1"})
-	assert_eq(_mine()["results"][0]["damage"], 10, "clean target: 11 - 1")
+	assert_eq(_mine()["results"][0]["damage"], 9, "clean target: 10 - 1")
 	_until_my_turn()
 	_act({"action": "attack", "target": "e0"})
-	assert_eq(_mine()["results"][0]["damage"], 11, "two DoT kinds: 10 x 1.10")
+	assert_eq(_mine()["results"][0]["damage"], 9, "two DoT kinds: 9 x 1.10 = 9.9 -> 9")
 
 
 func test_enervation_is_capped() -> void:
-	_start({"classes": {"rogue": {"passive": {"dot_bonus": 0.5}}}}, LONE_ROGUE, true)
+	_start({"meta": {"boons": {"Enervation": {"effect": {"dot_bonus": 0.5}}}}}, LONE_ROGUE, true)
 	_act({"action": "item", "item": "bleed_dart", "target": "e0"})
 	_until_my_turn()
 	_act({"action": "item", "item": "poison_dart", "target": "e0"})
 	_until_my_turn()
 	_act({"action": "attack", "target": "e0"})
-	assert_eq(_mine()["results"][0]["damage"], 11, "the Boon's x1.4 cap is fixed in content")
+	assert_eq(_mine()["results"][0]["damage"], 13, "9 * 1.4 = 12.6 -> 13")
 
 
 func test_inject_venom_grows_with_each_dot_kind_then_adds_toxin() -> void:
@@ -182,7 +182,7 @@ func test_inject_venom_grows_with_each_dot_kind_then_adds_toxin() -> void:
 	_until_my_turn()
 	assert_ok(_act({"action": "skill", "skill": "inject_venom", "target": "e1"}))
 	var clean: Dictionary = _mine()["results"][0]
-	assert_eq(clean["damage"], 10, "no DoT: 11 x 1.0 - 1")
+	assert_eq(clean["damage"], 9, "no DoT: 10 x 1.0 - 1")
 	assert_eq(clean["applied"], [{"status": "toxin", "stacks": 2, "turns": 2}])
 	_start({}, LONE_ROGUE, true)
 	_act({"action": "item", "item": "bleed_dart", "target": "e0"})
@@ -190,7 +190,7 @@ func test_inject_venom_grows_with_each_dot_kind_then_adds_toxin() -> void:
 	_act({"action": "item", "item": "poison_dart", "target": "e0"})
 	_until_my_turn()
 	assert_ok(_act({"action": "skill", "skill": "inject_venom", "target": "e0"}))
-	assert_eq(_mine()["results"][0]["damage"], 21, "(11 x 1.8 - 1) x Enervation 1.10 = 20.7")
+	assert_eq(_mine()["results"][0]["damage"], 19, "(10 x 1.8 - 1) x Enervation 1.10 = 18.7 -> 19")
 
 
 func test_rogue_takes_more_damage_from_dots() -> void:
@@ -198,7 +198,7 @@ func test_rogue_takes_more_damage_from_dots() -> void:
 			"attack": {"target": "enemy", "damage": {"amount": 1}, "apply_status": [{"status": "poison", "stacks": 1}]}}},
 		"statuses": {"poison": {"damage": 10}},
 		"party": {"ai_class_order": []},
-		"classes": {"rogue": {"stats": {"max_hp": 500}}}}, LONE_ROGUE, true)
+		"classes": {"rogue": {"base": {"max_hp": 500}}}}, LONE_ROGUE, true)
 	_act({"action": "defend"})
 	_until_my_turn()
 	var ticks: Array = seen.filter(func(e): return e["type"] == "status_tick" and e["target"] == "p0")

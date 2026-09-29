@@ -16,6 +16,12 @@ Files you may change: `content/forest.json`, `docs/balance.md`, `tools/simulate.
 Verify: `bash scripts/run_tests.sh` → 0 failed (exact line); both simulate modes with the final numbers. ONE Godot process at a
 time. Report in English: changes, test line, final win rates for both modes.
 
+
+## Note for this run
+A previous executor (Codex) worked on this task and was stopped by its usage limit before finishing or verifying. Its edits are
+committed on this branch as the latest "wip" commit (see `git show --stat HEAD`). Review them, keep what is right, finish every
+item, and verify. Run only ONE Godot process at a time (low RAM). Paste the exact final test summary line.
+
 ## Also: Story mode (from #58 QA)
 `simulate.gd --story --seeds=40 --humans=1` wins 9/40 (23%), all defeats at the boss, and the story bot never visits Merchant or
 Rest. First make `tests/support/match_bot.gd` in story mode play every character with the class AI presets (`src/match/ai/party_ai.gd`)

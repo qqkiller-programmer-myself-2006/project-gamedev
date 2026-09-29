@@ -217,6 +217,20 @@ func _shop(session: int, encounter: Dictionary) -> void:
 ## 3. Use a ready Skill where it makes sense.
 ## 4. Attack the weakest enemy in reach.
 func _fight(session: int, slot: int, view: Dictionary, encounter: Dictionary) -> void:
+	if view.get("story", false):
+		var snap := harness.server.snapshot(session)
+		var room = harness.server._rooms[snap["room"]["code"]]
+		var run = room.run
+		var combat = run.encounter
+		if run.encounter is ClassEncounter:
+			combat = run.encounter._trial
+		var cmd := PartyAi.decide(run, combat, slot)
+		if not cmd.is_empty():
+			if cmd.has("targets") and cmd["targets"].size() > 0:
+				cmd["target"] = cmd["targets"][0]
+			_act(session, slot, cmd)
+			return
+	
 	var me := "p%d" % slot
 	var choices: Dictionary = encounter["choices"]
 	var skills: Dictionary = choices["skills"]

@@ -92,7 +92,7 @@ func test_archers_pick_targets_at_random() -> void:
 
 func test_wisp_heals_a_wounded_ally() -> void:
 	_fight(["thornback_boar", "forest_wisp"], {"enemies": {
-		"thornback_boar": {"stats": {"max_hp": 60, "spd": 5}},
+		"thornback_boar": {"stats": {"max_hp": 150, "spd": 5}},
 		"forest_wisp": {"stats": {"spd": 4}},
 	}})
 	h.server.command(sessions[0], {"type": "action", "action": "attack", "target": "e0"})
