@@ -244,11 +244,11 @@ func test_bandit_hideout_offers_the_assassin_class() -> void:
 		var harness := MatchHarness.new(seed_value)
 		var sessions_here := harness.start_with_humans(1)
 		for option in harness.match_view(sessions_here[0])["vote"]["options"]:
-			if option["name"] == "Bandit Hideout":
+			if option["name"] == "Thief Hideout":
 				harness.server.command(sessions_here[0], {"type": "vote", "option": option["index"]})
 				harness.advance(harness.content.get_float("rules.travel_seconds") + 0.1, 0.1)
 				offered = str(harness.match_view(sessions_here[0])["encounter"]["class"])
 				break
 		if not offered.is_empty():
 			break
-	assert_eq(offered, "assassin", "some seed offers the Bandit Hideout in Layer 1, and it teaches assassin")
+	assert_eq(offered, "assassin", "some seed offers the Thief Hideout in Layer 1, and it teaches assassin")

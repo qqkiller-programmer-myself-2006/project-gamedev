@@ -130,7 +130,7 @@ func test_encounter_can_have_several_enemies() -> void:
 	var names := []
 	for enemy in _combat_view()["enemies"]:
 		names.append(enemy["name"])
-	assert_eq(names, ["Thornback Boar", "Grey Wolf", "Forest Wisp"])
+	assert_eq(names, ["Thornback Boar", "Wolf", "Slime"])
 
 
 func test_enemy_view_describes_each_kind() -> void:

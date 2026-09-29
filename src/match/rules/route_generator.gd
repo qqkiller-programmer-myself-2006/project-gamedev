@@ -36,10 +36,11 @@ static func generate(rng: GameRng, content: ForestContent) -> Array:
 
 	var routes: Array = []
 	var used_story_sites := {}
-	for types in layers:
+	for layer_index in layers.size():
+		var types: Array = layers[layer_index]
 		var options: Array = []
 		for type in types:
-			options.append(_make_option(rng, content, type, used_story_sites))
+			options.append(_make_option(rng, content, type, used_story_sites, layer_index + 1))
 		routes.append(options)
 	return routes
 
@@ -81,8 +82,14 @@ static func _force(rng: GameRng, layers: Array, type: String, index: int) -> voi
 		types[rng.pick(replaceable)] = type
 
 
-static func _make_option(rng: GameRng, content: ForestContent, type: String, used_story_sites: Dictionary) -> Dictionary:
+static func _make_option(rng: GameRng, content: ForestContent, type: String, used_story_sites: Dictionary, layer: int) -> Dictionary:
 	var sites := content.get_array("journey.sites.%s" % type)
+	var layer_sites: Array = []
+	for candidate in sites:
+		var allowed_layers: Array = candidate.get("layers", [1, 99])
+		if layer >= int(allowed_layers[0]) and layer <= int(allowed_layers[1]):
+			layer_sites.append(candidate)
+	sites = layer_sites
 	if type == "class":
 		sites = _class_sites(content, sites)
 	if type == "story":

@@ -147,4 +147,4 @@ func test_offer_explains_guardian_and_its_skills() -> void:
 		names.append(skill["name"])
 		assert_false(str(skill["description"]).is_empty())
 	assert_eq(names, ["Protect", "Shield Wall"])
-	assert_eq(_encounter()["trial"]["enemies"][0]["name"], "Stone Sentinel")
+	assert_eq(_encounter()["trial"]["enemies"][0]["name"], "Golem")
