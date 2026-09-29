@@ -3,7 +3,7 @@
 #   IDLE     no activity for over half the idle limit (the runner kills it at the limit and resumes)
 #   DEAD     process gone but never marked finished (runner itself was killed) -> marked 'died'
 #   NOBEAT   old-style run without heartbeat (started by a previous runner version)
-# Usage: powershell -File .ai/agent-status.ps1 [-All]
+# Usage: powershell -NoProfile -ExecutionPolicy Bypass -File .ai/agent-status.ps1 [-All]
 param([switch]$All)
 $logDir = Join-Path $PSScriptRoot 'logs'
 $rows = foreach ($f in Get-ChildItem $logDir -Filter *.status.json | Sort-Object LastWriteTime -Descending) {
