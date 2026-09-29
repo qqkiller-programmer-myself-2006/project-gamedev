@@ -262,11 +262,11 @@
       },
       "atk_attr": "str",
       "base": {
-        "max_hp": 42,
+        "max_hp": 50,
         "atk": 12,
-        "def": 4,
+        "def": 5,
         "mag": 1,
-        "res": 2,
+        "res": 3,
         "spd": 9,
         "crit": 0.02
       }
@@ -312,7 +312,7 @@
       "atk_attr": "str",
       "base": {
         "max_hp": 24,
-        "atk": 5,
+        "atk": 4,
         "def": 2,
         "mag": 1,
         "res": 2,
@@ -362,7 +362,7 @@
       "atk_attr": "dex",
       "base": {
         "max_hp": 28,
-        "atk": 3,
+        "atk": 2,
         "def": 2,
         "mag": 1,
         "res": 2,
@@ -414,7 +414,7 @@
         "max_hp": 22,
         "atk": -2,
         "def": 1,
-        "mag": 6,
+        "mag": 5,
         "res": 3,
         "spd": 8,
         "crit": 0.03
@@ -462,7 +462,7 @@
       "atk_attr": "str",
       "base": {
         "max_hp": 34,
-        "atk": 4,
+        "atk": 3,
         "def": 4,
         "mag": 0,
         "res": 4,
@@ -515,7 +515,7 @@
       "atk_attr": "dex",
       "base": {
         "max_hp": 26,
-        "atk": 4,
+        "atk": 3,
         "def": 2,
         "mag": 1,
         "res": 2,
@@ -1210,10 +1210,10 @@
       "behavior": "boss",
       "description": "The Guardian of the Forest: ancient bark and thorn. Watch for its warnings; its heaviest blows come one turn later.",
       "stats": {
-        "max_hp": 1450,
-        "atk": 18,
+        "max_hp": 1350,
+        "atk": 20,
         "def": 6,
-        "mag": 14,
+        "mag": 16,
         "res": 5,
         "spd": 9,
         "crit": 0.05
@@ -1961,7 +1961,7 @@
   },
   "class_encounters": {
     "mastery_exp": 0,
-    "pass_exp": 40
+    "pass_exp": 60
   },
   "story": {
     "events": {

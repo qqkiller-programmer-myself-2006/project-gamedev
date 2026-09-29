@@ -46,3 +46,18 @@ func test_legacy_rogue_loadout_command_is_accepted_as_assassin() -> void:
 	var session := h.create_room()
 	assert_ok(h.server.command(session, {"type": "set_loadout", "class": "rogue", "race": "Human", "boons": []}))
 	assert_eq(h.room_view(session)["slots"][0]["loadout"]["class"], "assassin")
+
+
+func test_loadout_ids_require_exact_top_level_keys() -> void:
+	var h := MatchHarness.new(15)
+	var session := h.create_room()
+	assert_rejected(h.server.command(session, {"type": "set_loadout",
+			"class": "swordsman.base", "race": "Human", "boons": []}), "invalid_loadout")
+	assert_rejected(h.server.command(session, {"type": "set_loadout",
+			"class": "swordsman", "race": "Human", "boons": ["Enervation.effect"]}),
+			"invalid_loadout")
+	assert_rejected(h.server.command(session, {"type": "set_loadout",
+			"class": "swordsman", "race": "Human", "boons": "Alert"}), "invalid_loadout")
+	assert_rejected(h.server.command(session, {"type": "set_loadout",
+			"class": "swordsman", "race": "Human", "boons": ["Alert", "Alert"]}),
+			"invalid_loadout")

@@ -178,7 +178,10 @@ func handle_setup_command(slot: int, cmd: Dictionary) -> Dictionary:
 			var target := int(cmd.get("slot", slot)) if story else slot
 			if target < 0 or target >= SLOT_COUNT:
 				return {"ok": false, "error": "invalid_slot"}
-			if story and target != host_slot and (str(cmd.get("race", "Human")) != "Human" or not cmd.get("boons", []).is_empty()):
+			var raw_boons = cmd.get("boons", [])
+			if not (raw_boons is Array):
+				return {"ok": false, "error": "invalid_loadout"}
+			if story and target != host_slot and (str(cmd.get("race", "Human")) != "Human" or not raw_boons.is_empty()):
 				return {"ok": false, "error": "invalid_loadout"}
 			return _set_loadout(target, cmd, profile)
 		"buy_race":
@@ -192,22 +195,33 @@ func handle_setup_command(slot: int, cmd: Dictionary) -> Dictionary:
 	return {"ok": false, "error": "unknown_command"}
 
 func _set_loadout(slot: int, cmd: Dictionary, profile: Dictionary) -> Dictionary:
-	var class_id := str(cmd.get("class", ""))
+	if not (cmd.get("class") is String) or not (cmd.get("race") is String) \
+			or not (cmd.get("boons", []) is Array):
+		return {"ok": false, "error": "invalid_loadout"}
+	var class_id := str(cmd["class"])
 	if class_id == "rogue":
 		class_id = "assassin"
-	var race := str(cmd.get("race", ""))
-	var boons: Array = cmd.get("boons", [])
-	if _content.get_dict("classes.%s" % class_id).is_empty() or class_id == "classless":
-		return {"ok": false, "error": "invalid_class"}
+	var race := str(cmd["race"])
+	var boons: Array = cmd["boons"]
+	var classes := _content.get_dict("classes")
+	var races := _content.get_dict("meta.races")
+	var boon_defs := _content.get_dict("meta.boons")
+	if class_id == "classless" or not classes.has(class_id) or not (classes[class_id] is Dictionary):
+		return {"ok": false, "error": "invalid_loadout"}
+	if not races.has(race) or not (races[race] is Dictionary):
+		return {"ok": false, "error": "invalid_loadout"}
 	if not profile.get("races_owned", []).has(race):
 		return {"ok": false, "error": "race_not_owned"}
 	if boons.size() > 5:
 		return {"ok": false, "error": "over_capacity"}
 	var used := 0
+	var seen := {}
 	for boon in boons:
-		var data := _content.get_dict("meta.boons.%s" % boon)
-		if data.is_empty():
-			return {"ok": false, "error": "invalid_boon"}
+		if not (boon is String) or seen.has(boon) or not boon_defs.has(boon) \
+				or not (boon_defs[boon] is Dictionary):
+			return {"ok": false, "error": "invalid_loadout"}
+		seen[boon] = true
+		var data: Dictionary = boon_defs[boon]
 		used += int(data.get("slots", 0))
 		if boon == "The Chosen One" and _prestige_total(profile) < 5:
 			return {"ok": false, "error": "locked"}
@@ -219,8 +233,9 @@ func _set_loadout(slot: int, cmd: Dictionary, profile: Dictionary) -> Dictionary
 	return {"ok": true, "loadout": slots[slot]["loadout"]}
 
 func _buy_race(slot: int, race: String, profile: Dictionary) -> Dictionary:
-	var data := _content.get_dict("meta.races.%s" % race)
-	if data.is_empty(): return {"ok": false, "error": "invalid_race"}
+	var races := _content.get_dict("meta.races")
+	if not races.has(race) or not (races[race] is Dictionary): return {"ok": false, "error": "invalid_race"}
+	var data: Dictionary = races[race]
 	if profile["races_owned"].has(race): return {"ok": false, "error": "already_owned"}
 	var cost := int(data.get("cost", 0))
 	if int(profile["gems"]) < cost: return {"ok": false, "error": "not_enough_gems"}
@@ -229,11 +244,13 @@ func _buy_race(slot: int, race: String, profile: Dictionary) -> Dictionary:
 	return {"ok": true, "gems": profile["gems"], "race": race}
 
 func _tree_upgrade(_slot: int, class_id: String, node: String, profile: Dictionary) -> Dictionary:
-	if _content.get_dict("classes.%s" % class_id).is_empty() or class_id == "classless":
+	var classes := _content.get_dict("classes")
+	if not classes.has(class_id) or not (classes[class_id] is Dictionary) or class_id == "classless":
 		return {"ok": false, "error": "invalid_class"}
 	var tree: Dictionary = profile["class_trees"].get(class_id, {})
 	var level := int(tree.get(node, 0))
-	if _content.get_dict("meta.class_tree.%s" % node).is_empty(): return {"ok": false, "error": "invalid_node"}
+	var nodes := _content.get_dict("meta.class_tree")
+	if not nodes.has(node) or not (nodes[node] is Dictionary): return {"ok": false, "error": "invalid_node"}
 	if level >= 5: return {"ok": false, "error": "max_level"}
 	var cost := int(_content.get_value("meta.class_tree.%s.cost" % node, 10)) * (level + 1)
 	if int(profile["gems"]) < cost: return {"ok": false, "error": "not_enough_gems"}
@@ -243,7 +260,8 @@ func _tree_upgrade(_slot: int, class_id: String, node: String, profile: Dictiona
 	return {"ok": true, "gems": profile["gems"], "class": class_id, "node": node, "level": level + 1}
 
 func _buy_prestige(_slot: int, class_id: String, profile: Dictionary) -> Dictionary:
-	if _content.get_dict("classes.%s" % class_id).is_empty() or class_id == "classless":
+	var classes := _content.get_dict("classes")
+	if not classes.has(class_id) or not (classes[class_id] is Dictionary) or class_id == "classless":
 		return {"ok": false, "error": "invalid_class"}
 	var tree: Dictionary = profile["class_trees"].get(class_id, {})
 	for node in _content.get_dict("meta.class_tree").keys():
@@ -258,9 +276,17 @@ func _buy_prestige(_slot: int, class_id: String, profile: Dictionary) -> Diction
 	return {"ok": true, "gems": profile["gems"], "prestige": current + 1}
 
 func _reset_tree(_slot: int, class_id: String, profile: Dictionary) -> Dictionary:
-	if _content.get_dict("classes.%s" % class_id).is_empty() or class_id == "classless":
+	var classes := _content.get_dict("classes")
+	if not classes.has(class_id) or not (classes[class_id] is Dictionary) or class_id == "classless":
 		return {"ok": false, "error": "invalid_class"}
 	var tree: Dictionary = profile["class_trees"].get(class_id, {})
+	var has_levels := false
+	for value in tree.values():
+		if int(value) > 0:
+			has_levels = true
+			break
+	if not has_levels:
+		return {"ok": false, "error": "nothing_to_reset"}
 	var reset_cost := _content.get_int("meta.reset_cost", 50)
 	if int(profile["gems"]) < reset_cost:
 		return {"ok": false, "error": "not_enough_gems"}

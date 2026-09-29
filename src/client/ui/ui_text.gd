@@ -60,6 +60,7 @@ const ERRORS := {
 	"invalid_node": "That Skill Tree node is unavailable.",
 	"max_level": "This node is already at level 5.",
 	"max_prestige": "This Class has reached maximum Prestige.",
+	"nothing_to_reset": "This Skill Tree has no levels to reset.",
 }
 
 const TYPE_LABELS := {

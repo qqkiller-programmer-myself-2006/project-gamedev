@@ -44,3 +44,14 @@ func test_match_end_awards_gems_and_persists_them() -> void:
 	assert_true(view["summary"].has("gems_earned"))
 	assert_true(int(view["summary"]["gems_earned"][0]) > 0)
 	assert_eq(store.load_profile(TOKEN)["gems"], int(view["summary"]["gems_earned"][0]))
+
+
+func test_reset_empty_tree_charges_nothing() -> void:
+	var store := _profile(100)
+	var h := MatchHarness.new(23, {}, store)
+	var session := _room(h)
+	var before := int(h.room_view(session)["profile"]["gems"])
+	assert_rejected(h.server.command(session, {"type": "reset_tree", "class": "swordsman"}),
+			"nothing_to_reset")
+	assert_eq(h.room_view(session)["profile"]["gems"], before)
+	assert_eq(UiText.error("nothing_to_reset"), "This Skill Tree has no levels to reset.")

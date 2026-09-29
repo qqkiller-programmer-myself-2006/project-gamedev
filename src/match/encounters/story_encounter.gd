@@ -131,7 +131,7 @@ func _show_outcome(run: MatchRun, data: Dictionary) -> void:
 			"items": data.get("items", {}), "exp": int(data.get("exp", 0)), "healed": false}
 	if data.has("clue") and run.add_clue(str(data["clue"]), "story"):
 		result["clue"] = run.clue_view(str(data["clue"]))
-	run.add_gold(result["gold"])
+		run.add_gold(result["gold"], true)
 	for item in result["items"]:
 		run.add_item(item, int(result["items"][item]))
 	if data.has("heal_ratio"):

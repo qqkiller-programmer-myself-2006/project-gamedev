@@ -68,6 +68,10 @@ var defeated_by: Dictionary = {}
 var cooldowns: Dictionary = {}
 ## Party ids that already had at least one turn (for first-turn Energy).
 var _had_turn: Dictionary = {}
+## Unit id -> number of own turns started in this Combat.
+var _turns_started: Dictionary = {}
+## Party ids whose Will of Thiacdemo has already prevented one defeat.
+var _will_used: Dictionary = {}
 ## Status effects on every unit, for this Combat only.
 var status_book: StatusBook = null
 ## status_applied events waiting to be sent after the action that caused them.
@@ -189,11 +193,17 @@ func _start_round(run: MatchRun) -> void:
 	_next_turn(run)
 
 
-## True when `a` acts before `b`: higher Speed first, then Party before
-## enemies, then lower slot / enemy index.
+## True when `a` acts before `b`: higher Initiative first, then Speed,
+## Party before enemies, then lower slot / enemy index.
 func _before(run: MatchRun, a: String, b: String) -> bool:
-	var sa: int = _unit(run, a)["spd"]
-	var sb: int = _unit(run, b)["spd"]
+	var ua := _unit(run, a)
+	var ub := _unit(run, b)
+	var ia := float(ua.get("derived", {}).get("initiative", ua["spd"]))
+	var ib := float(ub.get("derived", {}).get("initiative", ub["spd"]))
+	if not is_equal_approx(ia, ib):
+		return ia > ib
+	var sa: int = ua["spd"]
+	var sb: int = ub["spd"]
 	if sa != sb:
 		return sa > sb
 	if a[0] != b[0]:
@@ -214,6 +224,7 @@ func _next_turn(run: MatchRun) -> void:
 
 
 func _begin_turn(run: MatchRun, id: String) -> void:
+	_turns_started[id] = int(_turns_started.get(id, 0)) + 1
 	# DoTs tick before Energy regen and before the unit acts (ADR-0010).
 	if not _tick_statuses(run, id):
 		return
@@ -269,9 +280,11 @@ func _tick_statuses(run: MatchRun, id: String) -> bool:
 	for tick in outcome["ticks"]:
 		var floor_hp := 1 if trial and id.begins_with(PARTY_PREFIX) else 0
 		unit["hp"] = maxi(mini(floor_hp, unit["hp"]), unit["hp"] - int(tick["damage"]))
+		var survived := _prevent_fall(run, id, unit)
 		var down: bool = unit["hp"] <= 0
 		run.emit({"type": "status_tick", "round": round_number, "target": id, "status": tick["status"],
-				"name": tick["name"], "damage": tick["damage"], "color": tick["color"], "hp": unit["hp"], "down": down})
+				"name": tick["name"], "damage": tick["damage"], "color": tick["color"], "hp": unit["hp"],
+				"down": down, "survived": survived})
 		if down:
 			defeated_by[id] = str(tick.get("applier", ""))
 			if id.begins_with(ENEMY_PREFIX):
@@ -411,8 +424,13 @@ func can_afford(run: MatchRun, id: String, skill: String) -> bool:
 ## energy_start, capped by energy_max.
 func _reset_energy(run: MatchRun) -> void:
 	for character in run.party:
-		character["energy"] = run.content.get_int("rules.energy_start", 1)
 		character["energy_max"] = run.content.get_int("rules.energy_max", 6)
+		var bonus := 1 if str(character.get("race", "")) == "Lunaeia" else 0
+		if int(character.get("_profile", {}).get("class_trees", {}).get(
+				character.get("class", ""), {}).get("reserves", 0)) >= 5:
+			bonus += 1
+		character["energy"] = mini(character["energy_max"],
+				run.content.get_int("rules.energy_start", 1) + bonus)
 
 
 ## Targets an action with `profile` would hit when the player picked
@@ -606,6 +624,7 @@ func _apply_profile(run: MatchRun, source: String, profile: Dictionary, targets:
 	for target in targets:
 		var unit := _unit(run, target)
 		var entry := {"target": target}
+		var damage_landed := not profile.has("damage")
 		if profile.has("damage"):
 			var guard := _protector_of(run, target)
 			var multiplier := 1.0
@@ -616,6 +635,8 @@ func _apply_profile(run: MatchRun, source: String, profile: Dictionary, targets:
 			var hits := maxi(1, int(profile.get("hits", 1)))
 			for n in hits:
 				var hit := _hit(run, source, struck, profile["damage"], multiplier)
+				if not hit.get("dodged", false):
+					damage_landed = true
 				if n == 0:
 					entry.merge(hit)
 				else:
@@ -631,16 +652,20 @@ func _apply_profile(run: MatchRun, source: String, profile: Dictionary, targets:
 					var each: Array = entry.get("hits", [])
 					each.append(hit.get("damage", 0))
 					entry["hits"] = each
-				if per_hit and struck["hp"] > 0:
+				if per_hit and not hit.get("dodged", false) and struck["hp"] > 0:
 					for spec in statuses:
 						entry["applied"] = entry.get("applied", []) + [_add_status(run, source, entry["target"], spec)]
 				if struck["hp"] <= 0:
 					break
 		if profile.has("heal") and unit["hp"] > 0:
 			var fth = 0.0
+			var heal_mult := 1.0
 			if source.begins_with(PARTY_PREFIX):
-				fth = float(_unit(run, source).get("attributes", {}).get("fth", 0))
-			var heal_amount = int(round(float(profile["heal"]) * (1.0 + 0.02 * fth)))
+				var healer := _unit(run, source)
+				fth = float(healer.get("attributes", {}).get("fth", 0))
+				if healer.get("boons", []).has("Critical Healing"):
+					heal_mult = 1.5
+			var heal_amount = int(round(float(profile["heal"]) * heal_mult * (1.0 + 0.02 * fth)))
 			
 			var before: int = unit["hp"]
 			unit["hp"] = mini(unit["max_hp"], unit["hp"] + heal_amount)
@@ -657,7 +682,7 @@ func _apply_profile(run: MatchRun, source: String, profile: Dictionary, targets:
 				entry["status"] = "shielded"
 		if not entry.has("target"):
 			entry["target"] = target
-		if not per_hit and _unit(run, entry["target"])["hp"] > 0:
+		if not per_hit and damage_landed and _unit(run, entry["target"])["hp"] > 0:
 			for spec in statuses:
 				entry["applied"] = entry.get("applied", []) + [_add_status(run, source, entry["target"], spec)]
 		entry["hp"] = _unit(run, entry["target"])["hp"]
@@ -675,7 +700,7 @@ func _apply_coating(run: MatchRun, source: String, results: Array) -> void:
 		var landed := false
 		for entry in results:
 			var target := str(entry["target"])
-			if entry.has("damage") and target[0] != source[0] and _unit(run, target)["hp"] > 0:
+			if int(entry.get("damage", 0)) > 0 and target[0] != source[0] and _unit(run, target)["hp"] > 0:
 				entry["applied"] = entry.get("applied", []) + [_add_status(run, source, target, coats)]
 				landed = true
 		if not landed:
@@ -695,10 +720,14 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary,
 	var target_dodge = float(target.get("derived", {}).get("dodge", 0.0))
 	if focusing.has(target_id):
 		target_dodge += 0.1
+	if _alert_active(run, target_id):
+		target_dodge += 0.05
 	if run.rng.chance(target_dodge):
 		return {"dodged": true, "damage": 0}
 
 	var target_block = float(target.get("derived", {}).get("block", 0.0))
+	if _alert_active(run, target_id):
+		target_block += 0.05
 	var blocked = run.rng.chance(target_block)
 	
 	var dots := status_book.distinct_dots(target_id)
@@ -740,6 +769,7 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary,
 	var dealt := maxi(1, int(round(amount)))
 	var floor_hp := 1 if trial and target_id.begins_with(PARTY_PREFIX) else 0
 	target["hp"] = maxi(mini(floor_hp, target["hp"]), target["hp"] - dealt)
+	var survived := _prevent_fall(run, target_id, target)
 	
 	var ls = float(attacker.get("derived", {}).get("lifesteal", 0.0))
 	if ls > 0.0 and dealt > 0 and attacker["hp"] > 0:
@@ -750,12 +780,31 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary,
 	var out := {"damage": dealt, "crit": crit, "weak": weak, "element": element}
 	if blocked:
 		out["blocked"] = true
+	if survived:
+		out["survived"] = true
 	if target["hp"] <= 0:
 		out["down"] = true
 		defeated_by[target_id] = source
 		if target_id.begins_with(ENEMY_PREFIX):
 			defeated_kinds.append(str(target["kind"]))
 	return out
+
+
+func _alert_active(run: MatchRun, id: String) -> bool:
+	return id.begins_with(PARTY_PREFIX) \
+			and _unit(run, id).get("boons", []).has("Alert") \
+			and int(_turns_started.get(id, 0)) <= 2
+
+
+## Returns true when Will of Thiacdemo changed a first lethal hit to 1 HP.
+func _prevent_fall(run: MatchRun, id: String, unit: Dictionary) -> bool:
+	if unit["hp"] > 0 or not id.begins_with(PARTY_PREFIX) or _will_used.has(id):
+		return false
+	if not unit.get("boons", []).has("Will of Thiacdemo"):
+		return false
+	unit["hp"] = 1
+	_will_used[id] = true
+	return true
 
 
 ## True when the Party should brace: less than half of its total HP is
@@ -834,7 +883,7 @@ func _grant_rewards(run: MatchRun) -> Dictionary:
 			if run.rng.chance(float(drop.get("chance", 0.0)) * lck_bonus):
 				var item := str(drop["item"])
 				items[item] = int(items.get(item, 0)) + 1
-	run.add_gold(gold)
+	run.add_gold(gold, true)
 	for item in items:
 		run.add_item(item, items[item])
 	var clue := _roll_clue(run)

@@ -113,7 +113,7 @@ func test_stab_pierces_half_the_defense_and_causes_bleed() -> void:
 	_start({}, LONE_assassin, true)
 	assert_ok(_act({"action": "skill", "skill": "stab", "target": "e0"}))
 	var hit: Dictionary = _mine()["results"][0]
-	assert_eq(hit["damage"], 13, "10 x 1.3 - 2 DEF x 0.5 x half = 12.5 -> 13")
+	assert_eq(hit["damage"], 13, "Human Assassin: 10 ATK x 1.3 - 2 DEF x 0.5 x half = 12.5 -> 13")
 	assert_eq(hit["applied"], [{"status": "bleed", "stacks": 1, "turns": 3}])
 
 

@@ -124,22 +124,22 @@ func test_defend_halves_damage_until_next_turn() -> void:
 	_combat(1)
 	assert_ok(_act(sessions[0], {"action": "defend"}))
 	_until_turn("p0", 2)
-	assert_eq(_party(0)["hp"], 48, "defending")
+	assert_eq(_party(0)["hp"], 56, "defending")
 	assert_ok(_act(sessions[0], {"action": "attack", "target": "e0"}))
 	_until_turn("p0", 3)
-	assert_eq(_party(0)["hp"], 34, "no longer defending")
+	assert_eq(_party(0)["hp"], 44, "no longer defending")
 
 
 func test_item_heals_from_shared_party_inventory() -> void:
 	_combat(2)
 	assert_ok(_act(sessions[0], {"action": "defend"}))
 	_until_turn("p0", 2)
-	assert_eq(_party(0)["hp"], 48)
+	assert_eq(_party(0)["hp"], 56)
 	h.server.take_events(sessions[0])
 	assert_ok(_act(sessions[0], {"action": "item", "item": "herb", "target": "p0"}))
 	var action: Dictionary = _events_of(sessions[0], "action_resolved")[0]
 	assert_eq(action["results"][0]["heal"], 6, "heal capped at max HP")
-	assert_eq(_party(0)["hp"], 54)
+	assert_eq(_party(0)["hp"], 62)
 	var seen_by_partner: Array = h.match_view(sessions[1])["inventory"]
 	assert_eq(seen_by_partner[0]["item"], "herb")
 	assert_eq(seen_by_partner[0]["count"], 2, "one herb used from the shared inventory")
@@ -199,7 +199,7 @@ func test_victory_grants_exp_gold_and_level_ups() -> void:
 	assert_eq(view["gold"], 14)
 	for character in view["party"]:
 		assert_eq([character["level"], character["exp"]], [3, 5], "60 EXP: 20 + 35 to reach level 3")
-		assert_eq([character["max_hp"], character["atk"]], [64, 17], "+5 HP and +1 ATK per level")
+		assert_eq([character["max_hp"], character["atk"]], [72, 17], "+5 HP and +1 ATK per level")
 
 
 func test_journey_continues_after_combat_victory() -> void:
