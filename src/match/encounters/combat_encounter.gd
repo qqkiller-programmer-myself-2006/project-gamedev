@@ -288,7 +288,11 @@ func _tick_statuses(run: MatchRun, id: String) -> bool:
 func _passive(run: MatchRun, id: String) -> Dictionary:
 	if not id.begins_with(PARTY_PREFIX):
 		return {}
-	return run.content.get_dict("classes.%s.passive" % _unit(run, id)["class"])
+	var character: Dictionary = _unit(run, id)
+	var passive := run.content.get_dict("classes.%s.passive" % character["class"])
+	if str(passive.get("name", "")) == "Enervation" and not character.get("boons", []).has("Enervation"):
+		return {}
+	return passive
 
 
 ## Adds a status from `source` to `target` and queues its event.

@@ -3,7 +3,7 @@ extends RefCounted
 
 const ATTRS: Array[String] = ["str", "dex", "con", "int", "fth", "cha", "lck"]
 const STATS: Array[String] = ["max_hp", "atk", "def", "mag", "res", "spd"]
-const DERIVED: Array[String] = ["initiative", "crit", "crit_damage", "dodge", "block", "block_reduction", "aggro", "lifesteal", "energy_regen"]
+const DERIVED: Array[String] = ["initiative", "crit", "crit_damage", "dodge", "block", "block_reduction", "aggro", "lifesteal", "energy_regen", "status_resist"]
 
 static func recalculate(character: Dictionary, content: ForestContent) -> void:
 	var base := content.get_dict("classes.%s.base" % character["class"])
@@ -56,6 +56,14 @@ static func recalculate(character: Dictionary, content: ForestContent) -> void:
 				
 	# 3. Calculate Derived Stats
 	var derived: Dictionary = character["derived"]
+	var race := str(character.get("race", "Human"))
+	var race_data := content.get_dict("meta.races.%s" % race)
+	var boons: Array = character.get("boons", [])
+	if race == "Elf": character["crit"] += 0.05
+	if race == "Elf": character["attributes"]["dex"] += 2
+	if race == "Withered": character["max_hp"] = int(character["max_hp"] * 0.9)
+	if race == "Dwarf": character["max_hp"] = int(character["max_hp"] * 1.1)
+	if race == "Lunaeia": character["mag"] = int(character["mag"] * 1.1)
 	derived["crit_damage"] = content.get_float("rules.crit_multiplier", 1.5) + float(attrs["lck"]) * 0.02
 	derived["dodge"] = float(attrs["dex"]) * 0.005
 	derived["block"] = float(attrs["con"]) * 0.005
@@ -74,3 +82,10 @@ static func recalculate(character: Dictionary, content: ForestContent) -> void:
 	
 	derived["energy_regen"] = content.get_int("rules.energy_regen", 1)
 	derived["initiative"] = character["spd"]
+	derived["status_resist"] = 0.1 if race == "Dwarf" else 0.0
+	if boons.has("Potential: Bunny"):
+		derived["initiative"] += 3
+		derived["dodge"] += 0.15
+	if boons.has("Alert"):
+		derived["initiative"] += 3
+		derived["dodge"] += 0.05

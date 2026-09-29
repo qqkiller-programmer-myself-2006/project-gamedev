@@ -31,7 +31,7 @@ func _init(room_code: String, rng: GameRng, clock, content: ForestContent) -> vo
 	_clock = clock
 	_content = content
 	for i in SLOT_COUNT:
-		slots.append({"session": 0, "name": ""})
+		slots.append({"session": 0, "name": "", "token": "", "profile": ProfileStore.normalize({}), "loadout": {}})
 
 
 func human_count() -> int:
@@ -68,7 +68,7 @@ func join(session_id: int, display_name: String) -> int:
 		if slots[i]["session"] == 0:
 			index = i
 			break
-	slots[index] = {"session": session_id, "name": display_name}
+	slots[index] = {"session": session_id, "name": display_name, "token": "", "profile": ProfileStore.normalize({}), "loadout": {}}
 	_empty_since = -1.0
 	_emit({"type": "player_joined", "slot": index, "name": display_name})
 	if host_slot == -1:
@@ -83,7 +83,7 @@ func leave(session_id: int, reason: String) -> void:
 	if index == -1:
 		return
 	var old_name: String = slots[index]["name"]
-	slots[index] = {"session": 0, "name": ""}
+	slots[index] = {"session": 0, "name": "", "token": "", "profile": ProfileStore.normalize({}), "loadout": {}}
 	_emit({"type": "player_left", "slot": index, "name": old_name, "reason": reason})
 	if run != null:
 		run.set_human(index, false)
@@ -105,7 +105,10 @@ func start_match() -> void:
 		humans.append(slot["session"] != 0)
 	_matches_started += 1
 	state = State.IN_MATCH
-	run = MatchRun.new(_rng.fork(), _clock, _content, humans, _matches_started)
+	var loadouts: Array = []
+	for slot in slots:
+		loadouts.append(slot.get("loadout", {}).duplicate(true))
+	run = MatchRun.new(_rng.fork(), _clock, _content, humans, _matches_started, loadouts)
 	_drain_run()
 
 
@@ -114,6 +117,102 @@ func handle_match_command(slot: int, cmd: Dictionary) -> Dictionary:
 	var result := run.handle(slot, cmd)
 	_drain_run()
 	return result
+
+func set_profile(slot: int, profile: Dictionary, token: String) -> void:
+	if slot < 0 or slot >= slots.size():
+		return
+	slots[slot]["profile"] = ProfileStore.normalize(profile)
+	slots[slot]["token"] = token
+
+func profile_of(slot: int) -> Dictionary:
+	return slots[slot].get("profile", ProfileStore.normalize({})).duplicate(true)
+
+func handle_setup_command(slot: int, cmd: Dictionary) -> Dictionary:
+	if state != State.LOBBY:
+		return {"ok": false, "error": "wrong_phase"}
+	if slot < 0 or slots[slot]["session"] == 0:
+		return {"ok": false, "error": "not_in_room"}
+	var profile: Dictionary = slots[slot]["profile"]
+	var kind := str(cmd.get("type", ""))
+	match kind:
+		"set_loadout":
+			return _set_loadout(slot, cmd, profile)
+		"buy_race":
+			return _buy_race(slot, str(cmd.get("race", "")), profile)
+		"tree_upgrade":
+			return _tree_upgrade(slot, str(cmd.get("class", "")), str(cmd.get("node", "")), profile)
+		"buy_prestige":
+			return _buy_prestige(slot, str(cmd.get("class", "")), profile)
+		"reset_tree":
+			return _reset_tree(slot, str(cmd.get("class", "")), profile)
+	return {"ok": false, "error": "unknown_command"}
+
+func _set_loadout(slot: int, cmd: Dictionary, profile: Dictionary) -> Dictionary:
+	var class_id := str(cmd.get("class", ""))
+	var race := str(cmd.get("race", ""))
+	var boons: Array = cmd.get("boons", [])
+	if _content.get_dict("classes.%s" % class_id).is_empty() or class_id == "classless":
+		return {"ok": false, "error": "invalid_class"}
+	if not profile.get("races_owned", []).has(race):
+		return {"ok": false, "error": "race_not_owned"}
+	if boons.size() > 5:
+		return {"ok": false, "error": "over_capacity"}
+	var used := 0
+	for boon in boons:
+		var data := _content.get_dict("meta.boons.%s" % boon)
+		if data.is_empty():
+			return {"ok": false, "error": "invalid_boon"}
+		used += int(data.get("slots", 0))
+	if used > 5:
+		return {"ok": false, "error": "over_capacity"}
+	slots[slot]["loadout"] = {"class": class_id, "race": race, "boons": boons.duplicate()}
+	profile["last_loadout"] = slots[slot]["loadout"].duplicate(true)
+	_emit({"type": "loadout_changed", "slot": slot, "loadout": slots[slot]["loadout"]})
+	return {"ok": true, "loadout": slots[slot]["loadout"]}
+
+func _buy_race(slot: int, race: String, profile: Dictionary) -> Dictionary:
+	var data := _content.get_dict("meta.races.%s" % race)
+	if data.is_empty(): return {"ok": false, "error": "invalid_race"}
+	if profile["races_owned"].has(race): return {"ok": false, "error": "already_owned"}
+	var cost := int(data.get("cost", 0))
+	if int(profile["gems"]) < cost: return {"ok": false, "error": "not_enough_gems"}
+	profile["gems"] -= cost
+	profile["races_owned"].append(race)
+	return {"ok": true, "gems": profile["gems"], "race": race}
+
+func _tree_upgrade(_slot: int, class_id: String, node: String, profile: Dictionary) -> Dictionary:
+	var tree: Dictionary = profile["class_trees"].get(class_id, {})
+	var level := int(tree.get(node, 0))
+	if _content.get_dict("meta.class_tree.%s" % node).is_empty(): return {"ok": false, "error": "invalid_node"}
+	if level >= 5: return {"ok": false, "error": "max_level"}
+	var cost := int(_content.get_value("meta.class_tree.%s.cost" % node, 10 * (level + 1)))
+	if int(profile["gems"]) < cost: return {"ok": false, "error": "not_enough_gems"}
+	profile["gems"] -= cost
+	tree[node] = level + 1
+	profile["class_trees"][class_id] = tree
+	return {"ok": true, "gems": profile["gems"], "class": class_id, "node": node, "level": level + 1}
+
+func _buy_prestige(_slot: int, class_id: String, profile: Dictionary) -> Dictionary:
+	var tree: Dictionary = profile["class_trees"].get(class_id, {})
+	for node in _content.get_dict("meta.class_tree").keys():
+		if int(tree.get(node, 0)) < 5: return {"ok": false, "error": "locked"}
+	var current := int(profile["prestige"].get(class_id, 0))
+	if current >= _content.get_int("meta.prestige.max", 25): return {"ok": false, "error": "max_prestige"}
+	var cost := _content.get_int("meta.prestige.cost", 100)
+	if int(profile["gems"]) < cost: return {"ok": false, "error": "not_enough_gems"}
+	profile["gems"] -= cost
+	profile["prestige"][class_id] = current + 1
+	profile["class_trees"][class_id] = {}
+	return {"ok": true, "gems": profile["gems"], "prestige": current + 1}
+
+func _reset_tree(_slot: int, class_id: String, profile: Dictionary) -> Dictionary:
+	var tree: Dictionary = profile["class_trees"].get(class_id, {})
+	var refund := 0
+	for node in tree:
+		for level in range(1, int(tree[node]) + 1): refund += int(_content.get_value("meta.class_tree.%s.cost" % node, 10 * level))
+	profile["gems"] += refund
+	profile["class_trees"][class_id] = {}
+	return {"ok": true, "gems": profile["gems"], "refunded": refund}
 
 
 func update() -> void:
@@ -148,14 +247,18 @@ func snapshot_for(session_id: int) -> Dictionary:
 			"owner_name": slots[i]["name"],
 			"is_host": i == host_slot,
 			"is_you": i == you,
+			"loadout": slots[i].get("loadout", {}).duplicate(true),
 		})
-	return {
+	var view := {
 		"code": code,
 		"state": _state_name(),
 		"host_slot": host_slot,
 		"your_slot": you,
 		"slots": slot_views,
 	}
+	if you >= 0:
+		view["profile"] = {"gems": slots[you]["profile"].get("gems", 0), "races_owned": slots[you]["profile"].get("races_owned", []).duplicate(), "class_trees": slots[you]["profile"].get("class_trees", {}).duplicate(true), "prestige": slots[you]["profile"].get("prestige", {}).duplicate(true)}
+	return view
 
 
 func _set_host(index: int) -> void:

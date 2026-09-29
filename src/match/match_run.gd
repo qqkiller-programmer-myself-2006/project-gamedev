@@ -52,14 +52,16 @@ var _outbox: Array[Dictionary] = []
 var _started_at := 0.0
 var _phase_deadline := -1.0
 var _pending_option: Dictionary = {}
+var _loadouts: Array = []
 
 
-func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array[bool], match_number: int) -> void:
+func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array[bool], match_number: int, loadouts: Array = []) -> void:
 	rng = match_rng
 	clock = match_clock
 	content = forest
 	_humans = humans.duplicate()
 	number = match_number
+	_loadouts = loadouts.duplicate(true)
 	_started_at = clock.now()
 	_create_party()
 	gold = content.get_int("party.starting_gold", 0)
@@ -305,6 +307,14 @@ func _exp_to_next(level: int) -> int:
 
 func _create_party() -> void:
 	var members := content.get_array("party.members")
+	var ai_order: Array = content.get_array("party.ai_class_order")
+	var claimed: Array = []
+	var has_human_loadout := false
+	for candidate in _loadouts:
+		if candidate is Dictionary and not str(candidate.get("class", "")).is_empty():
+			has_human_loadout = true
+			claimed.append(str(candidate.get("class", "")))
+	var ai_index := 0
 	for i in PARTY_SIZE:
 		var member: Dictionary = members[i] if i < members.size() else {}
 		var character := {
@@ -317,6 +327,18 @@ func _create_party() -> void:
 			"invested": {},
 			"gear": {},
 		}
+		var loadout: Dictionary = _loadouts[i] if i < _loadouts.size() and _loadouts[i] is Dictionary else {}
+		if not _humans[i] and has_human_loadout:
+			loadout = {}
+			while ai_index < ai_order.size() and claimed.has(str(ai_order[ai_index])): ai_index += 1
+			if ai_index < ai_order.size():
+				loadout = {"class": str(ai_order[ai_index]), "race": "Human", "boons": []}
+				claimed.append(str(ai_order[ai_index]))
+				ai_index += 1
+		if not loadout.is_empty():
+			character["class"] = str(loadout.get("class", "classless"))
+			character["race"] = str(loadout.get("race", "Human"))
+			character["boons"] = loadout.get("boons", []).duplicate()
 		_apply_stats(character)
 		character["hp"] = character["max_hp"]
 		character["energy"] = content.get_int("rules.energy_start", 1)

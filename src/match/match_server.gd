@@ -28,6 +28,7 @@ const MAX_NAME_LENGTH := 16
 var _rng: GameRng
 var _clock
 var _content: ForestContent
+var _profiles: ProfileStore
 
 var _next_session_id := 1
 ## session id -> {"events": Array, "room": String}
@@ -38,18 +39,19 @@ var _rooms: Dictionary = {}
 var _closed_codes: Dictionary = {}
 
 
-func _init(rng: GameRng, clock, content: ForestContent) -> void:
+func _init(rng: GameRng, clock, content: ForestContent, profiles: ProfileStore = null) -> void:
 	assert(rng != null and clock != null and content != null)
 	_rng = rng
 	_clock = clock
 	_content = content
+	_profiles = profiles if profiles != null else MemoryProfileStore.new()
 
 
 ## Registers a new anonymous connection and returns its session id.
 func open_session() -> int:
 	var id := _next_session_id
 	_next_session_id += 1
-	_sessions[id] = {"events": [], "room": ""}
+	_sessions[id] = {"events": [], "room": "", "token": "", "profile": ProfileStore.normalize({})}
 	return id
 
 
@@ -81,6 +83,16 @@ func command(session_id: int, cmd: Dictionary) -> Dictionary:
 		"start_match":
 			return _start_match(session_id)
 	if not MatchRun.COMMANDS.has(kind):
+		if kind in ["set_loadout", "buy_race", "tree_upgrade", "buy_prestige", "reset_tree"]:
+			var setup_room := _room_of(session_id)
+			if setup_room == null:
+				return _reject("not_in_room")
+			var setup_result := setup_room.handle_setup_command(setup_room.slot_of(session_id), cmd)
+			if setup_result.get("ok", false):
+				if not str(_sessions[session_id]["token"]).is_empty():
+					_profiles.save_profile(str(_sessions[session_id]["token"]), setup_room.profile_of(setup_room.slot_of(session_id)))
+			_flush(setup_room)
+			return setup_result
 		return _reject("unknown_command")
 	var room := _room_of(session_id)
 	if room == null:
@@ -132,6 +144,8 @@ func snapshot(session_id: int) -> Dictionary:
 func _create_room(session_id: int, cmd: Dictionary) -> Dictionary:
 	if _room_of(session_id) != null:
 		return _reject("already_in_room")
+	if cmd.has("token") and not str(cmd.get("token", "")).is_empty() and not _valid_token(str(cmd.get("token", ""))):
+		return _reject("invalid_token")
 	var display_name := _clean_name(cmd.get("name", ""))
 	if display_name.is_empty():
 		return _reject("invalid_name")
@@ -141,6 +155,7 @@ func _create_room(session_id: int, cmd: Dictionary) -> Dictionary:
 	var room := Room.new(code, _rng.fork(), _clock, _content)
 	_rooms[code] = room
 	var slot := room.join(session_id, display_name)
+	_set_session_profile(session_id, room, slot, cmd)
 	_sessions[session_id]["room"] = code
 	_flush(room)
 	return {"ok": true, "code": code, "slot": slot}
@@ -149,6 +164,8 @@ func _create_room(session_id: int, cmd: Dictionary) -> Dictionary:
 func _join_room(session_id: int, cmd: Dictionary) -> Dictionary:
 	if _room_of(session_id) != null:
 		return _reject("already_in_room")
+	if cmd.has("token") and not str(cmd.get("token", "")).is_empty() and not _valid_token(str(cmd.get("token", ""))):
+		return _reject("invalid_token")
 	var display_name := _clean_name(cmd.get("name", ""))
 	if display_name.is_empty():
 		return _reject("invalid_name")
@@ -165,6 +182,7 @@ func _join_room(session_id: int, cmd: Dictionary) -> Dictionary:
 	if room.is_full():
 		return _reject("room_full")
 	var slot := room.join(session_id, display_name)
+	_set_session_profile(session_id, room, slot, cmd)
 	_sessions[session_id]["room"] = code
 	_flush(room)
 	return {"ok": true, "code": code, "slot": slot}
@@ -200,6 +218,23 @@ func _room_of(session_id: int) -> Room:
 	if code.is_empty() or not _rooms.has(code):
 		return null
 	return _rooms[code]
+
+func _set_session_profile(session_id: int, room: Room, slot: int, cmd: Dictionary) -> void:
+	var token := str(cmd.get("token", ""))
+	if not token.is_empty() and not _valid_token(token):
+		return
+	_sessions[session_id]["token"] = token
+	var profile := _profiles.load_profile(token) if not token.is_empty() else ProfileStore.normalize({})
+	_sessions[session_id]["profile"] = profile
+	room.set_profile(slot, profile, token)
+
+static func _valid_token(token: String) -> bool:
+	if token.length() != 32:
+		return false
+	for c in token:
+		if c not in "0123456789abcdefABCDEF":
+			return false
+	return true
 
 
 ## Delivers the room's pending events to every human in it.
