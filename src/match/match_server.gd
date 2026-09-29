@@ -82,6 +82,14 @@ func command(session_id: int, cmd: Dictionary) -> Dictionary:
 			return _leave_room(session_id)
 		"start_match":
 			return _start_match(session_id)
+		"restore_story":
+			var story_room := _room_of(session_id)
+			if story_room == null or not story_room.story or story_room.slot_of(session_id) != story_room.host_slot:
+				return _reject("not_in_room")
+			if not (cmd.get("save") is Dictionary) or not story_room.restore_story(cmd["save"]):
+				return _reject("invalid_save")
+			_flush(story_room)
+			return {"ok": true}
 	if not MatchRun.COMMANDS.has(kind):
 		if kind in ["set_loadout", "buy_race", "tree_upgrade", "buy_prestige", "reset_tree"]:
 			var setup_room := _room_of(session_id)
@@ -141,6 +149,14 @@ func snapshot(session_id: int) -> Dictionary:
 	return view
 
 
+## Only Story rooms expose a save point, at the start of the current Layer.
+func export_story(session_id: int) -> Dictionary:
+	var room := _room_of(session_id)
+	if room == null or not room.story or room.slot_of(session_id) != room.host_slot or room.run == null:
+		return {}
+	return room.run.export_layer_start()
+
+
 func _create_room(session_id: int, cmd: Dictionary) -> Dictionary:
 	if _room_of(session_id) != null:
 		return _reject("already_in_room")
@@ -153,6 +169,7 @@ func _create_room(session_id: int, cmd: Dictionary) -> Dictionary:
 	while _rooms.has(code) or _closed_codes.has(code):
 		code = RoomCodes.generate(_rng)
 	var room := Room.new(code, _rng.fork(), _clock, _content, _profiles)
+	room.story = cmd.get("story", false) == true
 	_rooms[code] = room
 	var slot := room.join(session_id, display_name)
 	_set_session_profile(session_id, room, slot, cmd)
@@ -177,6 +194,8 @@ func _join_room(session_id: int, cmd: Dictionary) -> Dictionary:
 	if not _rooms.has(code):
 		return _reject("room_not_found")
 	var room: Room = _rooms[code]
+	if room.story:
+		return _reject("room_closed")
 	if room.state == Room.State.IN_MATCH:
 		return _reject("match_in_progress")
 	if room.is_full():

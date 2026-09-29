@@ -36,6 +36,10 @@ var _banner_until := 0.0
 var _embedded_server: GameServer = null
 var _dev_playtest := false
 var _dev_tag: PanelContainer = null
+var story_launcher: StoryLauncher = null
+var story_save := StorySave.new()
+var _story_classes: Array = []
+var _story_restore: Dictionary = {}
 
 
 func configure(launch_options: Dictionary) -> void:
@@ -158,6 +162,9 @@ func disconnect_from_server() -> void:
 		connection = null
 		old.close("left")
 	snapshot = {}
+	if story_launcher != null:
+		story_launcher.stop()
+		story_launcher = null
 	stop_dev_playtest()
 	_show_screen("title")
 
@@ -196,6 +203,16 @@ func stop_dev_playtest() -> void:
 		_embedded_server = null
 
 
+func start_story(classes: Array = [], restore: Dictionary = {}, seed_value: int = 0) -> void:
+	if connection != null:
+		disconnect_from_server()
+	_story_classes = classes.duplicate()
+	_story_restore = restore.duplicate(true)
+	story_launcher = StoryLauncher.new()
+	story_launcher.start(self, seed_value if seed_value != 0 else int(restore.get("seed", 0)))
+	send({"type": "create_room", "name": settings.player_name if not settings.player_name.is_empty() else "Traveller", "story": true})
+
+
 func _free_local_port() -> int:
 	for port in range(8911, 8931):
 		var probe := TCPServer.new()
@@ -227,6 +244,7 @@ func _on_closed(reason: String, which: ServerConnection = null) -> void:
 	if which != null and which != connection:
 		return
 	connection = null
+	story_launcher = null
 	snapshot = {}
 	_show_screen("title")
 	if _current is TitleScreen:
@@ -238,6 +256,12 @@ func _on_update(events: Array, snap: Dictionary) -> void:
 		_snapshot_server_time = float(snap["time"])
 		_snapshot_local_time = _local_now()
 	snapshot = snap
+	if story_launcher != null:
+		for event in events:
+			if event.get("type", "") == "story_layer_started":
+				story_save.save(story_launcher.server.export_story(int(snap.get("session", 0))))
+			elif event.get("type", "") == "match_ended":
+				story_save.clear()
 	_publish_for_web(snap)
 	var wanted := _screen_for(snap)
 	if wanted != _current_name:
@@ -256,6 +280,13 @@ func _on_result(_id: int, _cmd: Dictionary, result: Dictionary) -> void:
 			_current.show_error(message)
 		else:
 			toast(message)
+	elif story_launcher != null and str(_cmd.get("type", "")) == "create_room":
+		if not _story_restore.is_empty():
+			send({"type": "restore_story", "save": _story_restore})
+		else:
+			for i in _story_classes.size():
+				send({"type": "set_loadout", "slot": i, "class": str(_story_classes[i]), "race": "Human", "boons": []})
+			send({"type": "start_match"})
 	elif _dev_playtest and str(_cmd.get("type", "")) == "create_room":
 		send({"type": "start_match"})
 

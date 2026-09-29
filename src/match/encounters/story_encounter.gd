@@ -51,7 +51,7 @@ func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 			if not error.is_empty():
 				return {"ok": false, "error": error}
 			run.emit({"type": "story_vote_cast", "slot": slot})
-			if vote.everyone_voted(run.humans()):
+			if vote.everyone_voted(run.voters()):
 				_resolve(run)
 			return {"ok": true}
 		"ready":
@@ -77,7 +77,7 @@ func update(run: MatchRun) -> void:
 func on_control_changed(run: MatchRun, slot: int) -> void:
 	if stage == "choosing":
 		vote.forget(slot)
-		if vote.everyone_voted(run.humans()):
+		if vote.everyone_voted(run.voters()):
 			_resolve(run)
 	else:
 		_finish_if_everyone_ready(run)
@@ -150,6 +150,6 @@ func _finish_if_everyone_ready(run: MatchRun) -> void:
 	if done or stage != "outcome":
 		return
 	for slot in run.humans().size():
-		if run.is_human(slot) and not ready_slots.has(slot):
+		if run.needs_ready(slot) and not ready_slots.has(slot):
 			return
 	done = true

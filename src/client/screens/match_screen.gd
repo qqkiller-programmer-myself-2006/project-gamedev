@@ -34,6 +34,7 @@ var _camp: CampView
 ## Card id -> times (ms) of recent floating numbers, to stack them.
 var _float_stack: Dictionary = {}
 var _camp_mode := false
+var _story_director: StoryDirector = null
 
 
 func setup(client: ClientApp) -> void:
@@ -92,6 +93,12 @@ func setup(client: ClientApp) -> void:
 	add_child(_camp)
 	_camp.setup(self, client)
 	_camp.visible = false
+	if app.story_launcher != null:
+		_story_director = StoryDirector.new()
+		_story_director.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_story_director.text_scale = app.settings.text_scale
+		_story_director.reduced_motion = app.settings.reduced_motion
+		add_child(_story_director)
 
 
 ## Where one-time tips appear, next to the log so they never cover controls.
@@ -187,6 +194,8 @@ func handle_key(client: ClientApp, key: int) -> bool:
 
 
 func show_events(client: ClientApp, events: Array) -> void:
+	if _story_director != null:
+		_story_director.observe(events, client.snapshot)
 	for event in events:
 		var line := describe(event)
 		if not line.is_empty():
@@ -450,7 +459,7 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 	var me := "p%d" % your_slot()
 	match str(event["type"]):
 		"turn_started":
-			if event["actor"] == me and event["controller"] == "human":
+			if (event["actor"] == me or (room_view().get("story", false) and str(event["actor"]).begins_with("p"))) and event["controller"] == "human":
 				_announce(client, "Your turn!", 1.6, "turn")
 		"status_tick":
 			var status := str(event["status"])

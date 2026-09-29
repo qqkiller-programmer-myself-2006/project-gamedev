@@ -9,6 +9,9 @@ var _status: Label
 var _seed: LineEdit
 var _content: Control
 var _view := "menu"
+var _story_picks: Array[OptionButton] = []
+const STORY_CLASSES := ["swordsman", "archer", "mage", "guardian", "rogue"]
+const STORY_NAMES := ["Arin", "Bram", "Cora", "Dain", "Wren"]
 
 func setup(app: ClientApp) -> void:
 	_app = app
@@ -18,6 +21,8 @@ func setup(app: ClientApp) -> void:
 	add_child(backdrop)
 	_build_chrome()
 	_show_menu()
+	if _app.options.has("auto"):
+		_show_multiplayer()
 	if app.options.has("playtest") and app.can_playtest():
 		_app.start_dev_playtest("")
 
@@ -84,6 +89,65 @@ func _show_menu() -> void:
 func _show_play() -> void:
 	_view = "play"
 	_clear_content()
+	var body := UiKit.vbox(12)
+	body.custom_minimum_size = Vector2(420, 0)
+	var panel := UiKit.panel(body, "CardPanel")
+	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	panel.position = Vector2(88, 175)
+	panel.size = Vector2(460, 0)
+	add_child(panel)
+	_content = panel
+	body.add_child(UiKit.label("CHOOSE YOUR JOURNEY", "heading", UiKit.ACCENT))
+	body.add_child(UiKit.label("Story · offline, control all five", "body"))
+	body.add_child(UiKit.button("New Story", _show_story_setup, true))
+	if _app.story_save.has_save():
+		body.add_child(UiKit.button("Continue Story", func() -> void: _app.start_story([], _app.story_save.load()), true))
+	body.add_child(HSeparator.new())
+	body.add_child(UiKit.label("Multiplayer · create or join a room", "body"))
+	body.add_child(UiKit.button("Multiplayer", _show_multiplayer, true))
+	body.add_child(UiKit.button("Back", _show_menu))
+	UiKit.focus_first(body)
+
+func _show_story_setup() -> void:
+	_view = "story_setup"
+	_clear_content()
+	_story_picks.clear()
+	var body := UiKit.vbox(8)
+	body.custom_minimum_size = Vector2(450, 0)
+	var panel := UiKit.panel(body, "CardPanel")
+	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	panel.position = Vector2(88, 175)
+	panel.size = Vector2(490, 0)
+	add_child(panel)
+	_content = panel
+	body.add_child(UiKit.label("STORY PARTY", "heading", UiKit.ACCENT))
+	body.add_child(UiKit.para("Choose a Class for every traveller.", "dim"))
+	for i in STORY_NAMES.size():
+		var row := UiKit.hbox(10)
+		var name_label := UiKit.label(STORY_NAMES[i], "body")
+		name_label.custom_minimum_size.x = 100
+		row.add_child(name_label)
+		var pick := OptionButton.new()
+		pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for class_id in STORY_CLASSES:
+			pick.add_item(class_id.capitalize())
+		pick.select(i)
+		_story_picks.append(pick)
+		row.add_child(pick)
+		body.add_child(row)
+	body.add_child(UiKit.button("Begin Story", _begin_story, true))
+	body.add_child(UiKit.button("Back", _show_play))
+	UiKit.focus_first(body)
+
+func _begin_story() -> void:
+	var classes := []
+	for pick in _story_picks:
+		classes.append(STORY_CLASSES[pick.selected])
+	_app.start_story(classes)
+
+func _show_multiplayer() -> void:
+	_view = "multiplayer"
+	_clear_content()
 	var body := UiKit.vbox(10)
 	body.custom_minimum_size = Vector2(520, 0)
 	var panel := UiKit.panel(body, "CardPanel")
@@ -121,7 +185,7 @@ func _show_play() -> void:
 	_status = UiKit.para("", "body", UiKit.WARN)
 	_status.visible = false
 	body.add_child(_status)
-	var back := UiKit.button("Back", _show_menu)
+	var back := UiKit.button("Back", _show_play)
 	back.set_meta("focus_id", "back")
 	body.add_child(back)
 	create.grab_focus.call_deferred()

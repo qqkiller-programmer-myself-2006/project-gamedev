@@ -1,7 +1,7 @@
 {
   "prologue": [
     {"speaker":"narrator","text":"The Forest has kept Father's trail for three long winters.","mood":"quiet"},
-    {"speaker":"arin","text":"Arin, Bram, Cora, Dain—stay close. We find his path, then we find him.","mood":"determined"},
+    {"speaker":"arin","text":"Bram, Cora, Dain, Wren—stay close. We find his path, then we find him.","mood":"determined"},
     {"speaker":"bram","text":"He went west with a map and a stubborn plan. That sounds like him.","mood":"wry"},
     {"speaker":"cora","text":"And Wren went with him. Wren came back alone, carrying the journal but no memory of the road.","mood":"concerned"},
     {"speaker":"dain","text":"Then we search every Layer until the Forest gives us an answer.","mood":"hopeful"},

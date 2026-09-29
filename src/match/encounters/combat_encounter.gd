@@ -106,7 +106,7 @@ func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 		return _reject("not_your_slot")
 	if actor != _pid(slot) or not run.is_human(slot):
 		return _reject("not_your_turn")
-	if run.clock.now() >= deadline:
+	if deadline >= 0.0 and run.clock.now() >= deadline:
 		return _reject("action_window_closed")
 	var plan := _plan_for(run, slot, cmd)
 	if plan.has("error"):
@@ -247,7 +247,7 @@ func _begin_turn(run: MatchRun, id: String) -> void:
 	var now: float = run.clock.now()
 	var controller := _controller_of(run, id)
 	if controller == "human":
-		deadline = now + run.content.get_float("rules.action_window_seconds", 15.0)
+		deadline = -1.0 if run.story else now + run.content.get_float("rules.action_window_seconds", 15.0)
 	elif controller == "ai":
 		act_at = now + run.content.get_float("rules.ai_turn_seconds", 0.8)
 	else:
