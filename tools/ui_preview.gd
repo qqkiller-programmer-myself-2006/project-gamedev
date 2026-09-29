@@ -71,11 +71,10 @@ func _process(delta: float) -> bool:
 		app.apply_settings()
 	if frame == 15:
 		_shot("01_title")
-		# The home menu opens the Play form first; the second Enter preserves the
-		# old preview automation by activating Create in the same frame.
+		# Play now offers Story or Multiplayer; the preview drives the Multiplayer form.
 		app.use_connection(local)
 		local.start()
-		(app._current as TitleScreen)._show_play()
+		(app._current as TitleScreen)._show_multiplayer()
 		(app._current as TitleScreen)._create()
 		return false
 	if frame == 25:
