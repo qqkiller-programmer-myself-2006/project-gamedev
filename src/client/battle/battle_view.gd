@@ -46,6 +46,7 @@ var _center_text: Label
 var _banner: PanelContainer
 var _banner_label: Label
 var _banner_tween: Tween = null
+var _menu_panel: PanelContainer
 
 
 func setup(screen: MatchScreen, app: ClientApp) -> void:
@@ -66,7 +67,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	left.set_anchors_preset(Control.PRESET_LEFT_WIDE)
 	left.offset_top = 52
 	left.offset_bottom = -170
-	left.custom_minimum_size = Vector2(212, 0)
+	left.custom_minimum_size = Vector2(150, 0)
 	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -78,9 +79,17 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 
 	var corner := UiKit.hbox(6)
 	corner.position = Vector2(10, 10)
-	corner.add_child(_small_button("Clues [C]", screen.toggle_clues))
-	corner.add_child(_small_button("Settings [F2]", app.open_settings))
-	corner.add_child(_small_button("Leave", func() -> void:
+	corner.add_child(_icon_button("≡", "Menu", func() -> void: _toggle_menu()))
+	corner.add_child(_icon_button("?", "Clues [C]", screen.toggle_clues))
+	_menu_panel = UiKit.panel(UiKit.vbox(2), "HudPanel")
+	_menu_panel.position = Vector2(10, 52)
+	_menu_panel.custom_minimum_size = Vector2(156, 0)
+	_menu_panel.visible = false
+	add_child(_menu_panel)
+	var menu_items: VBoxContainer = _menu_panel.get_child(0)
+	menu_items.add_child(_menu_button("Clues [C]", screen.toggle_clues))
+	menu_items.add_child(_menu_button("Settings [F2]", app.open_settings))
+	menu_items.add_child(_menu_button("Leave", func() -> void:
 		app.send({"type": "leave_room"})
 		app.disconnect_from_server()))
 	add_child(corner)
@@ -108,6 +117,9 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	tips.offset_right = -10
 	tips.offset_bottom = -10
 	tips.custom_minimum_size = Vector2(220, 0)
+	# AAC's battle view is intentionally clean; contextual hints belong to the
+	# non-combat screens and otherwise cover the battlefield/nameplates.
+	tips.visible = false
 	add_child(tips)
 
 	_header = UiKit.vbox(6)
@@ -137,7 +149,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	bottom_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rewards = UiKit.vbox(0)
 	bottom_left.add_child(_rewards)
-	_log = UiKit.label("", "small", UiKit.TEXT_DIM)
+	_log = UiKit.pixel_label("", "small", UiKit.TEXT_DIM)
 	_log.custom_minimum_size = Vector2(220, 0)
 	_log.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -158,8 +170,9 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_banner = PanelContainer.new()
 	_banner.add_theme_stylebox_override("panel", UiKit.flat_box(Color(0.16, 0.16, 0.17, 0.78), Color(0, 0, 0, 0), 0, 8))
 	_banner.set_anchors_preset(Control.PRESET_HCENTER_WIDE)
-	_banner.anchor_top = 0.71
-	_banner.anchor_bottom = 0.71
+	# Keep the stripe above the HUD even with the 1.4x text-scale setting.
+	_banner.anchor_top = 0.63
+	_banner.anchor_bottom = 0.63
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_banner_label = UiKit.pixel_label("", "title")
 	_banner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -190,6 +203,10 @@ func build(view: Dictionary, combat: Dictionary) -> void:
 
 
 func tick() -> void:
+	# Match toasts are useful in menus, but would sit directly on top of the
+	# reference HUD during combat (especially at text scale 1.4).
+	_app._toast.visible = false
+	_app._toast_until = 0.0
 	if _countdown == null or not is_instance_valid(_countdown):
 		return
 	if _deadline == null:
@@ -211,6 +228,9 @@ func handle_key(key: int) -> bool:
 		return false
 	var choices: Dictionary = _combat.get("choices", {})
 	match key:
+		KEY_F:
+			_set_mode("skills")
+			return true
 		KEY_A:
 			_set_mode("attack")
 			return true
@@ -225,6 +245,12 @@ func handle_key(key: int) -> bool:
 			return true
 		KEY_I:
 			_set_mode("items")
+			return true
+		KEY_O:
+			if choices.get("focus", false):
+				_send({"action": "focus"})
+			else:
+				_app.toast("Focus arrives with the next server update")
 			return true
 		KEY_ESCAPE, KEY_BACKSPACE:
 			if not _screen.combat_mode.is_empty():
@@ -241,6 +267,8 @@ func handle_key(key: int) -> bool:
 func announce(text: String) -> void:
 	_banner_label.text = text
 	_banner.visible = true
+	if _bottom != null and _bottom.get_child_count() > 1:
+		_bottom.get_child(0).visible = false
 	if _banner_tween != null:
 		_banner_tween.kill()
 	_banner.modulate.a = 1.0
@@ -252,7 +280,11 @@ func announce(text: String) -> void:
 		_banner_tween.tween_property(_banner, "modulate:a", 1.0, 0.15)
 		_banner_tween.tween_interval(1.1)
 		_banner_tween.tween_property(_banner, "modulate:a", 0.0, 0.3)
-	_banner_tween.tween_callback(func() -> void: _banner.visible = false)
+	_banner_tween.tween_callback(func() -> void:
+		_banner.visible = false
+		if _bottom != null and _bottom.get_child_count() > 1:
+			_bottom.get_child(0).visible = true
+	)
 
 
 func add_log(line: String) -> void:
@@ -268,14 +300,20 @@ func _build_region(view: Dictionary) -> void:
 	var phase := str(view.get("phase", ""))
 	var total := int(view.get("layers_total", 5))
 	var encounter = view.get("encounter")
-	if phase == "boss" or (encounter != null and encounter.get("kind") == "boss"):
-		_region.text = "Forest (Boss)"
-	else:
-		_region.text = "Forest (%d/%d)" % [int(view.get("layer", 0)), total]
-	var sub := "Round %d" % int(_combat.get("round", 1))
+	_region.text = "Forest (%d/%d)" % [int(view.get("layer", 0)), total]
+	var sub := "\"%s\"\nAll" % _encounter_title(view)
 	if _combat.get("trial", false):
 		sub = "Challenge  %d/%d" % [int(_combat.get("round", 1)), int(_combat.get("round_limit", 3))]
 	_region_sub.text = sub
+
+
+func _encounter_title(view: Dictionary) -> String:
+	var encounter: Dictionary = view.get("encounter", {}) if view.get("encounter") != null else {}
+	var title := str(encounter.get("name", encounter.get("title", "Encounter")))
+	if encounter.get("kind", "") == "boss":
+		var boss: Dictionary = encounter.get("boss", {})
+		title = str(boss.get("name", boss.get("title", "Guardian")))
+	return title.replace("\"", "")
 
 
 func _build_header(view: Dictionary) -> void:
@@ -330,25 +368,25 @@ func _build_timeline(view: Dictionary) -> void:
 		var entry := UiKit.vbox(1)
 		var acted := not remaining.has(id)
 		var is_actor: bool = id == actor
-		var head := UiKit.hbox(4)
+		var head := UiKit.vbox(0)
 		var tag := _controller_tag(str(id), unit)
-		head.add_child(UiKit.pixel_label(("> " if is_actor else "") + tag[0], "small", tag[1]))
 		var color := UiKit.ACCENT if is_actor else (UiKit.TEXT_DIM if acted else UiKit.TEXT)
-		var name_label := UiKit.pixel_label(_screen.name_of(str(id)), "small", color)
+		var name_label := UiKit.pixel_label(("> " if is_actor else "") + _screen.name_of(str(id)) + " (%d)" % int(unit.get("level", 1)), "small", color)
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		name_label.clip_text = true
-		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		head.add_child(name_label)
 		var hp := int(unit.get("hp", 0))
-		head.add_child(UiKit.pixel_label("DOWN" if hp <= 0 else str(hp), "small", UiKit.TEXT_DIM if hp <= 0 else UiKit.TEXT))
 		entry.add_child(head)
-		entry.add_child(UiKit.stat_bar(hp, int(unit.get("max_hp", 1)), UiKit.BAR_HP, "", 6))
+		entry.add_child(UiKit.stat_bar(hp, int(unit.get("max_hp", 1)), UiKit.BAR_HP,
+				"DOWN" if hp <= 0 else "%d/%d" % [hp, int(unit.get("max_hp", 1))], 9, "small"))
 		if unit.has("energy"):
-			entry.add_child(UiKit.stat_bar(int(unit["energy"]), int(unit.get("energy_max", 6)), UiKit.BAR_ENERGY, "", 4))
+			entry.add_child(UiKit.stat_bar(int(unit["energy"]), int(unit.get("energy_max", 6)), UiKit.BAR_ENERGY,
+					"%d/%d" % [int(unit["energy"]), int(unit.get("energy_max", 6))], 7, "small"))
 		var card := UiKit.panel(entry, "HudPanel")
 		if is_actor:
 			card.add_theme_stylebox_override("panel", UiKit.flat_box(UiKit.HUD_BG, UiKit.ACCENT, 2, 6))
 		card.modulate = Color(1, 1, 1, 0.55) if hp <= 0 or acted else Color.WHITE
-		card.tooltip_text = "%s (%s) - Speed %d - HP %d/%d%s%s" % [_screen.name_of(str(id)), tag[2],
+		card.tooltip_text = "%s (%s) - %s - Speed %d - HP %d/%d%s%s" % [tag[0], _screen.name_of(str(id)), tag[2],
 				int(unit.get("spd", 0)), hp, int(unit.get("max_hp", 1)),
 				(", Energy %d/%d" % [int(unit["energy"]), int(unit.get("energy_max", 6))]) if unit.has("energy") else "",
 				" (already acted this round)" if acted else (" - acting now" if is_actor else "")]
@@ -406,11 +444,15 @@ func _build_stage(view: Dictionary) -> void:
 			var weakness: Array = enemy.get("weakness", [])
 			var data := {
 				"id": id, "side": "boss" if boss else "enemy", "name": _screen.name_of(id), "kind": enemy["kind"],
-				"hp": enemy["hp"], "max_hp": enemy["max_hp"], "statuses": statuses.get(id, enemy.get("statuses", [])),
+				"hp": enemy["hp"], "max_hp": enemy["max_hp"],
+				"energy": enemy["energy"] if enemy.has("energy") else null,
+				"energy_max": enemy.get("energy_max", 4), "statuses": statuses.get(id, enemy.get("statuses", [])),
 				"acting": _combat.get("actor", "") == id,
 				"tooltip": "%s\n%s%s" % [_screen.name_of(id), enemy.get("description", ""),
 						("\nWeak to: " + ", ".join(weakness)) if not weakness.is_empty() else ""],
-			}
+		}
+			if not enemy.has("energy"):
+				data.erase("energy")
 			var y := 0.32 if list.size() == 1 else 0.16 + i * (0.36 / float(list.size() - 1))
 			_spots[id] = [float(group[1]) - (0.03 if boss else 0.0), 0.23 if boss else y]
 			_add_token(data)
@@ -450,7 +492,9 @@ func _build_bottom(view: Dictionary) -> void:
 	var your_turn: bool = _combat.get("your_turn", false) and str(_combat.get("result", "")).is_empty()
 	var choices: Dictionary = _combat.get("choices", {})
 	if your_turn and mode in ["skills", "items"]:
-		_bottom.add_child(_card_grid(mode, choices))
+		var grid := _card_grid(mode, choices)
+		grid.visible = not _banner.visible
+		_bottom.add_child(grid)
 	elif your_turn and not mode.is_empty():
 		var caption := UiKit.pixel_label("Choose a target on the field (1-%d), Esc to go back" % _choices.size(), "body", UiKit.ACCENT)
 		caption.add_theme_color_override("font_outline_color", Color.BLACK)
@@ -458,7 +502,7 @@ func _build_bottom(view: Dictionary) -> void:
 		_bottom.add_child(_centered(caption))
 
 	var hud := UiKit.vbox(6)
-	hud.custom_minimum_size = Vector2(600, 0)
+	hud.custom_minimum_size = Vector2(510, 0)
 	var info := UiKit.hbox(12)
 	if not me.is_empty():
 		var exp_text := "(%d/%d)" % [int(me.get("exp", 0)), int(me.get("exp_next", 0))] if int(me.get("exp_next", 0)) > 0 else "(MAX)"
@@ -467,7 +511,8 @@ func _build_bottom(view: Dictionary) -> void:
 	_countdown = UiKit.pixel_label("", "heading")
 	info.add_child(_countdown)
 	info.add_child(UiKit.spacer())
-	info.add_child(UiKit.pixel_label("%d Gold" % int(view.get("gold", 0)), "heading", UiKit.ACCENT))
+	var gold := int(me.get("gold", view.get("gold", 0))) if not me.is_empty() else int(view.get("gold", 0))
+	info.add_child(UiKit.pixel_label("%d ◈" % gold, "heading", UiKit.ACCENT))
 	hud.add_child(info)
 	_window_bar = null
 	if _deadline != null:
@@ -487,16 +532,14 @@ func _build_bottom(view: Dictionary) -> void:
 	if your_turn:
 		var actions := UiKit.hbox(8)
 		var has_skills: bool = not choices.get("skills", {}).is_empty()
-		actions.add_child(_action_button("Attack [A]", "attack", func() -> void: _set_mode("attack"), mode == "attack"))
-		var skill := _action_button("Skill [S]", "skill", func() -> void: _set_mode("skills"), mode == "skills" or mode.begins_with("skill:"))
-		if not has_skills:
-			skill.disabled = true
-			skill.tooltip_text = UiText.error("skill_unavailable")
-		actions.add_child(skill)
-		actions.add_child(_action_button("Defend [D]", "defend", func() -> void: _send({"action": "defend"}), false))
-		var item := _action_button("Item [I]", "item", func() -> void: _set_mode("items"), mode == "items" or mode.begins_with("item:"))
+		actions.add_child(_action_button("Fight [F]", "fight", func() -> void: _set_mode("skills"), mode == "skills" or mode == "attack" or mode.begins_with("skill:")))
+		var item := _action_button("Items [I]", "items", func() -> void: _set_mode("items"), mode == "items" or mode.begins_with("item:"))
 		item.disabled = choices.get("items", {}).is_empty()
 		actions.add_child(item)
+		var focus := _action_button("Focus [O]", "focus", func() -> void: _send({"action": "focus"}), false)
+		focus.disabled = not choices.get("focus", false)
+		focus.tooltip_text = "Focus arrives with the next server update" if focus.disabled else "Gain Energy and Dodge this turn."
+		actions.add_child(focus)
 		hud.add_child(actions)
 		_app.hint("combat")
 		if has_skills:
@@ -511,6 +554,10 @@ func _build_bottom(view: Dictionary) -> void:
 	if your_turn and not choices.get("skills", {}).is_empty():
 		var squares := UiKit.hbox(4)
 		squares.size_flags_vertical = Control.SIZE_SHRINK_END
+		var hourglass := UiKit.panel(UiKit.pixel_label("⌛", "heading", UiKit.TEXT_DIM), "HudPanel")
+		hourglass.custom_minimum_size = Vector2(38, 42)
+		hourglass.tooltip_text = "Action window"
+		squares.add_child(hourglass)
 		for skill_id in choices["skills"]:
 			var info_skill: Dictionary = choices["skills"][skill_id]
 			var left := int(info_skill["cooldown"])
@@ -531,7 +578,7 @@ func _build_bottom(view: Dictionary) -> void:
 			count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			mark.add_child(count)
 			var square := UiKit.panel(mark, "HudPanel")
-			square.custom_minimum_size = Vector2(40, 0)
+			square.custom_minimum_size = Vector2(38, 42)
 			var why := "ready"
 			if left > 0:
 				why = "%d turn(s) of cooldown left" % left
@@ -551,9 +598,9 @@ func _card_grid(mode: String, choices: Dictionary) -> Control:
 	grid.add_theme_constant_override("h_separation", 6)
 	grid.add_theme_constant_override("v_separation", 6)
 	if mode == "skills":
-		grid.add_child(_card("Attack", "Cost: 0 | Cooldown: 0", "A", UiKit.TEXT, true,
+		grid.add_child(_card("Strike", "Cost: 0 | Cooldown: 0", "⚔", UiKit.TEXT, true,
 				"A basic attack.", func() -> void: _set_mode("attack")))
-		grid.add_child(_card("Defend", "Cost: 0 | Cooldown: 0", "D", UiKit.TEXT, true,
+		grid.add_child(_card("Guard", "Cost: 0 | Cooldown: 0", "▣", UiKit.TEXT, true,
 				"Halve damage until your next turn.", func() -> void: _send({"action": "defend"})))
 		for skill_id in choices.get("skills", {}):
 			var info: Dictionary = choices["skills"][skill_id]
@@ -589,7 +636,7 @@ func _card(title: String, sub: String, icon: String, icon_color: Color, usable: 
 	var number := _choices.size() + 1
 	var button := Button.new()
 	button.theme_type_variation = "HudButton"
-	button.custom_minimum_size = Vector2(236, 58)
+	button.custom_minimum_size = Vector2(164, 58)
 	button.focus_mode = Control.FOCUS_ALL
 	button.disabled = not usable
 	button.tooltip_text = tip
@@ -764,6 +811,30 @@ func _small_button(text: String, callback: Callable) -> Button:
 	button.focus_mode = Control.FOCUS_ALL
 	button.pressed.connect(callback)
 	return button
+
+
+func _icon_button(text: String, hint: String, callback: Callable) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.tooltip_text = hint
+	button.theme_type_variation = "HudButton"
+	button.custom_minimum_size = Vector2(34, 34)
+	button.add_theme_font_size_override("font_size", int(UiKit.SIZES["heading"] * _app.settings.text_scale))
+	button.pressed.connect(callback)
+	return button
+
+
+func _menu_button(text: String, callback: Callable) -> Button:
+	var button := _small_button(text, func() -> void:
+		_menu_panel.visible = false
+		callback.call())
+	button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.custom_minimum_size = Vector2(140, 30)
+	return button
+
+
+func _toggle_menu() -> void:
+	_menu_panel.visible = not _menu_panel.visible
 
 
 static func _centered(node: Control) -> Control:
