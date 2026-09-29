@@ -160,23 +160,24 @@ func test_alert_defenses_last_for_only_the_first_two_own_turns() -> void:
 	assert_false(hit.get("blocked", false), "Block bonus expires on turn 3")
 
 
-func test_critical_healing_boosts_item_healing_by_fifty_percent() -> void:
+func test_critical_healing_heals_twenty_percent_of_crit_damage() -> void:
 	var run := _run("Human", ["Critical Healing"])
 	var combat := _combat(run)
-	var healer: Dictionary = run.party[0]
-	healer["hp"] = healer["max_hp"] - 40
-	var before := int(healer["hp"])
-	# Herb heals 30, so 1.5 * 30 = 45.
-	combat._apply_profile(run, "p0", {"heal": 30}, ["p0"])
-	var after := int(healer["hp"])
-	assert_eq(after - before, 40, "45 capped at max HP")
-	
-	healer["hp"] = healer["max_hp"] - 50
-	before = int(healer["hp"])
-	var fth = float(healer.get("attributes", {}).get("fth", 0))
-	var expected = int(round(30.0 * 1.5 * (1.0 + 0.02 * fth)))
-	combat._apply_profile(run, "p0", {"heal": 30}, ["p0"])
-	assert_eq(int(healer["hp"]) - before, expected)
+	var attacker: Dictionary = run.party[0]
+	combat.enemies[0]["derived"] = {"dodge": 0.0, "block": 0.0}
+	combat.enemies[0]["hp"] = 500
+	attacker["hp"] = attacker["max_hp"] - 30
+	var before := int(attacker["hp"])
+	var hit := combat._hit(run, "p0", combat.enemies[0], {"stat": "atk", "power": 1.0, "always_crit": true})
+	assert_true(hit["crit"], "forced crit")
+	var expected := mini(30, maxi(1, int(round(int(hit["damage"]) * 0.2))))
+	assert_eq(int(attacker["hp"]) - before, expected, "crit heals 20% of damage dealt")
+	assert_eq(int(hit.get("crit_heal", 0)), expected)
+	# No heal without a crit, and healing actions are not boosted.
+	attacker["crit"] = 0.0
+	before = int(attacker["hp"])
+	combat._hit(run, "p0", combat.enemies[0], {"stat": "atk", "power": 1.0})
+	assert_eq(int(attacker["hp"]), before, "no crit, no heal")
 
 
 func test_daredevil_impulse_increases_damage_at_thirty_percent_hp() -> void:

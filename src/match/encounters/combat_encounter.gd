@@ -663,8 +663,6 @@ func _apply_profile(run: MatchRun, source: String, profile: Dictionary, targets:
 			if source.begins_with(PARTY_PREFIX):
 				var healer := _unit(run, source)
 				fth = float(healer.get("attributes", {}).get("fth", 0))
-				if healer.get("boons", []).has("Critical Healing"):
-					heal_mult = 1.5
 			var heal_amount = int(round(float(profile["heal"]) * heal_mult * (1.0 + 0.02 * fth)))
 			
 			var before: int = unit["hp"]
@@ -776,8 +774,16 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary,
 		var ls_amt = int(round(dealt * ls))
 		if ls_amt > 0:
 			attacker["hp"] = mini(attacker["max_hp"], attacker["hp"] + ls_amt)
-			
+	# Critical Healing (ADR-0013): a critical hit heals the attacker for 20% of the damage dealt.
+	var crit_heal := 0
+	if crit and dealt > 0 and attacker["hp"] > 0 and attacker.get("boons", []).has("Critical Healing"):
+		var before_heal: int = attacker["hp"]
+		attacker["hp"] = mini(attacker["max_hp"], attacker["hp"] + maxi(1, int(round(dealt * 0.2))))
+		crit_heal = attacker["hp"] - before_heal
+
 	var out := {"damage": dealt, "crit": crit, "weak": weak, "element": element}
+	if crit_heal > 0:
+		out["crit_heal"] = crit_heal
 	if blocked:
 		out["blocked"] = true
 	if survived:
