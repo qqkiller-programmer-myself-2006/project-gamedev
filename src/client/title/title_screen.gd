@@ -10,7 +10,7 @@ var _seed: LineEdit
 var _content: Control
 var _view := "menu"
 var _story_picks: Array[OptionButton] = []
-const STORY_CLASSES := ["swordsman", "archer", "mage", "guardian", "rogue"]
+const STORY_CLASSES := ["swordsman", "archer", "mage", "guardian", "assassin"]
 const STORY_NAMES := ["Arin", "Bram", "Cora", "Dain", "Wren"]
 
 func setup(app: ClientApp) -> void:

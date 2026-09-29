@@ -61,7 +61,7 @@
     "starting_inventory": {
       "herb": 3
     },
-    "ai_class_order": ["guardian", "swordsman", "archer", "mage", "rogue"]
+    "ai_class_order": ["guardian", "swordsman", "archer", "mage", "assassin"]
   },
   "meta": {
     "races": {
@@ -320,8 +320,8 @@
       },
       "aggro": 1.5
     },
-    "rogue": {
-      "name": "Rogue",
+    "assassin": {
+      "name": "assassin",
       "role": "Melee DoT",
       "recommended_stats": ["DEX", "LCK"],
       "description": "Daggers and poison. Stacks Bleed, Poison and Toxin on one enemy, then finishes it with Inject Venom. Fast and deadly, but fragile.",
@@ -340,7 +340,7 @@
         "poke_up",
         "inject_venom"
       ],
-      "ai": "rogue",
+      "ai": "assassin",
       "challenge": {
         "trainer": "masked_outlaw",
         "rounds": 3,
@@ -544,7 +544,7 @@
           "name": "Bandit Hideout",
           "hint": "A masked figure watches from the ferns, twirling a dagger.",
           "classes": {
-            "rogue": 1
+            "assassin": 1
           }
         }
       ]
@@ -1352,7 +1352,7 @@
     },
     "stab": {
       "name": "Stab",
-      "class": "rogue",
+      "class": "assassin",
       "description": "A piercing stab at 130% ATK that ignores half the target's DEF and causes Bleed. Costs 1 Energy. Cooldown: 4 turns.",
       "cooldown": 4,
       "energy": 1,
@@ -1375,7 +1375,7 @@
     },
     "prep_time": {
       "name": "Prep Time",
-      "class": "rogue",
+      "class": "assassin",
       "description": "Coat your weapon with poison: your next 3 damaging actions also apply Poison. Costs 1 Energy. Cooldown: 6 turns.",
       "cooldown": 6,
       "energy": 1,
@@ -1391,7 +1391,7 @@
     },
     "poke_up": {
       "name": "Poke Up",
-      "class": "rogue",
+      "class": "assassin",
       "description": "Three quick stabs at 55% ATK each on one enemy; every stab causes Bleed. Costs 2 Energy. Cooldown: 3 turns.",
       "cooldown": 3,
       "energy": 2,
@@ -1415,7 +1415,7 @@
     },
     "inject_venom": {
       "name": "Inject Venom",
-      "class": "rogue",
+      "class": "assassin",
       "description": "Drive venom into one enemy: 100% ATK plus 40% for each different DoT on it, then 2 stacks of Toxin. Costs 2 Energy. Cooldown: 6 turns.",
       "cooldown": 6,
       "energy": 2,

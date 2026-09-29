@@ -21,14 +21,14 @@ func test_race_purchase_and_tree_costs_caps_and_reset_refund() -> void:
 	var session := _room(h)
 	assert_ok(h.server.command(session, {"type": "buy_race", "race": "Dwarf"}))
 	assert_eq(h.room_view(session)["profile"]["gems"], 950)
-	assert_ok(h.server.command(session, {"type": "tree_upgrade", "class": "rogue", "node": "might"}))
-	assert_eq(h.room_view(session)["profile"]["class_trees"]["rogue"]["might"], 1)
+	assert_ok(h.server.command(session, {"type": "tree_upgrade", "class": "assassin", "node": "might"}))
+	assert_eq(h.room_view(session)["profile"]["class_trees"]["assassin"]["might"], 1)
 	assert_eq(h.room_view(session)["profile"]["gems"], 940)
 	for i in 4:
-		assert_ok(h.server.command(session, {"type": "tree_upgrade", "class": "rogue", "node": "might"}))
-	assert_eq(h.server.command(session, {"type": "tree_upgrade", "class": "rogue", "node": "might"})["error"], "max_level")
+		assert_ok(h.server.command(session, {"type": "tree_upgrade", "class": "assassin", "node": "might"}))
+	assert_eq(h.server.command(session, {"type": "tree_upgrade", "class": "assassin", "node": "might"})["error"], "max_level")
 	var before: int = int(h.room_view(session)["profile"]["gems"])
-	assert_ok(h.server.command(session, {"type": "reset_tree", "class": "rogue"}))
+	assert_ok(h.server.command(session, {"type": "reset_tree", "class": "assassin"}))
 	assert_eq(h.room_view(session)["profile"]["gems"], before + 100)
 
 

@@ -1,6 +1,6 @@
 extends TestCase
 
-const CLASSES := ["swordsman", "archer", "mage", "guardian", "rogue"]
+const CLASSES := ["swordsman", "archer", "mage", "guardian", "assassin"]
 
 
 func _start_story(h: MatchHarness) -> int:

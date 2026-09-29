@@ -14,7 +14,7 @@ class TreeLinks extends Control:
 		draw_line(Vector2(w * 1.5, h * 1.5), Vector2(w * 1.5, h * 2.5), ink, 2)
 
 class ClassMark extends Control:
-	var class_id := "rogue"
+	var class_id := "assassin"
 	func _draw() -> void:
 		var center := size * 0.5
 		var pale := UiKit.TEXT
@@ -34,7 +34,7 @@ class ClassMark extends Control:
 
 const NAV := ["Profile", "Races", "Class", "Boons", "Records"]
 const ICONS := ["◆", "♜", "⚔", "✦", "♛"]
-const CLASSES := ["swordsman", "archer", "mage", "guardian", "rogue"]
+const CLASSES := ["swordsman", "archer", "mage", "guardian", "assassin"]
 const RACE_ORDER := ["Elf", "Dwarf", "Kobold", "Lunaeia", "Withered", "Human"]
 const TREE_ORDER := ["vitality", "might", "precision", "swiftness", "reserves", "mastery", "stat_points"]
 const PASSIVES := {
@@ -77,7 +77,7 @@ var _meta: Dictionary = {}
 var _classes: Dictionary = {}
 var _sprite_manifest: Dictionary = {}
 var _tab := "Class"
-var _class_id := "rogue"
+var _class_id := "assassin"
 var _race := "Human"
 var _boons: Array = []
 var _node := "stat_points"
@@ -105,7 +105,7 @@ func setup(app: ClientApp, finish: Callable) -> void:
 	for slot in room.get("slots", []):
 		if slot.get("is_you", false):
 			var loadout: Dictionary = slot.get("loadout", {})
-			_class_id = str(loadout.get("class", "rogue"))
+			_class_id = str(loadout.get("class", "assassin"))
 			_race = str(loadout.get("race", "Human"))
 			_boons = loadout.get("boons", []).duplicate()
 			break

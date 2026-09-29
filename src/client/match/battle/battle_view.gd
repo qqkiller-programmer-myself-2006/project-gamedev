@@ -1,7 +1,7 @@
 class_name BattleView
 extends Control
 ## Full-screen battle for Combats, Class Challenges and the Guardian Boss,
-## laid out after docs/references/aac_rogue/ (04-07, 11): the initiative
+## laid out after docs/references/aac_assassin/ (04-07, 11): the initiative
 ## timeline on the left, the Party (left) facing the enemies (right) on a
 ## 2D stage, Region/Layer top-right, and at the bottom a HUD with your
 ## character, the Action window countdown, Gold, HP, Energy and the

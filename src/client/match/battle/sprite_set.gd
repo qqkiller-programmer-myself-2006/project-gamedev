@@ -4,7 +4,7 @@ extends RefCounted
 
 const ROOT := "res://assets/heroes/"
 const MANIFEST := "res://assets/heroes/manifest.json"
-const ART_CLASSES := {"archer": true, "mage": true, "swordsman": true}
+const ART_CLASSES := {"archer": true, "mage": true, "swordsman": true, "guardian": true, "assassin": true}
 
 static var _manifest: Dictionary = {}
 static var _loaded := false

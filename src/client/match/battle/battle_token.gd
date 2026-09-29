@@ -3,7 +3,7 @@ extends Button
 ## One combatant on the battle stage: Status-effect badges on top, a figure
 ## drawn in code in the middle (replace `_draw_figure` with a sprite later
 ## without touching the layout) and a nameplate with HP - and Energy for
-## Party characters - below, like docs/references/aac_rogue/07. It is a
+## Party characters - below, like docs/references/aac_assassin/07. It is a
 ## Button so a valid target can be clicked, or focused and confirmed with
 ## Enter.
 
@@ -20,10 +20,10 @@ const PARTY_OUTFITS := {
 
 const CLASS_TINTS := {
 	"classless": Color("#b9a98c"), "swordsman": Color("#c3cbd9"), "archer": Color("#86c77e"),
-	"mage": Color("#6fa9f2"), "guardian": Color("#d9b65f"), "rogue": Color("#a584de"),
+	"mage": Color("#6fa9f2"), "guardian": Color("#d9b65f"), "assassin": Color("#a584de"),
 }
 const CLASS_GLYPHS := {
-	"classless": "-", "swordsman": "S", "archer": "A", "mage": "M", "guardian": "G", "rogue": "R",
+	"classless": "-", "swordsman": "S", "archer": "A", "mage": "M", "guardian": "G", "assassin": "R",
 }
 const ENEMY_TINTS := {
 	"grey_wolf": Color("#9aa3ad"), "thornback_boar": Color("#a5714f"), "bramble_archer": Color("#79a150"),

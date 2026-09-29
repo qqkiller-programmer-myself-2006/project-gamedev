@@ -69,7 +69,7 @@ func _simulate(humans: int, start: int, seeds: int, pace: bool, use_loadout: boo
 				sessions.append(h.join("P%d" % (i + 1)))
 			if story_mode:
 				# Story rooms accept Race/Boons only for the host's own character.
-				var story_classes := ["swordsman", "archer", "mage", "guardian", "rogue"]
+				var story_classes := ["swordsman", "archer", "mage", "guardian", "assassin"]
 				for i in 5:
 					var pick := {"type": "set_loadout", "slot": i, "class": story_classes[i],
 						"race": "Elf" if i == 0 else "Human", "boons": ["Potential: Bunny"] if i == 0 else []}
@@ -78,7 +78,7 @@ func _simulate(humans: int, start: int, seeds: int, pace: bool, use_loadout: boo
 			else:
 				# Rotate through available starter choices instead of giving every run
 				# the same high-survival Archer/Guardian + Bunny loadout.
-				var loadout_classes := ["archer", "guardian", "swordsman", "mage", "rogue"]
+				var loadout_classes := ["archer", "guardian", "swordsman", "mage", "assassin"]
 				var loadout_races := ["Elf", "Human", "Kobold", "Withered"]
 				var loadout_boons := [
 					["Potential: Bunny"],

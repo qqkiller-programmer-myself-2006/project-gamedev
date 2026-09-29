@@ -14,7 +14,7 @@ const EASY := {
 		"archer": {"base": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
 		"mage": {"base": {"max_hp": 999, "atk": 120, "mag": 120, "def": 60, "spd": 40}},
 		"guardian": {"base": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
-		"rogue": {"base": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
+		"assassin": {"base": {"max_hp": 999, "atk": 120, "def": 60, "spd": 40}},
 	},
 }
 
@@ -49,7 +49,7 @@ const EXACT_DAMAGE := {
 		"archer": {"base": {"crit": 0.19}},
 		"mage": {"base": {"crit": -0.02}},
 		"guardian": {"base": {"crit": -0.02}},
-		"rogue": {"base": {"crit": -0.06}},
+		"assassin": {"base": {"crit": -0.06}},
 	},
 	"enemies": {
 		"grey_wolf": {"stats": {"max_hp": 26, "atk": 9, "crit": 0}, "rewards": {"exp": 8, "gold": 5, "drops": []}},
@@ -120,7 +120,7 @@ func enter_first_encounter(sessions: Array[int]) -> void:
 static func class_and_combat(class_id: String) -> Dictionary:
 	var trainer: String = {
 		"swordsman": "old_swordsman", "archer": "veteran_hunter",
-		"mage": "shrine_spirit", "guardian": "stone_sentinel", "rogue": "masked_outlaw",
+		"mage": "shrine_spirit", "guardian": "stone_sentinel", "assassin": "masked_outlaw",
 	}[class_id]
 	return {
 		"journey": {
