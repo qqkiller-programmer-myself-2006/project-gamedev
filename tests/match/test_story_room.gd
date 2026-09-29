@@ -36,6 +36,8 @@ func test_story_action_waits_and_routes_to_current_character() -> void:
 	h.advance(10.0)
 	var combat: Dictionary = h.match_view(session)["encounter"]
 	assert_eq(combat["kind"], "combat")
+	for enemy in combat["enemies"]:
+		assert_eq(enemy["energy_max"], 1, "Story uses its documented enemy Energy cap")
 	while not str(combat["actor"]).begins_with("p"):
 		h.advance(1.0)
 		combat = h.match_view(session)["encounter"]
@@ -148,7 +150,45 @@ func test_forged_save_is_rejected() -> void:
 	# Missing version
 	var missing_version = JSON.parse_string(JSON.stringify(saved))
 	missing_version.erase("version")
-	assert_rejected(restored.server.command(new_session, {"type": "restore_story", "save": missing_version}), "invalid_save")
+	assert_rejected(restored.server.command(new_session, {"type": "restore_story", "save": missing_version}), "old_save")
+
+	# Unknown gear id
+	var unknown_gear = JSON.parse_string(JSON.stringify(saved))
+	unknown_gear["party"][0]["gear"]["weapon"] = "invalid_item_id_123"
+	assert_rejected(restored.server.command(new_session, {"type": "restore_story", "save": unknown_gear}), "invalid_save")
+
+	# Forged attributes
+	var forged_attr = JSON.parse_string(JSON.stringify(saved))
+	forged_attr["party"][0]["attributes"]["str"] += 1
+	assert_rejected(restored.server.command(new_session, {"type": "restore_story", "save": forged_attr}), "invalid_save")
+	var forged_points = JSON.parse_string(JSON.stringify(saved))
+	forged_points["party"][0]["points"] += 1
+	assert_rejected(restored.server.command(new_session, {"type": "restore_story", "save": forged_points}), "invalid_save")
+
+	# Wrong clue type
+	var wrong_clue = JSON.parse_string(JSON.stringify(saved))
+	wrong_clue["clues"].append({"id": "journal_page", "title": "Scorched Journal Page",
+		"text": "Father followed the stream west with a companion he called 'W.'",
+		"layer": "one", "source": "story"})
+	assert_rejected(restored.server.command(new_session, {"type": "restore_story", "save": wrong_clue}), "invalid_save")
+
+	# Clue id not in content
+	var bad_clue = JSON.parse_string(JSON.stringify(saved))
+	bad_clue["clues"].append({"id": "made_up_clue", "title": "Fake", "text": "Fake",
+		"layer": 1, "source": "combat"})
+	assert_rejected(restored.server.command(new_session, {"type": "restore_story", "save": bad_clue}), "invalid_save")
+
+	# Extra clue keys are rejected; the canonical five-key clue restores.
+	var extra_clue = JSON.parse_string(JSON.stringify(saved))
+	extra_clue["clues"].append({"id": "journal_page", "title": "Scorched Journal Page",
+		"text": "Father followed the stream west with a companion he called 'W.'",
+		"layer": 1, "source": "story", "extra": true})
+	assert_rejected(restored.server.command(new_session, {"type": "restore_story", "save": extra_clue}), "invalid_save")
+	var valid_clue = JSON.parse_string(JSON.stringify(saved))
+	valid_clue["clues"].append({"id": "journal_page", "title": "Scorched Journal Page",
+		"text": "Father followed the stream west with a companion he called 'W.'",
+		"layer": 1, "source": "story"})
+	assert_ok(restored.server.command(new_session, {"type": "restore_story", "save": valid_clue}))
 
 
 func test_story_room_lead_gets_last_loadout_race_and_boons() -> void:

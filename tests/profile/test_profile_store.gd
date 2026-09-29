@@ -51,6 +51,15 @@ func test_d1_store_builds_authenticated_get_and_put_requests() -> void:
 	assert_eq(JSON.parse_string(sender.calls[1]["body"])["version"], 1)
 
 
+func test_game_server_configure_builds_d1_store_with_http_sender() -> void:
+	var game_server := GameServer.new()
+	game_server.configure({"seed": 1, "profile-url": "https://profiles.example", "profile-secret": "secret"})
+	assert_true(game_server.profile_store is D1ProfileStore)
+	assert_true(game_server.profile_store.sender is HttpProfileSender)
+	game_server.profile_store.sender.stop()
+	game_server.free()
+
+
 func test_d1_store_handles_missing_and_unavailable_profiles_safely() -> void:
 	var sender := FakeSender.new()
 	var store := D1ProfileStore.new("https://profiles.example", "secret", sender)

@@ -54,18 +54,24 @@ func test_merchant_offers_content_stock_with_prices() -> void:
 func test_buying_spends_personal_gold_and_fills_shared_inventory() -> void:
 	_shop(100, 2)  # 100 split among 5 chars; AI gold collected to 2 humans → 50 each
 	h.server.take_events(sessions[1])
-	assert_ok(h.server.command(sessions[0], {"type": "buy", "item": "tonic"}))
-	assert_ok(h.server.command(sessions[1], {"type": "buy", "item": "herb"}), "each human buys from own purse")
+	var first_purchase := h.server.command(sessions[0], {"type": "buy", "item": "tonic"})
+	var second_purchase := h.server.command(sessions[1], {"type": "buy", "item": "herb"})
+	assert_ok(first_purchase)
+	assert_ok(second_purchase, "each human buys from own purse")
+	assert_eq(first_purchase["gold"], 23, "purchase result reports the buyer's purse")
+	assert_eq(second_purchase["gold"], 38, "each buyer gets their own remaining Gold")
 	assert_eq(_view(sessions[1])["party"][0]["gold"], 50 - 27, "buyer's personal gold drops")
 	assert_eq(_view(sessions[1])["party"][1]["gold"], 50 - 12, "second buyer's personal gold drops")
+	assert_eq(_view(sessions[1])["gold"], 61, "run Gold is derived from every personal purse")
 	assert_eq(_count("tonic", sessions[1]), 1)
 	assert_eq(_count("herb", sessions[1]), 4, "3 starting herbs + 1")
 	assert_eq(_stock("tonic")["remaining"], 1)
 	var purchases := []
 	for event in h.server.take_events(sessions[1]):
 		if event["type"] == "purchase":
-			purchases.append([event["slot"], event["item"]])
-	assert_eq(purchases, [[0, "tonic"], [1, "herb"]], "everyone sees every purchase")
+			purchases.append([event["slot"], event["item"], event["gold"]])
+	assert_eq(purchases, [[0, "tonic", 23], [1, "herb", 38]],
+			"everyone sees each purchase and the buyer's remaining Gold")
 
 
 func test_not_enough_gold_is_rejected_without_change() -> void:

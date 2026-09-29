@@ -310,6 +310,7 @@ func _on_result(_id: int, _cmd: Dictionary, result: Dictionary) -> void:
 	if not result.get("ok", false):
 		if story_launcher != null and str(_cmd.get("type", "")) in ["create_room", "restore_story"]:
 			var msg := UiText.error(str(result.get("error", "")))
+			story_save.clear()
 			story_launcher.stop()
 			story_launcher = null
 			if _current is TitleScreen:

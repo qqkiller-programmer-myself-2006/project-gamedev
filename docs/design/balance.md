@@ -155,3 +155,20 @@ Critical Healing follows ADR-0013 (a crit heals the attacker for 20% of the dama
 Loadout with 2 players is 1 point above the 92% target, inside the ±3% noise of 100 seeds. Raising the boss HP to 1400
 did not move it (93%) but dropped Story to 69% and default 2-player to 73%, so the boss stays at 1350. Revisit with more
 seeds during QA (#54).
+
+## T26 enemy first-turn Energy re-tuning (#71)
+
+ADR-0012 now applies the enemy's +1 Energy at the start of its first turn as well as later turns. To keep every measured
+mode inside the 70–92% target, Heavy Charge and Bull Rush cost 2 Energy instead of 3. Story mode uses the documented
+`rules.story_enemy_energy_max = 1`; normal Multiplayer keeps `rules.enemy_energy_max = 4`, so its enemies continue to use
+their 2–3 Energy specials.
+
+Final 100-seed runs from seed 1000:
+
+| Mode | 1 player | 2 players |
+| --- | ---: | ---: |
+| Default | 79% | 74% |
+| Loadout (`--loadout`) | 79% | 91% |
+| Story (`--story`) | 76% | — |
+
+All five measured modes are inside the target. Rejected commands were 0 in every run.

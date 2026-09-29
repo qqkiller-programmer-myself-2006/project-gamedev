@@ -125,6 +125,9 @@ func _show_play() -> void:
 	_content = panel
 	body.add_child(UiKit.label("CHOOSE YOUR JOURNEY", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.label("Story · offline, control all five", "body"))
+	_status = UiKit.para("", "body", UiKit.WARN)
+	_status.visible = false
+	body.add_child(_status)
 	var has_save: bool = _app.story_save.has_save()
 	if has_save:
 		var resume := UiKit.primary("Continue Story", func() -> void: _app.start_story([], _app.story_save.load()))

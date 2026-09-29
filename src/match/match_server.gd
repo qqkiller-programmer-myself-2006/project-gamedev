@@ -89,7 +89,11 @@ func command(session_id: int, cmd: Dictionary) -> Dictionary:
 			var story_room := _room_of(session_id)
 			if story_room == null or not story_room.story or story_room.slot_of(session_id) != story_room.host_slot:
 				return _reject("not_in_room")
-			if not (cmd.get("save") is Dictionary) or not story_room.restore_story(cmd["save"]):
+			if not (cmd.get("save") is Dictionary):
+				return _reject("invalid_save")
+			if not cmd["save"].has("version"):
+				return _reject("old_save")
+			if not story_room.restore_story(cmd["save"]):
 				return _reject("invalid_save")
 			_flush(story_room)
 			return {"ok": true}

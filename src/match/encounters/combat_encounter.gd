@@ -239,20 +239,21 @@ func _begin_turn(run: MatchRun, id: String) -> void:
 		for skill in cooldowns[id]:
 			cooldowns[id][skill] = maxi(0, int(cooldowns[id][skill]) - 1)
 	# Energy starts at energy_start for the whole Party, so each character's
-	# first turn in a Combat grants no regen yet; every later own turn
-	# (including ones that time out into an automatic Defend) regains
-	# energy_regen up to energy_max.
-	if _had_turn.has(id):
+	# Party members skip regen on their first turn because they start with
+	# Energy. Enemies start at zero and gain +1 on every own turn, including
+	# their first, as required by ADR-0012 section 3.
+	var is_party = id.begins_with(PARTY_PREFIX)
+	if _had_turn.has(id) or not is_party:
 		var character := _unit(run, id)
-		var is_party = id.begins_with(PARTY_PREFIX)
 		var regen = int(character.get("derived", {}).get("energy_regen", run.content.get_int("rules.energy_regen", 1))) if is_party else 1
 		if is_party and character.get("boons", []).has("Energy Conserver") and run.rng.chance(0.15):
 			regen += 1
-		var def_max = run.content.get_int("rules.energy_max", 6) if is_party else run.content.get_int("rules.enemy_energy_max", 4)
+		var enemy_max := run.content.get_int("rules.story_enemy_energy_max", 1) \
+				if run.story else run.content.get_int("rules.enemy_energy_max", 4)
+		var def_max = run.content.get_int("rules.energy_max", 6) if is_party else enemy_max
 		var def_start = run.content.get_int("rules.energy_start", 1) if is_party else 0
 		character["energy"] = mini(int(character.get("energy_max", def_max)), int(character.get("energy", def_start)) + regen)
-	else:
-		_had_turn[id] = true
+	_had_turn[id] = true
 	deadline = -1.0
 	act_at = -1.0
 	var now: float = run.clock.now()
@@ -939,7 +940,9 @@ func _make_enemy(run: MatchRun, kind: String, index: int) -> Dictionary:
 	enemy["crit"] = float(stats.get("crit", 0.0))
 	enemy["hp"] = enemy["max_hp"]
 	enemy["energy"] = 0
-	enemy["energy_max"] = int(data.get("energy_max", run.content.get_int("rules.enemy_energy_max", 4)))
+	var default_energy_max := run.content.get_int("rules.story_enemy_energy_max", 1) \
+			if run.story else run.content.get_int("rules.enemy_energy_max", 4)
+	enemy["energy_max"] = int(data.get("energy_max", default_energy_max))
 	return enemy
 
 

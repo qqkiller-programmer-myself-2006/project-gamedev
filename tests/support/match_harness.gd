@@ -52,7 +52,10 @@ const EXACT_DAMAGE := {
 		"assassin": {"base": {"crit": -0.06}},
 	},
 	"enemies": {
-		"grey_wolf": {"stats": {"max_hp": 26, "atk": 9, "crit": 0}, "rewards": {"exp": 8, "gold": 5, "drops": []}},
+		# Keep generic exact-damage tests about their named mechanic. Energy
+		# tests override this cost when they specifically exercise enemy specials.
+		"grey_wolf": {"stats": {"max_hp": 26, "atk": 9, "crit": 0}, "special": {"energy": 999},
+			"rewards": {"exp": 8, "gold": 5, "drops": []}},
 		"thornback_boar": {"stats": {"max_hp": 48, "atk": 12}, "rewards": {"exp": 14, "gold": 9}},
 		"bramble_archer": {"stats": {"max_hp": 20, "atk": 10}, "rewards": {"exp": 10, "gold": 12}},
 		"forest_wisp": {"stats": {"max_hp": 18, "mag": 9}, "rewards": {"exp": 12, "gold": 8}},
