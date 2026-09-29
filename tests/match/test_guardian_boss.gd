@@ -95,7 +95,7 @@ func test_boss_telegraphs_its_heavy_blow_a_turn_ahead() -> void:
 		if events[i]["type"] == "boss_telegraph" and telegraph_at == -1:
 			telegraph_at = i
 		if events[i]["type"] == "action_resolved" and events[i].get("move") == "crushing_root" \
-				and events[i]["action"] == "attack" and blow_at == -1:
+				and events[i]["action"] in ["attack", "special"] and blow_at == -1:
 			blow_at = i
 	assert_true(telegraph_at >= 0, "the Boss announces Crushing Root")
 	assert_true(blow_at > telegraph_at, "and only strikes later")

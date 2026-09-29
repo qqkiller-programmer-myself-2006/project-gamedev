@@ -231,15 +231,15 @@ func _begin_turn(run: MatchRun, id: String) -> void:
 	# first turn in a Combat grants no regen yet; every later own turn
 	# (including ones that time out into an automatic Defend) regains
 	# energy_regen up to energy_max.
-	if id.begins_with(PARTY_PREFIX):
-		if _had_turn.has(id):
-			var character := _unit(run, id)
-			var regen = int(character.get("derived", {}).get("energy_regen", run.content.get_int("rules.energy_regen", 1)))
-			character["energy"] = mini(int(character.get("energy_max",
-					run.content.get_int("rules.energy_max", 6))), int(character.get("energy",
-					run.content.get_int("rules.energy_start", 1))) + regen)
-		else:
-			_had_turn[id] = true
+	if _had_turn.has(id):
+		var character := _unit(run, id)
+		var is_party = id.begins_with(PARTY_PREFIX)
+		var regen = int(character.get("derived", {}).get("energy_regen", run.content.get_int("rules.energy_regen", 1))) if is_party else 1
+		var def_max = run.content.get_int("rules.energy_max", 6) if is_party else run.content.get_int("rules.enemy_energy_max", 4)
+		var def_start = run.content.get_int("rules.energy_start", 1) if is_party else 0
+		character["energy"] = mini(int(character.get("energy_max", def_max)), int(character.get("energy", def_start)) + regen)
+	else:
+		_had_turn[id] = true
 	deadline = -1.0
 	act_at = -1.0
 	var now: float = run.clock.now()
@@ -330,7 +330,11 @@ func _plan_for(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 			return {"actor": me, "action": "attack", "profile": profile, "targets": [target]}
 		"item":
 			var item := str(cmd.get("item", ""))
-			if int(run.inventory.get(item, 0)) <= 0:
+			var me_unit := _unit(run, me)
+			var has_consumable = false
+			if me_unit.get("consumable") != null and me_unit["consumable"]["item"] == item and int(me_unit["consumable"]["count"]) > 0:
+				has_consumable = true
+			if not has_consumable and int(run.inventory.get(item, 0)) <= 0:
 				return {"error": "item_unavailable"}
 			var profile: Dictionary = run.content.get_dict("items.%s.use" % item)
 			if profile.is_empty():
@@ -525,12 +529,20 @@ func _perform(run: MatchRun, plan: Dictionary, automatic: bool) -> void:
 		"charge":
 			event["move"] = plan["move"]
 			event["move_name"] = plan.get("move_name", plan["move"])
-		"attack", "skill", "item":
+		"attack", "skill", "item", "special":
 			if plan.has("item"):
 				event["item"] = plan["item"]
-				run.inventory[plan["item"]] = int(run.inventory[plan["item"]]) - 1
-				if int(run.inventory[plan["item"]]) <= 0:
-					run.inventory.erase(plan["item"])
+				var me_unit := _unit(run, id)
+				var consumed_from_slot = false
+				if me_unit.get("consumable") != null and me_unit["consumable"]["item"] == plan["item"] and int(me_unit["consumable"]["count"]) > 0:
+					me_unit["consumable"]["count"] = int(me_unit["consumable"]["count"]) - 1
+					if int(me_unit["consumable"]["count"]) <= 0:
+						me_unit["consumable"] = null
+					consumed_from_slot = true
+				if not consumed_from_slot:
+					run.inventory[plan["item"]] = int(run.inventory[plan["item"]]) - 1
+					if int(run.inventory[plan["item"]]) <= 0:
+						run.inventory.erase(plan["item"])
 			if plan.has("move"):
 				event["move"] = plan["move"]
 				event["move_name"] = plan.get("move_name", plan["move"])
@@ -546,6 +558,13 @@ func _perform(run: MatchRun, plan: Dictionary, automatic: bool) -> void:
 					if not cooldowns.has(id):
 						cooldowns[id] = {}
 					cooldowns[id][plan["skill"]] = cooldown + 1 if cooldown > 0 else 0
+			if plan["action"] == "special" and id.begins_with(ENEMY_PREFIX):
+				var cost := int(plan.get("energy_spent", 0))
+				event["energy_spent"] = cost
+				event["name"] = str(plan.get("move_name", "Special"))
+				var enemy := _unit(run, id)
+				enemy["energy"] = maxi(0, int(enemy.get("energy", cost)) - cost)
+				event["energy"] = enemy["energy"]
 			event["results"] = _apply_profile(run, id, plan["profile"], plan["targets"])
 			if plan["action"] != "item":
 				_apply_coating(run, id, event["results"])
@@ -837,6 +856,8 @@ func _make_enemy(run: MatchRun, kind: String, index: int) -> Dictionary:
 		enemy[stat] = int(stats.get(stat, 0))
 	enemy["crit"] = float(stats.get("crit", 0.0))
 	enemy["hp"] = enemy["max_hp"]
+	enemy["energy"] = 0
+	enemy["energy_max"] = int(data.get("energy_max", run.content.get_int("rules.enemy_energy_max", 4)))
 	return enemy
 
 
@@ -853,6 +874,8 @@ func _enemy_views() -> Array:
 			"row": enemy["row"],
 			"weakness": enemy["weakness"],
 			"description": enemy["description"],
+			"energy": int(enemy.get("energy", 0)),
+			"energy_max": int(enemy.get("energy_max", 0)),
 			"statuses": status_book.view(enemy["id"]) if status_book != null else [],
 		})
 	return out

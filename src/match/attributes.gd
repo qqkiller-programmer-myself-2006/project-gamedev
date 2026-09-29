@@ -62,10 +62,7 @@ static func recalculate(character: Dictionary, content: ForestContent) -> void:
 	derived["block_reduction"] = 0.5
 	
 	var cls = str(character["class"])
-	var aggro = 1.0
-	if cls == "guardian": aggro = 1.5
-	elif cls == "swordsman": aggro = 1.2
-	elif cls == "rogue": aggro = 0.85
+	var aggro = content.get_float("classes.%s.aggro" % cls, 1.0)
 	derived["aggro"] = aggro
 	
 	var lifesteal = 0.0
@@ -76,5 +73,4 @@ static func recalculate(character: Dictionary, content: ForestContent) -> void:
 	derived["lifesteal"] = lifesteal
 	
 	derived["energy_regen"] = content.get_int("rules.energy_regen", 1)
-	derived["initiative"] = character["spd"] # Derived stat initiative used in snapshot if needed, equivalent to spd? Wait, spec says initiative, maybe just set to spd or don't worry.
-
+	derived["initiative"] = character["spd"]
