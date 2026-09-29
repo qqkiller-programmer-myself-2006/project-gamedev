@@ -47,3 +47,21 @@ xvfb-run -a godot --path . --rendering-driver opengl3 -s tools/ui_preview.gd -- 
 ```
 
 ตัวเลือก: `--scale=1.45` (ขนาดตัวหนังสือ), `--reduced-motion`
+
+## Profile storage
+
+Run these commands once from `deploy/profile-worker/`, after replacing the placeholder `database_id` in `wrangler.toml` with the ID returned by the D1 create command:
+
+```bash
+npx wrangler login
+npx wrangler d1 create btwe-profiles
+npx wrangler d1 execute btwe-profiles --remote --file=schema.sql
+npx wrangler secret put SERVER_SECRET
+npx wrangler deploy
+```
+
+Then start the game server with the deployed Worker URL and the same secret:
+
+```bash
+godot --headless --path . -- --server --profile-url=https://... --profile-secret=...
+```
