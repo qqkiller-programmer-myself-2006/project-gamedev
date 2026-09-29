@@ -7,7 +7,9 @@ param(
     [int]$TimeoutMin = 45,
     [string[]]$Images = @(),
     [string]$Model = '',
-    [switch]$Network
+    [switch]$Network,
+    # Same trust level as agy (owner-approved, worktree only); needed when the sandbox blocks tools such as Python.
+    [switch]$NoSandbox
 )
 $ErrorActionPreference = 'Stop'
 
@@ -30,8 +32,9 @@ $prompt = "In this run YOU are the hands-on executor: edit files and run command
 if ($Agent -eq 'codex') {
     $exe = (Get-Command codex.cmd).Source
     # prompt must come before -i, which is variadic and would swallow it
-    $argv = @('exec', $prompt, '-C', $Worktree, '-s', 'workspace-write', '--skip-git-repo-check',
-        '--add-dir', (Join-Path $env:APPDATA 'Godot'), '-o', "$base.last.md")
+    $argv = @('exec', $prompt, '-C', $Worktree, '--skip-git-repo-check', '-o', "$base.last.md")
+    if ($NoSandbox) { $argv += '--dangerously-bypass-approvals-and-sandbox' }
+    else { $argv += @('-s', 'workspace-write', '--add-dir', (Join-Path $env:APPDATA 'Godot')) }
     if ($Model) { $argv += @('-m', $Model) }
     if ($Network) { $argv += @('-c', 'sandbox_workspace_write.network_access=true') }
     foreach ($i in $Images) { $argv += @('-i', $i) }
