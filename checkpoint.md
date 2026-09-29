@@ -66,3 +66,4 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - T9a ตัดภาพเสร็จ merged 6a62ac5; T9b รอ #48
 - 2026-09-29 13:20: Story mode (#58, ADR-0014) — T11a (`ai/t11-story` / `../ai-t11`) กำลังทำผ่าน subagent; T11b หลัง #52 + #57
 - เจ้าของงานขอ: ทุกครั้งที่ทดสอบ ให้เปิดเกมใน Godot ให้ดูจริง → server: `godot --headless --path . -- --server --port=8910`, client: `Godot_v4.7.2-stable_win64.exe --path . -- --url=ws://127.0.0.1:8910 --name=Tester --auto` (หลัง #57 ใช้ `--dev --playtest` แทน)
+- 2026-09-29 13:12: Codex T9b ล้มเพราะ RAM หมด (เครื่องมี 15.7 GB, ว่าง ~4 GB เพราะ claude/node/MCP กินเยอะ) → **กฎใหม่: รัน executor พร้อมกันไม่เกิน 2 งาน**; T9b WIP add4447 รอคิว (retry เมื่อมีช่องว่าง). โปรเซส Godot ที่เกิดใน sandbox ของ Codex ฆ่าจากนอก sandbox ไม่ได้ (Access denied)
