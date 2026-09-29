@@ -54,7 +54,14 @@ static func option_for(rng: GameRng, content: ForestContent, type: String, layer
 static func _pick_types(rng: GameRng, weights: Dictionary, count: int) -> Array:
 	var pool: Array = []
 	var pool_weights: Array = []
-	for type in TYPES:
+	# Types named only in content data come after the known ones, so real
+	# content (which has none) rolls exactly as before. MatchRun refuses to
+	# enter a type it does not support.
+	var candidates: Array = TYPES.duplicate()
+	for type in weights:
+		if not candidates.has(type):
+			candidates.append(str(type))
+	for type in candidates:
 		if float(weights.get(type, 0)) > 0.0:
 			pool.append(type)
 			pool_weights.append(float(weights[type]))

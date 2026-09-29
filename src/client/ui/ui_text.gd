@@ -15,6 +15,7 @@ const ERRORS := {
 	"not_in_room": "You are not in a room.",
 	"not_host": "Only the Host can start the Match.",
 	"wrong_phase": "That can't be done right now.",
+	"unsupported_encounter": "The route led somewhere the game does not know. The Match was stopped.",
 	"not_your_turn": "It is not your turn.",
 	"not_your_slot": "That character is not yours.",
 	"action_window_closed": "Too late: your turn ran out and you Defended.",

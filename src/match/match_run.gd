@@ -22,6 +22,10 @@ const COMMANDS: Array[String] = ["vote", "action", "class_choice", "buy", "ready
 		"craft", "equip", "unequip", "invest", "transfer_gold", "transfer_item"]
 ## Stats a character sheet is built from (crit is a ratio, the rest integers).
 const STATS: Array[String] = ["max_hp", "atk", "def", "mag", "res", "spd"]
+## Encounter types a route option may carry. Anything else is invalid route
+## data: entering it ends the Match with a `match_error` event (see
+## `_enter_encounter`), it is never treated as completed.
+const ENCOUNTER_TYPES: Array[String] = ["combat", "class", "merchant", "rest", "treasure", "story"]
 
 var number := 1
 var phase := "voting"
@@ -794,7 +798,17 @@ func _resolve_vote() -> void:
 		_phase_deadline = clock.now() + travel
 
 
+## Fail fast on invalid route data: an unsupported Encounter type ends the
+## Match (as a defeat, so no client needs a new phase) with a `match_error`
+## event {error: "unsupported_encounter", encounter_type, layer} and the same
+## keys in the summary. It never counts as a completed Encounter or a passed
+## Layer.
 func _enter_encounter() -> void:
+	var type := str(_pending_option.get("type", ""))
+	if not ENCOUNTER_TYPES.has(type):
+		emit({"type": "match_error", "error": "unsupported_encounter", "encounter_type": type, "layer": layer})
+		_end_match("defeat", {"error": "unsupported_encounter", "encounter_type": type})
+		return
 	phase = "encounter"
 	encounter = _make_encounter(_pending_option)
 	emit({
@@ -807,6 +821,7 @@ func _enter_encounter() -> void:
 	_after_encounter_step()
 
 
+## Only called for a type in ENCOUNTER_TYPES (checked by `_enter_encounter`).
 func _make_encounter(option: Dictionary) -> Encounter:
 	match str(option["type"]):
 		"combat":
@@ -821,7 +836,8 @@ func _make_encounter(option: Dictionary) -> Encounter:
 			return TreasureEncounter.new(option)
 		"story":
 			return StoryEncounter.new(option)
-	return PlaceholderEncounter.new(option)
+	push_error("MatchRun: unsupported encounter type '%s'" % str(option.get("type", "")))
+	return null
 
 
 ## Moves the journey on once the current Encounter has finished.
@@ -854,7 +870,7 @@ func _reach_boss() -> void:
 	_after_encounter_step()
 
 
-func _end_match(outcome: String) -> void:
+func _end_match(outcome: String, failure: Dictionary = {}) -> void:
 	var reached_boss := phase == "boss"
 	phase = outcome
 	var base_gems := layers_passed * content.get_int("meta.gems.layer", 10)
@@ -882,6 +898,7 @@ func _end_match(outcome: String) -> void:
 		"party": party_view(),
 		"gems_earned": gems_earned.duplicate(),
 	}
+	summary.merge(failure)
 	emit({"type": "match_ended", "result": outcome, "summary": summary})
 
 

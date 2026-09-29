@@ -47,7 +47,8 @@ func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 			if ready_slots.has(slot):
 				return {"ok": false, "error": "already_ready"}
 			ready_slots.append(slot)
-			run.emit({"type": "merchant_ready", "slot": slot})
+			run.emit({"type": "merchant_ready", "slot": slot, "ready": _ready_count(run),
+					"humans": _human_count(run)})
 			_close_if_everyone_ready(run)
 			return {"ok": true}
 	return {"ok": false, "error": "wrong_phase"}
@@ -58,7 +59,10 @@ func update(run: MatchRun) -> void:
 		_close(run)
 
 
-func on_control_changed(run: MatchRun, _slot: int) -> void:
+func on_control_changed(run: MatchRun, slot: int) -> void:
+	# A slot handed to AI counts as Ready by not being a human any more.
+	if not run.is_human(slot):
+		ready_slots.erase(slot)
 	run.collect_ai_gold()
 	_close_if_everyone_ready(run)
 
@@ -69,6 +73,7 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 		"greeting": str(run.content.get_value("encounters.merchant.greeting", "")),
 		"stock": _stock_view(run, viewer_slot),
 		"ready": ready_slots.duplicate(),
+		"ready_count": _ready_count(run),
 		"humans": _human_count(run),
 		"you_are_ready": ready_slots.has(viewer_slot),
 		"deadline": deadline,
@@ -103,6 +108,15 @@ func _buy(run: MatchRun, slot: int, item: String) -> Dictionary:
 func _human_count(run: MatchRun) -> int:
 	var count := 0
 	for slot in run.humans().size():
+		if run.needs_ready(slot):
+			count += 1
+	return count
+
+
+## Humans who pressed Ready: the x of `Ready (x/N)`.
+func _ready_count(run: MatchRun) -> int:
+	var count := 0
+	for slot in ready_slots:
 		if run.needs_ready(slot):
 			count += 1
 	return count
