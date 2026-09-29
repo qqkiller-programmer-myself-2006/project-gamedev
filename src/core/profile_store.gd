@@ -15,6 +15,10 @@ func load_profile(_token: String) -> Dictionary:
 func save_profile(_token: String, _profile: Dictionary) -> void:
 	pass
 
+## Store writes are fire-and-forget from the Match's point of view.
+func save_profile_async(token: String, profile: Dictionary) -> void:
+	save_profile(token, profile)
+
 static func normalize(profile: Dictionary) -> Dictionary:
 	var out := EMPTY_PROFILE.duplicate(true)
 	for key in profile:
@@ -22,4 +26,3 @@ static func normalize(profile: Dictionary) -> Dictionary:
 	if not out["races_owned"].has("Human"):
 		out["races_owned"].push_front("Human")
 	return out
-

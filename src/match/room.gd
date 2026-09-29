@@ -21,15 +21,17 @@ var outbox: Array[Dictionary] = []
 var _rng: GameRng
 var _clock
 var _content: ForestContent
+var _profiles: ProfileStore
 var _empty_since := -1.0
 var _matches_started := 0
 
 
-func _init(room_code: String, rng: GameRng, clock, content: ForestContent) -> void:
+func _init(room_code: String, rng: GameRng, clock, content: ForestContent, profiles: ProfileStore = null) -> void:
 	code = room_code
 	_rng = rng
 	_clock = clock
 	_content = content
+	_profiles = profiles if profiles != null else MemoryProfileStore.new()
 	for i in SLOT_COUNT:
 		slots.append({"session": 0, "name": "", "token": "", "profile": ProfileStore.normalize({}), "loadout": {}})
 
@@ -108,6 +110,8 @@ func start_match() -> void:
 	var loadouts: Array = []
 	for slot in slots:
 		loadouts.append(slot.get("loadout", {}).duplicate(true))
+	for i in loadouts.size():
+		loadouts[i] = {"loadout": loadouts[i], "profile": slots[i].get("profile", {}).duplicate(true)}
 	run = MatchRun.new(_rng.fork(), _clock, _content, humans, _matches_started, loadouts)
 	_drain_run()
 
@@ -163,6 +167,8 @@ func _set_loadout(slot: int, cmd: Dictionary, profile: Dictionary) -> Dictionary
 		if data.is_empty():
 			return {"ok": false, "error": "invalid_boon"}
 		used += int(data.get("slots", 0))
+		if boon == "The Chosen One" and _prestige_total(profile) < 5:
+			return {"ok": false, "error": "locked"}
 	if used > 5:
 		return {"ok": false, "error": "over_capacity"}
 	slots[slot]["loadout"] = {"class": class_id, "race": race, "boons": boons.duplicate()}
@@ -181,11 +187,13 @@ func _buy_race(slot: int, race: String, profile: Dictionary) -> Dictionary:
 	return {"ok": true, "gems": profile["gems"], "race": race}
 
 func _tree_upgrade(_slot: int, class_id: String, node: String, profile: Dictionary) -> Dictionary:
+	if _content.get_dict("classes.%s" % class_id).is_empty() or class_id == "classless":
+		return {"ok": false, "error": "invalid_class"}
 	var tree: Dictionary = profile["class_trees"].get(class_id, {})
 	var level := int(tree.get(node, 0))
 	if _content.get_dict("meta.class_tree.%s" % node).is_empty(): return {"ok": false, "error": "invalid_node"}
 	if level >= 5: return {"ok": false, "error": "max_level"}
-	var cost := int(_content.get_value("meta.class_tree.%s.cost" % node, 10 * (level + 1)))
+	var cost := int(_content.get_value("meta.class_tree.%s.cost" % node, 10)) * (level + 1)
 	if int(profile["gems"]) < cost: return {"ok": false, "error": "not_enough_gems"}
 	profile["gems"] -= cost
 	tree[node] = level + 1
@@ -193,6 +201,8 @@ func _tree_upgrade(_slot: int, class_id: String, node: String, profile: Dictiona
 	return {"ok": true, "gems": profile["gems"], "class": class_id, "node": node, "level": level + 1}
 
 func _buy_prestige(_slot: int, class_id: String, profile: Dictionary) -> Dictionary:
+	if _content.get_dict("classes.%s" % class_id).is_empty() or class_id == "classless":
+		return {"ok": false, "error": "invalid_class"}
 	var tree: Dictionary = profile["class_trees"].get(class_id, {})
 	for node in _content.get_dict("meta.class_tree").keys():
 		if int(tree.get(node, 0)) < 5: return {"ok": false, "error": "locked"}
@@ -206,13 +216,26 @@ func _buy_prestige(_slot: int, class_id: String, profile: Dictionary) -> Diction
 	return {"ok": true, "gems": profile["gems"], "prestige": current + 1}
 
 func _reset_tree(_slot: int, class_id: String, profile: Dictionary) -> Dictionary:
+	if _content.get_dict("classes.%s" % class_id).is_empty() or class_id == "classless":
+		return {"ok": false, "error": "invalid_class"}
 	var tree: Dictionary = profile["class_trees"].get(class_id, {})
+	var reset_cost := _content.get_int("meta.reset_cost", 50)
+	if int(profile["gems"]) < reset_cost:
+		return {"ok": false, "error": "not_enough_gems"}
+	profile["gems"] -= reset_cost
 	var refund := 0
 	for node in tree:
-		for level in range(1, int(tree[node]) + 1): refund += int(_content.get_value("meta.class_tree.%s.cost" % node, 10 * level))
+		for level in range(1, int(tree[node]) + 1): refund += int(_content.get_value("meta.class_tree.%s.cost" % node, 10)) * level
 	profile["gems"] += refund
 	profile["class_trees"][class_id] = {}
 	return {"ok": true, "gems": profile["gems"], "refunded": refund}
+
+
+func _prestige_total(profile: Dictionary) -> int:
+	var total := 0
+	for value in profile.get("prestige", {}).values():
+		total += int(value)
+	return total
 
 
 func update() -> void:
@@ -272,7 +295,22 @@ func _drain_run() -> void:
 	for event in run.take_outbox():
 		outbox.append(event)
 	if state == State.IN_MATCH and run.is_over():
+		_persist_match_rewards()
 		state = State.LOBBY
+
+
+func _persist_match_rewards() -> void:
+	if run == null:
+		return
+	for i in slots.size():
+		var token := str(slots[i].get("token", ""))
+		var earned := int(run.gems_earned[i]) if i < run.gems_earned.size() else 0
+		if token.is_empty() or earned <= 0:
+			continue
+		var profile: Dictionary = slots[i]["profile"]
+		profile["gems"] = int(profile.get("gems", 0)) + earned
+		slots[i]["profile"] = ProfileStore.normalize(profile)
+		_profiles.save_profile_async(token, slots[i]["profile"])
 
 
 func _emit(event: Dictionary) -> void:

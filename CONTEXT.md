@@ -1,5 +1,20 @@
 # BEYOND THE WORLD'S END
 
+## ADR-0013 meta progression
+
+Classless is only the legacy start when a player supplies no loadout. A
+pre-match loadout selects a Tier 1 Class, an owned Race, and capacity-limited
+Boons; AI fills unclaimed Classes from `party.ai_class_order`. Class Encounters
+award EXP and Gems to characters that already have a Class, while Classless
+characters may still accept the offered Class.
+
+Races, Boons, per-Class skill trees, Prestige, and Gems are authoritative
+server-side metadata in `content/forest.json`. Gems are earned per passed
+Layer, Guardian victory, Story Clue, and eligible Class Encounter, then saved
+through the injected `ProfileStore` for token-bearing sessions. Missing tokens
+use a session-only profile. Enervation is a Boon, not a Rogue passive; status
+resistance is a derived stat.
+
 คำศัพท์และขอบเขตที่ใช้ร่วมกันสำหรับ vertical slice ของเกม BEYOND THE WORLD'S END ซึ่งเป็น online fantasy turn-based RPG แบบ co-op
 
 ## Game structure

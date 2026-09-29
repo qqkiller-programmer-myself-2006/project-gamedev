@@ -77,9 +77,9 @@ var content: ForestContent
 var server: MatchServer
 
 
-func _init(seed_value: int = 1, content_overrides: Dictionary = {}) -> void:
+func _init(seed_value: int = 1, content_overrides: Dictionary = {}, profile_store: ProfileStore = null) -> void:
 	content = ForestContent.load_default().with_overrides(content_overrides)
-	server = MatchServer.new(GameRng.new(seed_value), clock, content)
+	server = MatchServer.new(GameRng.new(seed_value), clock, content, profile_store)
 
 
 ## Passes `seconds` of time in small steps, calling update() after each one

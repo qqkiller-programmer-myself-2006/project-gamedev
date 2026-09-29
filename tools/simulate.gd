@@ -8,6 +8,7 @@ extends SceneTree
 ##   --start=N      first seed (default 1000)
 ##   --humans=1,2   modes to simulate: number of human players
 ##   --pace         bots take human-like thinking time (MatchBot.HUMAN_PACE)
+##   --loadout      run both default and pre-match loadout modes
 
 
 func _init() -> void:
@@ -15,6 +16,7 @@ func _init() -> void:
 	var start := 1000
 	var modes := [1, 2]
 	var pace := false
+	var loadout_mode := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--seeds="):
 			seeds = int(arg.trim_prefix("--seeds="))
@@ -26,12 +28,16 @@ func _init() -> void:
 				modes.append(int(part))
 		elif arg == "--pace":
 			pace = true
+		elif arg == "--loadout":
+			loadout_mode = true
 	for humans in modes:
-		_simulate(humans, start, seeds, pace)
+		_simulate(humans, start, seeds, pace, false)
+		if loadout_mode:
+			_simulate(humans, start, seeds, pace, true)
 	quit(0)
 
 
-func _simulate(humans: int, start: int, seeds: int, pace: bool) -> void:
+func _simulate(humans: int, start: int, seeds: int, pace: bool, use_loadout: bool) -> void:
 	var wins := 0
 	var durations: Array = []
 	var rounds: Array = []
@@ -44,7 +50,19 @@ func _simulate(humans: int, start: int, seeds: int, pace: bool) -> void:
 	var time_by_part := {}
 	for seed_value in range(start, start + seeds):
 		var h := MatchHarness.new(seed_value)
-		var bot := MatchBot.new(h, h.start_with_humans(humans))
+		var sessions: Array[int]
+		if use_loadout:
+			sessions = [h.create_room("P1")]
+			for i in range(1, humans):
+				sessions.append(h.join("P%d" % (i + 1)))
+			var loadout_classes := ["archer", "guardian"]
+			for i in humans:
+				h.server.command(sessions[i], {"type": "set_loadout", "class": loadout_classes[i % loadout_classes.size()],
+					"race": "Elf" if i % 2 == 0 else "Human", "boons": ["Potential: Bunny"]})
+			h.start(sessions[0])
+		else:
+			sessions = h.start_with_humans(humans)
+		var bot := MatchBot.new(h, sessions)
 		bot.choose_route = MatchBot.sensible_route
 		if pace:
 			bot.think = MatchBot.HUMAN_PACE
@@ -78,7 +96,7 @@ func _simulate(humans: int, start: int, seeds: int, pace: bool) -> void:
 			elif in_boss and event["type"] == "round_started":
 				boss_round_count += 1
 		boss_rounds.append(boss_round_count)
-	print("== %d human(s), %d seeds from %d%s ==" % [humans, seeds, start, " (human pace)" if pace else ""])
+	print("== %d human(s), %d seeds from %d%s%s ==" % [humans, seeds, start, " (human pace)" if pace else "", " (loadout)" if use_loadout else " (default)"])
 	print("win rate        %d/%d (%.0f%%)" % [wins, seeds, 100.0 * wins / seeds])
 	print("defeats         %s" % [defeats_at])
 	print("match minutes   avg %.1f  min %.1f  max %.1f" % [_avg(durations) / 60.0, durations.min() / 60.0, durations.max() / 60.0])

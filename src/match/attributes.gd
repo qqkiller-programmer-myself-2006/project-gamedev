@@ -56,9 +56,15 @@ static func recalculate(character: Dictionary, content: ForestContent) -> void:
 				
 	# 3. Calculate Derived Stats
 	var derived: Dictionary = character["derived"]
-	var race := str(character.get("race", "Human"))
+	var race := str(character.get("race", ""))
 	var race_data := content.get_dict("meta.races.%s" % race)
 	var boons: Array = character.get("boons", [])
+	if race == "Human":
+		for attr in ATTRS:
+			character["attributes"][attr] += 1
+	if boons.has("The Chosen One"):
+		for attr in ATTRS:
+			character["attributes"][attr] += 2
 	if race == "Elf": character["crit"] += 0.05
 	if race == "Elf": character["attributes"]["dex"] += 2
 	if race == "Withered": character["max_hp"] = int(character["max_hp"] * 0.9)
@@ -74,6 +80,8 @@ static func recalculate(character: Dictionary, content: ForestContent) -> void:
 	derived["aggro"] = aggro
 	
 	var lifesteal = 0.0
+	if race == "Withered":
+		lifesteal += 0.05
 	for item in character.get("gear", {}).values():
 		var bonus := content.get_dict("items.%s.gear.stats" % item)
 		if bonus.has("lifesteal"):

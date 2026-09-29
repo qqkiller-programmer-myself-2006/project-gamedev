@@ -235,6 +235,8 @@ func _begin_turn(run: MatchRun, id: String) -> void:
 		var character := _unit(run, id)
 		var is_party = id.begins_with(PARTY_PREFIX)
 		var regen = int(character.get("derived", {}).get("energy_regen", run.content.get_int("rules.energy_regen", 1))) if is_party else 1
+		if is_party and character.get("boons", []).has("Energy Conserver") and run.rng.chance(0.15):
+			regen += 1
 		var def_max = run.content.get_int("rules.energy_max", 6) if is_party else run.content.get_int("rules.enemy_energy_max", 4)
 		var def_start = run.content.get_int("rules.energy_start", 1) if is_party else 0
 		character["energy"] = mini(int(character.get("energy_max", def_max)), int(character.get("energy", def_start)) + regen)
@@ -290,7 +292,9 @@ func _passive(run: MatchRun, id: String) -> Dictionary:
 		return {}
 	var character: Dictionary = _unit(run, id)
 	var passive := run.content.get_dict("classes.%s.passive" % character["class"])
-	if str(passive.get("name", "")) == "Enervation" and not character.get("boons", []).has("Enervation"):
+	if character.get("boons", []).has("Enervation"):
+		return run.content.get_dict("meta.boons.Enervation.effect")
+	if str(passive.get("name", "")) == "Enervation":
 		return {}
 	return passive
 
@@ -298,6 +302,11 @@ func _passive(run: MatchRun, id: String) -> Dictionary:
 ## Adds a status from `source` to `target` and queues its event.
 func _add_status(run: MatchRun, source: String, target: String, spec: Dictionary) -> Dictionary:
 	var status := str(spec.get("status", ""))
+	var target_unit := _unit(run, target)
+	var resist := float(target_unit.get("derived", {}).get("status_resist", 0.0))
+	if source.begins_with(ENEMY_PREFIX) and target.begins_with(PARTY_PREFIX) and resist > 0.0 and run.rng.chance(resist):
+		run.emit({"type": "status_resisted", "target": target, "source": source, "status": status})
+		return {"status": status, "stacks": 0, "turns": 0}
 	var power := float(_passive(run, source).get("dot_out", 1.0))
 	var view := status_book.apply(target, status, int(spec.get("stacks", 1)), int(spec.get("turns", 0)), power, source)
 	if view.is_empty():
@@ -559,6 +568,8 @@ func _perform(run: MatchRun, plan: Dictionary, automatic: bool) -> void:
 					character["energy"] = maxi(0, int(character.get("energy", cost)) - cost)
 					event["energy"] = character["energy"]
 					var cooldown := run.content.get_int("skills.%s.cooldown" % plan["skill"])
+					if int(_unit(run, id).get("_profile", {}).get("class_trees", {}).get(_unit(run, id)["class"], {}).get("mastery", 0)) >= 5:
+						cooldown = maxi(0, cooldown - 1)
 					if not cooldowns.has(id):
 						cooldowns[id] = {}
 					cooldowns[id][plan["skill"]] = cooldown + 1 if cooldown > 0 else 0
@@ -700,12 +711,15 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary,
 		crit = bool(damage.get("always_crit", false)) or run.rng.chance(float(attacker.get("crit", 0.0)))
 	if crit:
 		amount *= float(attacker.get("derived", {}).get("crit_damage", rules.get_float("rules.crit_multiplier", 1.5)))
+	amount *= float(attacker.get("damage_multiplier", 1.0))
 	var weak: bool = target.get("weakness", []).has(element)
 	if weak:
 		amount *= rules.get_float("rules.weakness_multiplier", 1.5)
 	var passive := _passive(run, source)
 	if passive.has("dot_bonus"):
 		amount *= minf(float(passive.get("dot_bonus_cap", 1.4)), 1.0 + float(passive["dot_bonus"]) * dots)
+	if attacker.get("boons", []).has("Daredevil Impulse") and int(attacker.get("hp", 0)) * 100 <= int(attacker.get("max_hp", 1)) * 30:
+		amount *= 1.25
 	if defending.has(target_id):
 		amount *= rules.get_float("rules.defend_multiplier", 0.5)
 	if target_id.begins_with(PARTY_PREFIX):

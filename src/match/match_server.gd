@@ -90,7 +90,7 @@ func command(session_id: int, cmd: Dictionary) -> Dictionary:
 			var setup_result := setup_room.handle_setup_command(setup_room.slot_of(session_id), cmd)
 			if setup_result.get("ok", false):
 				if not str(_sessions[session_id]["token"]).is_empty():
-					_profiles.save_profile(str(_sessions[session_id]["token"]), setup_room.profile_of(setup_room.slot_of(session_id)))
+					_profiles.save_profile_async(str(_sessions[session_id]["token"]), setup_room.profile_of(setup_room.slot_of(session_id)))
 			_flush(setup_room)
 			return setup_result
 		return _reject("unknown_command")
@@ -152,7 +152,7 @@ func _create_room(session_id: int, cmd: Dictionary) -> Dictionary:
 	var code := RoomCodes.generate(_rng)
 	while _rooms.has(code) or _closed_codes.has(code):
 		code = RoomCodes.generate(_rng)
-	var room := Room.new(code, _rng.fork(), _clock, _content)
+	var room := Room.new(code, _rng.fork(), _clock, _content, _profiles)
 	_rooms[code] = room
 	var slot := room.join(session_id, display_name)
 	_set_session_profile(session_id, room, slot, cmd)
