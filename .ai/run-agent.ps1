@@ -146,6 +146,12 @@ for ($attempt = 0; $attempt -le $Retries; $attempt++) {
         Add-Content -Encoding utf8 (Join-Path $logDir 'stalled.log') "$((Get-Date).ToString('s')) $TaskFile $who attempt $attempt stalled ($IdleMin min idle) -> $(if ($attempt -lt $Retries) { 'resuming' } else { 'giving up' })"
         continue
     }
+    # Quota errors (e.g. agy 429) end the run within seconds with a non-zero exit: hand the task to the fallback agent.
+    if ($state -eq 'finished' -and $code -ne 0 -and $FallbackAgent -and $who -ne $FallbackAgent -and $attempt -lt $Retries -and
+        $attempts[-1].minutes -lt 5) {
+        Add-Content -Encoding utf8 (Join-Path $logDir 'stalled.log') "$((Get-Date).ToString('s')) $TaskFile $who attempt $attempt failed fast (exit $code) -> $FallbackAgent"
+        continue
+    }
     break
 }
 
