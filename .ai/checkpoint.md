@@ -91,3 +91,7 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - แผน restructure: `docs/plans/2026-09-29-restructure.md` (#72); agent `.claude/agents/repo-restructurer.md`; issues #72 restructure, #73 ศัตรู+ฉาก, #74 ฮีโร่ v2 + Assassin
 - เจ้าของงาน: ใช้ Codex + agy เต็มที่ ขนานกัน, commit+push+อัปเดต issue ทุก stage, ถามเมื่อไม่แน่ใจ, คุม token อย่าติด rate limit
 - กำลังทำ (ขนาน): T17 restructure (Codex, `ai/t17-restructure` / `../ai-t17`); T18 ตัดภาพศัตรู+ฉาก (agy, `ai/t18-enemy-art` / `../ai-t18`, ไฟล์ใหม่เท่านั้น). คิวหลัง T17: T16 icons (path ใหม่ tools/art, assets/icons), #74 ฮีโร่ v2 + Rogue→Assassin, #73 step 2 (ใส่ศัตรู/ฉาก/Layer ถ้ำ + balance), #65–#71
+- 2026-09-29 22:30: **#72 restructure merged** (30b7d1a + docs index) 281/281 — paths ใหม่: tests `tools/run_tests.sh`, checkpoint `.ai/checkpoint.md`, previews `tools/dev/*`, art tools `tools/art/*`, heroes `assets/heroes/`, raw art `art_source/`. ปิด #59 #60 #62 #64 #72; #63 เปิดต่อ (ช่องโหว่ที่เหลือใน comment)
+- การตัดสินใจ (Claude): Rogue→Assassin เปลี่ยน id จริง + migrate profile/loadout เก่า (ยังไม่ release); save Story เก่าที่ไม่มี version ถูกปฏิเสธ (ยังไม่ release)
+- กำลังทำ: T18 ตัดภาพศัตรู+ฉาก (agy, ai-t18 — แตกจาก base ก่อน restructure แต่สร้างแค่ไฟล์ใหม่), T19 ฮีโร่ v2 + Assassin (Codex, `ai/t19-heroes-v2` / `../ai-t19`)
+- คิว: T16 icons (แก้ path เป็น tools/art, tests/client, docs/design/ui-style.md), #73 step 2 (ใส่ศัตรู/ฉาก/Layer ถ้ำ + balance, agy หลัง T18), #65 (agy), #66–#71, T10b, T7/#54
