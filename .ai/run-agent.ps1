@@ -26,11 +26,11 @@ $prompt = "Read the task file '$TaskFile' in the current directory and carry it 
 
 if ($Agent -eq 'codex') {
     $exe = (Get-Command codex.cmd).Source
-    $argv = @('exec', '-C', $Worktree, '-s', 'workspace-write', '--skip-git-repo-check',
+    # prompt must come before -i, which is variadic and would swallow it
+    $argv = @('exec', $prompt, '-C', $Worktree, '-s', 'workspace-write', '--skip-git-repo-check',
         '--add-dir', (Join-Path $env:APPDATA 'Godot'), '-o', "$base.last.md")
-    foreach ($i in $Images) { $argv += @('-i', $i) }
     if ($Model) { $argv += @('-m', $Model) }
-    $argv += $prompt
+    foreach ($i in $Images) { $argv += @('-i', $i) }
 } else {
     $exe = (Get-Command agy).Source
     $argv = @('--print', $prompt, '--dangerously-skip-permissions', '--print-timeout', "$($TimeoutMin)m")
@@ -41,6 +41,7 @@ $argLine = ($argv | ForEach-Object { Quote $_ }) -join ' '
 $started = Get-Date
 $p = Start-Process -FilePath $exe -ArgumentList $argLine -WorkingDirectory $Worktree -NoNewWindow -PassThru `
     -RedirectStandardOutput "$base.out.log" -RedirectStandardError "$base.err.log"
+$null = $p.Handle  # cache the handle, otherwise ExitCode is null after exit
 @{ agent = $Agent; task = $TaskFile; worktree = $Worktree; pid = $p.Id; started = $started.ToString('s'); state = 'running' } |
     ConvertTo-Json | Set-Content -Encoding utf8 $status
 
