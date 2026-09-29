@@ -36,7 +36,7 @@
 
 | งาน | ผู้ทำ | branch / worktree | issue | สถานะ |
 | --- | --- | --- | --- | --- |
-| T1 Combat UI ตามภาพ 04–07, 11 | Codex | `ai/t1-combat-ui` / `../ai-t1` | #48 | รอบ 3 (`T1-r3-combat-layout.md`) รันผ่าน subagent background (general-purpose ทำหน้าที่ codex-executor) timeout 60 นาที |
+| T1 Combat UI ตามภาพ 04–07, 11 | Codex | `ai/t1-combat-ui` / `../ai-t1` | #48 | ✅ merged 3b80524 (QA 3 รอบ), integration 254/254 |
 | T2 Attribute 7 ตัว + Focus (server) | Antigravity | merged 50a6fa7 | #49 | ✅ เสร็จ 251/251, win 87/88% |
 | T3 Camp UI ตามภาพ 08–10 | Codex | `ai/t3-camp-ui` / `../ai-t3` | #50 | ✅ merged 35e7767 (3 รอบ QA); seed 3 = ได้ภาพ Rest, seed 11 = Merchant |
 | T4 Energy ศัตรู + Gold ส่วนตัว/Transfer (server) | Antigravity+Codex | merged | #51 | ✅ merged b3aaa02, 254/254, win 88/83% |
@@ -45,7 +45,7 @@
 | T7 QA รวม, 1920×1080, PR, final build | Claude | — | #54 | รอทั้งหมด |
 | T8 Cloudflare Worker + D1 เก็บ profile/Gems | Codex | merged 0ffd1b1 | #55 | ✅ โค้ดเสร็จ 5/5 test; รอเจ้าของงาน deploy ตาม docs/running.md |
 
-| T9 ใช้ sprite ของเจ้าของงาน (Archer/Mage/Swordsman) | Codex | `ai/t9-sprites` / `../ai-t9` | #56 | T9a ตัดภาพกำลังทำ; T9b ใส่ใน BattleToken หลัง #48 merge |
+| T9 ใช้ sprite ของเจ้าของงาน (Archer/Mage/Swordsman) | Codex | `ai/t9-sprites` / `../ai-t9` | #56 | T9a ✅ merged; T9b (`ai/t9b-sprites-battle` / `../ai-t9b`) กำลังทำ + เศษงาน #48 |
 
 การตัดสินใจรอบ 3 (2026-09-29 12:10): ใช้ Claude Code + agy + Codex เท่านั้น ไม่ใช้ opencode (เขียนใน AGENTS.md แล้ว); มี subagent `codex-executor` / `agy-executor` ใน `.claude/agents/` (ใช้ได้ใน session ใหม่)
 โควตา: agy Gemini หมด (รีเซ็ต ~14:25), agy Claude หมด (รีเซ็ต ~17:30) — ระหว่างนี้งานทั้งหมดไป Codex; T4-r2 และ T9a-r2 ย้ายมา Codex แล้ว
@@ -64,3 +64,5 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - 2026-09-29 12:50: เจ้าของงานสั่งให้ใช้ subagent codex-executor แบบ background; ชนิดนี้ยังไม่โหลดใน session นี้ จึงใช้ general-purpose + คำสั่งเดียวกันแทน (session ใหม่เรียก codex-executor / agy-executor ได้ตรงๆ). T9b spec พร้อม (รอ #48 + T9a)
 - 2026-09-29 13:00: เจ้าของงานขอหน้าแรกใหม่ + ปุ่ม bypass เล่นทดสอบ → #57; T10a (Codex, `ai/t10-home` / `../ai-t10`) กำลังทำ: หน้าแรก animated + Playtest ▶ (debug/--dev เท่านั้น, embedded GameServer, `--dev --playtest`); T10b (หลัง #52): กระโดดไปฉากที่ต้องการ + เลือก Class/seed
 - T9a ตัดภาพเสร็จ merged 6a62ac5; T9b รอ #48
+- 2026-09-29 13:20: Story mode (#58, ADR-0014) — T11a (`ai/t11-story` / `../ai-t11`) กำลังทำผ่าน subagent; T11b หลัง #52 + #57
+- เจ้าของงานขอ: ทุกครั้งที่ทดสอบ ให้เปิดเกมใน Godot ให้ดูจริง → server: `godot --headless --path . -- --server --port=8910`, client: `Godot_v4.7.2-stable_win64.exe --path . -- --url=ws://127.0.0.1:8910 --name=Tester --auto` (หลัง #57 ใช้ `--dev --playtest` แทน)
