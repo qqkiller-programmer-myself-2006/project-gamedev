@@ -32,6 +32,7 @@ var _choices: Array[Callable] = []
 ## Token id -> [x, y] fraction of the stage for its top-left corner.
 var _spots: Dictionary = {}
 var _tokens: Dictionary = {}
+var _previous_tokens: Dictionary = {}
 
 var _stage: Control
 var _timeline: VBoxContainer
@@ -137,8 +138,8 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_center_text = UiKit.pixel_label("", "huge")
 	_center_text.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	_center_text.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_center_text.offset_top = 92
-	_center_text.offset_bottom = 148
+	_center_text.offset_top = 72
+	_center_text.offset_bottom = 128
 	_center_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_center_text.add_theme_color_override("font_outline_color", Color.BLACK)
 	_center_text.add_theme_constant_override("outline_size", 10)
@@ -169,9 +170,9 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_log.max_lines_visible = 4
 	_log.add_theme_color_override("font_outline_color", Color.BLACK)
 	_log.add_theme_constant_override("outline_size", 3)
-	bottom_left.add_child(_log)
 	_rewards = UiKit.vbox(0)
 	bottom_left.add_child(_rewards)
+	bottom_left.add_child(_log)
 	add_child(bottom_left)
 
 	_bottom = UiKit.vbox(6)
@@ -283,6 +284,8 @@ func handle_key(key: int) -> bool:
 
 ## The screen-wide band announcing a Skill, Item or Boss move (06).
 func announce(text: String) -> void:
+	if not str(_combat.get("result", "")).is_empty():
+		return
 	if text == "Your turn!":
 		_turn_notice.text = text
 		_turn_notice.visible = true
@@ -380,7 +383,9 @@ func _build_header(view: Dictionary) -> void:
 	if encounter.get("kind") == "boss":
 		var boss: Dictionary = encounter["boss"]
 		var head := UiKit.vbox(2)
-		head.add_child(_centered(UiKit.pixel_label("%s, %s" % [boss["name"], boss["title"]], "heading", UiKit.ENEMY)))
+		var boss_title := UiKit.pixel_label("%s, %s" % [boss["name"], boss["title"]], "heading", UiKit.ENEMY)
+		boss_title.add_theme_font_size_override("font_size", int(13 * _app.settings.text_scale))
+		head.add_child(_centered(boss_title))
 		head.add_child(_centered(UiKit.pixel_label("Phase %d/%d: %s" % [int(boss["phase"]), int(boss["phases_total"]),
 				boss["phase_name"]], "small", UiKit.WARN)))
 		_header.add_child(UiKit.panel(head, "HudPanel"))
@@ -472,6 +477,7 @@ func _controller_tag(id: String, unit: Dictionary) -> Array:
 
 
 func _build_stage(view: Dictionary) -> void:
+	_previous_tokens = _tokens.duplicate()
 	for child in _stage.get_children():
 		_stage.remove_child(child)
 		child.queue_free()
@@ -537,11 +543,15 @@ func _build_stage(view: Dictionary) -> void:
 		token.set_target(i + 1, pick)
 		_choices.append(pick)
 	_place_tokens()
+	_previous_tokens.clear()
 
 
 func _add_token(data: Dictionary) -> void:
 	var token := BattleToken.new()
 	token.setup(data)
+	var previous: BattleToken = _previous_tokens.get(data["id"])
+	if previous != null:
+		token.continue_animation(previous)
 	_stage.add_child(token)
 	_tokens[data["id"]] = token
 	_screen.anchors[data["id"]] = token
@@ -570,10 +580,10 @@ func _build_bottom(view: Dictionary) -> void:
 		_combat_grid = _card_grid(mode, choices)
 		_combat_grid.set_anchors_preset(Control.PRESET_CENTER_TOP)
 		_combat_grid.grow_horizontal = Control.GROW_DIRECTION_BOTH
-		_combat_grid.offset_left = -310
-		_combat_grid.offset_right = 310
+		_combat_grid.offset_left = -365
+		_combat_grid.offset_right = 365
 		_combat_grid.offset_top = 360
-		_combat_grid.custom_minimum_size = Vector2(620, 0)
+		_combat_grid.custom_minimum_size = Vector2(730, 0)
 		_combat_grid.visible = not _banner.visible
 		_combat_grid.z_index = 5
 		add_child(_combat_grid)
@@ -718,7 +728,7 @@ func _card(title: String, sub: String, icon: String, icon_color: Color, usable: 
 	var number := _choices.size() + 1
 	var button := Button.new()
 	button.theme_type_variation = "HudButton"
-	button.custom_minimum_size = Vector2(190, 50)
+	button.custom_minimum_size = Vector2(232, 50)
 	button.focus_mode = Control.FOCUS_ALL
 	button.disabled = not usable
 	button.tooltip_text = tip
@@ -746,7 +756,7 @@ func _card(title: String, sub: String, icon: String, icon_color: Color, usable: 
 	name_label.clip_text = true
 	text.add_child(name_label)
 	var sub_label := UiKit.pixel_label(sub, "small", UiKit.TEXT_DIM)
-	sub_label.add_theme_font_size_override("font_size", int(10 * _app.settings.text_scale))
+	sub_label.add_theme_font_size_override("font_size", int(9 * _app.settings.text_scale))
 	sub_label.clip_text = false
 	text.add_child(sub_label)
 	row.add_child(text)
@@ -759,6 +769,12 @@ func _build_result() -> void:
 	UiKit.clear(_rewards)
 	var outcome := str(_combat.get("result", ""))
 	_center_text.text = ""
+	# Turn order is irrelevant after the fight and can crowd longer reward lists.
+	_timeline.visible = outcome.is_empty()
+	if not outcome.is_empty():
+		if _banner_tween != null:
+			_banner_tween.kill()
+		_banner.visible = false
 	match outcome:
 		"victory":
 			_center_text.text = "Challenge won!" if _combat.get("trial", false) else "Victory!"
@@ -781,7 +797,8 @@ func _build_result() -> void:
 
 
 func _reward_line(text: String, color: Color) -> Label:
-	var line := UiKit.pixel_label(text, "title", color)
+	var line := UiKit.pixel_label(text, "small", color)
+	line.add_theme_font_size_override("font_size", int(13 * _app.settings.text_scale))
 	line.add_theme_color_override("font_outline_color", Color.BLACK)
 	line.add_theme_constant_override("outline_size", 6)
 	return line

@@ -143,9 +143,28 @@ func play_animation(kind: String) -> void:
 		down = true
 	_set_animation(kind)
 
+## A fresh token is built for each snapshot. Carry a one-shot animation over
+## to it when the snapshot still describes the same life state.
+func continue_animation(previous: BattleToken) -> void:
+	if sprite_set == null or previous == null or previous.sprite_set == null:
+		return
+	if previous.class_id != class_id or previous.down != down:
+		return
+	if previous.animation == "idle":
+		_bob_time = previous._bob_time
+		return
+	_set_animation(previous.animation)
+	if animation_frames.is_empty():
+		return
+	animation_frame = mini(previous.animation_frame, animation_frames.size() - 1)
+	animation_elapsed = previous.animation_elapsed
+	_bob_time = previous._bob_time
+
 func _set_animation(kind: String) -> void:
 	animation = kind if sprite_set != null else "idle"
-	animation_frames = sprite_set.frames(animation) if sprite_set != null else []
+	animation_frames.clear()
+	if sprite_set != null:
+		animation_frames = sprite_set.frames(animation)
 	animation_frame = 0
 	animation_elapsed = 0.0
 	queue_redraw()
@@ -216,9 +235,15 @@ func _draw_figure(feet: Vector2) -> void:
 		var target_height := 110.0
 		var scale := target_height / maxf(1.0, canvas.y)
 		var bob := 0.0 if reduced_motion or animation != "idle" else sin(_bob_time * TAU) * 2.0
-		var top_left := Vector2(feet.x - canvas.x * scale * 0.5, feet.y - sprite_set.baseline(animation) * scale + bob)
+		var top_left := Vector2(roundf(feet.x - canvas.x * scale * 0.5),
+				roundf(feet.y - sprite_set.baseline(animation) * scale + bob))
 		var rect := Rect2(top_left, canvas * scale)
-		draw_texture_rect(animation_frames[animation_frame], rect, false)
+		if sprite_set.mirrored(animation):
+			draw_set_transform(top_left + Vector2(rect.size.x, 0), 0.0, Vector2(-1, 1))
+			draw_texture_rect(animation_frames[animation_frame], Rect2(Vector2.ZERO, rect.size), false)
+			draw_set_transform(Vector2.ZERO)
+		else:
+			draw_texture_rect(animation_frames[animation_frame], rect, false)
 		return
 	var body := tint
 	var dark := tint.darkened(0.45)

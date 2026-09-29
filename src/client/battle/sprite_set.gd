@@ -32,12 +32,39 @@ func frames(animation: String) -> Array[Texture2D]:
 	var listed = data.get("animations", {}).get(animation, [])
 	if listed is Dictionary:
 		listed = listed.get("right", listed.get("left", []))
+	elif animation == "idle" and listed is Array:
+		var facing := ""
+		for filename in listed:
+			if str(filename).contains("_right"):
+				facing = str(filename)
+				break
+		if facing.is_empty():
+			for filename in listed:
+				if str(filename).contains("_left"):
+					facing = str(filename)
+					break
+		if facing.is_empty() and not listed.is_empty():
+			facing = str(listed[0])
+		listed = [facing] if not facing.is_empty() else []
 	var result: Array[Texture2D] = []
 	for filename in listed:
 		var texture := load(ROOT + class_id + "/" + str(filename)) as Texture2D
 		if texture != null:
 			result.append(texture)
 	return result
+
+func mirrored(animation: String) -> bool:
+	var listed = data.get("animations", {}).get(animation, [])
+	if listed is Dictionary:
+		return not listed.has("right") and listed.has("left")
+	if animation == "idle" and listed is Array:
+		var has_left := false
+		for filename in listed:
+			if str(filename).contains("_right"):
+				return false
+			has_left = has_left or str(filename).contains("_left")
+		return has_left
+	return false
 
 func fps(animation: String) -> float:
 	return float(data.get("fps", {}).get(animation, 4))
