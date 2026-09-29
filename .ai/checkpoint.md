@@ -115,3 +115,4 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - 2026-09-30 04:40: merged T24 #67 (+story panel no-timer fix), T25 icons phase 2 (7048eae), T26 #63/#71 (acf0b10) → **331/331**; ปิด #61 #63 #67 #71. **บทเรียน: full test suite พังเงียบ (exit 127) เมื่อมี Godot ตัวอื่นรันพร้อมกัน (RAM) — รัน full suite ตอนไม่มี executor อื่นใช้ Godot**
 - กำลังทำ: T27 playtest jump (Codex, ai-t27), T28 #41-#43 (agy, ai-t28), fresh code review (code-reviewer, read-only) ของทุกอย่างตั้งแต่ 5a84021
 - หลังจากนี้: แก้ผล review → #44/#45 (a11y/responsive verify) → #54 QA 1920x1080 + large text + README + PR เข้า main + web export check
+- 2026-09-30 05:00: **Codex หมด quota ถึง 08:24, agy ถึง ~07:35** → T27/T28 ให้ Claude (sonnet subagent, isolated worktree) ทำแทน; ลบ worktree ai-t27/ai-t28 ที่ว่าง. code-reviewer กำลังรีวิว → `docs/review/2026-09-30-final-review.md`
