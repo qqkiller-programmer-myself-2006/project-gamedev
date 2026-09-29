@@ -24,6 +24,7 @@ var _think_until := 0.0
 var _last_key := ""
 var _done_at := -1
 var _setup_only := false
+var _sprite_idle_after := 0.0
 
 
 func _initialize() -> void:
@@ -139,6 +140,8 @@ func _drive() -> void:
 		return
 	var screen := _screen()
 	var battle = screen._battle if screen != null else null
+	if battle != null:
+		_capture_sprite_frames(battle)
 	if battle != null and battle._banner != null and battle._banner.visible and not shots.has("06_action_banner"):
 		_shot("06_action_banner")
 	if battle != null and str(battle._combat.get("result", "")) == "victory" and not shots.has("11_combat_reward"):
@@ -156,6 +159,27 @@ func _drive() -> void:
 		_shot(key)
 	_act(key, view)
 	_think_until = Time.get_ticks_msec() / 1000.0 + 0.5
+
+
+func _capture_sprite_frames(battle: BattleView) -> void:
+	for token in battle._tokens.values():
+		if token.sprite_set == null:
+			continue
+		var state: String = token.animation
+		if state == "idle" and not shots.has("sprite_idle"):
+			if _sprite_idle_after == 0.0:
+				_sprite_idle_after = Time.get_ticks_msec() / 1000.0 + 0.8
+			if Time.get_ticks_msec() / 1000.0 < _sprite_idle_after:
+				continue
+		if state != "idle" and token.animation_frame == 0:
+			continue
+		if state == "attack" and token.animation_frame != token.animation_frames.size() - 1:
+			continue
+		if state == "dead" and token.animation_frame != token.animation_frames.size() - 1:
+			continue
+		var name := "sprite_" + state
+		if not shots.has(name):
+			_shot(name)
 
 
 func _situation(view: Dictionary) -> String:
@@ -259,6 +283,15 @@ func _shot(name: String) -> void:
 	var image := root.get_viewport().get_texture().get_image()
 	image.save_png(out_dir.path_join(name + ".png"))
 	print("screenshot ", name)
+	if name.ends_with("_skills"):
+		var battle := _screen()._battle
+		for button in battle._bottom.find_children("*", "Button", true, false):
+			if button.get_meta("focus_id", "") == "action_focus":
+				print("focus choice=", battle._combat.get("choices", {}).get("focus", false),
+						" button_disabled=", button.disabled)
+				break
+		for enemy in battle._combat.get("enemies", []):
+			print("enemy energy ", enemy.get("id", "?"), "=", enemy.get("energy", "missing"))
 
 
 func _code() -> String:

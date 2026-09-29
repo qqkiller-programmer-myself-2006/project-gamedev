@@ -40,6 +40,14 @@ var enemy_kind := ""
 var outfit: Dictionary = {}
 var down := false
 var acting := false
+var class_id := ""
+var sprite_set: SpriteSet
+var animation := "idle"
+var animation_frames: Array[Texture2D] = []
+var animation_frame := 0
+var animation_elapsed := 0.0
+var reduced_motion := false
+var _bob_time := 0.0
 ## 1-based key shown while this token is a valid target, else 0.
 var target_number := 0
 
@@ -50,9 +58,13 @@ var _plate: PanelContainer
 ## `data`: {id, side, name, kind (class or enemy kind), hp, max_hp,
 ## energy, energy_max, statuses, acting, controller, you}
 func setup(data: Dictionary) -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	unit_id = str(data["id"])
 	side = str(data.get("side", "party"))
 	var kind := str(data.get("kind", ""))
+	class_id = kind.to_lower()
+	sprite_set = SpriteSet.for_class(class_id) if side == "party" else null
+	reduced_motion = bool(data.get("reduced_motion", false))
 	enemy_kind = kind
 	down = int(data.get("hp", 0)) <= 0
 	acting = bool(data.get("acting", false))
@@ -60,7 +72,7 @@ func setup(data: Dictionary) -> void:
 	text = ""
 	focus_mode = Control.FOCUS_NONE
 	disabled = true
-	var width := 140.0
+	var width := 180.0 if side == "boss" else 140.0
 	figure_height = 150.0 if side == "boss" else 110.0
 	custom_minimum_size = Vector2(width, BADGE_HEIGHT + figure_height + PLATE_HEIGHT)
 	size = custom_minimum_size
@@ -91,8 +103,10 @@ func setup(data: Dictionary) -> void:
 		who += " (you)"
 	elif str(data.get("controller", "")) == "ai":
 		who += " (AI)"
-	var name_label := UiKit.pixel_label(who, "small", UiKit.ACCENT if bool(data.get("you", false)) else UiKit.TEXT)
-	name_label.clip_text = true
+	var name_color := tint if side == "party" else (UiKit.ACCENT if bool(data.get("you", false)) else UiKit.TEXT)
+	var name_label := UiKit.pixel_label(who, "small", name_color)
+	name_label.add_theme_font_size_override("font_size", int(10 * (0.9 if side == "boss" else 1.0)))
+	name_label.clip_text = false
 	plate_box.add_child(name_label)
 	var bars := UiKit.hbox(0)
 	bars.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -114,6 +128,70 @@ func setup(data: Dictionary) -> void:
 	add_child(_plate)
 	tooltip_text = str(data.get("tooltip", ""))
 	modulate = Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
+	_set_animation("dead" if down else "idle")
+	set_process(sprite_set != null)
+
+func play_animation(kind: String) -> void:
+	if sprite_set == null:
+		return
+	if kind == "revive":
+		down = false
+		modulate = Color.WHITE
+		_set_animation("idle")
+		return
+	if kind == "dead":
+		down = true
+	_set_animation(kind)
+
+## A fresh token is built for each snapshot. Carry a one-shot animation over
+## to it when the snapshot still describes the same life state.
+func continue_animation(previous: BattleToken) -> void:
+	if sprite_set == null or previous == null or previous.sprite_set == null:
+		return
+	if previous.class_id != class_id or previous.down != down:
+		return
+	if previous.animation == "idle":
+		_bob_time = previous._bob_time
+		return
+	_set_animation(previous.animation)
+	if animation_frames.is_empty():
+		return
+	animation_frame = mini(previous.animation_frame, animation_frames.size() - 1)
+	animation_elapsed = previous.animation_elapsed
+	_bob_time = previous._bob_time
+
+func _set_animation(kind: String) -> void:
+	animation = kind if sprite_set != null else "idle"
+	animation_frames.clear()
+	if sprite_set != null:
+		animation_frames = sprite_set.frames(animation)
+	animation_frame = 0
+	animation_elapsed = 0.0
+	queue_redraw()
+
+func _process(delta: float) -> void:
+	if sprite_set == null:
+		return
+	_bob_time += delta
+	if animation == "idle":
+		if not reduced_motion:
+			queue_redraw()
+		return
+	if animation_frames.is_empty():
+		_set_animation("idle")
+		return
+	animation_elapsed += delta
+	var frame_time := 1.0 / maxf(1.0, sprite_set.fps(animation))
+	while animation_elapsed >= frame_time:
+		animation_elapsed -= frame_time
+		if animation == "dead":
+			animation_frame = mini(animation_frame + 1, animation_frames.size() - 1)
+		else:
+			animation_frame += 1
+			if animation_frame >= animation_frames.size():
+				_set_animation("idle")
+				break
+		queue_redraw()
 
 
 ## Makes the token a clickable target with number `number` (0 = not a target).
@@ -135,7 +213,10 @@ func _draw() -> void:
 		ring_color = Color("#fff3b0")
 	if has_focus():
 		ring_color = UiKit.ACCENT
-	_draw_ellipse(center, size.x * 0.34, 9.0, Color(0, 0, 0, 0.45), true)
+	var ground_color := Color(0, 0, 0, 0.45)
+	if side == "party":
+		ground_color = tint.darkened(0.25)
+	_draw_ellipse(center, size.x * 0.34, 9.0, ground_color, true)
 	if ring_color.a > 0.0:
 		_draw_ellipse(center, size.x * 0.42, 13.0, ring_color, false, 3.0)
 	_draw_figure(center)
@@ -149,6 +230,21 @@ func _draw() -> void:
 ## Compact block figures keep the stage readable at 1280x720. The silhouettes
 ## deliberately use rectangles like the reference's Roblox-style avatars.
 func _draw_figure(feet: Vector2) -> void:
+	if sprite_set != null and not animation_frames.is_empty():
+		var canvas: Vector2 = sprite_set.canvas(animation)
+		var target_height := 110.0
+		var scale := target_height / maxf(1.0, canvas.y)
+		var bob := 0.0 if reduced_motion or animation != "idle" else sin(_bob_time * TAU) * 2.0
+		var top_left := Vector2(roundf(feet.x - canvas.x * scale * 0.5),
+				roundf(feet.y - sprite_set.baseline(animation) * scale + bob))
+		var rect := Rect2(top_left, canvas * scale)
+		if sprite_set.mirrored(animation):
+			draw_set_transform(top_left + Vector2(rect.size.x, 0), 0.0, Vector2(-1, 1))
+			draw_texture_rect(animation_frames[animation_frame], Rect2(Vector2.ZERO, rect.size), false)
+			draw_set_transform(Vector2.ZERO)
+		else:
+			draw_texture_rect(animation_frames[animation_frame], rect, false)
+		return
 	var body := tint
 	var dark := tint.darkened(0.45)
 	match side:
