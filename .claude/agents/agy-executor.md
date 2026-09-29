@@ -23,7 +23,7 @@ You drive the Google Antigravity CLI (`agy`) as the hands-on executor for this r
    Built-in stall detector: if worktree files, logs and process-tree CPU all stay still for `-IdleMin` (default 20) minutes the run
    is killed as `stalled` and a fresh agent resumes the task in the same worktree (`-Retries 1`; add `-FallbackAgent codex` to resume
    with the other executor). agy prints nothing until it ends, so an empty log alone does not mean it is stuck. Check live runs with
-   `powershell -File .ai/agent-status.ps1` (IDLE / DEAD flags).
+   `powershell -NoProfile -ExecutionPolicy Bypass -File .ai/agent-status.ps1` (IDLE / DEAD flags).
 3. Read `.ai/logs/<task>-agy-*.status.json` and the tail of the `.out.log` report.
 4. Verify independently in the worktree — agy has reported wrong test counts before:
    - `GODOT=/d/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe bash tools/run_tests.sh` → exact summary line and
