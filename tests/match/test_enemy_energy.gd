@@ -12,7 +12,7 @@ func test_enemy_energy_gain_cap_and_snapshot() -> void:
 	_to_combat(1, {"enemies": {"grey_wolf": {"stats": {"max_hp": 1000}, "energy_max": 2, "special": {"name": "Rend", "energy": 1, "use": {"target": "enemy", "damage": {"stat": "atk", "power": 1.0}}}}}})
 	var v = h.match_view(sessions[0])
 	var wolf = v["encounter"]["enemies"][0]
-	assert_eq(int(wolf.get("energy", -1)), 0, "starts at 0")
+	assert_eq(int(wolf.get("energy", -1)), 1, "first own turn immediately gains 1 Energy")
 	assert_eq(int(wolf.get("energy_max", -1)), 2, "snapshot shows max")
 	
 	h.server.take_events(sessions[0])

@@ -23,14 +23,16 @@ func load() -> Dictionary:
 		return {}
 	var parser := JSON.new()
 	if parser.parse(FileAccess.get_file_as_string(PATH)) != OK:
-		return {}
+		# Keep the Continue path alive for one attempt so the normal restore
+		# rejection can explain the problem and clear the broken file.
+		return {"version": VERSION, "_invalid": true}
 	var parsed = parser.data
-	if not parsed is Dictionary or int(parsed.get("version", -1)) != VERSION:
-		return {}
+	if not parsed is Dictionary:
+		return {"version": VERSION, "_invalid": true}
 	return parsed
 
 func has_save() -> bool:
-	return not self.load().is_empty()
+	return FileAccess.file_exists(PATH)
 
 func clear() -> void:
 	if FileAccess.file_exists(PATH):

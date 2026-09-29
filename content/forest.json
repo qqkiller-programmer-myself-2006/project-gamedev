@@ -22,7 +22,8 @@
     "energy_max": 6,
     "story_read_seconds": 25,
     "story_vote_seconds": 20,
-    "enemy_energy_max": 4
+    "enemy_energy_max": 4,
+    "story_enemy_energy_max": 1
   },
   "party": {
     "members": [
@@ -1067,7 +1068,7 @@
       },
       "special": {
         "name": "Heavy Charge",
-        "energy": 3,
+        "energy": 2,
         "use": {
           "target": "enemy",
           "damage": {
@@ -1469,7 +1470,7 @@
       },
       "special": {
         "name": "Bull Rush",
-        "energy": 3,
+        "energy": 2,
         "use": {
           "target": "enemy",
           "damage": {
@@ -1530,7 +1531,7 @@
           "target": "enemy",
           "damage": {
             "stat": "mag",
-            "power": 1.2,
+            "power": 1.15,
             "element": "nature"
           },
           "apply_status": [
@@ -2228,7 +2229,7 @@
           "target": "all_enemies",
           "damage": {
             "stat": "mag",
-            "power": 1.15,
+            "power": 1.2,
             "element": "nature"
           }
         }

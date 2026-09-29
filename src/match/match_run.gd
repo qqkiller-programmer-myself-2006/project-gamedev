@@ -33,7 +33,12 @@ var vote: PathVote = null
 var last_vote: Dictionary = {}
 var encounter: Encounter = null
 ## Party-wide resources shared by every character.
-var gold := 0
+var gold: int:
+	get:
+		var sum := 0
+		for c in party:
+			sum += int(c.get("gold", 0))
+		return sum
 var inventory: Dictionary = {}
 ## Filled when the Match ends.
 var summary: Dictionary = {}
@@ -72,8 +77,7 @@ func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array
 	story_host = host_slot
 	_started_at = clock.now()
 	_create_party()
-	gold = content.get_int("party.starting_gold", 0)
-	add_gold(gold)
+	add_gold(content.get_int("party.starting_gold", 0))
 	for item in content.get_dict("party.starting_inventory"):
 		add_item(item, content.get_int("party.starting_inventory.%s" % item))
 	routes = RouteGenerator.generate(rng, content)
@@ -195,7 +199,6 @@ func inventory_view() -> Array:
 
 
 func add_gold(amount: int, reward: bool = false) -> void:
-	gold += amount
 	if amount <= 0 or party.is_empty():
 		return
 	var split = amount / party.size()
@@ -207,7 +210,6 @@ func add_gold(amount: int, reward: bool = false) -> void:
 		if reward and str(character.get("race", "")) == "Kobold":
 			bonus = int(round(share * 0.1))
 		character["gold"] = int(character.get("gold", 0)) + share + bonus
-		gold += bonus
 
 
 func collect_ai_gold() -> void:
@@ -605,12 +607,30 @@ static func valid_story_save(data: Dictionary, forest: ForestContent) -> bool:
 	var gems_earned = data.get("gems_earned")
 	if not (gems_earned is Array) or gems_earned.size() != PARTY_SIZE:
 		return false
-	var gold = data.get("gold")
-	if not (gold is float or gold is int) or int(gold) < 0 or int(gold) > 1000000:
+	var saved_gold = data.get("gold")
+	if not _is_whole_number(saved_gold) or int(saved_gold) < 0 or int(saved_gold) > 1000000:
 		return false
+	var valid_clues := forest.get_dict("story.clues")
+	var seen_clues := {}
 	for clue in data["clues"]:
-		if not (clue is Dictionary) or not clue.has("id"):
+		if not (clue is Dictionary) or not _has_exact_keys(clue,
+				["id", "title", "text", "layer", "source"]):
 			return false
+		if not (clue["id"] is String) or not (clue["title"] is String) \
+				or not (clue["text"] is String) or not _is_whole_number(clue["layer"]) \
+				or not (clue["source"] is String):
+			return false
+		var clue_id := str(clue["id"])
+		if not valid_clues.has(clue_id) or seen_clues.has(clue_id):
+			return false
+		var canonical: Dictionary = valid_clues[clue_id]
+		if clue["title"] != str(canonical.get("title", clue_id)) \
+				or clue["text"] != str(canonical.get("text", "")):
+			return false
+		if int(clue["layer"]) < 1 or int(clue["layer"]) > forest.get_int("journey.layers", 5) \
+				or str(clue["source"]) not in ["story", "combat"]:
+			return false
+		seen_clues[clue_id] = true
 	for item in data["stash"]:
 		if str(item).is_empty() or not forest.get_value("items.%s" % item, null):
 			return false
@@ -618,12 +638,22 @@ static func valid_story_save(data: Dictionary, forest: ForestContent) -> bool:
 			return false
 	var max_level = forest.get_int("rules.max_level", 20)
 	var pts_per_lvl = forest.get_int("leveling.points_per_level", 0)
+	var party_gold := 0
 	for character in saved_party:
 		if not (character is Dictionary): return false
-		for key in ["class", "hp", "max_hp", "level", "attributes", "gear"]:
+		for key in ["class", "hp", "max_hp", "level", "points", "invested", "attributes", "gear", "gold"]:
 			if not character.has(key): return false
+		if not (character["class"] is String) or not forest.get_dict("classes").has(character["class"]):
+			return false
+		if not _is_whole_number(character["level"]) or not _is_whole_number(character["points"]) \
+				or not _is_whole_number(character["gold"]):
+			return false
 		var level = int(character["level"])
-		if level < 1 or level > max_level:
+		if level < 1 or level > max_level or int(character["points"]) < 0 \
+				or int(character["gold"]) < 0 or int(character["gold"]) > 1000000:
+			return false
+		if not (character["attributes"] is Dictionary) or not (character["invested"] is Dictionary) \
+				or not (character["gear"] is Dictionary):
 			return false
 		for gear_slot in character["gear"]:
 			var item = str(character["gear"][gear_slot])
@@ -636,13 +666,50 @@ static func valid_story_save(data: Dictionary, forest: ForestContent) -> bool:
 			var item = str(consumable["item"])
 			if item.is_empty() or not forest.get_value("items.%s" % item, null):
 				return false
-		var tree_pts = int(character.get("_profile", {}).get("class_trees", {}).get(character.get("class", ""), {}).get("stat_points", 0))
-		var expected_total = level * tree_pts + (level - 1) * pts_per_lvl
+		var expected_total: int = (level - 1) * pts_per_lvl
+		if str(character.get("race", "")) == "Human":
+			expected_total += floori(float(level) / 2.0)
 		var invested: Dictionary = character.get("invested", {})
-		var sum_invested = 0
+		var sum_invested := 0
 		for stat in invested:
+			if stat not in Attributes.ATTRS or not _is_whole_number(invested[stat]) or int(invested[stat]) < 0:
+				return false
 			sum_invested += int(invested[stat])
 		if sum_invested + int(character.get("points", 0)) != expected_total:
+			return false
+		var saved_boons = character.get("boons", [])
+		if not saved_boons is Array:
+			return false
+		var expected := {
+			"class": character["class"], "level": level,
+			"race": str(character.get("race", "")),
+			"boons": saved_boons.duplicate(),
+			"invested": invested.duplicate(true), "gear": character["gear"].duplicate(true),
+			"attributes": {}, "derived": {},
+		}
+		Attributes.recalculate(expected, forest)
+		var attributes: Dictionary = character["attributes"]
+		if not _has_exact_keys(attributes, Attributes.ATTRS):
+			return false
+		for stat in Attributes.ATTRS:
+			if not _is_whole_number(attributes[stat]) \
+					or int(attributes[stat]) != int(expected["attributes"][stat]):
+				return false
+		party_gold += int(character["gold"])
+	if party_gold != int(saved_gold):
+		return false
+	return true
+
+
+static func _is_whole_number(value) -> bool:
+	return value is int or (value is float and is_equal_approx(value, floorf(value)))
+
+
+static func _has_exact_keys(data: Dictionary, keys: Array) -> bool:
+	if data.size() != keys.size():
+		return false
+	for key in keys:
+		if not data.has(key):
 			return false
 	return true
 
@@ -653,7 +720,6 @@ func restore_layer_start(data: Dictionary) -> void:
 	for character in data["party"]:
 		party.append(character.duplicate(true))
 	inventory = data["stash"].duplicate(true)
-	gold = int(data["gold"])
 	clues.clear()
 	for clue in data["clues"]:
 		clues.append(clue.duplicate(true))

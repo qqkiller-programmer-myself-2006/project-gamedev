@@ -256,11 +256,10 @@ func test_enemies_start_at_zero_energy_and_gain_per_turn() -> void:
 		for event in h.server.take_events(sessions[0]):
 			if event["type"] == "action_resolved" and str(event["actor"]) == "e0":
 				seen.append(event)
-	assert_true(seen.size() >= 3, "the first wolf gets repeated turns")
-	assert_eq(seen[0]["action"], "attack", "the wolf cannot afford Rend at 0 Energy")
-	assert_eq(seen[1]["action"], "attack", "one gained Energy is still below Rend's cost")
-	assert_eq(seen[2]["action"], "special", "the wolf uses Rend after gaining 2 Energy")
-	assert_eq(seen[2]["energy_spent"], 2)
+	assert_true(seen.size() >= 2, "the first wolf gets repeated turns")
+	assert_eq(seen[0]["action"], "attack", "the wolf cannot afford Rend at 1 Energy")
+	assert_eq(seen[1]["action"], "special", "the wolf uses Rend on its second turn (2 Energy)")
+	assert_eq(seen[1]["energy_spent"], 2)
 
 
 func test_ai_never_uses_unaffordable_skills() -> void:

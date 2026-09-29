@@ -96,8 +96,8 @@ func _buy(run: MatchRun, slot: int, item: String) -> Dictionary:
 	run.party[slot]["gold"] = int(run.party[slot]["gold"]) - price
 	entry["remaining"] = int(entry["remaining"]) - 1
 	run.add_item(item, 1)
-	run.emit({"type": "purchase", "slot": slot, "item": item, "price": price, "gold": run.gold})
-	return {"ok": true, "gold": run.gold}
+	run.emit({"type": "purchase", "slot": slot, "item": item, "price": price, "gold": int(run.party[slot].get("gold", 0))})
+	return {"ok": true, "gold": int(run.party[slot].get("gold", 0))}
 
 
 func _human_count(run: MatchRun) -> int:
