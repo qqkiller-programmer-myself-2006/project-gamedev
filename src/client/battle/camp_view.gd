@@ -22,6 +22,11 @@ var _category := ""
 var _left_search := ""
 var _inventory_search := ""
 var _left_mode := "craft"
+const CAMP_PANEL := Color("#5c5c5c")
+const CAMP_ROW := Color("#7b7b7b")
+const CAMP_BUTTON := Color("#4a4a4a")
+const CAMP_BORDER := Color("#303030")
+const CAMP_TEXT := Color("#f7f4ea")
 const SLOTS := ["helmet", "chest", "legs", "boots", "weapon", "charm1", "charm2", "charm3"]
 const ATTRIBUTES := ["str", "dex", "con", "int", "fth", "cha", "lck"]
 
@@ -51,11 +56,21 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_region.offset_right = -18
 	_region.offset_top = 10
 	add_child(_region)
+	var encounter_box := UiKit.panel(UiKit.pixel_label("\"Jumpscare\"\nAll", "small"), "HudCard")
+	encounter_box.name = "EncounterBox"
+	encounter_box.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	encounter_box.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	encounter_box.offset_right = -18
+	encounter_box.offset_top = 48
+	encounter_box.offset_left = -128
+	encounter_box.offset_bottom = 88
+	encounter_box.add_theme_stylebox_override("panel", _flat_box(CAMP_BUTTON, CAMP_BORDER, 2, 7))
+	add_child(encounter_box)
 	_workspace = Control.new()
 	_workspace.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_workspace.offset_left = 38
 	_workspace.offset_right = -38
-	_workspace.offset_top = 72
+	_workspace.offset_top = 104
 	_workspace.offset_bottom = -66
 	add_child(_workspace)
 	_columns = UiKit.hbox(12)
@@ -99,29 +114,66 @@ func build(view: Dictionary, encounter: Dictionary) -> void:
 
 func _build_columns(view: Dictionary, merchant: bool) -> void:
 	UiKit.clear(_columns)
-	_columns.add_child(_column("Shop" if merchant else "Crafting", _left_panel(view, merchant), 0.30))
-	_columns.add_child(_column("Inventory", _inventory_panel(view), 0.32))
-	_columns.add_child(_column("Equipment", _equipment_panel(view, merchant), 0.38))
+	_columns.add_child(_column("Shop" if merchant else "Crafting", _left_panel(view, merchant), 0.28))
+	_columns.add_child(_vertical_tabs(["Stash", "Shop" if merchant else "Craft"], true))
+	_columns.add_child(_column("Inventory", _inventory_panel(view), 0.30))
+	_columns.add_child(_vertical_tabs(["Inventory", "Abilities"], false, view))
+	_columns.add_child(_column("Equipment", _equipment_panel(view, merchant), 0.36))
 
 func _column(title: String, content: Control, ratio: float) -> Control:
 	var column := UiKit.vbox(5)
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.size_flags_stretch_ratio = ratio
-	var heading := UiKit.pixel_label(title, "title")
+	var heading := UiKit.pixel_label(title, "heading" if title == "Equipment" else "title")
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	heading.clip_text = true
+	heading.custom_minimum_size = Vector2(0, 0)
 	heading.add_theme_color_override("font_outline_color", Color.BLACK)
 	heading.add_theme_constant_override("outline_size", 5)
 	column.add_child(heading)
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var panel := UiKit.panel(content, "HudPanel")
+	panel.add_theme_stylebox_override("panel", _flat_box(CAMP_PANEL, CAMP_BORDER, 2, 7))
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(panel)
+	return column
+
+func _vertical_tabs(labels: Array, left: bool, view: Dictionary = {}) -> Control:
+	var tabs := UiKit.vbox(5)
+	tabs.custom_minimum_size = Vector2(70, 0)
+	tabs.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	for i in labels.size():
+		var label: String = labels[i]
+		var button := _button(label, func() -> void:
+			if label == "Stash": _left_mode = "stash"
+			elif label == "Craft" or label == "Shop": _left_mode = "craft"
+			elif label == "Abilities": _show_abilities(view)
+			_screen.refresh(_app, true))
+		button.custom_minimum_size = Vector2(70, 58)
+		button.add_theme_font_size_override("font_size", 12)
+		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		button.clip_text = true
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.disabled = (label == "Stash" and _left_mode == "stash") or ((label == "Craft" or label == "Shop") and _left_mode == "craft")
+		tabs.add_child(button)
+	if not left:
+		var you := _character(view, _screen.your_slot())
+		var consumable := str(you.get("consumable", ""))
+		var slot := UiKit.panel(UiKit.pixel_label("Consumable\n" + (consumable if not consumable.is_empty() else "Empty"), "small"), "HudCard")
+		slot.custom_minimum_size = Vector2(70, 76)
+		slot.add_theme_stylebox_override("panel", _flat_box(CAMP_ROW, CAMP_BORDER, 1, 5))
+		tabs.add_child(slot)
+	return tabs
+
+func _scroll_body(body: Control) -> ScrollContainer:
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.follow_focus = true
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(content)
-	var panel := UiKit.panel(scroll, "HudPanel")
-	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	column.add_child(panel)
-	return column
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(body)
+	return scroll
 
 func _left_panel(view: Dictionary, merchant: bool) -> Control:
 	var root := UiKit.vbox(6)
@@ -133,20 +185,8 @@ func _left_panel(view: Dictionary, merchant: bool) -> Control:
 		_left_search = value
 		_screen.refresh(_app, true))
 	root.add_child(search)
-	var tabs := UiKit.hbox(4)
-	var stash := _button("Stash", func() -> void:
-		_left_mode = "stash"
-		_screen.refresh(_app, true))
-	var action := _button("Shop" if merchant else "Craft", func() -> void:
-		_left_mode = "craft"
-		_screen.refresh(_app, true))
-	stash.disabled = _left_mode == "stash"
-	action.disabled = _left_mode == "craft"
-	tabs.add_child(stash)
-	tabs.add_child(action)
-	root.add_child(tabs)
 	var body := UiKit.vbox(5)
-	root.add_child(body)
+	root.add_child(_scroll_body(body))
 	if _left_mode == "stash": _build_stash(view, body)
 	elif merchant: _build_shop(view, body)
 	else: _build_crafting(body)
@@ -159,7 +199,11 @@ func _build_shop(view: Dictionary, body: VBoxContainer) -> void:
 		var card := _row_card()
 		var text := UiKit.vbox(1)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		text.add_child(UiKit.pixel_label(str(entry.get("name", entry.get("item", ""))), "heading"))
+		text.custom_minimum_size = Vector2(0, 0)
+		var shop_name := UiKit.pixel_label(str(entry.get("name", entry.get("item", ""))), "heading")
+		shop_name.clip_text = true
+		shop_name.custom_minimum_size = Vector2(0, 0)
+		text.add_child(shop_name)
 		text.add_child(UiKit.pixel_label("%d Gold   (%d)" % [int(entry.get("price", 0)), int(entry.get("remaining", 0))], "small", UiKit.ACCENT))
 		card.get_child(0).add_child(text)
 		var actions := UiKit.vbox(2)
@@ -195,7 +239,11 @@ func _recipe_row(recipe: Dictionary, index: int) -> Control:
 	var card := _row_card()
 	var name := UiKit.vbox(1)
 	name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	name.add_child(UiKit.pixel_label(str(recipe.get("name", recipe.get("recipe", ""))), "heading"))
+	name.custom_minimum_size = Vector2(0, 0)
+	var recipe_name := UiKit.pixel_label(str(recipe.get("name", recipe.get("recipe", ""))), "heading")
+	recipe_name.clip_text = true
+	recipe_name.custom_minimum_size = Vector2(0, 0)
+	name.add_child(recipe_name)
 	var tips_text := ""
 	for material in recipe.get("materials", []):
 		tips_text += "%d %s (%d)\n" % [int(material.get("need", 0)), str(material.get("name", material.get("item", ""))), int(material.get("have", 0))]
@@ -204,6 +252,7 @@ func _recipe_row(recipe: Dictionary, index: int) -> Control:
 	var craft := _button("Craft", func() -> void: _app.send({"type": "craft", "recipe": recipe.get("recipe", "")}))
 	craft.disabled = not craftable
 	craft.add_theme_color_override("font_color", UiKit.ALLY if craftable else UiKit.ENEMY)
+	craft.add_theme_color_override("font_disabled_color", UiKit.ALLY if craftable else UiKit.ENEMY)
 	craft.tooltip_text = tips_text
 	craft.set_meta("focus_id", "craft_" + str(recipe.get("recipe", "")))
 	actions.add_child(craft)
@@ -226,12 +275,8 @@ func _inventory_panel(view: Dictionary) -> Control:
 		_inventory_search = value
 		_screen.refresh(_app, true))
 	root.add_child(search)
-	var tabs := UiKit.hbox(4)
-	tabs.add_child(_button("Inventory", func() -> void: _screen.refresh(_app, true)))
-	tabs.add_child(_button("Abilities", func() -> void: _show_abilities(view)))
-	root.add_child(tabs)
 	var body := UiKit.vbox(5)
-	root.add_child(body)
+	root.add_child(_scroll_body(body))
 	for entry in view.get("inventory", []):
 		if _matches(str(entry.get("name", "")), _inventory_search): body.add_child(_item_row(entry, true))
 	var you := _character(view, _screen.your_slot())
@@ -243,16 +288,20 @@ func _inventory_panel(view: Dictionary) -> Control:
 	transfer.disabled = not you.has("gold")
 	transfer.tooltip_text = "Arrives with the next server update" if transfer.disabled else ""
 	gold_row.add_child(transfer)
-	body.add_child(UiKit.panel(gold_row, "HudCard"))
-	var consumable := str(you.get("consumable", ""))
-	body.add_child(UiKit.panel(UiKit.pixel_label("Consumable\n" + (consumable if not consumable.is_empty() else "Empty"), "body"), "HudCard"))
+	var gold_panel := UiKit.panel(gold_row, "HudCard")
+	gold_panel.add_theme_stylebox_override("panel", _flat_box(CAMP_ROW, CAMP_BORDER, 1, 5))
+	root.add_child(gold_panel)
 	return root
 
 func _item_row(entry: Dictionary, with_transfer: bool) -> Control:
 	var card := _row_card()
 	var text := UiKit.vbox(1)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	text.add_child(UiKit.pixel_label("%s (x%d)" % [str(entry.get("name", entry.get("item", ""))), int(entry.get("count", 1))], "heading"))
+	text.custom_minimum_size = Vector2(0, 0)
+	var item_name := UiKit.pixel_label("%s (x%d)" % [str(entry.get("name", entry.get("item", ""))), int(entry.get("count", 1))], "heading")
+	item_name.clip_text = true
+	item_name.custom_minimum_size = Vector2(0, 0)
+	text.add_child(item_name)
 	card.get_child(0).add_child(text)
 	var actions := UiKit.vbox(2)
 	if with_transfer: actions.add_child(_button("Transfer", func() -> void: _open_item_picker(str(entry.get("item", "")))))
@@ -279,21 +328,33 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	root.add_child(switcher)
 	var grid := GridContainer.new()
 	grid.columns = 4
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", 4)
 	grid.add_theme_constant_override("v_separation", 4)
 	var gear: Dictionary = character.get("gear", {})
 	for slot in SLOTS:
 		var cell := UiKit.vbox(1)
-		cell.custom_minimum_size = Vector2(0, 74)
+		cell.custom_minimum_size = Vector2(0, 86)
+		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var worn: Dictionary = gear.get(slot, {})
-		cell.add_child(UiKit.pixel_label(_slot_name(slot) + "\n" + (str(worn.get("name", "Empty")) if not worn.is_empty() else "Empty"), "small"))
+		var slot_label := UiKit.pixel_label(_slot_name(slot) + "\n" + (str(worn.get("name", "Empty")) if not worn.is_empty() else "Empty"), "small")
+		slot_label.add_theme_font_size_override("font_size", 12)
+		slot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		slot_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		slot_label.clip_text = true
+		slot_label.custom_minimum_size = Vector2(0, 48)
+		slot_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cell.add_child(slot_label)
 		var controls := UiKit.hbox(2)
 		controls.alignment = BoxContainer.ALIGNMENT_END
 		if not worn.is_empty():
 			controls.add_child(_button("–", func() -> void: _app.send({"type": "unequip", "gear_slot": slot})))
 			controls.add_child(_button("T", func() -> void: _show_info(worn)))
 		cell.add_child(controls)
-		grid.add_child(UiKit.panel(cell, "HudCard"))
+		var cell_panel := UiKit.panel(cell, "HudCard")
+		cell_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		cell_panel.add_theme_stylebox_override("panel", _flat_box(CAMP_ROW, CAMP_BORDER, 1, 5))
+		grid.add_child(cell_panel)
 	root.add_child(grid)
 	var stats := UiKit.vbox(1)
 	var attrs: Dictionary = character.get("attributes", {})
@@ -301,9 +362,16 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	stats.add_child(_stat("HP", "%d/%d" % [int(character.get("hp", 0)), int(character.get("max_hp", 0))]))
 	stats.add_child(_stat("Energy", str(character.get("energy", 0))))
 	stats.add_child(_stat("Level", "%d (%d/%d)" % [int(character.get("level", 1)), int(character.get("exp", 0)), int(character.get("exp_next", 0))]))
-	stats.add_child(Control.new())
-	for key in ATTRIBUTES: stats.add_child(_stat(key.to_upper(), str(attrs.get(key, _fallback_attr(character, key)))))
-	stats.add_child(Control.new())
+	var separator_one := Control.new()
+	separator_one.custom_minimum_size = Vector2(0, 8)
+	stats.add_child(separator_one)
+	if attrs.is_empty():
+		for key in ["atk", "def", "mag", "res", "spd"]: stats.add_child(_stat(key.to_upper(), str(character.get(key, 0))))
+	else:
+		for key in ATTRIBUTES: stats.add_child(_stat(key.to_upper(), str(attrs.get(key, 0))))
+	var separator_two := Control.new()
+	separator_two.custom_minimum_size = Vector2(0, 8)
+	stats.add_child(separator_two)
 	stats.add_child(_stat("Initiative", _range_text(derived.get("initiative", character.get("spd", 0)))))
 	stats.add_child(_stat("Crit Chance", _percent(derived.get("crit", character.get("crit", 0)))))
 	stats.add_child(_stat("Crit Damage", _percent(derived.get("crit_damage", 1.5))))
@@ -313,7 +381,12 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	stats.add_child(_stat("Aggro", _percent(derived.get("aggro", 1.0))))
 	stats.add_child(_stat("Lifesteal", _percent(derived.get("lifesteal", 0))))
 	stats.add_child(_stat("Energy Regen", str(derived.get("energy_regen", 1))))
-	root.add_child(UiKit.panel(stats, "HudCard"))
+	var stat_scroll := _scroll_body(stats)
+	stat_scroll.custom_minimum_size = Vector2(0, 0)
+	var stat_panel := UiKit.panel(stat_scroll, "HudCard")
+	stat_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	stat_panel.add_theme_stylebox_override("panel", _flat_box(CAMP_ROW, CAMP_BORDER, 1, 7))
+	root.add_child(stat_panel)
 	var points := int(character.get("points", 0))
 	var invest := _button("Invest Points (%d)" % points, func() -> void: _open_invest(character))
 	invest.disabled = merchant or points <= 0 or _inspect != _screen.your_slot()
@@ -322,8 +395,14 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 
 func _stat(label: String, value: String) -> Control:
 	var row := UiKit.hbox(5)
-	row.add_child(UiKit.pixel_label(label + ":", "small", UiKit.TEXT_DIM))
-	row.add_child(UiKit.pixel_label(value, "small"))
+	var stat_name := UiKit.pixel_label(label + ":", "small", UiKit.TEXT_DIM)
+	stat_name.clip_text = true
+	stat_name.custom_minimum_size = Vector2(118, 22)
+	row.add_child(stat_name)
+	var stat_value := UiKit.pixel_label(value, "small")
+	stat_value.clip_text = true
+	stat_value.custom_minimum_size = Vector2(42, 22)
+	row.add_child(stat_value)
 	return row
 
 func _build_bottom() -> void:
@@ -364,8 +443,10 @@ func focus_default() -> void:
 
 func _row_card() -> PanelContainer:
 	var row := UiKit.hbox(5)
-	row.custom_minimum_size = Vector2(0, 62)
-	return UiKit.panel(row, "HudCard")
+	row.custom_minimum_size = Vector2(0, 54)
+	var panel := UiKit.panel(row, "HudCard")
+	panel.add_theme_stylebox_override("panel", _flat_box(CAMP_ROW, CAMP_BORDER, 1, 5))
+	return panel
 
 func _button(text: String, callback: Callable) -> Button:
 	var button := Button.new()
@@ -373,7 +454,23 @@ func _button(text: String, callback: Callable) -> Button:
 	button.theme_type_variation = "HudButton"
 	button.focus_mode = Control.FOCUS_ALL
 	button.pressed.connect(callback)
+	button.add_theme_font_size_override("font_size", 15)
+	button.add_theme_color_override("font_color", CAMP_TEXT)
+	button.add_theme_color_override("font_outline_color", Color("#242424"))
+	button.add_theme_constant_override("outline_size", 3)
+	button.custom_minimum_size = Vector2(0, 27)
+	button.add_theme_stylebox_override("normal", _flat_box(CAMP_BUTTON, CAMP_BORDER, 1, 4))
+	button.add_theme_stylebox_override("disabled", _flat_box(Color("#666666"), CAMP_BORDER, 1, 4))
 	return button
+
+func _flat_box(bg: Color, border: Color, width: int, margin: int) -> StyleBoxFlat:
+	var box := StyleBoxFlat.new()
+	box.bg_color = bg
+	box.border_color = border
+	box.set_border_width_all(width)
+	box.set_corner_radius_all(2)
+	box.set_content_margin_all(margin)
+	return box
 
 func _matches(value: String, query: String) -> bool:
 	return query.strip_edges().is_empty() or value.to_lower().contains(query.to_lower())
