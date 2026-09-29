@@ -59,6 +59,7 @@ func update(run: MatchRun) -> void:
 
 
 func on_control_changed(run: MatchRun, _slot: int) -> void:
+	run.collect_ai_gold()
 	_close_if_everyone_ready(run)
 
 

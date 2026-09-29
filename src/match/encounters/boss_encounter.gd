@@ -52,8 +52,6 @@ func _enemy_plan(run: MatchRun, enemy: Dictionary) -> Dictionary:
 		var unleash := pending
 		pending = {}
 		var plan := _move_plan(run, unleash["move"], unleash["target"])
-		plan["action"] = "special"
-		plan["energy_spent"] = int(_unit(run, BOSS_ID).get("energy", 0))
 		return plan
 	var pattern: Array = _phases(run)[phase_index].get("pattern", ["attack"])
 	var step := str(pattern[pattern_step % pattern.size()])

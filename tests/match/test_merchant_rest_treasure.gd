@@ -51,12 +51,13 @@ func test_merchant_offers_content_stock_with_prices() -> void:
 	assert_eq(items, [["herb", 12, 5], ["tonic", 27, 2], ["spirit_bloom", 39, 1], ["firebomb", 23, 2]])
 
 
-func test_buying_spends_shared_gold_and_fills_shared_inventory() -> void:
-	_shop(50, 2)
+func test_buying_spends_personal_gold_and_fills_shared_inventory() -> void:
+	_shop(100, 2)  # 100 split among 5 chars; AI gold collected to 2 humans → 50 each
 	h.server.take_events(sessions[1])
 	assert_ok(h.server.command(sessions[0], {"type": "buy", "item": "tonic"}))
-	assert_ok(h.server.command(sessions[1], {"type": "buy", "item": "herb"}), "any human buys from the same purse")
-	assert_eq(_view(sessions[1])["gold"], 50 - 27 - 12)
+	assert_ok(h.server.command(sessions[1], {"type": "buy", "item": "herb"}), "each human buys from own purse")
+	assert_eq(_view(sessions[1])["party"][0]["gold"], 50 - 27, "buyer's personal gold drops")
+	assert_eq(_view(sessions[1])["party"][1]["gold"], 50 - 12, "second buyer's personal gold drops")
 	assert_eq(_count("tonic", sessions[1]), 1)
 	assert_eq(_count("herb", sessions[1]), 4, "3 starting herbs + 1")
 	assert_eq(_stock("tonic")["remaining"], 1)
@@ -83,7 +84,7 @@ func test_invalid_and_sold_out_items_are_rejected() -> void:
 	assert_rejected(h.server.command(sessions[0], {"type": "buy", "item": "dragon_egg"}), "invalid_item")
 	assert_ok(h.server.command(sessions[0], {"type": "buy", "item": "spirit_bloom"}))
 	assert_rejected(h.server.command(sessions[0], {"type": "buy", "item": "spirit_bloom"}), "out_of_stock")
-	assert_eq(_view()["gold"], 161)
+	assert_eq(_view()["party"][0]["gold"], 200 - 39)
 
 
 func test_single_player_moves_on_without_buying() -> void:
@@ -91,7 +92,7 @@ func test_single_player_moves_on_without_buying() -> void:
 	assert_ok(h.server.command(sessions[0], {"type": "ready"}))
 	var view := _view()
 	assert_eq([view["phase"], view["layer"]], ["voting", 2])
-	assert_eq(view["gold"], 100, "AI slots never spend the Party's Gold")
+	assert_eq(view["party"][0]["gold"], 100, "AI gold collected to the human, nothing spent")
 
 
 func test_shop_closes_once_every_human_is_ready() -> void:
@@ -130,10 +131,11 @@ func test_gold_won_in_combat_buys_items() -> void:
 	h.take_route(sessions, "combat")
 	h.server.command(sessions[0], {"type": "action", "action": "attack", "target": "e0"})
 	h.advance(4.0)
-	assert_eq(_view()["gold"], 20)
+	assert_eq(_view()["gold"], 20, "party earned 20 total gold")
 	h.take_route(sessions, "merchant")
+	assert_eq(_view()["party"][0]["gold"], 20, "AI gold collected to the human")
 	assert_ok(h.server.command(sessions[0], {"type": "buy", "item": "herb"}))
-	assert_eq(_view()["gold"], 8)
+	assert_eq(_view()["party"][0]["gold"], 20 - 12)
 
 
 func test_rest_restores_party_hp_by_content_ratio() -> void:

@@ -85,9 +85,10 @@ func leave(session_id: int, reason: String) -> void:
 	var old_name: String = slots[index]["name"]
 	slots[index] = {"session": 0, "name": ""}
 	_emit({"type": "player_left", "slot": index, "name": old_name, "reason": reason})
-	if run != null and state == State.IN_MATCH:
+	if run != null:
 		run.set_human(index, false)
-		_drain_run()
+		if state == State.IN_MATCH:
+			_drain_run()
 	if host_slot == index:
 		host_slot = -1
 		for i in SLOT_COUNT:
