@@ -22,6 +22,8 @@ var _category := ""
 var _left_search := ""
 var _inventory_search := ""
 var _left_mode := "craft"
+var _inventory_mode := "inventory"
+var _invest_panel: PanelContainer
 const CAMP_PANEL := Color("#5c5c5c")
 const CAMP_ROW := Color("#7b7b7b")
 const CAMP_BUTTON := Color("#4a4a4a")
@@ -54,14 +56,15 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_region.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	_region.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_region.offset_right = -18
-	_region.offset_top = 10
+	_region.offset_top = 6
+	_region.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	add_child(_region)
 	var encounter_box := UiKit.panel(UiKit.pixel_label("\"Jumpscare\"\nAll", "small"), "HudCard")
 	encounter_box.name = "EncounterBox"
 	encounter_box.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	encounter_box.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	encounter_box.offset_right = -18
-	encounter_box.offset_top = 48
+	encounter_box.offset_top = 62
 	encounter_box.offset_left = -128
 	encounter_box.offset_bottom = 88
 	encounter_box.add_theme_stylebox_override("panel", _flat_box(CAMP_BUTTON, CAMP_BORDER, 2, 7))
@@ -124,7 +127,7 @@ func _column(title: String, content: Control, ratio: float) -> Control:
 	var column := UiKit.vbox(5)
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.size_flags_stretch_ratio = ratio
-	var heading := UiKit.pixel_label(title, "heading" if title == "Equipment" else "title")
+	var heading := UiKit.pixel_label(title, "title")
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	heading.clip_text = true
 	heading.custom_minimum_size = Vector2(0, 0)
@@ -145,17 +148,26 @@ func _vertical_tabs(labels: Array, left: bool, view: Dictionary = {}) -> Control
 	tabs.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	for i in labels.size():
 		var label: String = labels[i]
+		var active := (left and ((label == "Stash" and _left_mode == "stash") or
+				((label == "Craft" or label == "Shop") and _left_mode == "craft"))) \
+				or (not left and ((label == "Inventory" and _inventory_mode == "inventory") or
+				(label == "Abilities" and _inventory_mode == "abilities")))
 		var button := _button(label, func() -> void:
 			if label == "Stash": _left_mode = "stash"
 			elif label == "Craft" or label == "Shop": _left_mode = "craft"
-			elif label == "Abilities": _show_abilities(view)
+			elif label == "Inventory": _inventory_mode = "inventory"
+			elif label == "Abilities":
+				_inventory_mode = "abilities"
+				_show_abilities(view)
 			_screen.refresh(_app, true))
 		button.custom_minimum_size = Vector2(70, 58)
 		button.add_theme_font_size_override("font_size", 12)
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.clip_text = true
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.disabled = (label == "Stash" and _left_mode == "stash") or ((label == "Craft" or label == "Shop") and _left_mode == "craft")
+		if active:
+			button.add_theme_stylebox_override("normal", _flat_box(Color("#777777"), Color("#e0e0e0"), 2, 4))
+			button.add_theme_stylebox_override("hover", _flat_box(Color("#858585"), Color("#f0c85c"), 2, 4))
 		tabs.add_child(button)
 	if not left:
 		var you := _character(view, _screen.your_slot())
@@ -200,8 +212,9 @@ func _build_shop(view: Dictionary, body: VBoxContainer) -> void:
 		var text := UiKit.vbox(1)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		text.custom_minimum_size = Vector2(0, 0)
-		var shop_name := UiKit.pixel_label(str(entry.get("name", entry.get("item", ""))), "heading")
-		shop_name.clip_text = true
+		var shop_name := UiKit.pixel_label(str(entry.get("name", entry.get("item", ""))), "small")
+		shop_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		shop_name.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		shop_name.custom_minimum_size = Vector2(0, 0)
 		text.add_child(shop_name)
 		text.add_child(UiKit.pixel_label("%d Gold   (%d)" % [int(entry.get("price", 0)), int(entry.get("remaining", 0))], "small", UiKit.ACCENT))
@@ -240,8 +253,9 @@ func _recipe_row(recipe: Dictionary, index: int) -> Control:
 	var name := UiKit.vbox(1)
 	name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name.custom_minimum_size = Vector2(0, 0)
-	var recipe_name := UiKit.pixel_label(str(recipe.get("name", recipe.get("recipe", ""))), "heading")
-	recipe_name.clip_text = true
+	var recipe_name := UiKit.pixel_label(str(recipe.get("name", recipe.get("recipe", ""))), "small")
+	recipe_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	recipe_name.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	recipe_name.custom_minimum_size = Vector2(0, 0)
 	name.add_child(recipe_name)
 	var tips_text := ""
@@ -298,8 +312,9 @@ func _item_row(entry: Dictionary, with_transfer: bool) -> Control:
 	var text := UiKit.vbox(1)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text.custom_minimum_size = Vector2(0, 0)
-	var item_name := UiKit.pixel_label("%s (x%d)" % [str(entry.get("name", entry.get("item", ""))), int(entry.get("count", 1))], "heading")
-	item_name.clip_text = true
+	var item_name := UiKit.pixel_label("%s (x%d)" % [str(entry.get("name", entry.get("item", ""))), int(entry.get("count", 1))], "small")
+	item_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	item_name.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	item_name.custom_minimum_size = Vector2(0, 0)
 	text.add_child(item_name)
 	card.get_child(0).add_child(text)
@@ -338,11 +353,11 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var worn: Dictionary = gear.get(slot, {})
 		var slot_label := UiKit.pixel_label(_slot_name(slot) + "\n" + (str(worn.get("name", "Empty")) if not worn.is_empty() else "Empty"), "small")
-		slot_label.add_theme_font_size_override("font_size", 12)
+		slot_label.add_theme_font_size_override("font_size", 11)
 		slot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		slot_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		slot_label.clip_text = true
-		slot_label.custom_minimum_size = Vector2(0, 48)
+		slot_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		slot_label.custom_minimum_size = Vector2(0, 62)
 		slot_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		cell.add_child(slot_label)
 		var controls := UiKit.hbox(2)
@@ -365,10 +380,8 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	var separator_one := Control.new()
 	separator_one.custom_minimum_size = Vector2(0, 8)
 	stats.add_child(separator_one)
-	if attrs.is_empty():
-		for key in ["atk", "def", "mag", "res", "spd"]: stats.add_child(_stat(key.to_upper(), str(character.get(key, 0))))
-	else:
-		for key in ATTRIBUTES: stats.add_child(_stat(key.to_upper(), str(attrs.get(key, 0))))
+	for key in ATTRIBUTES:
+		stats.add_child(_stat(key.to_upper(), str(attrs.get(key, _fallback_attr(character, key)))))
 	var separator_two := Control.new()
 	separator_two.custom_minimum_size = Vector2(0, 8)
 	stats.add_child(separator_two)
@@ -394,15 +407,10 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	return root
 
 func _stat(label: String, value: String) -> Control:
-	var row := UiKit.hbox(5)
-	var stat_name := UiKit.pixel_label(label + ":", "small", UiKit.TEXT_DIM)
-	stat_name.clip_text = true
-	stat_name.custom_minimum_size = Vector2(118, 22)
-	row.add_child(stat_name)
-	var stat_value := UiKit.pixel_label(value, "small")
-	stat_value.clip_text = true
-	stat_value.custom_minimum_size = Vector2(42, 22)
-	row.add_child(stat_value)
+	var row := UiKit.pixel_label(label + ": " + value, "small")
+	row.clip_text = false
+	row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	row.custom_minimum_size = Vector2(0, 22)
 	return row
 
 func _build_bottom() -> void:
@@ -436,6 +444,8 @@ func reset() -> void:
 	_inspect = -1
 	_category = ""
 	_left_mode = "craft"
+	_inventory_mode = "inventory"
+	_close_invest_panel()
 	_hidden = false
 
 func focus_default() -> void:
@@ -443,7 +453,7 @@ func focus_default() -> void:
 
 func _row_card() -> PanelContainer:
 	var row := UiKit.hbox(5)
-	row.custom_minimum_size = Vector2(0, 54)
+	row.custom_minimum_size = Vector2(0, 62)
 	var panel := UiKit.panel(row, "HudCard")
 	panel.add_theme_stylebox_override("panel", _flat_box(CAMP_ROW, CAMP_BORDER, 1, 5))
 	return panel
@@ -454,7 +464,7 @@ func _button(text: String, callback: Callable) -> Button:
 	button.theme_type_variation = "HudButton"
 	button.focus_mode = Control.FOCUS_ALL
 	button.pressed.connect(callback)
-	button.add_theme_font_size_override("font_size", 15)
+	button.add_theme_font_size_override("font_size", 13)
 	button.add_theme_color_override("font_color", CAMP_TEXT)
 	button.add_theme_color_override("font_outline_color", Color("#242424"))
 	button.add_theme_constant_override("outline_size", 3)
@@ -518,13 +528,33 @@ func _open_gold_picker() -> void:
 	if party.size() > 1: _app.send({"type": "transfer_gold", "to": int(party[1].get("slot", 1)), "amount": 1})
 
 func _open_invest(character: Dictionary) -> void:
-	var attrs: Dictionary = character.get("attributes", {})
-	var stat := "dex"
-	for key in ATTRIBUTES:
-		if not attrs.has(key):
-			stat = key
-			break
-	_app.send({"type": "invest", "stat": stat})
+	_close_invest_panel()
+	var body := UiKit.vbox(4)
+	body.add_child(UiKit.pixel_label("Invest Points (%d)" % int(character.get("points", 0)), "small"))
+	for attr in ATTRIBUTES:
+		var stat: String = attr
+		var plus := _button("+ %s" % attr.to_upper(), func() -> void:
+			_app.send({"type": "invest", "stat": stat})
+			_close_invest_panel())
+		plus.custom_minimum_size = Vector2(150, 28)
+		body.add_child(plus)
+	_invest_panel = UiKit.panel(body, "HudPanel")
+	_invest_panel.name = "InvestPanel"
+	_invest_panel.add_theme_stylebox_override("panel", _flat_box(CAMP_PANEL, Color("#e0e0e0"), 2, 8))
+	_invest_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_invest_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_invest_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_invest_panel.offset_left = -90
+	_invest_panel.offset_right = 90
+	_invest_panel.offset_top = -150
+	_invest_panel.offset_bottom = 150
+	add_child(_invest_panel)
+	UiKit.focus_first(_invest_panel)
+
+func _close_invest_panel() -> void:
+	if is_instance_valid(_invest_panel):
+		_invest_panel.queue_free()
+	_invest_panel = null
 
 func _toggle_hidden() -> void:
 	_hidden = not _hidden
