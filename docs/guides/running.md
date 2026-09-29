@@ -23,6 +23,21 @@ godot --path . -- --url=ws://127.0.0.1:8910 --name=Ann  # กรอกค่า�
 ทดสอบ co-op บนเครื่องเดียว: เปิด server หนึ่งตัว แล้วเปิด client สองหน้าต่าง
 คนหนึ่งกด **Create a room** อีกคนใส่ Room code แล้วกด **Join room**
 
+### Dev Playtest (กระโดดไปฉากที่ต้องการ)
+
+เฉพาะ debug build หรือ `--dev` (ไม่มีใน release export): ปุ่ม **[DEV] Playtest** บนหน้าแรกเปิด panel ให้เลือก
+**Start at** (Journey start, Combat, Merchant, Rest camp, Class Encounter, Story event, Cave = Layer 5 combat, Boss),
+**Class** ของผู้เล่น (Classless/Swordsman/Archer/Mage/Guardian/Assassin) และ **Seed** แล้วเริ่ม match คนเดียวบน server ในตัวเกม
+แล้วข้ามไปฉากนั้นทันที (ตั้ง Layer และเลเวล/EXP ให้เหมาะกับ Layer นั้น, ใช้ seed เดิม = ฉากเดิม)
+
+```bash
+godot --path . -- --dev --playtest --jump=boss --class=mage --seed=7   # ข้าม panel
+```
+
+`--jump=` journey|combat|merchant|rest|class|story|cave|boss (ตั้งค่าเริ่มต้น journey), `--class=` classless|swordsman|archer|mage|guardian|assassin, `--seed=` ตัวเลข.
+ข้างใน: คำสั่ง `dev_jump {target, layer?, class?}` ที่ `MatchServer` รับเฉพาะเมื่อ `allow_dev` ถูกตั้ง (ตั้งเฉพาะใน `GameServer.listen_embedded`);
+server ออนไลน์ตอบ `dev_offline_only`.
+
 ## Browser client
 
 ดู [web.md](web.md)

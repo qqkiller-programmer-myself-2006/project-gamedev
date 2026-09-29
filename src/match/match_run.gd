@@ -735,6 +735,23 @@ func restore_layer_start(data: Dictionary) -> void:
 	_begin_layer(int(data["layer"]))
 
 
+## DEV ONLY (Playtest, see DevJump): drops the current Vote/Encounter and starts
+## `option` on `to_layer` right away; an empty option starts the Guardian Boss.
+func dev_jump(to_layer: int, option: Dictionary) -> void:
+	vote = null
+	_pending_option = {}
+	_phase_deadline = -1.0
+	if option.is_empty():
+		layer = routes.size()
+		layers_passed = routes.size()
+		_reach_boss()
+		return
+	layer = to_layer
+	layers_passed = to_layer - 1
+	_pending_option = option
+	_enter_encounter()
+
+
 func _handle_vote(slot: int, cmd: Dictionary) -> Dictionary:
 	if phase != "voting":
 		return {"ok": false, "error": "wrong_phase"}

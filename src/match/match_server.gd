@@ -38,6 +38,8 @@ var _rooms: Dictionary = {}
 ## Codes of rooms that have been closed, so joining them says so.
 var _closed_codes: Dictionary = {}
 var allow_story := false
+## Dev-only commands (dev_jump). Set only by the embedded Playtest server, never online.
+var allow_dev := false
 
 
 func _init(rng: GameRng, clock, content: ForestContent, profiles: ProfileStore = null) -> void:
@@ -97,6 +99,8 @@ func command(session_id: int, cmd: Dictionary) -> Dictionary:
 				return _reject("invalid_save")
 			_flush(story_room)
 			return {"ok": true}
+	if kind == "dev_jump":
+		return _dev_jump(session_id, cmd)
 	if not MatchRun.COMMANDS.has(kind):
 		if kind in ["set_loadout", "buy_race", "tree_upgrade", "buy_prestige", "reset_tree"]:
 			var setup_room := _room_of(session_id)
@@ -235,6 +239,23 @@ func _start_match(session_id: int) -> Dictionary:
 	if room.state != Room.State.LOBBY:
 		return _reject("wrong_phase")
 	room.start_match()
+	_flush(room)
+	return {"ok": true}
+
+
+## Dev Playtest only: moves the caller's Match straight to a scene (see DevJump).
+func _dev_jump(session_id: int, cmd: Dictionary) -> Dictionary:
+	if not allow_dev:
+		return _reject("dev_offline_only")
+	var room := _room_of(session_id)
+	if room == null:
+		return _reject("not_in_room")
+	if room.state != Room.State.IN_MATCH or room.run == null or room.run.is_over():
+		return _reject("wrong_phase")
+	var error := DevJump.apply(room.run, room.slot_of(session_id), str(cmd.get("target", "")),
+			int(cmd.get("layer", 0)), str(cmd.get("class", "")))
+	if not error.is_empty():
+		return _reject(error)
 	_flush(room)
 	return {"ok": true}
 
