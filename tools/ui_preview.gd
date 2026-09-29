@@ -101,6 +101,12 @@ func _drive() -> void:
 	var view = app.snapshot.get("match")
 	if view == null:
 		return
+	var screen := _screen()
+	var battle = screen._battle if screen != null else null
+	if battle != null and battle._banner != null and battle._banner.visible and not shots.has("06_action_banner"):
+		_shot("06_action_banner")
+	if battle != null and str(battle._combat.get("result", "")) == "victory" and not shots.has("11_combat_reward"):
+		_shot("11_combat_reward")
 	var key := _situation(view)
 	if key.is_empty():
 		return

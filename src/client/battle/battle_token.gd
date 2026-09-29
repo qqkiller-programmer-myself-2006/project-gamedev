@@ -7,8 +7,16 @@ extends Button
 ## Button so a valid target can be clicked, or focused and confirmed with
 ## Enter.
 
-const BADGE_HEIGHT := 30.0
-const PLATE_HEIGHT := 58.0
+const BADGE_HEIGHT := 18.0
+const PLATE_HEIGHT := 36.0
+
+const PARTY_OUTFITS := {
+	"Arin": {"shirt": Color("#d85b52"), "pants": Color("#3f547a"), "hair": Color("#e7c08d")},
+	"Bram": {"shirt": Color("#4d9b86"), "pants": Color("#59416f"), "hair": Color("#342a2a")},
+	"Cora": {"shirt": Color("#d28bba"), "pants": Color("#4a658c"), "hair": Color("#f0d4a7")},
+	"Dain": {"shirt": Color("#c4974d"), "pants": Color("#443f36"), "hair": Color("#7a4f32")},
+	"Wren": {"shirt": Color("#5a78c8"), "pants": Color("#31505d"), "hair": Color("#c8d4de")},
+}
 
 const CLASS_TINTS := {
 	"classless": Color("#b9a98c"), "swordsman": Color("#c3cbd9"), "archer": Color("#86c77e"),
@@ -28,6 +36,8 @@ var side := "party"
 var figure_height := 84.0
 var tint := Color.WHITE
 var glyph := "?"
+var enemy_kind := ""
+var outfit: Dictionary = {}
 var down := false
 var acting := false
 ## 1-based key shown while this token is a valid target, else 0.
@@ -43,18 +53,20 @@ func setup(data: Dictionary) -> void:
 	unit_id = str(data["id"])
 	side = str(data.get("side", "party"))
 	var kind := str(data.get("kind", ""))
+	enemy_kind = kind
 	down = int(data.get("hp", 0)) <= 0
 	acting = bool(data.get("acting", false))
 	flat = true
 	text = ""
 	focus_mode = Control.FOCUS_NONE
 	disabled = true
-	var width := 212.0 if side == "boss" else 150.0
-	figure_height = 150.0 if side == "boss" else 84.0
+	var width := 140.0
+	figure_height = 150.0 if side == "boss" else 110.0
 	custom_minimum_size = Vector2(width, BADGE_HEIGHT + figure_height + PLATE_HEIGHT)
 	size = custom_minimum_size
 	if side == "party":
-		tint = CLASS_TINTS.get(kind, CLASS_TINTS["classless"])
+		outfit = PARTY_OUTFITS.get(str(data.get("name", "")), PARTY_OUTFITS["Wren"])
+		tint = outfit["shirt"]
 		glyph = str(CLASS_GLYPHS.get(kind, "?"))
 	else:
 		tint = ENEMY_TINTS.get(kind, Color("#c8a98a"))
@@ -69,10 +81,10 @@ func setup(data: Dictionary) -> void:
 	var compact := statuses.size() > (3 if side == "boss" else 2)
 	_badges.add_theme_constant_override("separation", 1 if compact else 3)
 	for entry in statuses:
-		_badges.add_child(UiKit.status_badge(entry, compact))
+		_badges.add_child(_status_badge(entry, compact))
 	add_child(_badges)
 
-	var plate_box := UiKit.vbox(2)
+	var plate_box := UiKit.vbox(1)
 	plate_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var who := str(data.get("name", unit_id))
 	if bool(data.get("you", false)):
@@ -82,22 +94,23 @@ func setup(data: Dictionary) -> void:
 	var name_label := UiKit.pixel_label(who, "small", UiKit.ACCENT if bool(data.get("you", false)) else UiKit.TEXT)
 	name_label.clip_text = true
 	plate_box.add_child(name_label)
-	var bars := UiKit.hbox(3)
+	var bars := UiKit.hbox(0)
+	bars.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var hp_bar := UiKit.stat_bar(int(data.get("hp", 0)), int(data.get("max_hp", 1)), UiKit.BAR_HP,
-			"%d/%d" % [int(data.get("hp", 0)), int(data.get("max_hp", 1))] if not down else "DOWN", 18)
+			"%d/%d" % [int(data.get("hp", 0)), int(data.get("max_hp", 1))] if not down else "DOWN", 14, "small")
 	hp_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bars.add_child(hp_bar)
 	if data.has("energy"):
 		var energy := UiKit.stat_bar(int(data["energy"]), int(data.get("energy_max", 6)), UiKit.BAR_ENERGY,
-				"%d/%d" % [int(data["energy"]), int(data.get("energy_max", 6))], 18)
-		energy.custom_minimum_size.x = 52
+				"%d/%d" % [int(data["energy"]), int(data.get("energy_max", 6))], 14, "small")
+		energy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bars.add_child(energy)
 	plate_box.add_child(bars)
 	_plate = UiKit.panel(plate_box, "HudPanel")
 	_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_plate.position = Vector2(0, BADGE_HEIGHT + figure_height + 2)
 	_plate.custom_minimum_size = Vector2(width, 0)
-	_plate.size = Vector2(width, PLATE_HEIGHT - 2)
+	_plate.size = Vector2(width, PLATE_HEIGHT)
 	add_child(_plate)
 	tooltip_text = str(data.get("tooltip", ""))
 	modulate = Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
@@ -133,46 +146,111 @@ func _draw() -> void:
 		draw_string(font, Vector2(size.x - 34, BADGE_HEIGHT + 18), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, UiKit.ACCENT)
 
 
-## The placeholder art: a hooded hero for the Party, a beast for enemies,
-## a towering tree-guardian for the Boss. Each carries its Class/enemy glyph.
+## Compact block figures keep the stage readable at 1280x720. The silhouettes
+## deliberately use rectangles like the reference's Roblox-style avatars.
 func _draw_figure(feet: Vector2) -> void:
 	var body := tint
 	var dark := tint.darkened(0.45)
-	var font := UiKit.pixel_font()
 	match side:
 		"party":
-			var top := feet.y - figure_height + 14
-			draw_colored_polygon(PackedVector2Array([
-				Vector2(feet.x - 22, feet.y - 4), Vector2(feet.x + 22, feet.y - 4),
-				Vector2(feet.x + 14, top + 26), Vector2(feet.x - 14, top + 26)]), dark)
-			draw_colored_polygon(PackedVector2Array([
-				Vector2(feet.x - 17, feet.y - 8), Vector2(feet.x + 17, feet.y - 8),
-				Vector2(feet.x + 11, top + 28), Vector2(feet.x - 11, top + 28)]), body)
-			draw_circle(Vector2(feet.x, top + 14), 14.0, body.lightened(0.15))
-			draw_circle(Vector2(feet.x, top + 14), 14.0, dark, false, 2.0)
-			_draw_glyph(font, Vector2(feet.x, feet.y - 22), 20)
+			_draw_humanoid(feet, outfit.get("shirt", body), dark, 1.35)
 		"enemy":
-			var c := Vector2(feet.x, feet.y - 28)
-			draw_circle(c, 30.0, dark)
-			draw_circle(c + Vector2(0, -2), 26.0, body)
-			draw_circle(c + Vector2(-9, -8), 4.0, Color("#1b1b1b"))
-			draw_circle(c + Vector2(9, -8), 4.0, Color("#1b1b1b"))
-			draw_circle(c + Vector2(-9, -9), 1.5, Color("#ff6b5a"))
-			draw_circle(c + Vector2(9, -9), 1.5, Color("#ff6b5a"))
-			_draw_glyph(font, c + Vector2(0, 14), 18)
+			_draw_enemy(feet, body, dark)
 		"boss":
-			var top := feet.y - figure_height + 10
-			draw_colored_polygon(PackedVector2Array([
-				Vector2(feet.x - 44, feet.y - 2), Vector2(feet.x + 44, feet.y - 2),
-				Vector2(feet.x + 26, top + 50), Vector2(feet.x - 26, top + 50)]), dark)
-			draw_colored_polygon(PackedVector2Array([
-				Vector2(feet.x - 36, feet.y - 6), Vector2(feet.x + 36, feet.y - 6),
-				Vector2(feet.x + 20, top + 52), Vector2(feet.x - 20, top + 52)]), body.darkened(0.2))
-			for offset in [Vector2(-34, 34), Vector2(0, 18), Vector2(34, 34), Vector2(-18, 22), Vector2(18, 22)]:
-				draw_circle(Vector2(feet.x, top) + offset, 24.0, body)
-			draw_circle(Vector2(feet.x - 10, top + 62), 5.0, Color("#b8ff7a"))
-			draw_circle(Vector2(feet.x + 10, top + 62), 5.0, Color("#b8ff7a"))
-			_draw_glyph(font, Vector2(feet.x, feet.y - 30), 26)
+			_draw_humanoid(feet, body, dark, 2.0)
+			draw_rect(Rect2(feet.x - 46, feet.y - 132, 92, 34), dark)
+			draw_rect(Rect2(feet.x - 35, feet.y - 143, 70, 45), body.darkened(0.2))
+			draw_circle(Vector2(feet.x - 17, feet.y - 124), 5.0, Color("#b8ff7a"))
+			draw_circle(Vector2(feet.x + 17, feet.y - 124), 5.0, Color("#b8ff7a"))
+
+
+func _draw_humanoid(feet: Vector2, body: Color, dark: Color, scale: float) -> void:
+	var s := scale
+	var head := Rect2(feet.x - 13.0 * s, feet.y - 72.0 * s, 26.0 * s, 25.0 * s)
+	draw_rect(head.grow(2.0 * s), dark)
+	var head_color: Color = outfit.get("hair", body.lightened(0.18)) if side == "party" else body.lightened(0.18)
+	draw_rect(head, head_color)
+	if side == "party":
+		draw_rect(Rect2(head.position + Vector2(0, 2.0 * s), Vector2(head.size.x, 7.0 * s)), outfit.get("hair", dark).darkened(0.1))
+	draw_rect(Rect2(feet.x - 19.0 * s, feet.y - 45.0 * s, 38.0 * s, 34.0 * s), dark)
+	var shirt: Color = outfit.get("shirt", body) if side == "party" else body
+	var pants: Color = outfit.get("pants", dark) if side == "party" else dark
+	draw_rect(Rect2(feet.x - 15.0 * s, feet.y - 43.0 * s, 30.0 * s, 28.0 * s), shirt)
+	draw_rect(Rect2(feet.x - 29.0 * s, feet.y - 42.0 * s, 10.0 * s, 30.0 * s), dark)
+	draw_rect(Rect2(feet.x + 19.0 * s, feet.y - 42.0 * s, 10.0 * s, 30.0 * s), shirt.darkened(0.12))
+	draw_rect(Rect2(feet.x - 14.0 * s, feet.y - 13.0 * s, 11.0 * s, 15.0 * s), pants)
+	draw_rect(Rect2(feet.x + 3.0 * s, feet.y - 13.0 * s, 11.0 * s, 15.0 * s), pants.darkened(0.12))
+	if glyph == "R":
+		draw_line(Vector2(feet.x + 25.0 * s, feet.y - 27.0 * s), Vector2(feet.x + 40.0 * s, feet.y - 8.0 * s), Color("#e7e9ed"), maxf(2.0, 3.0 * s))
+	elif glyph == "A":
+		draw_line(Vector2(feet.x + 24.0 * s, feet.y - 54.0 * s), Vector2(feet.x + 42.0 * s, feet.y - 8.0 * s), Color("#c99d5b"), maxf(2.0, 2.0 * s))
+	elif glyph == "M":
+		draw_circle(Vector2(feet.x + 28.0 * s, feet.y - 27.0 * s), 7.0 * s, Color("#8fe8f0"))
+
+
+func _draw_enemy(feet: Vector2, body: Color, dark: Color) -> void:
+	var kind := enemy_kind.to_lower()
+	if kind.contains("bee"):
+		draw_rect(Rect2(feet.x - 25, feet.y - 48, 50, 36), Color("#d8ad24"))
+		for x in [-12, 5]:
+			draw_rect(Rect2(feet.x + x, feet.y - 48, 8, 36), Color("#24242a"))
+		draw_colored_polygon(PackedVector2Array([Vector2(feet.x - 25, feet.y - 42), Vector2(feet.x - 54, feet.y - 62), Vector2(feet.x - 31, feet.y - 19)]), Color(0.75, 0.9, 1.0, 0.6))
+		draw_colored_polygon(PackedVector2Array([Vector2(feet.x + 25, feet.y - 42), Vector2(feet.x + 54, feet.y - 62), Vector2(feet.x + 31, feet.y - 19)]), Color(0.75, 0.9, 1.0, 0.6))
+	elif kind.contains("spider"):
+		draw_rect(Rect2(feet.x - 26, feet.y - 38, 52, 30), dark)
+		for side_x in [-1, 1]:
+			for y in [feet.y - 35, feet.y - 23, feet.y - 11]:
+				draw_line(Vector2(feet.x + side_x * 20, y), Vector2(feet.x + side_x * 46, y - 12), dark, 4)
+		draw_circle(Vector2(feet.x - 12, feet.y - 28), 4, Color("#e54d4d"))
+		draw_circle(Vector2(feet.x + 12, feet.y - 28), 4, Color("#e54d4d"))
+	elif kind.contains("rat"):
+		draw_rect(Rect2(feet.x - 25, feet.y - 34, 50, 25), body)
+		draw_circle(Vector2(feet.x - 16, feet.y - 36), 9, body.lightened(0.2))
+		draw_line(Vector2(feet.x + 22, feet.y - 13), Vector2(feet.x + 44, feet.y - 2), body, 3)
+	elif kind.contains("wolf"):
+		draw_rect(Rect2(feet.x - 32, feet.y - 42, 64, 27), body)
+		draw_colored_polygon(PackedVector2Array([Vector2(feet.x - 32, feet.y - 42), Vector2(feet.x - 8, feet.y - 66), Vector2(feet.x + 4, feet.y - 39)]), dark)
+		for x in [-25, -8, 12, 25]:
+			draw_rect(Rect2(feet.x + x, feet.y - 18, 8, 20), dark)
+		draw_circle(Vector2(feet.x - 22, feet.y - 49), 3, Color("#ff6b5a"))
+	elif kind.contains("boar"):
+		draw_rect(Rect2(feet.x - 35, feet.y - 43, 70, 31), body)
+		draw_rect(Rect2(feet.x - 44, feet.y - 38, 18, 19), dark)
+		draw_colored_polygon(PackedVector2Array([Vector2(feet.x - 45, feet.y - 20), Vector2(feet.x - 54, feet.y - 10), Vector2(feet.x - 39, feet.y - 16)]), Color("#f2e3bf"))
+		for x in [-26, -7, 13, 27]:
+			draw_rect(Rect2(feet.x + x, feet.y - 15, 8, 17), dark)
+		for x in [-24, -8, 8, 24]:
+			draw_colored_polygon(PackedVector2Array([Vector2(feet.x + x, feet.y - 43), Vector2(feet.x + x + 7, feet.y - 59), Vector2(feet.x + x + 13, feet.y - 43)]), dark)
+	elif kind.contains("wisp"):
+		for radius in [34.0, 26.0, 18.0]:
+			draw_circle(Vector2(feet.x, feet.y - 43), radius, Color(0.30, 0.90, 0.94, 0.06))
+		draw_circle(Vector2(feet.x, feet.y - 43), 18.0, Color("#8fe8f0"))
+		draw_circle(Vector2(feet.x - 6, feet.y - 49), 5.0, Color("#eaffff"))
+	elif kind.contains("outlaw") or kind.contains("bandit") or kind.contains("swordsman") or kind.contains("hunter") or kind.contains("sentinel"):
+		_draw_humanoid(feet, Color("#45494f"), Color("#20242b"), 1.0)
+		draw_rect(Rect2(feet.x - 17, feet.y - 53, 34, 9), Color("#181b22"))
+	elif kind.contains("archer"):
+		_draw_humanoid(feet, body, dark, 0.9)
+		draw_arc(Vector2(feet.x + 27, feet.y - 36), 24, -1.2, 1.2, 16, Color("#d8b36a"), 3)
+		draw_line(Vector2(feet.x + 27, feet.y - 58), Vector2(feet.x + 27, feet.y - 14), Color("#d8b36a"), 1)
+	else:
+		_draw_humanoid(feet, body, dark, 0.9)
+
+
+func _status_badge(entry: Dictionary, compact: bool) -> PanelContainer:
+	var status := str(entry.get("status", ""))
+	var color := UiKit.status_color(str(entry.get("color", "")))
+	var line := UiKit.hbox(2)
+	var gem := Panel.new()
+	gem.custom_minimum_size = Vector2(8, 8)
+	gem.add_theme_stylebox_override("panel", UiKit.flat_box(color, color.lightened(0.3), 1, 0))
+	line.add_child(gem)
+	line.add_child(UiKit.pixel_label(UiKit.status_tag(status), "small", color))
+	line.add_child(UiKit.pixel_label("%d" % int(entry.get("stacks", 1)), "small"))
+	var result := UiKit.panel(line)
+	result.add_theme_stylebox_override("panel", UiKit.flat_box(Color(0.05, 0.05, 0.06, 0.92), color, 1, 3))
+	result.tooltip_text = "%s: %s stack(s), %s turn(s) left" % [entry.get("name", status), entry.get("stacks", 1), entry.get("turns", 0)]
+	return result
 
 
 func _draw_glyph(font: Font, at: Vector2, font_size: int) -> void:
