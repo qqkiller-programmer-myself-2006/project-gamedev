@@ -31,6 +31,9 @@ var _overlay_holder: Control
 var _banner: PanelContainer
 var _banner_label: Label
 var _banner_until := 0.0
+var _embedded_server: GameServer = null
+var _dev_playtest := false
+var _dev_tag: PanelContainer = null
 
 
 func configure(launch_options: Dictionary) -> void:
@@ -56,6 +59,7 @@ func _ready() -> void:
 	_overlay_holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_overlay_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_overlay_holder)
+	_build_dev_tag()
 	sounds = SoundBank.new()
 	add_child(sounds)
 	apply_settings()
@@ -135,7 +139,51 @@ func disconnect_from_server() -> void:
 		connection = null
 		old.close("left")
 	snapshot = {}
+	stop_dev_playtest()
 	_show_screen("title")
+
+
+func can_playtest() -> bool:
+	return not OS.has_feature("web") and (OS.is_debug_build() or options.has("dev"))
+
+
+func start_dev_playtest(seed_text: String = "") -> void:
+	if not can_playtest() or _embedded_server != null:
+		return
+	var port := _free_local_port()
+	if port < 0:
+		toast("No local port available for DEV PLAYTEST")
+		return
+	var server := GameServer.new()
+	server.name = "EmbeddedGameServer"
+	var server_options := {"port": port}
+	if not seed_text.strip_edges().is_empty() and seed_text.is_valid_int():
+		server_options["seed"] = int(seed_text)
+	server.configure(server_options)
+	_embedded_server = server
+	_dev_playtest = true
+	_dev_tag.visible = true
+	add_child(server)
+	connect_and("ws://127.0.0.1:%d" % port, func() -> void:
+		send({"type": "create_room", "name": "Tester"}))
+
+
+func stop_dev_playtest() -> void:
+	_dev_playtest = false
+	if _dev_tag != null:
+		_dev_tag.visible = false
+	if _embedded_server != null:
+		_embedded_server.queue_free()
+		_embedded_server = null
+
+
+func _free_local_port() -> int:
+	for port in range(8911, 8931):
+		var probe := TCPServer.new()
+		if probe.listen(port, "127.0.0.1") == OK:
+			probe.stop()
+			return port
+	return -1
 
 
 func _use_connection(new_connection: ServerConnection) -> void:
@@ -189,6 +237,8 @@ func _on_result(_id: int, _cmd: Dictionary, result: Dictionary) -> void:
 			_current.show_error(message)
 		else:
 			toast(message)
+	elif _dev_playtest and str(_cmd.get("type", "")) == "create_room":
+		send({"type": "start_match"})
 
 
 # --- Screens ------------------------------------------------------------------
@@ -364,6 +414,16 @@ func _build_banner() -> void:
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_banner.visible = false
 	add_child(_banner)
+
+
+func _build_dev_tag() -> void:
+	var label := UiKit.pixel_label("DEV PLAYTEST", "small", UiKit.WARN)
+	_dev_tag = UiKit.panel(label, "HighlightPanel")
+	_dev_tag.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_dev_tag.position = Vector2(-24, 20)
+	_dev_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_dev_tag.visible = false
+	add_child(_dev_tag)
 
 
 ## Browser builds expose a small summary of the client state as

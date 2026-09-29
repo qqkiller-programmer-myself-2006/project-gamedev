@@ -1,77 +1,166 @@
 class_name TitleScreen
 extends Control
-## First screen: display name, server address, create a room or join one by
-## Room code. No account needed.
 
+var _app: ClientApp
 var _name: LineEdit
 var _server: LineEdit
 var _code: LineEdit
 var _status: Label
-var _app: ClientApp
-
+var _seed: LineEdit
+var _content: Control
+var _view := "menu"
 
 func setup(app: ClientApp) -> void:
 	_app = app
-	var center := CenterContainer.new()
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
-	var column := UiKit.vbox(14)
-	column.custom_minimum_size = Vector2(560, 0)
-	center.add_child(column)
+	var backdrop := HomeBackdrop.new()
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	backdrop.setup(app.settings.reduced_motion)
+	add_child(backdrop)
+	_build_chrome()
+	_show_menu()
+	if app.options.has("playtest") and app.can_playtest():
+		_app.start_dev_playtest("")
 
-	var title := UiKit.label("BEYOND THE WORLD'S END", "huge", UiKit.ACCENT)
+func _build_chrome() -> void:
+	var logo := UiKit.vbox(0)
+	logo.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	logo.position = Vector2(0, 28)
+	logo.offset_bottom = 118
+	var title := UiKit.pixel_label("BEYOND THE WORLD'S END", "huge", UiKit.ACCENT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	column.add_child(title)
-	var subtitle := UiKit.label("Forest - a co-op journey for 1 to 5 players", "heading")
+	title.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	title.add_theme_color_override("font_outline_color", Color("#0a1020"))
+	title.add_theme_constant_override("outline_size", 10)
+	logo.add_child(title)
+	var subtitle := UiKit.label("Forest - a co-op journey", "heading")
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	column.add_child(subtitle)
+	subtitle.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	subtitle.position.y = 70
+	logo.add_child(subtitle)
+	add_child(logo)
+	var build := UiKit.label("BUILD 0.10  |  FOREST SLICE", "small", UiKit.TEXT_DIM)
+	build.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	build.offset_left = -360
+	build.offset_top = -36
+	build.offset_right = -24
+	build.offset_bottom = -10
+	add_child(build)
 
-	var form := UiKit.vbox(10)
-	column.add_child(UiKit.panel(form))
-	form.add_child(UiKit.label("Your name (shown to other players)", "dim"))
-	_name = _line_edit(app.settings.player_name, "e.g. Arin", 16)
-	form.add_child(_name)
-	form.add_child(UiKit.label("Server address", "dim"))
-	_server = _line_edit(app.server_url(), ClientApp.DEFAULT_URL, 200)
-	form.add_child(_server)
+func _show_menu() -> void:
+	_view = "menu"
+	_clear_content()
+	var body := UiKit.vbox(10)
+	body.custom_minimum_size = Vector2(340, 0)
+	var panel := UiKit.panel(body, "CardPanel")
+	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	panel.position = Vector2(88, 150)
+	panel.size = Vector2(390, 0)
+	add_child(panel)
+	_content = panel
+	body.add_child(UiKit.label("WELCOME, TRAVELLER", "heading", UiKit.ACCENT))
+	body.add_child(UiKit.para("Choose your path into the forest.", "dim"))
+	var play := UiKit.button("Play", _show_play, true)
+	play.set_meta("focus_id", "play")
+	body.add_child(play)
+	if _app.can_playtest():
+		var dev := UiKit.button("Playtest  >", func() -> void: _app.start_dev_playtest(_seed.text if is_instance_valid(_seed) else ""), true)
+		dev.set_meta("focus_id", "playtest")
+		dev.tooltip_text = "DEV: embedded server, single-player fast path"
+		dev.add_theme_color_override("font_color", UiKit.WARN)
+		body.add_child(dev)
+		_seed = _line_edit("", "Seed (optional)", 12)
+		_seed.editable = false
+		_seed.tooltip_text = "arrives with T10b"
+		_seed.custom_minimum_size.y = 30
+		body.add_child(_seed)
+	var settings := UiKit.button("Settings [F2]", _app.open_settings)
+	settings.set_meta("focus_id", "settings")
+	body.add_child(settings)
+	body.add_child(UiKit.button("Credits", _show_credits))
+	if not OS.has_feature("web"):
+		body.add_child(UiKit.button("Quit", func() -> void: _app.stop_dev_playtest(); get_tree().quit()))
+	UiKit.focus_first(body)
+
+func _show_play() -> void:
+	_view = "play"
+	_clear_content()
+	var body := UiKit.vbox(10)
+	body.custom_minimum_size = Vector2(520, 0)
+	var panel := UiKit.panel(body, "CardPanel")
+	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	panel.position = Vector2(88, 150)
+	panel.size = Vector2(560, 0)
+	add_child(panel)
+	_content = panel
+	body.add_child(UiKit.label("ENTER THE FOREST", "heading", UiKit.ACCENT))
+	body.add_child(UiKit.label("Your name (shown to other players)", "dim"))
+	_name = _line_edit(_app.settings.player_name, "e.g. Arin", 16)
+	body.add_child(_name)
 	var create := UiKit.button("Create a room", _create, true)
 	create.set_meta("focus_id", "create")
-	form.add_child(create)
-	form.add_child(HSeparator.new())
-	form.add_child(UiKit.para("Have a Room code? Letters and numbers, case does not matter.", "dim"))
-	var join_row := UiKit.hbox(8)
-	_code = _line_edit(str(app.options.get("join", "")) if app.options.get("join") is String else "", "Room code", 12)
+	body.add_child(create)
+	body.add_child(HSeparator.new())
+	body.add_child(UiKit.label("Have a Room code? Letters and numbers, case does not matter.", "dim"))
+	var row := UiKit.hbox(8)
+	_code = _line_edit(str(_app.options.get("join", "")), "Room code", 12)
 	_code.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_code.text_submitted.connect(func(_t: String) -> void: _join())
-	join_row.add_child(_code)
-	join_row.add_child(UiKit.button("Join room", _join, true))
-	form.add_child(join_row)
+	row.add_child(_code)
+	var join := UiKit.button("Join room", _join, true)
+	join.set_meta("focus_id", "join")
+	row.add_child(join)
+	body.add_child(row)
+	var advanced := CheckButton.new()
+	advanced.text = "Advanced connection options"
+	advanced.toggled.connect(func(on: bool) -> void: _server.visible = on)
+	body.add_child(advanced)
+	_server = _line_edit(_app.server_url(), ClientApp.DEFAULT_URL, 200)
+	_server.visible = false
+	_server.tooltip_text = "WebSocket server address"
+	body.add_child(_server)
 	_status = UiKit.para("", "body", UiKit.WARN)
 	_status.visible = false
-	form.add_child(_status)
-
-	var footer := UiKit.hbox(8)
-	footer.alignment = BoxContainer.ALIGNMENT_CENTER
-	footer.add_child(UiKit.button("Settings [F2]", app.open_settings))
-	column.add_child(footer)
-	(_name if _name.text.is_empty() else create).grab_focus.call_deferred()
-	if app.options.has("auto") and not _name.text.is_empty() and not app.options.has("auto_done"):
-		app.options["auto_done"] = true
+	body.add_child(_status)
+	var back := UiKit.button("Back", _show_menu)
+	back.set_meta("focus_id", "back")
+	body.add_child(back)
+	create.grab_focus.call_deferred()
+	if _app.options.has("auto") and not _name.text.is_empty():
 		(_join if not _code.text.is_empty() else _create).call_deferred()
 
+func _show_credits() -> void:
+	_view = "credits"
+	_clear_content()
+	var body := UiKit.vbox(14)
+	body.custom_minimum_size = Vector2(420, 0)
+	var panel := UiKit.panel(body, "CardPanel")
+	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	panel.position = Vector2(88, 150)
+	panel.size = Vector2(470, 0)
+	add_child(panel)
+	_content = panel
+	body.add_child(UiKit.label("BEYOND THE WORLD'S END", "title", UiKit.ACCENT))
+	body.add_child(UiKit.label("Made with Godot 4.7", "heading"))
+	body.add_child(UiKit.para("Font: Pixelify Sans, OFL\nCharacter art by the project owner.", "body"))
+	body.add_child(UiKit.button("Back", _show_menu))
+	UiKit.focus_first(body)
+
+func _clear_content() -> void:
+	if is_instance_valid(_content):
+		_content.queue_free()
+	_content = null
 
 func show_error(message: String) -> void:
+	if _status == null:
+		return
 	_status.text = message
 	_status.visible = true
-
 
 func _create() -> void:
 	if not _remember():
 		return
 	var display_name := _name.text.strip_edges()
-	_app.connect_and(_server.text.strip_edges(), func() -> void:
-		_app.send({"type": "create_room", "name": display_name}))
-
+	_app.connect_and(_server.text.strip_edges(), func() -> void: _app.send({"type": "create_room", "name": display_name}))
 
 func _join() -> void:
 	if not _remember():
@@ -81,10 +170,7 @@ func _join() -> void:
 		_code.grab_focus()
 		return
 	var display_name := _name.text.strip_edges()
-	var code := _code.text.strip_edges()
-	_app.connect_and(_server.text.strip_edges(), func() -> void:
-		_app.send({"type": "join_room", "code": code, "name": display_name}))
-
+	_app.connect_and(_server.text.strip_edges(), func() -> void: _app.send({"type": "join_room", "code": _code.text.strip_edges(), "name": display_name}))
 
 func _remember() -> bool:
 	if _name.text.strip_edges().is_empty():
@@ -97,6 +183,14 @@ func _remember() -> bool:
 	_app.settings.save()
 	return true
 
+func handle_key(app: ClientApp, keycode: int) -> bool:
+	if keycode == KEY_ESCAPE:
+		if _view != "menu":
+			_show_menu()
+		else:
+			app.stop_dev_playtest()
+		return true
+	return false
 
 static func _line_edit(text: String, placeholder: String, max_length: int) -> LineEdit:
 	var edit := LineEdit.new()
