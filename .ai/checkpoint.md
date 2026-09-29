@@ -107,3 +107,5 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - 2026-09-30 01:55: merged T20a (6287c40) + T20b (9562213, 87e1caf) + simulate --story fix → **289/289**; ปิด #73; เปิด #75 (รอภาพบอส + Boar, ready-for-human). ศัตรูป่าใช้ภาพจริง + ฉากป่าวาด, Layer 5 ถ้ำ. win: default 85/77, loadout 84/92, story 71
 - runner: fail เร็ว (exit≠0 ภายใน 5 นาที เช่น agy 429) → ส่งต่อ `-FallbackAgent` อัตโนมัติ (self-test ผ่าน)
 - คิวต่อไป: #65 (effects: bonus/initiative/dodge/boons), #66 connection lifecycle, #67 story pacing, #68 camp, #69 hints, #70 text/fonts, #71 tidy+tests, #63 ที่เหลือ, icons redraw (#61 phase 1b) + phase 2 (ใส่ไอคอนทุกหน้า), badge "R"→"A", T10b playtest jump, #54 QA/PR
+- 2026-09-30 02:45: merged T22 (#66 #69, 5c32652) + T23 (#68, c07a068) + crit display fix → **297/297**; ปิด #66 #68 #69. Codex ติดลิมิตถึง 03:23. กำลังทำ: T21 #65 (agy→fallback codex, ai-t21), #70 text/fonts (Claude sonnet subagent, isolated worktree)
+- คิว: #67 story pacing (หลัง #65 เพราะแตะ src/match), #71 tidy+tests, #63 ที่เหลือ, icons redraw + phase 2, T10b, #54 QA/PR
