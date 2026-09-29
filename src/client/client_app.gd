@@ -275,6 +275,18 @@ func _on_update(events: Array, snap: Dictionary) -> void:
 
 func _on_result(_id: int, _cmd: Dictionary, result: Dictionary) -> void:
 	if not result.get("ok", false):
+		if story_launcher != null and str(_cmd.get("type", "")) in ["create_room", "restore_story"]:
+			var msg := UiText.error(str(result.get("error", "")))
+			story_launcher.stop()
+			story_launcher = null
+			if _current is TitleScreen:
+				if _current.has_method("_show_play"):
+					_current._show_play()
+				_current.show_error(msg)
+			else:
+				toast(msg)
+			return
+		
 		var message := UiText.error(str(result.get("error", "")))
 		if _current is TitleScreen:
 			_current.show_error(message)

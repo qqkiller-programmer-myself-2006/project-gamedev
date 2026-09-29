@@ -484,14 +484,23 @@ func valid_targets(run: MatchRun, id: String, profile: Dictionary) -> Array[Stri
 func _choices_for(run: MatchRun, slot: int) -> Dictionary:
 	var me := _pid(slot)
 	var items := {}
-	for item in run.inventory:
-		if int(run.inventory[item]) <= 0:
+	
+	var stash := run.inventory.duplicate()
+	var me_unit := _unit(run, me)
+	if me_unit.get("consumable") != null:
+		var slot_item = me_unit["consumable"]["item"]
+		var slot_count = int(me_unit["consumable"]["count"])
+		if slot_count > 0:
+			stash[slot_item] = int(stash.get(slot_item, 0)) + slot_count
+
+	for item in stash:
+		if int(stash[item]) <= 0:
 			continue
 		var profile: Dictionary = run.content.get_dict("items.%s.use" % item)
 		if profile.is_empty():
 			continue
 		items[item] = {
-			"count": run.inventory[item],
+			"count": stash[item],
 			"target": str(profile.get("target", "")),
 			"targets": valid_targets(run, me, profile),
 		}

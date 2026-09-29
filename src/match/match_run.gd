@@ -228,7 +228,22 @@ func add_item(item: String, count: int = 1) -> void:
 	inventory[item] = int(inventory.get(item, 0)) + count
 
 
+func remove_item(item: String, count: int = 1) -> bool:
+	if count <= 0:
+		return false
+	var current = int(inventory.get(item, 0))
+	if current < count:
+		return false
+	if current == count:
+		inventory.erase(item)
+	else:
+		inventory[item] = current - count
+	return true
+
+
 func award_gems(slot: int, amount: int, source: String = "") -> void:
+	if story:
+		return
 	if slot < 0 or slot >= gems_earned.size() or amount <= 0:
 		return
 	gems_earned[slot] += amount
@@ -551,7 +566,7 @@ func _begin_layer(next_layer: int) -> void:
 	emit({"type": "vote_started", "layer": layer, "options": view["options"], "deadline": deadline})
 	if story:
 		_layer_start = {
-			"seed": rng.save_state()["seed"], "rng": rng.save_state(), "layer": layer,
+			"version": 1, "seed": rng.save_state()["seed"], "rng": rng.save_state(), "layer": layer,
 			"route": routes.duplicate(true), "party": party.duplicate(true),
 			"stash": inventory.duplicate(true), "gold": gold,
 			"clues": clues.duplicate(true), "classes_discovered": classes_discovered.duplicate(),
@@ -566,6 +581,8 @@ func export_layer_start() -> Dictionary:
 
 
 static func valid_story_save(data: Dictionary, forest: ForestContent) -> bool:
+	if int(data.get("version", -1)) != 1:
+		return false
 	var route = data.get("route")
 	var saved_party = data.get("party")
 	var next_layer := int(data.get("layer", 0))
@@ -575,8 +592,47 @@ static func valid_story_save(data: Dictionary, forest: ForestContent) -> bool:
 		return false
 	if not (data.get("rng") is Dictionary) or not (data.get("stash") is Dictionary) or not (data.get("clues") is Array):
 		return false
+	var gems_earned = data.get("gems_earned")
+	if not (gems_earned is Array) or gems_earned.size() != PARTY_SIZE:
+		return false
+	var gold = data.get("gold")
+	if not (gold is float or gold is int) or int(gold) < 0 or int(gold) > 1000000:
+		return false
+	for clue in data["clues"]:
+		if not (clue is Dictionary) or not clue.has("id"):
+			return false
+	for item in data["stash"]:
+		if str(item).is_empty() or not forest.get_value("items.%s" % item, null):
+			return false
+		if not (data["stash"][item] is int or data["stash"][item] is float) or int(data["stash"][item]) <= 0:
+			return false
+	var max_level = forest.get_int("rules.max_level", 20)
+	var pts_per_lvl = forest.get_int("leveling.points_per_level", 0)
 	for character in saved_party:
-		if not (character is Dictionary) or not character.has("class") or not character.has("hp"):
+		if not (character is Dictionary): return false
+		for key in ["class", "hp", "max_hp", "level", "attributes", "gear"]:
+			if not character.has(key): return false
+		var level = int(character["level"])
+		if level < 1 or level > max_level:
+			return false
+		for gear_slot in character["gear"]:
+			var item = str(character["gear"][gear_slot])
+			if item.is_empty() or not forest.get_value("items.%s" % item, null):
+				return false
+		var consumable = character.get("consumable")
+		if consumable != null:
+			if not (consumable is Dictionary) or not consumable.has("item") or not consumable.has("count"):
+				return false
+			var item = str(consumable["item"])
+			if item.is_empty() or not forest.get_value("items.%s" % item, null):
+				return false
+		var tree_pts = int(character.get("_profile", {}).get("class_trees", {}).get(character.get("class", ""), {}).get("stat_points", 0))
+		var expected_total = level * tree_pts + (level - 1) * pts_per_lvl
+		var invested: Dictionary = character.get("invested", {})
+		var sum_invested = 0
+		for stat in invested:
+			sum_invested += int(invested[stat])
+		if sum_invested + int(character.get("points", 0)) != expected_total:
 			return false
 	return true
 
@@ -754,27 +810,24 @@ func _encounter_view(viewer_slot: int) -> Variant:
 	return view
 
 func transfer_item(slot: int, item: String, to: int) -> String:
-	if not inventory.has(item) or int(inventory[item]) <= 0:
-		return "not_in_stash"
 	if str(content.get_value("items.%s.kind" % item, "")) != "consumable":
 		return "not_consumable"
 	if to < 0 or to >= party.size():
 		return "invalid_target"
+	if not remove_item(item, 1):
+		return "not_in_stash"
 	var target_char = party[to]
 	if target_char["consumable"] != null:
 		var current = target_char["consumable"]
 		if current["item"] == item:
 			current["count"] = int(current["count"]) + 1
-			add_item(item, -1)
 		else:
 			# Swap
 			var old_item = current["item"]
 			var old_count = current["count"]
-			add_item(item, -1)
 			add_item(old_item, old_count)
 			target_char["consumable"] = {"item": item, "count": 1}
 	else:
-		add_item(item, -1)
 		target_char["consumable"] = {"item": item, "count": 1}
 	emit({"type": "item_transferred", "from": slot, "to": to, "item": item})
 	return ""

@@ -9,6 +9,7 @@ func start(client_app: ClientApp, seed_value: int = 0) -> LocalConnection:
 	client = client_app
 	var actual_seed := seed_value if seed_value != 0 else int(Time.get_ticks_usec())
 	server = MatchServer.new(GameRng.new(actual_seed), SystemClock.new(), ForestContent.load_default())
+	server.allow_story = true
 	connection = LocalConnection.new(server)
 	client.use_connection(connection)
 	connection.start()
