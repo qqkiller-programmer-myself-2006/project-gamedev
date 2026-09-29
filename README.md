@@ -59,7 +59,29 @@ docs/screenshots/        Current game screenshots
 ./tools/run_tests.sh                               # all tests, headless
 godot --headless --path . -- --server --port=8910    # authoritative server
 godot --path . -- --url=ws://127.0.0.1:8910          # PC client (open two for co-op)
+godot --path . -- --dev --playtest --jump=boss --class=mage --seed=7   # dev: jump straight to a scene
 ```
+
+## Final build (2026-10-02): what is in the game
+
+Goal: every screen and rule matches the AAC reference images ([#47](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/47)).
+
+- **Modes:** online co-op Multiplayer (room code, 1–5 players, AI fills empty slots) and offline **Story mode**
+  (one player controls all five, story scenes, chapter cards, Save/Continue; no timers) — ADR-0014.
+- **Before the match:** pick Class, Race and Boons (ADR-0013); Skill tree, Prestige and Gems kept per player on the server
+  (Cloudflare Worker + D1, `deploy/profile-worker`; the owner deploys it — see its README).
+- **Classes:** Swordsman, Archer, Mage, Guardian, Assassin (renamed from Rogue on 2026-09-30; old profiles migrate),
+  plus Classless. Hero art from the owner's sprite sheets (`art_source/heroes/`), cut by `tools/art/slice_character_sheet.py`.
+- **Rules (ADR-0012):** 7 attributes (STR/DEX/CON/INT/FTH/CHA/LCK), Fight / Items / Focus with Strike and Guard,
+  Energy for party and enemies, personal Gold with Transfer, Consumable slot.
+- **Journey:** 5 Layers — Layers 1–4 in the forest (Wolf, Thief, Golem, Slime, Goblin), Layer 5 and the boss in a cave
+  (Kobold, Skeleton, Giant Spider, Minotaur), painted forest/cave backdrops. Boss and Thornback Boar art pending (#75).
+- **UI:** one Navy + Gold theme ([docs/design/ui-style.md](docs/design/ui-style.md)), 55 code-drawn pixel icons beside labels
+  ([docs/design/icons.md](docs/design/icons.md)), text scale up to Extra-large.
+- **Balance** (100 seeds, [docs/design/balance.md](docs/design/balance.md)): every mode wins 74–93% with bots.
+- **Quality:** 362 headless tests; reviews in [docs/review/](docs/review/).
+
+Older sections below describe earlier milestones; where they say *Rogue*, the class is now *Assassin*.
 
 ## The Match interface
 
@@ -275,13 +297,13 @@ Merchant และ Rest ใช้หน้า 3 คอลัมน์ตาม�
 ```bash
 export GODOT="/path/to/Godot_v4.7.2-stable_win64_console.exe"   # หรือให้ godot อยู่ใน PATH
 ./tools/run_tests.sh                                          # 227 test, ~90 วินาที
-./tools/run_tests.sh --filter=rogue                           # เฉพาะ test ที่ id มีคำว่า rogue
+./tools/run_tests.sh --filter=assassin                        # เฉพาะ test ที่ id มีคำว่า assassin
 
 # วัด balance: เล่นเต็ม Match ด้วย bot หลาย seed
 godot --headless --path . -s tools/dev/simulate.gd -- --seeds=100 --humans=1,2
 
-# จับภาพหน้าจอจริงของทุกหน้า (ต้องมี display) ให้ Rogue เป็น Class เดียวที่สอนได้
-godot --path . -s tools/dev/ui_preview.gd -- --out=build/ui --seed=11 --speed=10 --class=rogue
+# จับภาพหน้าจอจริงของทุกหน้า (ต้องมี display) ให้ Assassin (เดิม Rogue) เป็น Class เดียวที่สอนได้
+godot --path . -s tools/dev/ui_preview.gd -- --out=build/ui --seed=11 --speed=10 --class=assassin
 
 # เล่นเองบน browser
 godot --headless --path . --export-release "Web" build/web/index.html
@@ -297,7 +319,7 @@ python -m http.server -d build/web 8060     # แล้วเปิด http://lo
 | --- | --- | --- |
 | `test_energy.gd` | 14 | ค่าเริ่มต้น/regen/เพดาน, regen ตอนหมดเวลา, ค่าใช้และ `not_enough_energy` โดยสถานะไม่เปลี่ยน, รีเซ็ตระหว่าง Combat, ศัตรูไม่มี Energy, AI ไม่ใช้เกินตัว, ทุกผู้เล่นเห็น Energy ของทุกตัว |
 | `test_status_effects.gd` | 11 | tick, stack/refresh, หลายชนิดพร้อมกัน, ลำดับก่อน Energy regen, หมดอายุ, ล้มเพราะ DoT (ศัตรูและตัวละคร), Combat จบกลาง tick, modifier ขาออก/ขาเข้า |
-| `test_rogue.gd` | 12 | ทุก Skill, Enervation ทั้ง 3 ส่วนและเพดาน, Prep Time 3 ครั้งแล้วหมด, AI, การรับ Class ที่ Bandit Hideout |
+| `test_assassin.gd` (เดิม test_rogue.gd) | 12 | ทุก Skill, Enervation ทั้ง 3 ส่วนและเพดาน, Prep Time 3 ครั้งแล้วหมด, AI, การรับ Class ที่ Bandit Hideout |
 | `test_battle_view_data.gd` | 4 | `round_order`, `spd`, `exp_next`, `crit` |
 
 test ทั้งหมดผ่าน Match interface เท่านั้น ตาม [docs/guides/testing.md](docs/guides/testing.md) และ test เดิมที่กระทบ (Archer/Mage, Class Encounter, Guardian) ถูกปรับให้สอดคล้องกับ Energy
