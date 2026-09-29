@@ -37,6 +37,7 @@ var _sessions: Dictionary = {}
 var _rooms: Dictionary = {}
 ## Codes of rooms that have been closed, so joining them says so.
 var _closed_codes: Dictionary = {}
+var allow_story := false
 
 
 func _init(rng: GameRng, clock, content: ForestContent, profiles: ProfileStore = null) -> void:
@@ -83,6 +84,8 @@ func command(session_id: int, cmd: Dictionary) -> Dictionary:
 		"start_match":
 			return _start_match(session_id)
 		"restore_story":
+			if not allow_story:
+				return _reject("story_offline_only")
 			var story_room := _room_of(session_id)
 			if story_room == null or not story_room.story or story_room.slot_of(session_id) != story_room.host_slot:
 				return _reject("not_in_room")
@@ -97,7 +100,7 @@ func command(session_id: int, cmd: Dictionary) -> Dictionary:
 				return _reject("not_in_room")
 			var setup_result := setup_room.handle_setup_command(setup_room.slot_of(session_id), cmd)
 			if setup_result.get("ok", false):
-				if not str(_sessions[session_id]["token"]).is_empty():
+				if not setup_room.story and not str(_sessions[session_id]["token"]).is_empty():
 					_profiles.save_profile_async(str(_sessions[session_id]["token"]), setup_room.profile_of(setup_room.slot_of(session_id)))
 			_flush(setup_room)
 			return setup_result
@@ -158,6 +161,8 @@ func export_story(session_id: int) -> Dictionary:
 
 
 func _create_room(session_id: int, cmd: Dictionary) -> Dictionary:
+	if cmd.get("story", false) == true and not allow_story:
+		return _reject("story_offline_only")
 	if _room_of(session_id) != null:
 		return _reject("already_in_room")
 	if cmd.has("token") and not str(cmd.get("token", "")).is_empty() and not _valid_token(str(cmd.get("token", ""))):

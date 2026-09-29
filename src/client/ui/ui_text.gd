@@ -42,6 +42,8 @@ const ERRORS := {
 	"already_decided": "You already answered.",
 	"unknown_command": "The server did not understand that.",
 	"unknown_session": "Your session expired. Please reconnect.",
+	"story_offline_only": "Story mode is an offline journey. Play alone or over Local Network.",
+	"invalid_save": "This story save file is broken or from a different version.",
 	"bad_message": "The server did not understand that.",
 	"cannot_connect": "Could not reach the server. Check the address and try again.",
 	"connection_lost": "The connection to the server was lost.",
