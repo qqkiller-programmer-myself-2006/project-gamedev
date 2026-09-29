@@ -12,66 +12,66 @@ INK, GOLD, TEXT, SUCCESS, WARN, DANGER, HP, ENERGY, BG = (
     "#d8453c", "#3b9ae1", "#1c2233",
 )
 PALETTE = {".": None, "K": INK, "G": GOLD, "T": TEXT, "S": SUCCESS,
-           "W": WARN, "D": DANGER, "H": HP, "E": ENERGY}
+           "W": WARN, "D": DANGER, "H": HP, "E": ENERGY, "V": "#9a79e8"}
 
 # Each symbol is a hand-drawn 8x8 pixel grid. Doubling each cell creates the
 # authored 16x16 source pixels while keeping the outline exactly one pixel wide
 # in the logical design (two output pixels at native resolution).
 PATTERNS = {
-    "fight": ("G......K", ".G...K..", "..G.K...", "...GG...", "...GG...", "..K.G...", ".K...G..", "K......G"),
+    "fight": ("G.....K.", ".G...K..", "..G.K...", "...GK...", "...KG...", "..K.G...", ".K...G..", "K.....G."),
     "items": ("........", ".KKKKKK.", "KTTTTTTK", "KTTKKTTK", "KTTKKTTK", "KTTTTTTK", ".KKKKKK.", "........"),
-    "focus": ("KK....KK", "K.K..K.K", "..K..K..", "...KK...", "...KK...", "..K..K..", "K.K..K.K", "KK....KK"),
-    "strike": (".......K", "......KG", ".....KGG", "....KGGK", "...KGGK.", "..KGGK..", ".KGGK...", "KKKK...."),
-    "guard": ("........", "...KK...", "..KGGK..", ".KGGGGK.", "KGGGGGGK", ".KGGGGK.", "..KGGK..", "...KK..."),
+    "focus": ("..KKKK..", ".KTTTTK.", "KTTKKTTK", "KTTKKTTK", "KTTKKTTK", "KTTKKTTK", ".KTTTTK.", "..KKKK.."),
+    "strike": ("....K..K", "...KG.KG", "..KGGKG.", ".KGGKG..", "KGGKG...", "KKKG....", "..KK....", "........"),
+    "guard": ("..KKKK..", ".KGGGGK.", "KGGGGGGK", "KGGKGGGK", "KGGKGGGK", ".KGGGKK.", "..KK..K.", "...KKKK."),
     "defend": ("...KK...", "..KTTK..", ".KTTTTK.", "KTTTTTTK", "KTTTTTTK", ".KTTTTK.", "..KTTK..", "...KK..."),
-    "flee": ("K.......", "KG......", "KGG.....", "KGGG....", "KGGGG...", "KGGGGG..", "KGGGGGG.", "KKKKKKKK"),
-    "skill": ("...KK...", "..KGGK..", ".KGGGGK.", "KGGKKGGK", "..KGGK..", "..KGGK..", "...KK...", "...KK..."),
-    "ready": ("........", "G.......", ".G......", "..G.....", "...G...G", "....G.G.", "....GG..", ".....G.."),
-    "transfer": ("........", ".GGG....", "G...G..G", "....G.G.", "....G.G.", "G...G..G", ".GGG....", "........"),
+    "flee": ("KK......", "KGGK....", "KGGGK...", "..KGK...", "...KGG..", "..KGGG..", ".KGG.KG.", "KK...KKK"),
+    "skill": ("..KKKK..", ".KTTTTK.", "KTTGTTTK", "KTTGTTTK", "KTTGTTTK", "KTTGTTTK", ".KTTTTK.", "..KKKK.."),
+    "ready": ("..KKKK..", ".KTTTTK.", "KTTTTTTK", "KTTTTGKK", "KTTTGKK.", ".KTTGK..", "..KKKK..", "........"),
+    "transfer": (".KK..KK.", "KGGKKG.K", "KGGK..KG", ".KK...KK", "KK...KK.", "GKK..KGG", "K.GKKGGK", ".KK..KK."),
     "hp": ("........", ".KK..KK.", "KHHKKHHK", "KHHHHHHK", ".KHHHHK.", "..KHHK..", "...K....", "........"),
     "energy": ("...KK...", "..KEEK..", ".KEEEEK.", "KEEEEEEK", "KEEEEEEK", ".KEEEEK.", "..KEEK..", "...KK..."),
-    "gold": ("...KK...", "..KGGK..", ".KGGGGK.", "KGGGGGGK", "KGGGGGGK", ".KGGGGK.", "..KGGK..", "...KK..."),
-    "gems": ("...KK...", "..KGGK..", ".KGGGGK.", "KGGGGGGK", ".KGGGGK.", "..KGGK..", "...KK...", "........"),
+    "gold": ("..KKKK..", ".KGGGGK.", "KGGGGGGK", "KGGKKGGK", "KGGKKGGK", "KGGGGGGK", ".KGGGGK.", "..KKKK.."),
+    "gems": ("...KK...", "..KEEK..", ".KEEEEK.", "KEEVEEEK", "KEEVEEEK", ".KEEEEK.", "..KEEK..", "...KK..."),
     "exp": ("...KK...", "..KSSK..", ".KSSSSK.", "KSSSSSSK", ".KSSSSK.", "..KSSK..", "...KK...", "........"),
     "level": ("...KK...", "..KGGK..", ".KGGGGK.", "..KGGK..", "..KGGK..", "..KGGK..", "..KGGK..", "KKKKKKKK"),
-    "str": ("...KK...", "..KTTK..", ".KTTTTK.", "..KTTK..", "..KTTK..", "..KTTK..", "..KTTK..", "...KK..."),
-    "dex": ("........", "K......K", ".K....K.", "..K..K..", "...KK...", "..K..K..", ".K....K.", "K......K"),
-    "con": ("..KKKK..", ".K....K.", "K......K", "K..KK..K", "K..KK..K", ".K....K.", "..K..K..", "...KK..."),
+    "str": ("...KK...", "..KTTK..", ".KTTTTK.", "KTTTTTTK", "KTTTKTTK", ".KTTKK..", "..KTTK..", "...KK..."),
+    "dex": ("..KKKK..", ".KTTTTK.", "KTTTTTTK", "KTTKKTTK", "KTTKKTTK", ".KTTKK..", "..KTTK..", "...KK..."),
+    "con": ("..KKKK..", ".KTTTTK.", "KTTTTTTK", "KTTKKTTK", "KTTKKTTK", ".KTTTTK.", "..KTTK..", "...KK..."),
     "int": ("...KK...", "..KTTK..", ".KTTTTK.", "KTTKKTTK", "KTTKKTTK", ".KTTTTK.", "..K..K..", "...KK..."),
-    "fth": ("...KK...", "..KGGK..", ".KGGGGK.", "..KGGK..", "..KGGK..", "..KGGK..", "..KGGK..", "...KK..."),
-    "cha": (".KKKKKK.", "K......K", "K.K..K.K", "K......K", "K..KK..K", ".K....K.", "..KKKK..", "........"),
-    "lck": (".K..K...", ".K..K...", ".K..K...", "..KK....", "...K....", "..K.K...", ".K...K..", "K.....K."),
-    "poison": ("....K...", "...KSK..", "..KSSSK.", "..KSSSK.", "...KSK..", "....K...", "...K....", "........"),
-    "bleed": ("...KK...", "..KDDK..", "..KDDK..", "...KDK..", "...KDK..", "....K...", "....K...", "........"),
+    "fth": ("...KK...", "..KGK...", ".KGGGK..", "KGGGGGK.", ".KGGGK..", "..KGK...", "...K....", "........"),
+    "cha": (".KKKKKK.", "KGGGGGGK", "KGK..KGK", "KGGGGGGK", "KGGKKGGK", ".KGGGGK.", "..KKKK..", "........"),
+    "lck": ("...KK...", "..KGGK..", ".KGGGGK.", "KGGGGGGK", ".KGGGGK.", "..KGGK..", "...KK...", "........"),
+    "poison": ("...KK...", "..KSSK..", ".KSSSSK.", "KSSSSSSK", ".KSSSSK.", "..KSSK..", "..K..K..", "........"),
+    "bleed": ("...KK...", "..KDDK..", ".KDDDDK.", "KDDDDDK.", ".KDDDK..", "..KDK...", "...K....", "........"),
     "burn": ("...K....", "..KDK...", "..KDDK..", ".KDDDK..", ".KDDDK..", "KDDDDDK.", "KDDDDDK.", ".KKKKK.."),
     "stun": ("...K....", "..KWK...", ".KWWK...", "..KWKK..", "...KWWK.", "...KKW..", "....K...", "........"),
-    "weak": ("...KK...", "..K..K..", ".K....K.", "K......K", "K......K", ".K....K.", "..K..K..", "...KK..."),
-    "shield": ("..KKKK..", ".K....K.", "K......K", "K..GG..K", ".K....K.", "..K..K..", "...KK...", "....K..."),
+    "weak": ("...KK...", "..KGGK..", ".KGGGGK.", "KGGGGGGK", "KGGGGGGK", ".KGGGGK.", "..KGGK..", "...KK..."),
+    "shield": ("..KKKK..", ".KGGGGK.", "KGGGGGGK", "KGGKKGGK", "KGGGGGGK", ".KGGGGK.", "..KGGK..", "...KK..."),
     "regen": ("...KK...", "..KSSK..", ".KSSSSK.", "KSSSSSSK", "..KSSK..", "..KSSK..", "...KK...", "........"),
-    "dodge": ("K......K", "KK....KK", "K.K..K.K", "..K..K..", "...KK...", "..K..K..", ".K....K.", "K......K"),
-    "crit": ("......KK", ".....KGG", "....KGGK", "...KGGK.", "..KGGK..", ".KGGK...", "KKKK....", "........"),
+    "dodge": ("K......K", "KK....KK", "K.KGGK.K", "..KGGK..", "...KK...", "..KTTK..", ".KTTTTK.", "K......K"),
+    "crit": ("...K.K..", "..KGKGK.", ".KGGGGGK", "KGGGGGGK", ".KGGGGGK", "..KGKGK.", "...K.K..", "........"),
     "weapon": ("......K.", ".....KGK", "....KGGK", "...KGGK.", "..KGGK..", ".KGGK...", "KGGK....", "KKK....."),
-    "armor": ("..KKKK..", ".K....K.", "K......K", "K..KK..K", "K..KK..K", ".K....K.", "..K..K..", "...KK..."),
-    "accessory": ("...KK...", "..KGGK..", ".K....K.", "K......K", ".K....K.", "..KGGK..", "...KK...", "........"),
+    "armor": ("..KKKK..", ".KGGGGK.", "KGGGGGGK", "KGGKKGGK", "KGGKKGGK", "KGGGGGGK", ".KGGGGK.", "..KGGK.."),
+    "accessory": ("...KK...", "..KGGK..", ".KGGGGK.", "KGGKKGGK", ".KGGGGK.", "..KGGK..", "...KK...", "........"),
     "consumable": ("..KKKK..", ".K....K.", "K..SS..K", "K..SS..K", "K..SS..K", ".K....K.", "..KKKK..", "........"),
     "combat": ("...KK...", "..KDDK..", ".KDDDDK.", "KDDDDDDK", ".KDDDDK.", "..KDDK..", "...KK...", "........"),
-    "elite": ("...KK...", "..KGGK..", ".KGGGGK.", "KGGKKGGK", "..KGGK..", "..KGGK..", "...KK...", "...KK..."),
+    "elite": ("K......K", "KK....KK", "K.K..K.K", "..KTTK..", ".KTTTTK.", "KTTKKTTK", ".KTTTTK.", "..KKKK.."),
     "merchant": ("...KK...", "..KTTK..", ".KTTTTK.", "KTTTTTTK", "...KK...", "..KGGK..", ".K....K.", "K......K"),
-    "rest": ("........", "..KSSK..", ".K....K.", "K..KK..K", "K..K...K", ".K.K..K.", "..KKKK..", "........"),
+    "rest": ("........", "..KSSK..", ".KSSSSK.", "KSSSSSSK", "KSSSSSSK", ".KSSSSK.", "..KSSK..", "...KK..."),
     "treasure": ("..KKKK..", ".KGGGGK.", "KGGGGGGK", "KGGKKGGK", "KGGGGGGK", ".KGGGGK.", "..KKKK..", "........"),
-    "story": (".KKKKKK.", "KTTTTTTK", "KTTKKTTK", "KTTTTTTK", "KTTKKTTK", "KTTTTTTK", "KTTTTTTK", ".KKKKKK."),
+    "story": (".KKKKKK.", "KTTTTTTK", "KTTKKTTK", "KTTTTTTK", "KTTKKTTK", "KTTTTTTK", "KTTGGTTK", ".KKGGKKK"),
     "class_trial": ("...KK...", "..KGGK..", ".KGGGGK.", "..KGGK..", "...KK...", "..KGGK..", ".K....K.", "K......K"),
-    "boss": ("K......K", "KK....KK", "K.K..K.K", "..KGGK..", "..KGGK..", "..K..K..", ".K....K.", "K......K"),
-    "play": ("........", "...K....", "...KKK..", "...KKKK.", "...KKKK.", "...KKK..", "...K....", "........"),
-    "multiplayer": ("..KK..KK", ".KTTK.KT", "KTTTTKKT", ".KTTK.KT", "..KK..KK", "..K..K..", ".K....K.", "K......K"),
-    "story_mode": (".KKKKKK.", "KTTTTTTK", "KTTKKTTK", "KTTTTTTK", "KTTKKTTK", "KTTTTTTK", "KTTTTTTK", ".KKKKKK."),
-    "settings": ("..K..K..", ".K.KK.K.", "K..GG..K", ".K....K.", ".K....K.", "K..GG..K", ".K.KK.K.", "..K..K.."),
+    "boss": ("K......K", "KK....KK", "K.KGGK.K", "..KGGK..", "..KGGK..", "..KGGK..", ".K....K.", "K......K"),
+    "play": ("........", "...K....", "...KKK..", "..KGGGKK", ".KGGGGKK", "...KKK..", "...K....", "........"),
+    "multiplayer": (".KK..KK.", ".KTTK.KT", "KTTTKTTK", ".KTTK.KT", ".KK..KK.", "..K..K..", ".K....K.", "K......K"),
+    "story_mode": (".KKKKKK.", "KTTTTTTK", "KTTKKTTK", "KTTTTTTK", "KTTKKTTK", "KTTTTTTK", "KTTTTTTK", "KKKGGKKK"),
+    "settings": ("..K..K..", ".K.GK.K.", "K..GG..K", ".K.GG.K.", ".K.GG.K.", "K..GG..K", ".K.GK.K.", "..K..K.."),
     "credits": (".KKKKKK.", "KTTTTTTK", "K..KK..K", "K..KK..K", "K..KK..K", "KTTTTTTK", ".KKKKKK.", "........"),
-    "back": ("...K....", "..KK....", ".K......", "KKKKKKKK", ".K......", "..KK....", "...K....", "........"),
-    "quit": ("K......K", ".K....K.", "..K..K..", "...KK...", "..K..K..", ".K....K.", "K......K", "........"),
+    "back": ("...K....", "..KK....", ".KGG....", "KKGGGGKK", ".KGG....", "..KK....", "...K....", "........"),
+    "quit": ("K......K", ".K....K.", "..K..K..", "...KK...", "..KGGK..", ".KGGGGK.", "KGGGGGGK", "........"),
     "save": (".KKKKKK.", "KTTTTTTK", "KTTKKTTK", "KTTKKTTK", "KTTTTTTK", "KTTKKTTK", "KTTKKTTK", ".KKKKKK."),
-    "lock": ("..KKKK..", ".K....K.", ".K....K.", "K......K", "K..GG..K", "K..GG..K", "K......K", "KKKKKKKK"),
-    "info": ("...KK...", "..KGGK..", "...KK...", "...KK...", "...KK...", "...KK...", "..KKKK..", "........"),
+    "lock": ("..KKKK..", ".K....K.", ".K....K.", "K......K", "K.GGG.K.", "K.GGG.K.", "K......K", "KKKKKKKK"),
+    "info": ("..KKKK..", ".KTTTTK.", "KTTTTTTK", "KTTKKTTK", "..KTTK..", "..KTTK..", ".KTTTTK.", "..KKKK.."),
     "warning": ("...KK...", "..KWWK..", ".KWWWWK.", "KWWWWWWK", "KWWKKWWK", "KWWKKWWK", "KWWWWWWK", "KKKKKKKK"),
 }
 
@@ -95,9 +95,29 @@ def filename(name):
     return "_con" if name == "con" else name
 
 
+def self_check(names):
+    seen = {}
+    for name in names:
+        image = render_icon(PATTERNS[name]).convert("RGBA")
+        pixels = tuple(image.getdata())
+        if pixels in seen:
+            raise ValueError(f"duplicate icon pixels: {name} and {seen[pixels]}")
+        seen[pixels] = name
+        bright = 0
+        for pixel in pixels:
+            if pixel[3] == 0 or pixel[:3] == Image.new("RGB", (1, 1), INK).getpixel((0, 0)):
+                continue
+            luminance = (0.2126 * pixel[0] + 0.7152 * pixel[1] + 0.0722 * pixel[2]) / 255
+            if luminance > 0.35:
+                bright += 1
+        if bright < 20:
+            raise ValueError(f"{name} has only {bright} bright non-outline pixels (need 20)")
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     names = list(PATTERNS)
+    self_check(names)
     for name, pattern in PATTERNS.items():
         render_icon(pattern).save(OUT / f"{filename(name)}.png")
 
