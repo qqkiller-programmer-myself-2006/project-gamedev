@@ -36,13 +36,15 @@
 
 | งาน | ผู้ทำ | branch / worktree | issue | สถานะ |
 | --- | --- | --- | --- | --- |
-| T1 Combat UI ตามภาพ 04–07, 11 | Codex | `ai/t1-combat-ui` | — | กำลังเริ่ม |
-| T2 Attribute 7 ตัว + Focus (server) | Antigravity | `ai/t2-attributes` | — | กำลังเริ่ม |
-| T3 Camp UI ตามภาพ 08–10 | Codex | — | — | รอ T1 |
-| T4 Energy ศัตรู + Gold ส่วนตัว/Transfer (server) | Antigravity | — | — | รอ T2 |
-| T5 ADR-0013 + server: Race, Boons, Class meta/Prestige | Antigravity | — | — | รอ T4 |
-| T6 หน้าจอ Class/Race/Boons ตามภาพ 01–03 | Codex | — | — | รอ T3, T5 |
-| T7 QA รวม, 1920×1080, PR, final build | Claude | — | — | รอทั้งหมด |
+| T1 Combat UI ตามภาพ 04–07, 11 | Codex | `ai/t1-combat-ui` / `../ai-t1` | #48 | กำลังทำ |
+| T2 Attribute 7 ตัว + Focus (server) | Antigravity | `ai/t2-attributes` / `../ai-t2` | #49 | กำลังทำ |
+| T3 Camp UI ตามภาพ 08–10 | Codex | — | #50 | รอ T1 |
+| T4 Energy ศัตรู + Gold ส่วนตัว/Transfer (server) | Antigravity | — | #51 | รอ T2 |
+| T5 ADR-0013 + server: Race, Boons, Class meta/Prestige | Antigravity | — | #52 | รอ T4 |
+| T6 หน้าจอ Class/Race/Boons ตามภาพ 01–03 | Codex | — | #53 | รอ T3, T5 |
+| T7 QA รวม, 1920×1080, PR, final build | Claude | — | #54 | รอทั้งหมด |
+
+Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), Project #8 (Status + Start/Target date ตั้งแล้ว)
 
 ## Log
 
