@@ -187,7 +187,7 @@ func _camp(session: int, slot: int, view: Dictionary, encounter: Dictionary) -> 
 				_send(session, {"type": "equip", "item": entry["item"], "gear_slot": gear_slot})
 				taken[gear_slot] = true
 				break
-	var stat := str({"mage": "mag", "guardian": "def", "classless": "max_hp"}.get(me["class"], "atk"))
+	var stat := str({"mage": "int", "guardian": "con", "classless": "con", "archer": "dex", "rogue": "dex"}.get(me["class"], "str"))
 	for i in int(me["points"]):
 		_send(session, {"type": "invest", "stat": stat})
 

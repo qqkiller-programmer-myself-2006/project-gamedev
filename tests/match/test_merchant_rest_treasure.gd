@@ -48,7 +48,7 @@ func test_merchant_offers_content_stock_with_prices() -> void:
 		items.append([entry["item"], entry["price"], entry["remaining"]])
 		assert_false(str(entry["name"]).is_empty())
 		assert_false(str(entry["description"]).is_empty())
-	assert_eq(items, [["herb", 12, 5], ["tonic", 28, 2], ["spirit_bloom", 40, 1], ["firebomb", 24, 2]])
+	assert_eq(items, [["herb", 12, 5], ["tonic", 27, 2], ["spirit_bloom", 39, 1], ["firebomb", 23, 2]])
 
 
 func test_buying_spends_shared_gold_and_fills_shared_inventory() -> void:
@@ -56,7 +56,7 @@ func test_buying_spends_shared_gold_and_fills_shared_inventory() -> void:
 	h.server.take_events(sessions[1])
 	assert_ok(h.server.command(sessions[0], {"type": "buy", "item": "tonic"}))
 	assert_ok(h.server.command(sessions[1], {"type": "buy", "item": "herb"}), "any human buys from the same purse")
-	assert_eq(_view(sessions[1])["gold"], 50 - 28 - 12)
+	assert_eq(_view(sessions[1])["gold"], 50 - 27 - 12)
 	assert_eq(_count("tonic", sessions[1]), 1)
 	assert_eq(_count("herb", sessions[1]), 4, "3 starting herbs + 1")
 	assert_eq(_stock("tonic")["remaining"], 1)
@@ -83,7 +83,7 @@ func test_invalid_and_sold_out_items_are_rejected() -> void:
 	assert_rejected(h.server.command(sessions[0], {"type": "buy", "item": "dragon_egg"}), "invalid_item")
 	assert_ok(h.server.command(sessions[0], {"type": "buy", "item": "spirit_bloom"}))
 	assert_rejected(h.server.command(sessions[0], {"type": "buy", "item": "spirit_bloom"}), "out_of_stock")
-	assert_eq(_view()["gold"], 160)
+	assert_eq(_view()["gold"], 161)
 
 
 func test_single_player_moves_on_without_buying() -> void:

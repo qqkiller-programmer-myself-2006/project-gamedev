@@ -296,7 +296,7 @@ func test_swordsman_ai_uses_power_slash_when_ready() -> void:
 		for event in h.server.take_events(sessions[0]):
 			if event["type"] == "action_resolved" and event["actor"] == "p1":
 				p1.append(event)
-	assert_eq(p1[0]["action"], "attack", "saves Energy on the first turn")
+	assert_eq(p1[0]["action"], "focus", "focuses to get Energy on the first turn")
 	assert_eq(p1[1]["action"], "skill", "slashes once it can afford it")
 	assert_eq(p1[1]["skill"], "power_slash")
 	assert_eq(p1[1]["energy_spent"], 2)

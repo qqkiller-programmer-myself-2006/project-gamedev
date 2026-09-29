@@ -47,7 +47,7 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 	return {
 		"kind": "merchant",
 		"greeting": str(run.content.get_value("encounters.merchant.greeting", "")),
-		"stock": _stock_view(run),
+		"stock": _stock_view(run, viewer_slot),
 		"ready": ready_slots.duplicate(),
 		"humans": _human_count(run),
 		"you_are_ready": ready_slots.has(viewer_slot),
@@ -64,12 +64,19 @@ func _buy(run: MatchRun, slot: int, item: String) -> Dictionary:
 		return {"ok": false, "error": "invalid_item"}
 	if int(entry["remaining"]) <= 0:
 		return {"ok": false, "error": "out_of_stock"}
-	if run.gold < int(entry["price"]):
+		
+	var price = int(entry["price"])
+	if slot >= 0 and slot < run.party.size():
+		var cha = int(run.party[slot].get("attributes", {}).get("cha", 0))
+		var discount = min(0.3, cha * 0.01)
+		price = int(round(price * (1.0 - discount)))
+		
+	if run.gold < price:
 		return {"ok": false, "error": "not_enough_gold"}
-	run.add_gold(-int(entry["price"]))
+	run.add_gold(-price)
 	entry["remaining"] = int(entry["remaining"]) - 1
 	run.add_item(item, 1)
-	run.emit({"type": "purchase", "slot": slot, "item": item, "price": entry["price"], "gold": run.gold})
+	run.emit({"type": "purchase", "slot": slot, "item": item, "price": price, "gold": run.gold})
 	return {"ok": true, "gold": run.gold}
 
 
@@ -95,16 +102,22 @@ func _close(run: MatchRun) -> void:
 	run.emit({"type": "merchant_closed"})
 
 
-func _stock_view(run: MatchRun) -> Array:
+func _stock_view(run: MatchRun, viewer_slot: int = -1) -> Array:
 	var out: Array = []
+	var cha = 0
+	if viewer_slot >= 0 and viewer_slot < run.party.size():
+		cha = int(run.party[viewer_slot].get("attributes", {}).get("cha", 0))
+	var discount = min(0.3, cha * 0.01)
+
 	for entry in stock:
 		var data := run.content.get_dict("items.%s" % entry["item"])
+		var price = int(round(int(entry["price"]) * (1.0 - discount)))
 		out.append({
 			"item": entry["item"],
 			"name": str(data.get("name", entry["item"])),
 			"description": str(data.get("description", "")),
-			"price": entry["price"],
+			"price": price,
 			"remaining": entry["remaining"],
-			"affordable": run.gold >= int(entry["price"]) and int(entry["remaining"]) > 0,
+			"affordable": run.gold >= price and int(entry["remaining"]) > 0,
 		})
 	return out

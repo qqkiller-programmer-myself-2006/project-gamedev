@@ -4,7 +4,7 @@ extends TestCase
 ## from content overrides apply them. Match interface only.
 
 ## Classless hits for 1 so AI-controlled allies barely scratch the wolves.
-const SOFT_PARTY := {"classes": {"classless": {"stats": {"atk": 0, "crit": 0}}}}
+const SOFT_PARTY := {"classes": {"classless": {"base": {"atk": 0, "crit": -1.0}, "attributes": {"str": 0, "dex": 0, "con": 0, "int": 0, "fth": 0, "cha": 0, "lck": 0}}}}
 const DARTS := {
 	"party": {"starting_inventory": {"bleed_dart": 5, "poison_dart": 5, "toxin_dart": 5,
 			"deep_cut": 3, "bleed_rain": 3}},

@@ -22,7 +22,12 @@ static func decide(run: MatchRun, combat: CombatEncounter, enemy: Dictionary) ->
 			var heal := _heal_plan(run, combat, enemy)
 			if not heal.is_empty():
 				return heal
-	return _attack(id, attack, str(run.rng.pick(targets)))
+	var weights := []
+	for t in targets:
+		weights.append(combat._unit(run, t).get("derived", {}).get("aggro", 1.0))
+	var idx = run.rng.weighted_index(weights)
+	var target = targets[0] if idx == -1 else targets[idx]
+	return _attack(id, attack, str(target))
 
 
 static func _attack(id: String, profile: Dictionary, target: String) -> Dictionary:

@@ -46,6 +46,15 @@ static func decide(run: MatchRun, combat: CombatEncounter, slot: int) -> Diction
 		var reaction := _react_to_threat(run, combat, id, preset, threat, ratio)
 		if not reaction.is_empty():
 			return reaction
+			
+	var cheapest := -1
+	for skill in combat.class_skills(run, id):
+		var cost = combat.skill_energy(run, skill)
+		if cheapest == -1 or cost < cheapest:
+			cheapest = cost
+	if cheapest > 0 and int(me.get("energy", run.content.get_int("rules.energy_start", 1))) < cheapest:
+		return {"actor": id, "action": "focus"}
+		
 	match preset:
 		"swordsman":
 			var slash := _ready_skill(run, combat, id, "power_slash")
