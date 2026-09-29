@@ -95,3 +95,7 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - การตัดสินใจ (Claude): Rogue→Assassin เปลี่ยน id จริง + migrate profile/loadout เก่า (ยังไม่ release); save Story เก่าที่ไม่มี version ถูกปฏิเสธ (ยังไม่ release)
 - กำลังทำ: T18 ตัดภาพศัตรู+ฉาก (agy, ai-t18 — แตกจาก base ก่อน restructure แต่สร้างแค่ไฟล์ใหม่), T19 ฮีโร่ v2 + Assassin (Codex, `ai/t19-heroes-v2` / `../ai-t19`)
 - คิว: T16 icons (แก้ path เป็น tools/art, tests/client, docs/design/ui-style.md), #73 step 2 (ใส่ศัตรู/ฉาก/Layer ถ้ำ + balance, agy หลัง T18), #65 (agy), #66–#71, T10b, T7/#54
+- 2026-09-29 22:45: **stall detector** ใน `.ai/run-agent.ps1` (5afb0ae): ไฟล์ใน worktree + log + CPU ของ process tree นิ่งครบ `-IdleMin` (20) นาที → kill tree, state `stalled`, เปิด agent ใหม่ resume ใน worktree เดิม (`-Retries 1`, `-FallbackAgent`); ตรวจสด `powershell -NoProfile -ExecutionPolicy Bypass -File .ai/agent-status.ps1` (IDLE/DEAD/NOBEAT); `.ai/logs/stalled.log`. self-test ผ่านทั้ง hang และ slow-working
+- T18 agy ไม่ได้ค้าง: รอบ 1 จบ 21:49 (27 นาที) รอบ retry ยังเขียนไฟล์อยู่ (agy ไม่พิมพ์ log จนจบ)
+- T19: Codex ตัดภาพฮีโร่พัง 2 รอบ (สองตัวในเฟรมเดียว, label ติด, ชิ้นส่วน) → commit เฉพาะ rename+wiring `cac48cc` บน `ai/t19-heroes-v2` (ยังไม่ merge), ทิ้งภาพเสีย; ต้องเขียน slicer ใหม่ (detect จากภาพ; ต้องการแค่ idle_right, attack, hurt, dead, portrait) → ให้ agy หลัง T18 ถ้าวิธีของ T18 ดี ไม่งั้น Claude ทำเอง; badge "R" ใน battle_token ยังต้องเปลี่ยนเป็น "A"
+- กำลังทำ: T18 (agy), T16 icons (Codex, `ai/t16-icons` / `../ai-t16`)
