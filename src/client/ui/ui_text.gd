@@ -80,6 +80,8 @@ const HINTS := {
 	"boss": "Watch the warnings: the Guardian announces its heaviest blows a turn early. Defend, Protect or raise Shield Wall before they land.",
 }
 
+const STORY_TRIGGERS := ["first_combat_won", "class_gained", "story_clue", "merchant_first", "rest_first", "before_boss", "boss_won", "party_defeated"]
+
 
 static func error(code: String) -> String:
 	return str(ERRORS.get(code, "Something went wrong (%s)." % code))
