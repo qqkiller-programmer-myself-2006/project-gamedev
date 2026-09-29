@@ -6,7 +6,8 @@ param(
     [Parameter(Mandatory = $true)][string]$TaskFile,
     [int]$TimeoutMin = 45,
     [string[]]$Images = @(),
-    [string]$Model = ''
+    [string]$Model = '',
+    [switch]$Network
 )
 $ErrorActionPreference = 'Stop'
 
@@ -32,6 +33,7 @@ if ($Agent -eq 'codex') {
     $argv = @('exec', $prompt, '-C', $Worktree, '-s', 'workspace-write', '--skip-git-repo-check',
         '--add-dir', (Join-Path $env:APPDATA 'Godot'), '-o', "$base.last.md")
     if ($Model) { $argv += @('-m', $Model) }
+    if ($Network) { $argv += @('-c', 'sandbox_workspace_write.network_access=true') }
     foreach ($i in $Images) { $argv += @('-i', $i) }
 } else {
     $exe = (Get-Command agy).Source
