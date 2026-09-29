@@ -4,6 +4,7 @@ extends RefCounted
 ## Encounter type labels and short explanations used by hints.
 
 const ERRORS := {
+	"profile_unavailable": "Your profile could not be loaded. Progress will not be saved this session.",
 	"invalid_name": "Please enter a display name.",
 	"invalid_code": "Room codes are 6 letters or numbers, like K7PQ2M.",
 	"room_not_found": "No room uses that code. Check it with your friend.",
