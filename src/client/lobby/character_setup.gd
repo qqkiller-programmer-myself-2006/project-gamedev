@@ -33,44 +33,10 @@ class ClassMark extends Control:
 			draw_circle(center + Vector2(0, 58), 7, shadow)
 
 const NAV := ["Profile", "Races", "Class", "Boons", "Records"]
-const ICONS := ["◆", "♜", "⚔", "✦", "♛"]
+const NAV_ICONS := ["info", "multiplayer", "weapon", "shield", "story"]
 const CLASSES := ["swordsman", "archer", "mage", "guardian", "assassin"]
 const RACE_ORDER := ["Elf", "Dwarf", "Kobold", "Lunaeia", "Withered", "Human"]
 const TREE_ORDER := ["vitality", "might", "precision", "swiftness", "reserves", "mastery", "stat_points"]
-const PASSIVES := {
-	"adaptable": ["Adaptable", "+1 attribute point at every even level."],
-	"versatile": ["Versatile", "+1 to every attribute."],
-	"keen_eyes": ["Keen Eyes", "+5% critical chance."],
-	"grace": ["Grace", "+2 DEX."],
-	"scrappy": ["Scrappy", "+10% Gold from rewards."],
-	"small_target": ["Small Target", "+5% Dodge."],
-	"undying": ["Undying", "5% Lifesteal."],
-	"frail": ["Frail", "−10% max HP."],
-	"dwarven_resilience": ["Dwarven Resilience", "+10% max HP and +10% Status resistance."],
-	"masterwork": ["Masterwork", "Crafted gear gains +0.75% stats per current level."],
-	"moonlit": ["Moonlit", "+10% magic damage."],
-	"tidal": ["Tidal", "+1 starting Energy in Combat."]
-}
-const BOON_EFFECTS := {
-	"Potential: Bunny": "+3 Initiative and +15% Dodge.",
-	"The Chosen One": "+2 to every attribute. Requires 5 total Prestige.",
-	"Daredevil Impulse": "+25% damage while HP is 30% or lower.",
-	"Critical Healing": "Critical hits heal you for 20% of damage dealt.",
-	"Energy Conserver": "15% chance to gain one extra Energy at turn start.",
-	"Enervation": "More direct damage per DoT type; stronger outgoing DoTs, but more incoming DoT damage.",
-	"Alert": "+3 Initiative; +5% Block and Dodge for the first two turns.",
-	"Will of Thiacdemo": "Once per Combat, survive a lethal hit at 1 HP."
-}
-const TREE_EFFECTS := {
-	"vitality": "+2% max HP per level.",
-	"might": "+2% direct damage per level.",
-	"precision": "+1% critical chance per level.",
-	"swiftness": "+1 Initiative per two levels.",
-	"reserves": "+1 starting Energy at level 5.",
-	"mastery": "Class Skill cooldown −1 at level 5.",
-	"stat_points": "+1 starting attribute point per level."
-}
-
 var _app: ClientApp
 var _finish: Callable
 var _meta: Dictionary = {}
@@ -131,7 +97,10 @@ func _build_shell() -> void:
 	for i in NAV.size():
 		var tab_name: String = NAV[i]
 		var button := Button.new()
-		button.text = ICONS[i]
+		button.icon = Icons.texture(NAV_ICONS[i])
+		button.expand_icon = true
+		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		button.custom_minimum_size = Vector2(72, 72)
 		button.focus_mode = Control.FOCUS_ALL
 		button.theme_type_variation = "TabButton"
@@ -156,7 +125,7 @@ func _build_shell() -> void:
 	finish_button.offset_top = -75
 	finish_button.offset_bottom = -18
 	add_child(finish_button)
-	_gems_label = UiKit.pixel_label("◆ 0", "heading", UiKit.SUCCESS)
+	_gems_label = UiKit.pixel_label(UiText.gems(0), "heading", UiKit.SUCCESS)
 	_gems_label.tooltip_text = "Gems: spend them on Races, the Skill Tree and Prestige."
 	_gems_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	_gems_label.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
@@ -171,7 +140,7 @@ func refresh(app: ClientApp, force: bool = false) -> void:
 	if digest == _digest and not force:
 		return
 	_digest = digest
-	_gems_label.text = "◆ %d" % int(_profile().get("gems", 0))
+	_gems_label.text = UiText.gems(int(_profile().get("gems", 0)))
 	_render()
 
 
@@ -224,13 +193,13 @@ func _render_class() -> void:
 		icon.custom_minimum_size.y = 145
 		portrait_panel.add_child(icon)
 	var arrows := UiKit.hbox(8)
-	var prev := _button("❮", func() -> void: _cycle_class(-1))
+	var prev := _button("<", func() -> void: _cycle_class(-1))
 	prev.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	arrows.add_child(prev)
-	arrows.add_child(_center("● " if CLASSES.find(_class_id) == 0 else "○ ", "small"))
+	arrows.add_child(_center("O " if CLASSES.find(_class_id) == 0 else "o ", "small"))
 	for i in range(1, CLASSES.size()):
-		arrows.add_child(UiKit.pixel_label("●" if i == CLASSES.find(_class_id) else "○", "small"))
-	var next := _button("❯", func() -> void: _cycle_class(1))
+		arrows.add_child(UiKit.pixel_label("O" if i == CLASSES.find(_class_id) else "o", "small"))
+	var next := _button(">", func() -> void: _cycle_class(1))
 	next.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	arrows.add_child(next)
 	portrait_panel.add_child(arrows)
@@ -243,7 +212,7 @@ func _render_class() -> void:
 	var level := _tree_level(_node)
 	middle.add_child(_heading(_node.replace("_", " ").capitalize()))
 	middle.add_child(UiKit.pixel_label("Level: %d/5" % level, "heading"))
-	middle.add_child(_text(str(TREE_EFFECTS.get(_node, ""))))
+	middle.add_child(_text(str(node_data.get("text", ""))))
 	middle.add_child(_text("Cost: %s\nStatus: Unlocked" % ("MAX" if level >= 5 else str(int(node_data.get("cost", 10)) * (level + 1)))))
 	middle.add_child(UiKit.spacer())
 	var upgrade := UiKit.primary("Upgrade", func() -> void: _app.send({"type": "tree_upgrade", "class": _class_id, "node": _node}), false)
@@ -280,7 +249,7 @@ func _render_class() -> void:
 			grid.add_child(blank)
 			continue
 		var node_id: String = TREE_ORDER[6] if i == 7 else TREE_ORDER[i]
-		var node_button := _button("✦\n%d/5" % _tree_level(node_id), func() -> void: _node = node_id; _render())
+		var node_button := _button("*\n%d/5" % _tree_level(node_id), func() -> void: _node = node_id; _render())
 		node_button.custom_minimum_size = Vector2(82, 76)
 		node_button.tooltip_text = node_id.replace("_", " ").capitalize()
 		node_button.set_meta("focus_id", "node_" + node_id)
@@ -295,7 +264,7 @@ func _render_class() -> void:
 		if _tree_level(node_id) < 5:
 			all_max = false
 	var prestige_cost := int(_meta.get("prestige", {}).get("cost", 100))
-	var buy := _button("Buy Prestige\n◆ %d" % prestige_cost, func() -> void: _app.send({"type": "buy_prestige", "class": _class_id}))
+	var buy := _button("Buy Prestige\n%s" % UiText.gems(prestige_cost), func() -> void: _app.send({"type": "buy_prestige", "class": _class_id}))
 	if prestige >= 25:
 		UiKit.disable(buy, true, UiText.WHY["prestige_max"])
 	elif not all_max:
@@ -305,7 +274,7 @@ func _render_class() -> void:
 	buy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions.add_child(buy)
 	var reset_cost := int(_meta.get("reset_cost", 50))
-	var reset := UiKit.button("Reset Skills\n◆ %d" % reset_cost, func() -> void:
+	var reset := UiKit.button("Reset Skills\n%s" % UiText.gems(reset_cost), func() -> void:
 		_app.confirm("reset_skills", func() -> void: _app.send({"type": "reset_tree", "class": _class_id}),
 				[_class_id.capitalize(), reset_cost]), false, "danger")
 	reset.set_meta("focus_id", "reset")
@@ -327,7 +296,7 @@ func _render_races() -> void:
 	for race in RACE_ORDER:
 		var cost := int(_meta.get("races", {}).get(race, {}).get("cost", 0))
 		var owned: bool = _profile().get("races_owned", []).has(race)
-		var button := _button("%s%s" % [race, "   ◆ %d" % cost if not owned else ""], func() -> void: _race = race; _render())
+		var button := _button("%s%s" % [race, "   %s" % UiText.gems(cost) if not owned else ""], func() -> void: _race = race; _render())
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.add_theme_font_size_override("font_size", int(UiKit.SIZES["title"] * _app.settings.text_scale))
 		button.custom_minimum_size.y = int(58 * _app.settings.text_scale)
@@ -336,7 +305,7 @@ func _render_races() -> void:
 			button.theme_type_variation = "SelectedButton"
 		elif not owned:
 			button.add_theme_color_override("font_color", UiKit.TEXT_DIM)
-		button.tooltip_text = "%s - owned" % race if owned else "%s - costs ◆ %d" % [race, cost]
+		button.tooltip_text = "%s - owned" % race if owned else "%s - costs %s" % [race, UiText.gems(cost)]
 		list.add_child(button)
 	var space := Control.new()
 	space.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -349,12 +318,12 @@ func _render_races() -> void:
 	details.add_child(info)
 	info.add_child(_center(_race, "title"))
 	for passive in _meta.get("races", {}).get(_race, {}).get("passives", []):
-		var entry: Array = PASSIVES.get(passive, [str(passive), ""])
-		info.add_child(UiKit.pixel_label(str(entry[0]), "heading"))
-		info.add_child(_text(str(entry[1])))
+		var entry: Dictionary = _meta.get("passives", {}).get(passive, {})
+		info.add_child(UiKit.pixel_label(str(entry.get("name", passive)), "heading"))
+		info.add_child(_text(str(entry.get("text", ""))))
 	var owned: bool = _profile().get("races_owned", []).has(_race)
 	var race_cost := int(_meta.get("races", {}).get(_race, {}).get("cost", 0))
-	var action := UiKit.primary("Select" if owned else "Purchase  ◆ %d" % race_cost, func() -> void:
+	var action := UiKit.primary("Select" if owned else "Purchase  %s" % UiText.gems(race_cost), func() -> void:
 		if owned:
 			_send_loadout()
 		else:
@@ -392,7 +361,7 @@ func _render_boons() -> void:
 			button.visible = _search.is_empty() or boon_name.to_lower().contains(_search.to_lower())
 			button.mouse_entered.connect(func() -> void: _show_boon_details(boon_name))
 			button.focus_entered.connect(func() -> void: _show_boon_details(boon_name))
-			button.tooltip_text = str(BOON_EFFECTS.get(boon_name, ""))
+			button.tooltip_text = str(_meta.get("boons", {}).get(boon_name, {}).get("text", ""))
 			if boon_name == "The Chosen One" and _prestige_total() < 5:
 				button.disabled = true
 				button.tooltip_text = "Requires 5 total Prestige."
@@ -428,7 +397,7 @@ func _show_boon_details(boon: String) -> void:
 	var slots := int(_meta.get("boons", {}).get(boon, {}).get("slots", 0))
 	_boon_details.add_child(_center(boon, "title"))
 	_boon_details.add_child(_text("Slots: %d" % slots))
-	_boon_details.add_child(_text(str(BOON_EFFECTS.get(boon, ""))))
+	_boon_details.add_child(_text(str(_meta.get("boons", {}).get(boon, {}).get("text", ""))))
 	var status := ""
 	var color := UiKit.TEXT_DIM
 	if _boons.has(boon):

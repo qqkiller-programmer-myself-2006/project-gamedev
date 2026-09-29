@@ -127,7 +127,7 @@ func connect_and(url: String, action: Callable, transport: ServerConnection = nu
 	if client.connect_to(url) != OK:
 		_on_closed("cannot_connect")
 	else:
-		toast("Connecting to %s ..." % url, 3.0)
+		toast(UiText.LABELS["connecting"] % url, 3.0)
 
 
 ## Polls the active transport and fails a connection attempt that never opens.
@@ -442,7 +442,7 @@ func hint(key: String) -> void:
 	var panel := UiKit.panel(box, "HighlightPanel")
 	panel.set_meta("hint", true)
 	panel.set_meta("hint_key", key)
-	var close := UiKit.button("Got it [H]", func() -> void: _dismiss_hint(panel), false, "small")
+	var close := UiKit.button(UiText.LABELS["got_it"], func() -> void: _dismiss_hint(panel), false, "small")
 	head.add_child(close)
 	if _current != null and _current.has_method("tip_slot"):
 		_current.tip_slot().add_child(panel)

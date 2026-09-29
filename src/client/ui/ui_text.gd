@@ -61,6 +61,14 @@ const ERRORS := {
 	"invalid_node": "That Skill Tree node is unavailable.",
 	"max_level": "This node is already at level 5.",
 	"max_prestige": "This Class has reached maximum Prestige.",
+	"invalid_slot": "That character slot does not exist.",
+	"invalid_loadout": "That Race, Class or Boon choice is not allowed.",
+	"invalid_amount": "Enter an amount of at least 1.",
+	"invalid_token": "Your profile could not be verified. Restart the game and try again.",
+	"not_consumable": "That Item cannot be used.",
+	"not_in_stash": "The shared bag does not hold that Item.",
+	"nothing_to_reset": "No Skill Tree levels to reset for this Class.",
+	"handshake_timeout": "The server did not answer in time. Check the address and try again.",
 }
 
 const TYPE_LABELS := {
@@ -102,6 +110,20 @@ const CONFIRM := {
 	"reset_skills": ["Reset Skills?", "Every Skill Tree level of the %s Class goes back to 0. This costs %d Gems.", "Reset Skills"],
 }
 
+## Small labels and tooltips shared by several screens.
+const LABELS := {
+	"connecting": "Connecting to %s ...",
+	"got_it": "Got it [H]",
+	"continue": "Continue [Enter]",
+	"chapter": "Chapter %d",
+	"dialogue_hint": "> Next [Enter]     Skip [Esc]",
+	"menu_tip": "Menu [Esc]",
+	"clues_tip": "Clues [C]",
+	"action_window": "Action window",
+	"gold": "%d Gold",
+	"gems": "%d Gems",
+}
+
 ## Empty states: what the player can do next.
 const EMPTY := {
 	"inventory": "The shared bag is empty. Win fights, open Treasure or buy from a Merchant to fill it.",
@@ -129,6 +151,9 @@ const WHY := {
 	"equip_not_yours": "You can only change your own character's gear.",
 	"sold_out": "Sold out.",
 	"need_gold": "Not enough Gold: this costs %d.",
+	"focus_unavailable": "Focus is not available right now.",
+	"focus_ready": "Gain Energy and Dodge this turn.",
+	"transfer_unavailable": "Only a character carrying Gold can transfer it.",
 }
 
 const STORY_TRIGGERS := ["first_combat_won", "class_gained", "story_clue", "merchant_first", "rest_first", "before_boss", "boss_won", "party_defeated"]
@@ -136,6 +161,14 @@ const STORY_TRIGGERS := ["first_combat_won", "class_gained", "story_clue", "merc
 
 static func error(code: String) -> String:
 	return str(ERRORS.get(code, "Something went wrong (%s)." % code))
+
+
+static func gems(amount: int) -> String:
+	return LABELS["gems"] % amount
+
+
+static func gold(amount: int) -> String:
+	return LABELS["gold"] % amount
 
 
 static func type_label(type: String) -> String:

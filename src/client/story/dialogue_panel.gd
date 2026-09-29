@@ -48,7 +48,7 @@ func _init(dialogue: Array = [], scale: float = 1.0, reduced: bool = false) -> v
 	_text_label.size = Vector2(1010, 86)
 	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text_label.add_theme_font_size_override("font_size", int(UiKit.SIZES["heading"] * text_scale))
-	_hint_label.text = "▶ Next [Enter]     Skip [Esc]"
+	_hint_label.text = UiText.LABELS["dialogue_hint"]
 	_hint_label.position = Vector2(840, 157)
 	_hint_label.size = Vector2(350, 26)
 	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
