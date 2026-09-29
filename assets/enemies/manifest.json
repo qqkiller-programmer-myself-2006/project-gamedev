@@ -1,0 +1,467 @@
+{
+  "giant_spider": {
+    "animations": {
+      "idle": 5,
+      "walk": 6,
+      "run": 6,
+      "attack": 6,
+      "hurt": 4,
+      "die": 5
+    },
+    "canvas": {
+      "idle": [
+        175,
+        99
+      ],
+      "walk": [
+        163,
+        100
+      ],
+      "run": [
+        166,
+        99
+      ],
+      "attack": [
+        224,
+        109
+      ],
+      "hurt": [
+        190,
+        115
+      ],
+      "die": [
+        201,
+        97
+      ]
+    },
+    "baseline": {
+      "idle": 93,
+      "walk": 94,
+      "run": 93,
+      "attack": 103,
+      "hurt": 109,
+      "die": 91
+    },
+    "size_px": 64,
+    "faces": "right",
+    "variants": [
+      "red",
+      "green",
+      "white",
+      "blue",
+      "brown"
+    ]
+  },
+  "goblin": {
+    "animations": {
+      "idle": 4,
+      "walk": 6,
+      "run": 6,
+      "attack": 6,
+      "hurt": 4,
+      "die": 5
+    },
+    "canvas": {
+      "idle": [
+        106,
+        103
+      ],
+      "walk": [
+        104,
+        102
+      ],
+      "run": [
+        118,
+        106
+      ],
+      "attack": [
+        161,
+        108
+      ],
+      "hurt": [
+        146,
+        128
+      ],
+      "die": [
+        146,
+        99
+      ]
+    },
+    "baseline": {
+      "idle": 97,
+      "walk": 96,
+      "run": 100,
+      "attack": 102,
+      "hurt": 122,
+      "die": 93
+    },
+    "size_px": 32,
+    "faces": "right",
+    "variants": []
+  },
+  "golem": {
+    "animations": {
+      "idle": 5,
+      "walk": 7,
+      "run": 7,
+      "attack": 6,
+      "hurt": 4,
+      "die": 6
+    },
+    "canvas": {
+      "idle": [
+        115,
+        110
+      ],
+      "walk": [
+        124,
+        118
+      ],
+      "run": [
+        146,
+        108
+      ],
+      "attack": [
+        246,
+        141
+      ],
+      "hurt": [
+        138,
+        117
+      ],
+      "die": [
+        193,
+        97
+      ]
+    },
+    "baseline": {
+      "idle": 104,
+      "walk": 112,
+      "run": 102,
+      "attack": 135,
+      "hurt": 111,
+      "die": 91
+    },
+    "size_px": 64,
+    "faces": "right",
+    "variants": [
+      "basic",
+      "fire",
+      "ice",
+      "dark",
+      "gold"
+    ]
+  },
+  "kobold": {
+    "animations": {
+      "idle": 5,
+      "walk": 8,
+      "run": 8,
+      "attack": 6,
+      "hurt": 4,
+      "die": 5
+    },
+    "canvas": {
+      "idle": [
+        140,
+        105
+      ],
+      "walk": [
+        130,
+        109
+      ],
+      "run": [
+        141,
+        102
+      ],
+      "attack": [
+        222,
+        114
+      ],
+      "hurt": [
+        121,
+        108
+      ],
+      "die": [
+        148,
+        84
+      ]
+    },
+    "baseline": {
+      "idle": 99,
+      "walk": 103,
+      "run": 96,
+      "attack": 108,
+      "hurt": 102,
+      "die": 78
+    },
+    "size_px": 32,
+    "faces": "right",
+    "variants": [
+      "basic",
+      "scout",
+      "miner",
+      "shaman",
+      "warrior",
+      "archer"
+    ]
+  },
+  "minotaur": {
+    "animations": {
+      "idle": 5,
+      "walk": 7,
+      "run": 7,
+      "attack": 6,
+      "hurt": 4,
+      "die": 6
+    },
+    "canvas": {
+      "idle": [
+        115,
+        116
+      ],
+      "walk": [
+        125,
+        112
+      ],
+      "run": [
+        147,
+        108
+      ],
+      "attack": [
+        218,
+        122
+      ],
+      "hurt": [
+        150,
+        109
+      ],
+      "die": [
+        151,
+        99
+      ]
+    },
+    "baseline": {
+      "idle": 110,
+      "walk": 106,
+      "run": 102,
+      "attack": 116,
+      "hurt": 103,
+      "die": 93
+    },
+    "size_px": 64,
+    "faces": "right",
+    "variants": [
+      "basic",
+      "dark",
+      "ice",
+      "fire",
+      "elite"
+    ]
+  },
+  "skeleton": {
+    "animations": {
+      "idle": 5,
+      "walk": 8,
+      "run": 8,
+      "attack": 7,
+      "hurt": 5,
+      "die": 7
+    },
+    "canvas": {
+      "idle": [
+        68,
+        98
+      ],
+      "walk": [
+        83,
+        99
+      ],
+      "run": [
+        112,
+        98
+      ],
+      "attack": [
+        152,
+        112
+      ],
+      "hurt": [
+        120,
+        112
+      ],
+      "die": [
+        163,
+        92
+      ]
+    },
+    "baseline": {
+      "idle": 92,
+      "walk": 93,
+      "run": 92,
+      "attack": 106,
+      "hurt": 106,
+      "die": 86
+    },
+    "size_px": 32,
+    "faces": "right",
+    "variants": [
+      "sword",
+      "shield",
+      "archer",
+      "spear",
+      "mage",
+      "elite"
+    ]
+  },
+  "slime": {
+    "animations": {
+      "idle": 5,
+      "walk": 7,
+      "jump": 7,
+      "attack": 6,
+      "hurt": 5,
+      "die": 6
+    },
+    "canvas": {
+      "idle": [
+        130,
+        71
+      ],
+      "walk": [
+        116,
+        72
+      ],
+      "jump": [
+        133,
+        114
+      ],
+      "attack": [
+        222,
+        75
+      ],
+      "hurt": [
+        143,
+        112
+      ],
+      "die": [
+        147,
+        88
+      ]
+    },
+    "baseline": {
+      "idle": 65,
+      "walk": 66,
+      "jump": 108,
+      "attack": 69,
+      "hurt": 106,
+      "die": 82
+    },
+    "size_px": 32,
+    "faces": "right",
+    "variants": [
+      "basic",
+      "blue",
+      "red",
+      "yellow",
+      "purple",
+      "ice",
+      "fire",
+      "poison",
+      "gold"
+    ]
+  },
+  "thief": {
+    "animations": {
+      "idle": 4,
+      "walk": 8,
+      "run": 7,
+      "attack": 6,
+      "hurt": 4,
+      "die": 6
+    },
+    "canvas": {
+      "idle": [
+        102,
+        114
+      ],
+      "walk": [
+        109,
+        112
+      ],
+      "run": [
+        127,
+        105
+      ],
+      "attack": [
+        142,
+        110
+      ],
+      "hurt": [
+        187,
+        129
+      ],
+      "die": [
+        153,
+        109
+      ]
+    },
+    "baseline": {
+      "idle": 108,
+      "walk": 106,
+      "run": 99,
+      "attack": 104,
+      "hurt": 123,
+      "die": 103
+    },
+    "size_px": 32,
+    "faces": "right",
+    "variants": []
+  },
+  "wolf": {
+    "animations": {
+      "idle": 4,
+      "walk": 7,
+      "run": 7,
+      "attack": 6,
+      "hurt": 4,
+      "die": 5
+    },
+    "canvas": {
+      "idle": [
+        169,
+        116
+      ],
+      "walk": [
+        161,
+        113
+      ],
+      "run": [
+        161,
+        104
+      ],
+      "attack": [
+        168,
+        106
+      ],
+      "hurt": [
+        157,
+        121
+      ],
+      "die": [
+        180,
+        114
+      ]
+    },
+    "baseline": {
+      "idle": 110,
+      "walk": 107,
+      "run": 98,
+      "attack": 100,
+      "hurt": 115,
+      "die": 108
+    },
+    "size_px": 48,
+    "faces": "right",
+    "variants": []
+  }
+}
