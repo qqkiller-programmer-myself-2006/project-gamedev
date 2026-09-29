@@ -17,6 +17,7 @@ func _init() -> void:
 	var modes := [1, 2]
 	var pace := false
 	var loadout_mode := false
+	var story_mode := false
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--seeds="):
 			seeds = int(arg.trim_prefix("--seeds="))
@@ -30,6 +31,12 @@ func _init() -> void:
 			pace = true
 		elif arg == "--loadout":
 			loadout_mode = true
+		elif arg == "--story":
+			story_mode = true
+	if story_mode:
+		_simulate(1, start, seeds, pace, true, true)
+		quit(0)
+		return
 	for humans in modes:
 		_simulate(humans, start, seeds, pace, false)
 		if loadout_mode:
@@ -37,7 +44,7 @@ func _init() -> void:
 	quit(0)
 
 
-func _simulate(humans: int, start: int, seeds: int, pace: bool, use_loadout: bool) -> void:
+func _simulate(humans: int, start: int, seeds: int, pace: bool, use_loadout: bool, story_mode: bool = false) -> void:
 	var wins := 0
 	var durations: Array = []
 	var rounds: Array = []
@@ -52,27 +59,41 @@ func _simulate(humans: int, start: int, seeds: int, pace: bool, use_loadout: boo
 		var h := MatchHarness.new(seed_value)
 		var sessions: Array[int]
 		if use_loadout:
-			sessions = [h.create_room("P1")]
+			if story_mode:
+				var session := h.server.open_session()
+				h.server.command(session, {"type": "create_room", "name": "Story", "story": true})
+				sessions = [session]
+			else:
+				sessions = [h.create_room("P1")]
 			for i in range(1, humans):
 				sessions.append(h.join("P%d" % (i + 1)))
-			# Rotate through available starter choices instead of giving every run
-			# the same high-survival Archer/Guardian + Bunny loadout.
-			var loadout_classes := ["archer", "guardian", "swordsman", "mage", "rogue"]
-			var loadout_races := ["Elf", "Human", "Kobold", "Withered"]
-			var loadout_boons := [
-				["Potential: Bunny"],
-				["Critical Healing", "Energy Conserver"],
-				["Enervation", "Alert", "Energy Conserver"],
-				["Daredevil Impulse", "Energy Conserver"],
-				["Alert", "Will of Thiacdemo", "Energy Conserver"],
-			]
-			var sample := seed_value - start
-			for i in humans:
-				var choice := {"type": "set_loadout", "class": loadout_classes[(sample + i * 2) % loadout_classes.size()],
-					"race": loadout_races[((sample / 5) + i) % loadout_races.size()],
-					"boons": loadout_boons[((sample / 20) + i) % loadout_boons.size()]}
-				var result: Dictionary = h.server.command(sessions[i], choice)
-				assert(result.get("ok", false), "invalid simulated loadout: %s" % result)
+			if story_mode:
+				# Story rooms accept Race/Boons only for the host's own character.
+				var story_classes := ["swordsman", "archer", "mage", "guardian", "rogue"]
+				for i in 5:
+					var pick := {"type": "set_loadout", "slot": i, "class": story_classes[i],
+						"race": "Elf" if i == 0 else "Human", "boons": ["Potential: Bunny"] if i == 0 else []}
+					var picked: Dictionary = h.server.command(sessions[0], pick)
+					assert(picked.get("ok", false), "invalid story loadout: %s" % picked)
+			else:
+				# Rotate through available starter choices instead of giving every run
+				# the same high-survival Archer/Guardian + Bunny loadout.
+				var loadout_classes := ["archer", "guardian", "swordsman", "mage", "rogue"]
+				var loadout_races := ["Elf", "Human", "Kobold", "Withered"]
+				var loadout_boons := [
+					["Potential: Bunny"],
+					["Critical Healing", "Energy Conserver"],
+					["Enervation", "Alert", "Energy Conserver"],
+					["Daredevil Impulse", "Energy Conserver"],
+					["Alert", "Will of Thiacdemo", "Energy Conserver"],
+				]
+				var sample := seed_value - start
+				for i in humans:
+					var choice := {"type": "set_loadout", "class": loadout_classes[(sample + i * 2) % loadout_classes.size()],
+						"race": loadout_races[((sample / 5) + i) % loadout_races.size()],
+						"boons": loadout_boons[((sample / 20) + i) % loadout_boons.size()]}
+					var result: Dictionary = h.server.command(sessions[i], choice)
+					assert(result.get("ok", false), "invalid simulated loadout: %s" % result)
 			h.start(sessions[0])
 		else:
 			sessions = h.start_with_humans(humans)
@@ -110,7 +131,7 @@ func _simulate(humans: int, start: int, seeds: int, pace: bool, use_loadout: boo
 			elif in_boss and event["type"] == "round_started":
 				boss_round_count += 1
 		boss_rounds.append(boss_round_count)
-	print("== %d human(s), %d seeds from %d%s%s ==" % [humans, seeds, start, " (human pace)" if pace else "", " (loadout)" if use_loadout else " (default)"])
+	print("== %s, %d seeds from %d%s%s ==" % ["story" if story_mode else "%d human(s)" % humans, seeds, start, " (human pace)" if pace else "", " (loadout)" if use_loadout else " (default)"])
 	print("win rate        %d/%d (%.0f%%)" % [wins, seeds, 100.0 * wins / seeds])
 	print("defeats         %s" % [defeats_at])
 	print("match minutes   avg %.1f  min %.1f  max %.1f" % [_avg(durations) / 60.0, durations.min() / 60.0, durations.max() / 60.0])

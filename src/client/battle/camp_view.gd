@@ -170,7 +170,7 @@ func _vertical_tabs(labels: Array, left: bool, view: Dictionary = {}) -> Control
 			button.add_theme_stylebox_override("hover", _flat_box(Color("#858585"), Color("#f0c85c"), 2, 4))
 		tabs.add_child(button)
 	if not left:
-		var you := _character(view, _screen.your_slot())
+		var you := _character(view, _acting_slot())
 		var consumable := str(you.get("consumable", ""))
 		var slot := UiKit.panel(UiKit.pixel_label("Consumable\n" + (consumable if not consumable.is_empty() else "Empty"), "small"), "HudCard")
 		slot.custom_minimum_size = Vector2(70, 76)
@@ -220,8 +220,9 @@ func _build_shop(view: Dictionary, body: VBoxContainer) -> void:
 		text.add_child(UiKit.pixel_label("%d Gold   (%d)" % [int(entry.get("price", 0)), int(entry.get("remaining", 0))], "small", UiKit.ACCENT))
 		card.get_child(0).add_child(text)
 		var actions := UiKit.vbox(2)
-		var buy := _button("Buy", func() -> void: _app.send({"type": "buy", "item": entry.get("item", "")}))
-		buy.disabled = not bool(entry.get("affordable", int(view.get("gold", 0)) >= int(entry.get("price", 0)))) or int(entry.get("remaining", 0)) <= 0
+		var buy := _button("Buy", func() -> void: _app.send({"type": "buy", "slot": _acting_slot(), "item": entry.get("item", "")}))
+		var affordable := int(_character(view, _acting_slot()).get("gold", 0)) >= int(entry.get("price", 0)) if _screen.room_view().get("story", false) else bool(entry.get("affordable", int(view.get("gold", 0)) >= int(entry.get("price", 0))))
+		buy.disabled = not affordable or int(entry.get("remaining", 0)) <= 0
 		buy.tooltip_text = "Need %d" % int(entry.get("price", 0)) if not bool(entry.get("affordable", true)) else ""
 		buy.set_meta("focus_id", "buy_" + str(entry.get("item", "")))
 		actions.add_child(buy)
@@ -263,7 +264,7 @@ func _recipe_row(recipe: Dictionary, index: int) -> Control:
 		tips_text += "%d %s (%d)\n" % [int(material.get("need", 0)), str(material.get("name", material.get("item", ""))), int(material.get("have", 0))]
 	var actions := UiKit.vbox(2)
 	var craftable := bool(recipe.get("craftable", false))
-	var craft := _button("Craft", func() -> void: _app.send({"type": "craft", "recipe": recipe.get("recipe", "")}))
+	var craft := _button("Craft", func() -> void: _app.send({"type": "craft", "slot": _acting_slot(), "recipe": recipe.get("recipe", "")}))
 	craft.disabled = not craftable
 	craft.add_theme_color_override("font_color", UiKit.ALLY if craftable else UiKit.ENEMY)
 	craft.add_theme_color_override("font_disabled_color", UiKit.ALLY if craftable else UiKit.ENEMY)
@@ -293,7 +294,7 @@ func _inventory_panel(view: Dictionary) -> Control:
 	root.add_child(_scroll_body(body))
 	for entry in view.get("inventory", []):
 		if _matches(str(entry.get("name", "")), _inventory_search): body.add_child(_item_row(entry, true))
-	var you := _character(view, _screen.your_slot())
+	var you := _character(view, _acting_slot())
 	var gold := int(you.get("gold", view.get("gold", 0)))
 	var gold_row := UiKit.hbox(4)
 	gold_row.add_child(UiKit.pixel_label("%d 🪙" % gold, "heading", UiKit.ACCENT))
@@ -320,7 +321,7 @@ func _item_row(entry: Dictionary, with_transfer: bool) -> Control:
 	card.get_child(0).add_child(text)
 	var actions := UiKit.vbox(2)
 	if with_transfer: actions.add_child(_button("Transfer", func() -> void: _open_item_picker(str(entry.get("item", "")))))
-	if str(entry.get("kind", "")) == "gear": actions.add_child(_button("Equip", func() -> void: _app.send({"type": "equip", "item": entry.get("item", "")})))
+	if str(entry.get("kind", "")) == "gear": actions.add_child(_button("Equip", func() -> void: _app.send({"type": "equip", "slot": _acting_slot(), "item": entry.get("item", "")})))
 	actions.add_child(_button("Inspect", func() -> void: _show_info(entry)))
 	card.get_child(0).add_child(actions)
 	return card
@@ -363,7 +364,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 		var controls := UiKit.hbox(2)
 		controls.alignment = BoxContainer.ALIGNMENT_END
 		if not worn.is_empty():
-			controls.add_child(_button("–", func() -> void: _app.send({"type": "unequip", "gear_slot": slot})))
+			controls.add_child(_button("–", func() -> void: _app.send({"type": "unequip", "slot": _acting_slot(), "gear_slot": slot})))
 			controls.add_child(_button("T", func() -> void: _show_info(worn)))
 		cell.add_child(controls)
 		var cell_panel := UiKit.panel(cell, "HudCard")
@@ -402,7 +403,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	root.add_child(stat_panel)
 	var points := int(character.get("points", 0))
 	var invest := _button("Invest Points (%d)" % points, func() -> void: _open_invest(character))
-	invest.disabled = merchant or points <= 0 or _inspect != _screen.your_slot()
+	invest.disabled = merchant or points <= 0 or (not _screen.room_view().get("story", false) and _inspect != _screen.your_slot())
 	root.add_child(invest)
 	return root
 
@@ -433,10 +434,10 @@ func handle_key(key: int) -> bool:
 		return true
 	var index := key - KEY_1
 	if str(_encounter.get("kind", "")) == "merchant" and index >= 0 and index < _stock.size():
-		_app.send({"type": "buy", "item": _stock[index].get("item", "")})
+		_app.send({"type": "buy", "slot": _acting_slot(), "item": _stock[index].get("item", "")})
 		return true
 	if str(_encounter.get("kind", "")) == "rest" and index >= 0 and index < mini(9, _recipes.size()):
-		_app.send({"type": "craft", "recipe": _recipes[index].get("recipe", "")})
+		_app.send({"type": "craft", "slot": _acting_slot(), "recipe": _recipes[index].get("recipe", "")})
 		return true
 	return false
 
@@ -490,6 +491,9 @@ func _character(view: Dictionary, slot: int) -> Dictionary:
 		if int(character.get("slot", -1)) == slot: return character
 	return {}
 
+func _acting_slot() -> int:
+	return _inspect if _screen.room_view().get("story", false) else _screen.your_slot()
+
 func _move_inspect(delta: int, party: Array) -> void:
 	if party.is_empty(): return
 	var index := 0
@@ -520,12 +524,40 @@ func _show_info(data: Dictionary) -> void: _app.hint(str(data.get("description",
 func _show_abilities(view: Dictionary) -> void: _app.hint("Skills: " + str(_character(view, _inspect).get("skills", "None")))
 
 func _open_item_picker(item: String) -> void:
-	var party: Array = _screen.match_view().get("party", [])
-	if not party.is_empty(): _app.send({"type": "transfer_item", "item": item, "to": int(party[0].get("slot", 0))})
+	_open_transfer_picker("transfer_item", item)
 
 func _open_gold_picker() -> void:
-	var party: Array = _screen.match_view().get("party", [])
-	if party.size() > 1: _app.send({"type": "transfer_gold", "to": int(party[1].get("slot", 1)), "amount": 1})
+	_open_transfer_picker("transfer_gold")
+
+func _open_transfer_picker(kind: String, item: String = "") -> void:
+	_close_invest_panel()
+	var body := UiKit.vbox(4)
+	body.add_child(UiKit.pixel_label("Transfer from %s" % _character(_screen.match_view(), _acting_slot()).get("name", ""), "small"))
+	var amount := LineEdit.new()
+	if kind == "transfer_gold":
+		amount.text = "1"
+		amount.placeholder_text = "Gold amount"
+		body.add_child(amount)
+	for character in _screen.match_view().get("party", []):
+		var to := int(character["slot"])
+		if to == _acting_slot():
+			continue
+		body.add_child(_button(str(character["name"]), func() -> void:
+			var command := {"type": kind, "slot": _acting_slot(), "to": to}
+			if kind == "transfer_gold":
+				command["amount"] = int(amount.text)
+			else:
+				command["item"] = item
+			_app.send(command)
+			_close_invest_panel()))
+	_invest_panel = UiKit.panel(body, "HudPanel")
+	_invest_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_invest_panel.offset_left = -130
+	_invest_panel.offset_right = 130
+	_invest_panel.offset_top = -130
+	_invest_panel.offset_bottom = 130
+	add_child(_invest_panel)
+	UiKit.focus_first(_invest_panel)
 
 func _open_invest(character: Dictionary) -> void:
 	_close_invest_panel()
@@ -534,7 +566,7 @@ func _open_invest(character: Dictionary) -> void:
 	for attr in ATTRIBUTES:
 		var stat: String = attr
 		var plus := _button("+ %s" % attr.to_upper(), func() -> void:
-			_app.send({"type": "invest", "stat": stat})
+			_app.send({"type": "invest", "slot": _acting_slot(), "stat": stat})
 			_close_invest_panel())
 		plus.custom_minimum_size = Vector2(150, 28)
 		body.add_child(plus)

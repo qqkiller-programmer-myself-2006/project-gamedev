@@ -1,5 +1,5 @@
 class_name StoryDirector
-extends Node
+extends Control
 
 const DialoguePanelScript = preload("res://src/client/story/dialogue_panel.gd")
 const ChapterCardScript = preload("res://src/client/story/chapter_card.gd")
@@ -19,13 +19,14 @@ var text_scale := 1.0
 var reduced_motion := false
 
 func _ready() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string(STORY_PATH))
 	content = parsed if parsed is Dictionary else {}
 
 func begin() -> void:
 	if not started:
 		started = true
-		_enqueue_scene("prologue")
+		queue.append({"kind":"scene", "id":"prologue", "lines":content.get("prologue", [])})
 		_pump()
 
 func observe(events: Array, snapshot: Dictionary) -> void:
@@ -40,6 +41,10 @@ func observe(events: Array, snapshot: Dictionary) -> void:
 			if int(chapter.get("number", 0)) == layer:
 				_enqueue_card(chapter)
 	for event in events:
+		if event.get("type", "") == "boss_reached":
+			for chapter in content.get("chapters", []):
+				if int(chapter.get("number", 0)) == 6:
+					_enqueue_card(chapter)
 		var trigger := _trigger_for(event)
 		if not trigger.is_empty():
 			_enqueue_scene(trigger)
@@ -49,7 +54,7 @@ func _trigger_for(event: Variant) -> String:
 	if not event is Dictionary:
 		return ""
 	var kind := str(event.get("type", event.get("kind", event.get("event", ""))))
-	var map := {"combat_won":"first_combat_won", "class_gained":"class_gained", "story_clue":"story_clue", "merchant_opened":"merchant_first", "rest_opened":"rest_first", "boss_started":"before_boss", "victory":"boss_won", "defeat":"party_defeated"}
+	var map := {"combat_ended":"first_combat_won" if event.get("result", "") == "victory" else "", "class_changed":"class_gained", "clue_found":"story_clue", "merchant_opened":"merchant_first", "rested":"rest_first", "boss_reached":"before_boss", "match_ended":"boss_won" if event.get("result", "") == "victory" else "party_defeated"}
 	return str(map.get(kind, kind if content.get("scenes", {}).has(kind) else ""))
 
 func _enqueue_scene(trigger: String) -> void:

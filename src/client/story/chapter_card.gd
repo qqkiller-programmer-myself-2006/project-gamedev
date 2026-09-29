@@ -26,13 +26,17 @@ func _init(data: Dictionary = {}, reduced: bool = false) -> void:
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		add_child(label)
 	_title.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	_title.position.y -= 80
-	_title.size = Vector2(900, 170)
+	_title.offset_left = -450
+	_title.offset_right = 450
+	_title.offset_top = -165
+	_title.offset_bottom = 5
 	_title.add_theme_font_size_override("font_size", 42)
 	_title.add_theme_color_override("font_color", Color("e8c56a"))
 	_subtitle.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	_subtitle.position.y += 72
-	_subtitle.size = Vector2(900, 50)
+	_subtitle.offset_left = -450
+	_subtitle.offset_right = 450
+	_subtitle.offset_top = 72
+	_subtitle.offset_bottom = 122
 	_subtitle.add_theme_font_size_override("font_size", 23)
 	_subtitle.add_theme_color_override("font_color", Color("e1e4ed"))
 	queue_redraw()

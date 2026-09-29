@@ -103,7 +103,7 @@ func _buy(run: MatchRun, slot: int, item: String) -> Dictionary:
 func _human_count(run: MatchRun) -> int:
 	var count := 0
 	for slot in run.humans().size():
-		if run.is_human(slot):
+		if run.needs_ready(slot):
 			count += 1
 	return count
 
@@ -112,7 +112,7 @@ func _close_if_everyone_ready(run: MatchRun) -> void:
 	if done:
 		return
 	for slot in run.humans().size():
-		if run.is_human(slot) and not ready_slots.has(slot):
+		if run.needs_ready(slot) and not ready_slots.has(slot):
 			return
 	_close(run)
 
