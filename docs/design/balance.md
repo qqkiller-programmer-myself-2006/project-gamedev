@@ -130,10 +130,28 @@ Baseline recorded before cave enemies: Default 84% / 75%, Loadout 79% / 90%, Sto
 | Giant Spider | 100 | 11 | 4 | 13 | 7 | 12 | random | Venom Web (3 Energy) |
 | Minotaur | 155 | 17 | 6 | 0 | 4 | 8 | charge_strongest | Bull Rush (3 Energy) |
 
-## T21 Re-tuning (S5 Boons & Human passive fix)
+## T21 re-tuning (#65: Race/Boon bonuses now apply before derived stats)
 
-Since the `Human` race passive (+1 to all attributes) correctly applies before derived stats are calculated, class stats and the boss were tweaked. To keep the 2-human win rate within the 70-92% range when AI slots (Classless, no Race) lag behind, we made the following adjustment to `content/forest.json`:
+Human (+1 all), Elf and Chosen One bonuses used to do nothing; once they applied, Race-less AI slots fell behind and the
+Classed party got stronger. Changes in `content/forest.json`:
 
-| ค่าใน `content/forest.json` | ก่อน | หลัง | เหตุผล |
-| --- | --- | --- | --- |
-| บอส Guardian HP / ATK | 1450 / 20 | 1350 / 20 | ปรับชดเชยการที่ AI slot (ไม่มี Race) อ่อนแอลงหลังจากการแก้บั๊ก attributes เพื่อให้ 2-human co-op win rate กลับมาที่ > 70% และไม่ทำให้ 1-human ง่ายเกินไป |
+| Value | Before | After |
+| --- | --- | --- |
+| Classless base HP / DEF / RES | 42 / 4 / 2 | 50 / 5 / 3 |
+| Class base ATK (Swordsman, Archer, Guardian, Assassin) / Mage MAG | 5, 3, 4, 4 / 6 | 4, 2, 3, 3 / 5 |
+| Guardian boss HP / ATK / MAG | 1450 / 18 / 14 | 1350 / 20 / 16 |
+| Class Trial `pass_exp` | 40 | 60 |
+
+Critical Healing follows ADR-0013 (a crit heals the attacker for 20% of the damage dealt).
+
+### Win rate after #65 (`tools/dev/simulate.gd`, 100 seeds from 1000)
+
+| Mode | 1 player | 2 players |
+| --- | --- | --- |
+| Default | 87% | 79% |
+| Loadout | 87% | 93% |
+| Story | 77% | — |
+
+Loadout with 2 players is 1 point above the 92% target, inside the ±3% noise of 100 seeds. Raising the boss HP to 1400
+did not move it (93%) but dropped Story to 69% and default 2-player to 73%, so the boss stays at 1350. Revisit with more
+seeds during QA (#54).

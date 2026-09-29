@@ -54,4 +54,4 @@ func test_reset_empty_tree_charges_nothing() -> void:
 	assert_rejected(h.server.command(session, {"type": "reset_tree", "class": "swordsman"}),
 			"nothing_to_reset")
 	assert_eq(h.room_view(session)["profile"]["gems"], before)
-	assert_eq(UiText.error("nothing_to_reset"), "This Skill Tree has no levels to reset.")
+	assert_eq(UiText.error("nothing_to_reset"), "No Skill Tree levels to reset for this Class.")
