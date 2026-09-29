@@ -40,8 +40,8 @@
 | T2 Attribute 7 ตัว + Focus (server) | Antigravity | merged 50a6fa7 | #49 | ✅ เสร็จ 251/251, win 87/88% |
 | T3 Camp UI ตามภาพ 08–10 | Codex | `ai/t3-camp-ui` / `../ai-t3` | #50 | ✅ merged 35e7767 (3 รอบ QA); seed 3 = ได้ภาพ Rest, seed 11 = Merchant |
 | T4 Energy ศัตรู + Gold ส่วนตัว/Transfer (server) | Antigravity+Codex | merged | #51 | ✅ merged b3aaa02, 254/254, win 88/83% |
-| T5 ADR-0013 + server: Race, Boons, Class meta/Prestige | Codex (agy หมดโควตา) | `ai/t5-loadout` / `../ai-t5` | #52 | กำลังทำ (Codex, ai/t5-loadout) |
-| T6 หน้าจอ Class/Race/Boons ตามภาพ 01–03 | Codex | — | #53 | รอ T3, T5 |
+| T5 ADR-0013 + server: Race, Boons, Class meta/Prestige | Codex | merged 2d1e7ef | #52 | ✅ 262/262; loadout win 100% → #59 |
+| T6 หน้าจอ Class/Race/Boons ตามภาพ 01–03 | Codex | `ai/t6-setup-ui` / `../ai-t6` | #53 | กำลังทำ |
 | T7 QA รวม, 1920×1080, PR, final build | Claude | — | #54 | รอทั้งหมด |
 | T8 Cloudflare Worker + D1 เก็บ profile/Gems | Codex | merged 0ffd1b1 | #55 | ✅ โค้ดเสร็จ 5/5 test; รอเจ้าของงาน deploy ตาม docs/running.md |
 
@@ -70,3 +70,6 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - 2026-09-29 13:35: #57 รอบ 1 merged beb28af (หน้าแรกใหม่ + Playtest ทำงาน, 254/254); รอบ 2 ต้องแก้: Swordsman ซ่อนหลังเมนูที่ 1.0, ตัวละครลอยไม่ยืนรอบกองไฟ, กองไฟเป็นสามเหลี่ยม/วงแสงสีดำ, เส้นลายบนท้องฟ้า, panel เขียวแทน navy, ข้อความ build ถูกตัด, ช่อง Seed อยู่ในเมนูหลัก
 - **หลัง merge ไฟล์ที่มี class_name ใหม่ ต้องรัน `"$GODOT" --headless --path . --import` ก่อนเปิดเกม** ไม่งั้นขึ้น "Identifier ... not declared"
 - เปิดทดสอบ: `Godot_v4.7.2-stable_win64.exe --path . -- --dev --playtest`
+- 2026-09-29 13:45: #52 merged; #53 (T6) เริ่ม; #58 part 1 merged 580f6b5, T11b spec พร้อม (รอช่องว่าง); #59 balance (T12) รอ agy Gemini รีเซ็ต ~14:25
+- คิวถัดไป (สูงสุด 2 งานพร้อมกัน): T11b Story wiring → T12 balance (agy) → T10a-r2 หน้าแรกขัดเกลา → T10b Playtest jump → T7 QA/PR
+- `.codex/agents/*.toml` ในรีโปเกิดจากแอป Codex คัดลอก .claude/agents มาเอง (ไม่ใช่ของเรา) — ไม่ commit
