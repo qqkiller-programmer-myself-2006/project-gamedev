@@ -15,3 +15,9 @@ plays loadout mode unrealistically well (e.g. always picking the strongest Boons
 Files you may change: `content/forest.json`, `docs/balance.md`, `tools/simulate.gd`, tests that pin exact numbers you changed.
 Verify: `bash scripts/run_tests.sh` → 0 failed (exact line); both simulate modes with the final numbers. ONE Godot process at a
 time. Report in English: changes, test line, final win rates for both modes.
+
+## Also: Story mode (from #58 QA)
+`simulate.gd --story --seeds=40 --humans=1` wins 9/40 (23%), all defeats at the boss, and the story bot never visits Merchant or
+Rest. First make `tests/support/match_bot.gd` in story mode play every character with the class AI presets (`src/match/ai/party_ai.gd`)
+and choose sensible routes (like the normal bot), then tune so story mode also lands in 70–90%. Merge the latest integration branch
+into this worktree first (`git merge claude/github-project-issue-learning-20567b`) — it now contains the Story room code.
