@@ -34,6 +34,7 @@ var _camp: CampView
 ## Card id -> times (ms) of recent floating numbers, to stack them.
 var _float_stack: Dictionary = {}
 var _camp_mode := false
+var _scroll_to_top := false
 var _story_director: StoryDirector = null
 
 
@@ -74,13 +75,15 @@ func setup(client: ClientApp) -> void:
 	_log = RichTextLabel.new()
 	_log.bbcode_enabled = false
 	_log.scroll_following = true
-	_log.custom_minimum_size = Vector2(0, 100)
+	_log.custom_minimum_size = Vector2(0, 90)
 	_log.focus_mode = Control.FOCUS_NONE
 	_log.add_theme_color_override("default_color", UiKit.TEXT_DIM)
 	var bottom := UiKit.hbox(10)
 	var log_panel := UiKit.panel(_log)
 	log_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bottom.add_child(log_panel)
+	# Tips sit next to the log (never over controls); they are short so the
+	# phase panel keeps its height.
 	_tips = UiKit.vbox(0)
 	bottom.add_child(_tips)
 	column.add_child(bottom)
@@ -112,7 +115,7 @@ func tip_slot() -> Container:
 func tip_width() -> float:
 	if _battle_mode:
 		return 210.0
-	return 300.0 if _camp_mode else 430.0
+	return 420.0 if _camp_mode else 520.0
 
 
 func match_view() -> Dictionary:
@@ -696,10 +699,19 @@ func _build_panel(view: Dictionary) -> void:
 	var key := "%s-%d-%s" % [phase, int(view.get("layer", 0)), str(encounter.get("kind", "")) if encounter != null else ""]
 	if key != _panel_key:
 		_panel_key = key
+		# A new kind of panel starts at the top, not where the last one was scrolled.
+		_center_scroll.scroll_vertical = 0
+		_scroll_to_top = true
 		app.fade_in(_panel, 0.25, Vector2(16, 0))
 
 
 func _scroll_to(control: Control) -> void:
+	# Wait for the containers to lay out (the list layout may have just been
+	# shown again after a fight), else the scroll overshoots.
+	await get_tree().process_frame
+	if _scroll_to_top:
+		_scroll_to_top = false
+		_center_scroll.scroll_vertical = 0
 	if is_instance_valid(control) and control.is_inside_tree():
 		_center_scroll.ensure_control_visible(control)
 

@@ -133,7 +133,8 @@ func _column(title: String, content: Control, ratio: float) -> Control:
 
 func _vertical_tabs(labels: Array, left: bool, view: Dictionary = {}) -> Control:
 	var tabs := UiKit.vbox(6)
-	tabs.custom_minimum_size = Vector2(88, 0)
+	var tab_width := 104.0 * maxf(1.0, _app.settings.text_scale)
+	tabs.custom_minimum_size = Vector2(tab_width, 0)
 	tabs.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	for i in labels.size():
 		var label: String = labels[i]
@@ -149,7 +150,7 @@ func _vertical_tabs(labels: Array, left: bool, view: Dictionary = {}) -> Control
 				_inventory_mode = "abilities"
 				_show_abilities(view)
 			_screen.refresh(_app, true))
-		button.custom_minimum_size = Vector2(88, 52)
+		button.custom_minimum_size = Vector2(tab_width, 52)
 		button.clip_text = true
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.set_meta("focus_id", "camp_tab_" + label)
@@ -165,7 +166,7 @@ func _vertical_tabs(labels: Array, left: bool, view: Dictionary = {}) -> Control
 		slot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		slot_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		var slot := UiKit.panel(slot_label, "HudCard")
-		slot.custom_minimum_size = Vector2(88, 64)
+		slot.custom_minimum_size = Vector2(tab_width, 64)
 		tabs.add_child(slot)
 	return tabs
 

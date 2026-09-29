@@ -10,6 +10,7 @@ extends SceneTree
 ##          --scale=1.2 (text size)  --reduced-motion
 ##          --class=rogue (every Class Encounter teaches that Class)
 ##          --setup-only (capture Room and Character setup, then exit)
+##          --resolution=1920x1080 (window size; the UI stretches from 1280x720)
 
 var out_dir := "build/ui"
 var speed := 4.0
@@ -47,6 +48,10 @@ func _initialize() -> void:
 			_setup_only = true
 		elif arg.begins_with("--class="):
 			only_class = arg.trim_prefix("--class=")
+		elif arg.begins_with("--resolution="):
+			var parts := arg.trim_prefix("--resolution=").split("x")
+			if parts.size() == 2 and parts[0].is_valid_int() and parts[1].is_valid_int():
+				DisplayServer.window_set_size(Vector2i(int(parts[0]), int(parts[1])))
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	var overrides := {}
 	if not only_class.is_empty():
@@ -116,6 +121,20 @@ func _process(delta: float) -> bool:
 		_shot("02e_lobby_loadout")
 		if _setup_only:
 			return true
+		app.confirm_leave()
+		return false
+	if frame == 68:
+		_shot("02f_confirm_leave")
+		for node in app._overlay_holder.get_children():
+			if node is ConfirmDialog:
+				node.close()
+		app.open_settings()
+		return false
+	if frame == 69:
+		_shot("02g_settings")
+		for node in app._overlay_holder.get_children():
+			if node is SettingsPanel:
+				node.queue_free()
 		app.send({"type": "start_match"})
 		return false
 	if frame < 70:

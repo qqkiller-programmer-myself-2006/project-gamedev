@@ -34,7 +34,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	if _offer["you_can_decide"]:
 		var row := UiKit.flow(10)
 		row.add_child(UiKit.label("Take the %s Class?" % info["name"], "heading"))
-		var accept := UiKit.button("Accept [Y]", func() -> void: app.send({"type": "class_choice", "accept": true}), true)
+		var accept := UiKit.primary("Accept [Y]", func() -> void: app.send({"type": "class_choice", "accept": true}))
 		accept.set_meta("focus_id", "accept")
 		row.add_child(accept)
 		var decline := UiKit.button("Decline [N]", func() -> void: app.send({"type": "class_choice", "accept": false}), true)

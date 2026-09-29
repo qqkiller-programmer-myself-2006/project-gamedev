@@ -85,6 +85,18 @@ before destructive actions.
 9. Nothing overlaps at 1280×720, 1920×1080 and text size 1.4; long lists scroll; rows wrap.
 10. Reduced motion turns off fades, slides and floating motion.
 
+## Checking a UI change
+
+```bash
+GODOT=/d/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe
+"$GODOT" --path . -s tools/ui_preview.gd -- --out=build/ux --seed=3 --speed=10          # add --scale=1.4, --seed=11,
+                                                                                    # --class=mage, --resolution=1920x1080
+"$GODOT" --path . -s tools/story_preview.gd -- --out=build/ux_story --full
+```
+
+`ui_preview` also captures the Leave confirmation (`02f`) and Settings (`02g`). Open the PNGs and look for clipped text,
+overlaps and more than one gold button per panel. Run one Godot process at a time.
+
 ## Audit: before → after (2026-09-29, `tools/ui_preview.gd` seeds 3 and 11, `tools/story_preview.gd --full`)
 
 | Screen | Before | After |

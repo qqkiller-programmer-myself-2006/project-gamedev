@@ -382,16 +382,19 @@ func hint(key: String) -> void:
 	settings.seen_hints.append(key)
 	settings.save()
 	var box := UiKit.vbox(4)
-	box.add_child(UiKit.label("Tip", "body", UiKit.ACCENT))
+	var head := UiKit.hbox(8)
+	head.add_child(UiKit.label("Tip", "body", UiKit.ACCENT))
+	head.add_child(UiKit.spacer())
+	box.add_child(head)
 	var width := 430.0
 	if _current != null and _current.has_method("tip_width"):
 		width = _current.tip_width()
-	var text := UiKit.para(UiText.HINTS[key], "small", Color(0, 0, 0, 0), width)
+	var text := UiKit.para(UiText.HINTS[key], "small", UiKit.TEXT, width)
 	box.add_child(text)
 	var panel := UiKit.panel(box, "HighlightPanel")
 	panel.set_meta("hint", true)
-	var close := UiKit.button("Got it [H]", func() -> void: panel.queue_free())
-	box.add_child(close)
+	var close := UiKit.button("Got it [H]", func() -> void: panel.queue_free(), false, "small")
+	head.add_child(close)
 	if _current != null and _current.has_method("tip_slot"):
 		_current.tip_slot().add_child(panel)
 		return
@@ -463,12 +466,14 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 
 func _build_toast() -> void:
+	# Toasts always appear at the top centre, on every screen.
 	_toast_label = UiKit.label("")
-	_toast = UiKit.panel(_toast_label, "HighlightPanel")
-	_toast.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	_toast = UiKit.panel(_toast_label, "ToastPanel")
+	_toast.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	_toast.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_toast.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_toast.position.y -= 24
+	_toast.grow_vertical = Control.GROW_DIRECTION_END
+	_toast.offset_top = 12
+	_toast.offset_bottom = 12
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_toast.visible = false
 	add_child(_toast)
@@ -477,10 +482,13 @@ func _build_toast() -> void:
 func _build_banner() -> void:
 	_banner_label = UiKit.label("", "title", UiKit.ACCENT)
 	_banner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# Banners sit below the Match top bar so they never hide its buttons.
 	_banner = UiKit.panel(_banner_label, "HighlightPanel")
 	_banner.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	_banner.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_banner.position.y += 4
+	_banner.grow_vertical = Control.GROW_DIRECTION_END
+	_banner.offset_top = 90
+	_banner.offset_bottom = 90
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_banner.visible = false
 	add_child(_banner)

@@ -31,7 +31,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 			text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			box.add_child(text)
 			var button := UiKit.button("[%d] Vote" % (index + 1), func() -> void: app.send({"type": "vote", "option": index}))
-			button.disabled = voted
+			UiKit.disable(button, voted, UiText.WHY["voted"])
 			button.set_meta("focus_id", "story_vote_%d" % index)
 			box.add_child(button)
 			add_child(UiKit.panel(box, "CardPanel"))
@@ -54,9 +54,9 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 			extras.append("the Party recovers some HP")
 		if not extras.is_empty():
 			add_child(UiKit.para(", ".join(extras), "heading"))
-		var go := UiKit.button("Waiting for the others..." if _ready else "Continue [Enter]",
-				func() -> void: app.send({"type": "ready"}), true)
-		go.disabled = _ready
+		var go := UiKit.primary("Waiting for the others..." if _ready else "Continue [Enter]",
+				func() -> void: app.send({"type": "ready"}))
+		UiKit.disable(go, _ready, UiText.WHY["ready"])
 		go.set_meta("focus_id", "continue")
 		add_child(go)
 	_countdown = UiKit.label("", "dim")

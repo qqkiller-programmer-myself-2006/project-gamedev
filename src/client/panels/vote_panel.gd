@@ -76,8 +76,8 @@ func _option_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> Co
 	box.add_child(tally)
 	var mine: bool = screen.get_meta("my_vote_%d" % int(screen.match_view()["layer"]), -1) == index
 	var text := "Your vote" if mine else ("[%d] Vote for this path" % (index + 1))
-	var button := UiKit.button(text, func() -> void: _vote(screen, app, index))
-	button.disabled = _voted
+	var button := UiKit.button(text, func() -> void: _vote(screen, app, index), false, "selected" if mine else "secondary")
+	UiKit.disable(button, _voted, UiText.WHY["voted"])
 	button.set_meta("focus_id", "vote_%d" % index)
 	box.add_child(button)
 	var card := UiKit.panel(box, "HighlightPanel" if mine else "CardPanel")

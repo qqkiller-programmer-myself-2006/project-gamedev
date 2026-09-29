@@ -26,9 +26,9 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 		ready_names.append(str(slots[int(slot)]["owner_name"]) if int(slot) < slots.size() else "?")
 	add_child(UiKit.label("Done shopping: %s" % (", ".join(ready_names) if not ready_names.is_empty() else "nobody yet"), "dim"))
 	var actions := UiKit.flow(10)
-	var done := UiKit.button("Waiting for the others..." if _ready else "Done shopping [R]",
-			func() -> void: app.send({"type": "ready"}), true)
-	done.disabled = _ready
+	var done := UiKit.primary("Waiting for the others..." if _ready else "Done shopping [R]",
+			func() -> void: app.send({"type": "ready"}))
+	UiKit.disable(done, _ready, UiText.WHY["ready"])
 	done.set_meta("focus_id", "ready")
 	actions.add_child(done)
 	_countdown = UiKit.label("", "heading")
@@ -66,7 +66,10 @@ func _row(app: ClientApp, index: int, entry: Dictionary) -> Control:
 	elif not entry["affordable"]:
 		label = "Need %d Gold" % int(entry["price"])
 	var buy := UiKit.button(label, func() -> void: app.send({"type": "buy", "item": entry["item"]}))
-	buy.disabled = not entry["affordable"]
+	if int(entry["remaining"]) <= 0:
+		UiKit.disable(buy, true, UiText.WHY["sold_out"])
+	else:
+		UiKit.disable(buy, not entry["affordable"], UiText.WHY["need_gold"] % int(entry["price"]))
 	buy.set_meta("focus_id", "buy_" + str(entry["item"]))
 	row.add_child(buy)
 	return UiKit.panel(row, "CardPanel")

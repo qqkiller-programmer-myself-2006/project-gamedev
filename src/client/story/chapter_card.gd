@@ -29,7 +29,8 @@ func _init(data: Dictionary = {}, reduced: bool = false) -> void:
 	_title.offset_left = -450
 	_title.offset_right = 450
 	_title.offset_top = -165
-	_title.offset_bottom = 5
+	_title.offset_bottom = 50
+	_title.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
 	_title.add_theme_font_size_override("font_size", UiKit.SIZES["huge"])
 	_title.add_theme_color_override("font_color", UiKit.GOLD)
 	_subtitle.set_anchors_and_offsets_preset(Control.PRESET_CENTER)

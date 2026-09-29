@@ -67,11 +67,11 @@ func refresh(app: ClientApp, force: bool = false) -> void:
 		list.add_child(_slot_row(slot))
 
 	var actions := UiKit.flow(12)
-	var setup_button := UiKit.button("Character Setup", _open_setup, true)
+	var setup_button := UiKit.button("Character Setup", _open_setup, true, "secondary" if is_host else "primary")
 	setup_button.set_meta("focus_id", "setup")
 	actions.add_child(setup_button)
 	if is_host:
-		var start := UiKit.button("Start the Match [Enter]", func() -> void: app.send({"type": "start_match"}), true)
+		var start := UiKit.primary("Start the Match", func() -> void: app.send({"type": "start_match"}))
 		start.set_meta("focus_id", "start")
 		actions.add_child(start)
 	else:
@@ -80,14 +80,12 @@ func refresh(app: ClientApp, force: bool = false) -> void:
 			if slot["is_host"]:
 				host_name = slot["owner_name"]
 		actions.add_child(UiKit.label("Waiting for %s (Host) to start the Match..." % host_name, "heading"))
-	var leave := UiKit.button("Leave room", func() -> void:
-		app.send({"type": "leave_room"})
-		app.disconnect_from_server())
+	var leave := UiKit.button("Leave room [Esc]", app.confirm_leave, true, "danger")
 	leave.set_meta("focus_id", "leave")
 	actions.add_child(leave)
-	actions.add_child(UiKit.button("Settings [F2]", app.open_settings))
+	actions.add_child(UiKit.button("Settings [F2]", app.open_settings, true))
 	_body.add_child(actions)
-	if not _restore_focus(focus_id) and not _restore_focus("start") and not _restore_focus("leave"):
+	if not _restore_focus(focus_id) and not _restore_focus("start") and not _restore_focus("setup"):
 		UiKit.focus_first(_body)
 
 
@@ -132,6 +130,9 @@ func _open_setup() -> void:
 func handle_key(_app_ref: ClientApp, keycode: int) -> bool:
 	if is_instance_valid(_setup):
 		return _setup.handle_key(keycode)
+	if keycode == KEY_ESCAPE:
+		_app.confirm_leave()
+		return true
 	return false
 
 

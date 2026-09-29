@@ -9,6 +9,16 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	var won: bool = summary.get("result") == "victory"
 	add_child(UiKit.label("VICTORY" if won else "DEFEAT", "huge", UiKit.GOOD if won else UiKit.ENEMY))
 	add_child(UiKit.para(str(summary.get("title", "")), "title", UiKit.ACCENT))
+	# What to do next comes first, so it is on screen without scrolling.
+	var actions := UiKit.flow(12)
+	if screen.is_host():
+		var again := UiKit.primary("Start a new Match", func() -> void: app.send({"type": "start_match"}))
+		again.set_meta("focus_id", "again")
+		actions.add_child(again)
+	else:
+		actions.add_child(UiKit.label("Waiting for the Host to start a new Match...", "heading"))
+	actions.add_child(UiKit.button("Clue log [C]", screen.toggle_clues, true))
+	add_child(actions)
 	add_child(UiKit.para(str(summary.get("text", ""))))
 	var stats := GridContainer.new()
 	stats.columns = 2
@@ -29,15 +39,6 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	add_child(UiKit.panel(stats, "CardPanel"))
 	for clue in summary.get("clues", []):
 		add_child(UiKit.para("- %s: %s" % [clue["title"], clue["text"]], "dim"))
-	var actions := UiKit.flow(12)
-	if screen.is_host():
-		var again := UiKit.button("Start a new Match [Enter]", func() -> void: app.send({"type": "start_match"}), true)
-		again.set_meta("focus_id", "again")
-		actions.add_child(again)
-	else:
-		actions.add_child(UiKit.label("Waiting for the Host to start a new Match...", "heading"))
-	actions.add_child(UiKit.button("Clue log [C]", screen.toggle_clues))
-	add_child(actions)
 
 
 static func _reached(summary: Dictionary, won: bool) -> String:

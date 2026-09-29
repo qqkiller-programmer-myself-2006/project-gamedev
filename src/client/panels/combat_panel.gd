@@ -158,7 +158,7 @@ func _build_your_turn(screen: MatchScreen, app: ClientApp, view: Dictionary) -> 
 		actions.add_child(skill)
 		actions.add_child(_action_button("Defend [D]", func() -> void: _send(app, {"action": "defend"}), "defend"))
 		var item := _action_button("Item [I]", func() -> void: _set_mode(screen, "items"), "item")
-		item.disabled = choices.get("items", {}).is_empty()
+		UiKit.disable(item, choices.get("items", {}).is_empty(), UiText.WHY["no_items"])
 		actions.add_child(item)
 		add_child(actions)
 		add_child(UiKit.para("Defend halves damage until your next turn. Items come from the Party's shared bag.", "dim"))

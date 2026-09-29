@@ -66,7 +66,7 @@ func _show_menu() -> void:
 	_content = panel
 	body.add_child(UiKit.label("WELCOME, TRAVELLER", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.para("Choose your path into the forest.", "dim"))
-	var play := UiKit.button("Play", _show_play, true)
+	var play := UiKit.primary("Play", _show_play)
 	play.set_meta("focus_id", "play")
 	body.add_child(play)
 	if _app.can_playtest():
@@ -92,7 +92,9 @@ func _show_menu() -> void:
 	var settings := UiKit.button("Settings [F2]", _app.open_settings)
 	settings.set_meta("focus_id", "settings")
 	body.add_child(settings)
-	body.add_child(UiKit.button("Credits", _show_credits))
+	var credits := UiKit.button("Credits", _show_credits)
+	credits.set_meta("focus_id", "credits")
+	body.add_child(credits)
 	if not OS.has_feature("web"):
 		body.add_child(UiKit.button("Quit", func() -> void: _app.stop_dev_playtest(); get_tree().quit()))
 	UiKit.focus_first(body)
@@ -116,13 +118,20 @@ func _show_play() -> void:
 	_content = panel
 	body.add_child(UiKit.label("CHOOSE YOUR JOURNEY", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.label("Story · offline, control all five", "body"))
-	body.add_child(UiKit.button("New Story", _show_story_setup, true))
-	if _app.story_save.has_save():
-		body.add_child(UiKit.button("Continue Story", func() -> void: _app.start_story([], _app.story_save.load()), true))
+	var has_save: bool = _app.story_save.has_save()
+	if has_save:
+		var resume := UiKit.primary("Continue Story", func() -> void: _app.start_story([], _app.story_save.load()))
+		resume.set_meta("focus_id", "continue_story")
+		body.add_child(resume)
+	var story := UiKit.button("New Story", _show_story_setup, true, "secondary" if has_save else "primary")
+	story.set_meta("focus_id", "new_story")
+	body.add_child(story)
 	body.add_child(HSeparator.new())
 	body.add_child(UiKit.label("Multiplayer · create or join a room", "body"))
-	body.add_child(UiKit.button("Multiplayer", _show_multiplayer, true))
-	body.add_child(UiKit.button("Back", _show_menu))
+	var multiplayer_button := UiKit.button("Multiplayer", _show_multiplayer, true)
+	multiplayer_button.set_meta("focus_id", "multiplayer")
+	body.add_child(multiplayer_button)
+	body.add_child(UiKit.button("Back [Esc]", _show_menu))
 	UiKit.focus_first(body)
 
 func _show_story_setup() -> void:
@@ -152,8 +161,8 @@ func _show_story_setup() -> void:
 		_story_picks.append(pick)
 		row.add_child(pick)
 		body.add_child(row)
-	body.add_child(UiKit.button("Begin Story", _begin_story, true))
-	body.add_child(UiKit.button("Back", _show_play))
+	body.add_child(UiKit.primary("Begin Story", _begin_story))
+	body.add_child(UiKit.button("Back [Esc]", _show_play))
 	UiKit.focus_first(body)
 
 func _begin_story() -> void:
@@ -177,7 +186,7 @@ func _show_multiplayer() -> void:
 	body.add_child(UiKit.label("Your name (shown to other players)", "dim"))
 	_name = _line_edit(_app.settings.player_name, "e.g. Arin", 16)
 	body.add_child(_name)
-	var create := UiKit.button("Create a room", _create, true)
+	var create := UiKit.primary("Create a room", _create)
 	create.set_meta("focus_id", "create")
 	body.add_child(create)
 	body.add_child(HSeparator.new())
@@ -187,7 +196,8 @@ func _show_multiplayer() -> void:
 	_code.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_code.text_submitted.connect(func(_t: String) -> void: _join())
 	row.add_child(_code)
-	var join := UiKit.button("Join room", _join, true)
+	var join := UiKit.button("Join room", _join)
+	join.tooltip_text = "Type the Room code, then press Enter or click here"
 	join.set_meta("focus_id", "join")
 	row.add_child(join)
 	body.add_child(row)
@@ -202,7 +212,7 @@ func _show_multiplayer() -> void:
 	_status = UiKit.para("", "body", UiKit.WARN)
 	_status.visible = false
 	body.add_child(_status)
-	var back := UiKit.button("Back", _show_play)
+	var back := UiKit.button("Back [Esc]", _show_play)
 	back.set_meta("focus_id", "back")
 	body.add_child(back)
 	create.grab_focus.call_deferred()
@@ -223,7 +233,7 @@ func _show_credits() -> void:
 	body.add_child(UiKit.label("BEYOND THE WORLD'S END", "title", UiKit.ACCENT))
 	body.add_child(UiKit.label("Made with Godot 4.7", "heading"))
 	body.add_child(UiKit.para("Font: Pixelify Sans, OFL\nCharacter art by the project owner.", "body"))
-	body.add_child(UiKit.button("Back", _show_menu))
+	body.add_child(UiKit.primary("Back [Esc]", _show_menu, false))
 	UiKit.focus_first(body)
 
 func _clear_content() -> void:
@@ -266,10 +276,14 @@ func _remember() -> bool:
 
 func handle_key(app: ClientApp, keycode: int) -> bool:
 	if keycode == KEY_ESCAPE:
-		if _view != "menu":
-			_show_menu()
-		else:
-			app.stop_dev_playtest()
+		# Esc does what the Back button of the current view does.
+		match _view:
+			"story_setup", "multiplayer":
+				_show_play()
+			"play", "credits":
+				_show_menu()
+			_:
+				app.stop_dev_playtest()
 		return true
 	return false
 
