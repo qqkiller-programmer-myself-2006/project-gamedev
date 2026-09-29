@@ -9,6 +9,7 @@ extends SceneTree
 ## Options: --out=DIR  --seed=N  --speed=X (game seconds per real second)
 ##          --scale=1.2 (text size)  --reduced-motion
 ##          --class=rogue (every Class Encounter teaches that Class)
+##          --setup-only (capture Room and Character setup, then exit)
 
 var out_dir := "build/ui"
 var speed := 4.0
@@ -22,6 +23,7 @@ var frame := 0
 var _think_until := 0.0
 var _last_key := ""
 var _done_at := -1
+var _setup_only := false
 
 
 func _initialize() -> void:
@@ -40,6 +42,8 @@ func _initialize() -> void:
 			scale = float(arg.trim_prefix("--scale="))
 		elif arg == "--reduced-motion":
 			reduced = true
+		elif arg == "--setup-only":
+			_setup_only = true
 		elif arg.begins_with("--class="):
 			only_class = arg.trim_prefix("--class=")
 	DirAccess.make_dir_recursive_absolute(out_dir)
@@ -70,8 +74,8 @@ func _process(delta: float) -> bool:
 		# old preview automation by activating Create in the same frame.
 		app.use_connection(local)
 		local.start()
-		_press(KEY_ENTER)
-		_press(KEY_ENTER)
+		(app._current as TitleScreen)._show_play()
+		(app._current as TitleScreen)._create()
 		return false
 	if frame == 25:
 		friend = harness.server.open_session()
@@ -80,10 +84,41 @@ func _process(delta: float) -> bool:
 		friend_bot.choose_route = MatchBot.sensible_route
 		return false
 	if frame == 40:
+		app._toast_until = 0.0
 		_shot("02_lobby")
-		_press(KEY_ENTER)
+		(app._current as LobbyScreen)._open_setup()
 		return false
-	if frame < 45:
+	if frame == 45:
+		_shot("02a_setup_class")
+		(app._current as LobbyScreen)._setup._cycle_class(-1)
+		(app._current as LobbyScreen)._setup._switch_tab("Races")
+		(app._current as LobbyScreen)._setup._race = "Dwarf"
+		(app._current as LobbyScreen)._setup._render()
+		return false
+	if frame == 50:
+		_shot("02b_setup_races")
+		(app._current as LobbyScreen)._setup._switch_tab("Boons")
+		return false
+	if frame == 55:
+		_shot("02c_setup_boons")
+		(app._current as LobbyScreen)._setup._select_boon("Alert")
+		return false
+	if frame == 60:
+		_shot("02d_setup_boons_equipped")
+		var chosen: Dictionary = (app._current as LobbyScreen)._setup._own_loadout()
+		if chosen.get("class", "") != "guardian" or not chosen.get("boons", []).has("Alert"):
+			printerr("ui_preview: Character setup did not reach the room snapshot")
+			quit(1)
+			return true
+		(app._current as LobbyScreen)._setup._finish.call()
+		return false
+	if frame == 65:
+		_shot("02e_lobby_loadout")
+		if _setup_only:
+			return true
+		app.send({"type": "start_match"})
+		return false
+	if frame < 70:
 		return false
 	harness.clock.advance(delta * speed)
 	harness.server.update()

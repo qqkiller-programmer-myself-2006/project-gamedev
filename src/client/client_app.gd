@@ -11,12 +11,14 @@ extends Control
 signal snapshot_changed
 
 const DEFAULT_URL := "ws://127.0.0.1:8910"
+const TOKEN_PATH := "user://player_token.txt"
 
 var settings: ClientSettings
 var connection: ServerConnection
 var snapshot: Dictionary = {}
 var sounds: SoundBank
 var options: Dictionary = {}
+var player_token := ""
 
 var _snapshot_server_time := 0.0
 var _snapshot_local_time := 0.0
@@ -42,6 +44,7 @@ func configure(launch_options: Dictionary) -> void:
 
 func _ready() -> void:
 	settings = ClientSettings.load_saved()
+	player_token = _load_player_token()
 	if options.has("name"):
 		settings.player_name = str(options["name"])
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -129,8 +132,24 @@ func send(cmd: Dictionary) -> void:
 	if connection == null or not connection.is_open():
 		toast(UiText.error("connection_lost"))
 		return
-	connection.send_command(cmd)
+	var outgoing := cmd
+	if str(cmd.get("type", "")) in ["create_room", "join_room"]:
+		outgoing = cmd.duplicate()
+		outgoing["token"] = player_token
+	connection.send_command(outgoing)
 	sounds.play("click")
+
+
+func _load_player_token() -> String:
+	if FileAccess.file_exists(TOKEN_PATH):
+		var saved := FileAccess.get_file_as_string(TOKEN_PATH).strip_edges().to_lower()
+		if saved.length() == 32 and saved.is_valid_hex_number():
+			return saved
+	var created := Crypto.new().generate_random_bytes(16).hex_encode()
+	var file := FileAccess.open(TOKEN_PATH, FileAccess.WRITE)
+	if file != null:
+		file.store_string(created)
+	return created
 
 
 func disconnect_from_server() -> void:

@@ -46,6 +46,17 @@ const ERRORS := {
 	"cannot_connect": "Could not reach the server. Check the address and try again.",
 	"connection_lost": "The connection to the server was lost.",
 	"server_stopping": "The server is shutting down.",
+	"invalid_class": "Choose one of the available Classes.",
+	"race_not_owned": "Purchase this Race before selecting it.",
+	"invalid_race": "That Race is unavailable.",
+	"already_owned": "You already own this Race.",
+	"not_enough_gems": "You do not have enough Gems.",
+	"invalid_boon": "That Boon is unavailable.",
+	"over_capacity": "Those Boons use more than five slots.",
+	"locked": "This choice is still locked.",
+	"invalid_node": "That Skill Tree node is unavailable.",
+	"max_level": "This node is already at level 5.",
+	"max_prestige": "This Class has reached maximum Prestige.",
 }
 
 const TYPE_LABELS := {
