@@ -73,3 +73,4 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - 2026-09-29 13:45: #52 merged; #53 (T6) เริ่ม; #58 part 1 merged 580f6b5, T11b spec พร้อม (รอช่องว่าง); #59 balance (T12) รอ agy Gemini รีเซ็ต ~14:25
 - คิวถัดไป (สูงสุด 2 งานพร้อมกัน): T11b Story wiring → T12 balance (agy) → T10a-r2 หน้าแรกขัดเกลา → T10b Playtest jump → T7 QA/PR
 - `.codex/agents/*.toml` ในรีโปเกิดจากแอป Codex คัดลอก .claude/agents มาเอง (ไม่ใช่ของเรา) — ไม่ commit
+- 2026-09-29 13:55: merged #53 (89baacb) และ #56 T9b (dba89c6), integration 266/266. กำลังทำ: T11b Story wiring (Codex), T12 balance (Codex เพราะ agy ยังหมดโควตา). คิว: T13 UI polish (`.ai/tasks/T13-ui-polish.md`, หลัง T11b เพราะแตะ title_screen/battle_view เหมือนกัน) → T10b → T7 QA/PR
