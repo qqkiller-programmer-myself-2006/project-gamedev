@@ -85,6 +85,10 @@ before destructive actions.
 9. Nothing overlaps at 1280×720, 1920×1080 and text size 1.4; long lists scroll; rows wrap.
 10. Reduced motion turns off fades, slides and floating motion.
 
+## Icons
+
+The authored 16×16 pixel icons in `assets/icons/` use the Navy + Gold tokens and bar colours, with a dark outline and top-left light. Render them with nearest-neighbour filtering through `Icons.rect()` or pair them with text using `Icons.with_text()`; keep their meaning available in text or a tooltip. See [`icons.md`](icons.md) for the set and regeneration command.
+
 ## Checking a UI change
 
 ```bash
