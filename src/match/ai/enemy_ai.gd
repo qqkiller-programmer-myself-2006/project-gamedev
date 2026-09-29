@@ -15,9 +15,9 @@ static func decide(run: MatchRun, combat: CombatEncounter, enemy: Dictionary) ->
 	var targets := combat.valid_targets(run, id, attack)
 	match str(enemy.get("behavior", "random")):
 		"hunt_weakest":
-			return _attack(id, attack, _extreme_hp(run, combat, targets, true))
+			return _special_if_able(run, combat, enemy, _extreme_hp(run, combat, targets, true), _attack(id, attack, _extreme_hp(run, combat, targets, true)))
 		"charge_strongest":
-			return _attack(id, attack, _extreme_hp(run, combat, targets, false))
+			return _special_if_able(run, combat, enemy, _extreme_hp(run, combat, targets, false), _attack(id, attack, _extreme_hp(run, combat, targets, false)))
 		"healer":
 			var heal := _heal_plan(run, combat, enemy)
 			if not heal.is_empty():
@@ -27,7 +27,7 @@ static func decide(run: MatchRun, combat: CombatEncounter, enemy: Dictionary) ->
 		weights.append(combat._unit(run, t).get("derived", {}).get("aggro", 1.0))
 	var idx = run.rng.weighted_index(weights)
 	var target = targets[0] if idx == -1 else targets[idx]
-	return _attack(id, attack, str(target))
+	return _special_if_able(run, combat, enemy, str(target), _attack(id, attack, str(target)))
 
 
 static func _attack(id: String, profile: Dictionary, target: String) -> Dictionary:
@@ -65,3 +65,13 @@ static func _heal_plan(run: MatchRun, combat: CombatEncounter, enemy: Dictionary
 		return {}
 	return {"actor": enemy["id"], "action": "skill", "skill": str(support.get("name", "Heal")),
 			"profile": support, "targets": [hurt]}
+
+static func _special_if_able(run: MatchRun, combat: CombatEncounter, enemy: Dictionary, target: String, attack_plan: Dictionary) -> Dictionary:
+	var special: Dictionary = run.content.get_dict("enemies.%s.special" % enemy["kind"])
+	if special.is_empty():
+		return attack_plan
+	var cost := int(special.get("energy", 1))
+	if int(enemy.get("energy", 0)) < cost:
+		return attack_plan
+	var profile: Dictionary = special.get("use", {})
+	return {"actor": enemy["id"], "action": "special", "move_name": str(special.get("name", "Special")), "energy_spent": cost, "profile": profile, "targets": [target]}

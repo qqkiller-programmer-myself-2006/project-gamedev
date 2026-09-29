@@ -38,7 +38,8 @@ godot --headless --path . -s tools/simulate.gd -- --seeds=100 --humans=1,2 --pac
 
 ## ผลล่าสุด (100 seed ต่อโหมด, `--pace`)
 
-| | Single-player | Duo co-op |
+| | Boss Energy | Boss spends all its accumulated Energy whenever it unleashes a telegraphed move, making the energy bar serve as a visual indicator for its ultimate attacks. |
+| Single-player | Duo co-op |
 | --- | --- | --- |
 | Win rate | 88% | 82% |
 | แพ้ที่ | Boss 10, ระหว่างทาง 2 | Boss 17, ระหว่างทาง 1 |
@@ -72,7 +73,8 @@ godot --headless --path . -s tools/simulate.gd -- --seeds=100 --humans=1,2 --pac
 `godot --headless --path . -s tools/simulate.gd -- --seeds=100 --humans=1,2`
 ค่า Energy: Power Slash 2, Aimed Shot 2, Fireball 2, Frost Lance 1, Protect 1, Shield Wall 2
 
-| | Single-player | Duo co-op |
+| | Boss Energy | Boss spends all its accumulated Energy whenever it unleashes a telegraphed move, making the energy bar serve as a visual indicator for its ultimate attacks. |
+| Single-player | Duo co-op |
 | --- | --- | --- |
 | Win rate | 85% | 82% |
 | แพ้ที่ | Boss 12, ระหว่างทาง 3 | Boss 11, ระหว่างทาง 7 |
@@ -84,7 +86,8 @@ win rate แทบไม่เปลี่ยนจากก่อนมี Ener
 
 ## ผลหลังเพิ่ม Attributes 7 ตัว (issue #25) — 100 seed ต่อโหมด, `--pace`
 
-| | Single-player | Duo co-op |
+| | Boss Energy | Boss spends all its accumulated Energy whenever it unleashes a telegraphed move, making the energy bar serve as a visual indicator for its ultimate attacks. |
+| Single-player | Duo co-op |
 | --- | --- | --- |
 | Win rate | 87% | 88% |
 | แพ้ที่ | Boss 12, ระหว่างทาง 1 | Boss 10, ระหว่างทาง 2 |

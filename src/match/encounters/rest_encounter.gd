@@ -25,6 +25,7 @@ func start(run: MatchRun) -> void:
 	deadline = run.clock.now() + run.content.get_float("encounters.rest.seconds", 60.0)
 	run.emit({"type": "rested", "healed": healed, "deadline": deadline})
 	_close_if_everyone_ready(run)
+	run.collect_ai_gold()
 
 
 func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
@@ -48,6 +49,24 @@ func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 			error = run.unequip(slot, str(cmd.get("gear_slot", "")))
 		"invest":
 			error = run.invest(slot, str(cmd.get("stat", "")))
+		"transfer_item":
+			error = run.transfer_item(slot, str(cmd.get("item", "")), int(cmd.get("to", -1)))
+			if error != "":
+				return {"ok": false, "error": error}
+			return {"ok": true}
+		"transfer_gold":
+			var to = int(cmd.get("to", -1))
+			var amount = int(cmd.get("amount", 0))
+			if amount <= 0:
+				return {"ok": false, "error": "invalid_amount"}
+			if to < 0 or to >= run.party.size() or to == slot:
+				return {"ok": false, "error": "invalid_target"}
+			if int(run.party[slot].get("gold", 0)) < amount:
+				return {"ok": false, "error": "not_enough_gold"}
+			run.party[slot]["gold"] = int(run.party[slot]["gold"]) - amount
+			run.party[to]["gold"] = int(run.party[to].get("gold", 0)) + amount
+			run.emit({"type": "gold_transferred", "from": slot, "to": to, "amount": amount})
+			return {"ok": true}
 		_:
 			error = "wrong_phase"
 	if not error.is_empty():

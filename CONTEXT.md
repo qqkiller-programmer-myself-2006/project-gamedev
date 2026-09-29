@@ -73,7 +73,7 @@ action เฉพาะ Class ที่ใช้ Energy ตามค่าที�
 _Avoid_: ability, spell (เมื่อหมายถึง action ในระบบ)
 
 **Energy**:
-พลังของตัวละครใน Party ที่ใช้จ่ายค่า Skill: เริ่ม Combat ที่ 1 (ใช้ได้ใน turn แรก), ได้ +1 ตอนเริ่มทุก turn ถัดไปของตัวเอง, สูงสุด 6 และรีเซ็ตทุก Combat (ADR-0009); Attack, Defend และ Item ไม่ใช้ Energy และศัตรูไม่มี Energy
+พลังของตัวละครใน Party ที่ใช้จ่ายค่า Skill: เริ่ม Combat ที่ 1 (ใช้ได้ใน turn แรก), ได้ +1 ตอนเริ่มทุก turn ถัดไปของตัวเอง, สูงสุด 6 และรีเซ็ตทุก Combat (ADR-0009); ศัตรูและ Boss ก็มี Energy เช่นกัน (เริ่ม 0, +1 ต่อ turn)
 _Avoid_: mana, MP, SP, stamina
 
 **Tier 1 Class**:
@@ -158,8 +158,16 @@ _Avoid_: attack (เมื่อหมายถึงชื่อบนจอ)
 คำสั่งป้องกัน (ชื่อระบบยังเป็น defend)
 _Avoid_: defend (เมื่อหมายถึงชื่อบนจอ)
 
+**Stash**:
+คลังของร่วมของ Party ที่เก็บ Item และ Material ไว้ด้วยกัน
+_Avoid_: inventory (เว้นแต่หมายถึงทั้งระบบ), bag
+
+**Consumable slot**:
+ช่องเก็บ Item ส่วนตัวของแต่ละตัวละคร (ช่องละ 1 ชิ้น) ซึ่งจะถูกเรียกใช้ก่อน Stash เสมอ
+_Avoid_: quick slot
+
 **Gold**:
-เงินร่วมของทั้ง Party (ไม่ใช่ของผู้เล่นแต่ละคน) ได้จาก Combat และ Treasure ใช้ที่ Merchant
+เงินส่วนตัวของแต่ละตัวละคร (Personal Gold) แบ่งเท่ากันจากรางวัล Combat/Treasure ใช้ซื้อของที่ Merchant และโอนให้กันได้
 _Avoid_: coins, money (ในเอกสารระบบ)
 
 **Reward**:

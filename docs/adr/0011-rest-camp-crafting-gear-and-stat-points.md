@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: accepted (Gold rules superseded by ADR-0012 �4)
 ---
 
 # Rest เป็นแคมป์ที่คราฟต์ของ เปลี่ยน Gear และลง Stat point ได้ พร้อม Ready check (ขยาย scope ของ ADR-0003)

@@ -21,7 +21,8 @@
     "energy_regen": 1,
     "energy_max": 6,
     "story_read_seconds": 25,
-    "story_vote_seconds": 20
+    "story_vote_seconds": 20,
+    "enemy_energy_max": 4
   },
   "party": {
     "members": [
@@ -141,7 +142,8 @@
         "res": 2,
         "spd": 8,
         "crit": 0.05
-      }
+      },
+      "aggro": 1.2
     },
     "archer": {
       "name": "Archer",
@@ -278,7 +280,8 @@
         "res": 4,
         "spd": 6,
         "crit": 0.03
-      }
+      },
+      "aggro": 1.5
     },
     "rogue": {
       "name": "Rogue",
@@ -334,7 +337,8 @@
         "res": 2,
         "spd": 9,
         "crit": 0.12
-      }
+      },
+      "aggro": 0.85
     }
   },
   "leveling": {
@@ -702,6 +706,24 @@
             "chance": 0.5
           }
         ]
+      },
+      "special": {
+        "name": "Rend",
+        "energy": 2,
+        "use": {
+          "target": "enemy",
+          "damage": {
+            "stat": "atk",
+            "power": 1.1,
+            "element": "physical"
+          },
+          "apply_status": [
+            {
+              "status": "bleed",
+              "stacks": 1
+            }
+          ]
+        }
       }
     },
     "thornback_boar": {
@@ -742,6 +764,18 @@
             "chance": 0.5
           }
         ]
+      },
+      "special": {
+        "name": "Heavy Charge",
+        "energy": 3,
+        "use": {
+          "target": "enemy",
+          "damage": {
+            "stat": "atk",
+            "power": 1.5,
+            "element": "physical"
+          }
+        }
       }
     },
     "bramble_archer": {
@@ -957,7 +991,8 @@
       "weakness": [
         "fire"
       ],
-      "rewards": {}
+      "rewards": {},
+      "energy_max": 6
     },
     "masked_outlaw": {
       "name": "Masked Outlaw",
@@ -982,7 +1017,20 @@
         }
       },
       "weakness": [],
-      "rewards": {}
+      "rewards": {},
+      "special": {
+        "name": "Double Strike",
+        "energy": 2,
+        "use": {
+          "target": "enemy",
+          "hits": 2,
+          "damage": {
+            "stat": "atk",
+            "power": 0.7,
+            "element": "physical"
+          }
+        }
+      }
     }
   },
   "encounters": {

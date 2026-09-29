@@ -19,7 +19,7 @@ extends RefCounted
 const PARTY_SIZE := 5
 ## In-Match command types (routed here by MatchServer during a Match).
 const COMMANDS: Array[String] = ["vote", "action", "class_choice", "buy", "ready",
-		"craft", "equip", "unequip", "invest"]
+		"craft", "equip", "unequip", "invest", "transfer_gold", "transfer_item"]
 ## Stats a character sheet is built from (crit is a ratio, the rest integers).
 const STATS: Array[String] = ["max_hp", "atk", "def", "mag", "res", "spd"]
 
@@ -63,6 +63,7 @@ func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array
 	_started_at = clock.now()
 	_create_party()
 	gold = content.get_int("party.starting_gold", 0)
+	add_gold(gold)
 	for item in content.get_dict("party.starting_inventory"):
 		add_item(item, content.get_int("party.starting_inventory.%s" % item))
 	routes = RouteGenerator.generate(rng, content)
@@ -172,7 +173,35 @@ func inventory_view() -> Array:
 
 func add_gold(amount: int) -> void:
 	gold += amount
+	if amount <= 0 or party.is_empty():
+		return
+	var split = amount / party.size()
+	var remainder = amount % party.size()
+	for character in party:
+		character["gold"] = int(character.get("gold", 0)) + split
+	if remainder > 0:
+		party[0]["gold"] = int(party[0].get("gold", 0)) + remainder
 
+
+func collect_ai_gold() -> void:
+	var ai_gold := 0
+	var human_slots: Array[int] = []
+	for character in party:
+		if not is_human(character["slot"]):
+			var g = int(character.get("gold", 0))
+			if g > 0:
+				ai_gold += g
+				character["gold"] = 0
+		else:
+			human_slots.append(character["slot"])
+	if ai_gold > 0 and not human_slots.is_empty():
+		var split = ai_gold / human_slots.size()
+		var remainder = ai_gold % human_slots.size()
+		for slot in human_slots:
+			party[slot]["gold"] = int(party[slot].get("gold", 0)) + split
+		if remainder > 0:
+			party[human_slots[0]]["gold"] = int(party[human_slots[0]].get("gold", 0)) + remainder
+		emit({"type": "ai_gold_transferred", "amount": ai_gold})
 
 func add_item(item: String, count: int = 1) -> void:
 	if count <= 0:
@@ -262,6 +291,8 @@ func party_view() -> Array:
 			"derived": c.get("derived", {}).duplicate(),
 			"gear": _gear_view(c),
 			"controller": "human" if _humans[c["slot"]] else "ai",
+			"gold": int(c.get("gold", 0)),
+			"consumable": c.get("consumable", null),
 		})
 	return out
 
@@ -290,6 +321,8 @@ func _create_party() -> void:
 		character["hp"] = character["max_hp"]
 		character["energy"] = content.get_int("rules.energy_start", 1)
 		character["energy_max"] = content.get_int("rules.energy_max", 6)
+		character["gold"] = 0
+		character["consumable"] = null
 		party.append(character)
 
 
@@ -577,3 +610,29 @@ func _encounter_view(viewer_slot: int) -> Variant:
 	view["type"] = encounter.option["type"]
 	view["name"] = encounter.option["name"]
 	return view
+
+func transfer_item(slot: int, item: String, to: int) -> String:
+	if not inventory.has(item) or int(inventory[item]) <= 0:
+		return "not_in_stash"
+	if str(content.get_value("items.%s.kind" % item, "")) != "consumable":
+		return "not_consumable"
+	if to < 0 or to >= party.size():
+		return "invalid_target"
+	var target_char = party[to]
+	if target_char["consumable"] != null:
+		var current = target_char["consumable"]
+		if current["item"] == item:
+			current["count"] = int(current["count"]) + 1
+			add_item(item, -1)
+		else:
+			# Swap
+			var old_item = current["item"]
+			var old_count = current["count"]
+			add_item(item, -1)
+			add_item(old_item, old_count)
+			target_char["consumable"] = {"item": item, "count": 1}
+	else:
+		add_item(item, -1)
+		target_char["consumable"] = {"item": item, "count": 1}
+	emit({"type": "item_transferred", "from": slot, "to": to, "item": item})
+	return ""
