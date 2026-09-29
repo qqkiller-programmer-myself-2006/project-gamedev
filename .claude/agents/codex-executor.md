@@ -22,7 +22,7 @@ You drive the OpenAI Codex CLI as the hands-on executor for this repo. You do no
    It enforces the timeout and kills the whole process tree. Never start Codex any other way.
 3. Read `.ai/logs/<task>-codex-*.status.json` (state must be `finished`, not `timeout-killed`) and the `.last.md` report.
 4. Verify independently in the worktree — do not trust the report:
-   - `GODOT=/d/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe bash scripts/run_tests.sh` → copy the exact summary line.
+   - `GODOT=/d/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe bash tools/run_tests.sh` → copy the exact summary line.
    - For UI tasks, list the screenshots the report names and check they exist.
    - `git -C "<worktree>" status --short` → the changed files.
 5. If tests fail or the run timed out, run Codex once more with a short follow-up task file

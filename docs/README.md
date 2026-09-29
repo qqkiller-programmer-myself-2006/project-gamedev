@@ -1,0 +1,42 @@
+# Documentation index
+
+- `README.md` ? This index.
+- `adr/` ? Documents and resources in this folder.
+- `agents/` ? Documents and resources in this folder.
+- `design/` ? Documents and resources in this folder.
+- `guides/` ? Documents and resources in this folder.
+- `plans/` ? Documents and resources in this folder.
+- `references/` ? Documents and resources in this folder.
+- `references/aac_rogue/` ? Documents and resources in this folder.
+- `review/` ? Documents and resources in this folder.
+- `screenshots/` ? Documents and resources in this folder.
+- `adr/0001-authoritative-cross-platform-online.md` ? ใช้ authoritative server ร่วมกันระหว่าง PC และ browser client.
+- `adr/0002-five-character-party-with-ai-fill.md` ? ใช้ Party 5 คนและเติม slot ที่ขาดด้วย AI.
+- `adr/0003-forest-production-vertical-slice.md` ? จำกัด production vertical slice ไว้ที่ Forest 5 Layers.
+- `adr/0004-in-repo-headless-test-runner.md` ? ใช้ test runner ขนาดเล็กที่เขียนเองในรีโป แทน GUT หรือ gdUnit4.
+- `adr/0005-skill-cooldowns.md` ? จำกัดการใช้ Skill ด้วย cooldown นับเป็น turn ของตัวละคร ไม่ใช้ resource (MP/SP).
+- `adr/0006-fifth-party-member-is-fathers-apprentice.md` ? ตัวละครลำดับที่ 5 ของ Party คือ Wren ลูกศิษย์และผู้ร่วมทางเก่าของพ่อ.
+- `adr/0007-english-in-game-text-in-content-data.md` ? ข้อความในเกมใช้ภาษาอังกฤษ และเก็บไว้ในข้อมูล content ไม่ hard-code ใน logic.
+- `adr/0008-websocket-json-transport.md` ? ใช้ WebSocket + ข้อความ JSON เป็น transport ระหว่าง client กับ authoritative server.
+- `adr/0009-energy-and-cooldown-skills.md` ? Skill ใช้ทั้ง Energy และ cooldown ทุก Class (แทน ADR-0005).
+- `adr/0010-rogue-class-and-dot-status-effects.md` ? เพิ่ม Rogue เป็น Tier 1 Class ตัวที่ 5 พร้อมระบบ Status effect แบบ DoT (ขยาย scope ของ ADR-0003).
+- `adr/0011-rest-camp-crafting-gear-and-stat-points.md` ? Rest เป็นแคมป์ที่คราฟต์ของ เปลี่ยน Gear และลง Stat point ได้ พร้อม Ready check (ขยาย scope ของ ADR-0003).
+- `adr/0012-aac-parity-attributes-focus-enemy-energy-personal-gold.md` ? เกมตามภาพ AAC ทั้งระบบ: Attribute 7 ตัว, Fight/Items/Focus, Energy ของศัตรู และ Gold ส่วนตัว (แทนบางส่วนของ ADR-0011 และ CONTEXT.md).
+- `adr/0013-pre-match-loadout-class-race-boons-prestige-gems.md` ? เลือก Class, Race และ Boons ก่อนเริ่ม Match แบบ AAC พร้อม Skill tree/Prestige และ Gems ที่เก็บบน server (แทน Classless start).
+- `adr/0014-offline-story-mode.md` ? Story mode: เล่นคนเดียวแบบออฟไลน์ คุมทั้ง 5 ตัว มีเนื้อเรื่องและ Save (Multiplayer คงเดิม).
+- `agents/domain.md` ? Domain Docs.
+- `agents/issue-tracker.md` ? Issue tracker: GitHub.
+- `agents/triage-labels.md` ? Triage Labels.
+- `design/accessibility.md` ? Accessibility และ UI/UX checklist (issue #17).
+- `design/balance.md` ? Balance และ pacing ของ Forest vertical slice.
+- `design/prd.md` ? PRD — BEYOND THE WORLD'S END.
+- `design/ui-style.md` ? UI style guide: Navy + Gold (issue #60).
+- `guides/running.md` ? Running the game.
+- `guides/staging.md` ? Staging และการรับรอง core flow (issue #19).
+- `guides/testing.md` ? Testing.
+- `guides/web.md` ? Browser build.
+- `plans/2026-09-29-restructure.md` ? Plan: simpler folder structure (owner request 2026-09-29).
+- `review/2026-09-29-client-review.md` ? Client / Story mode UI / tools review — 2026-09-29.
+- `review/2026-09-29-dev-plan.md` ? Development plan after the 2026-09-29 review.
+- `review/2026-09-29-server-review.md` ? Server / net / content / tests review — 2026-09-29.
+- `skills-lock.json` ? Locked documentation skill versions.

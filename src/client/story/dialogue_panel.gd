@@ -4,7 +4,7 @@ extends Control
 signal finished
 
 const FONT_PATH := "res://assets/fonts/PixelifySans.ttf"
-const PORTRAIT_ROOT := "res://assets/characters/"
+const PORTRAIT_ROOT := "res://assets/heroes/"
 
 var lines: Array = []
 var line_index := 0

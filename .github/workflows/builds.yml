@@ -61,7 +61,7 @@ jobs:
           mkdir -p /tmp/pw && cd /tmp/pw && npm init -y >/dev/null && npm install --silent playwright@1.56.1
           npx --prefix /tmp/pw playwright install --with-deps chromium
           cd "$GITHUB_WORKSPACE"
-          GODOT=~/godot/godot NODE_PATH=/tmp/pw/node_modules node tools/web_smoke.mjs
+          GODOT=~/godot/godot NODE_PATH=/tmp/pw/node_modules node tools/ci/web_smoke.mjs
 
       - name: Upload browser build
         uses: actions/upload-artifact@v4

@@ -1,5 +1,5 @@
 extends SceneTree
-## Headless test runner (see docs/testing.md).
+## Headless test runner (see docs/guides/testing.md).
 ##
 ##   godot --headless --path . -s tests/run_tests.gd
 ##   godot --headless --path . -s tests/run_tests.gd -- --filter=voting

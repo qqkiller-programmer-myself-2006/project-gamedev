@@ -22,9 +22,9 @@ You drive the Google Antigravity CLI (`agy`) as the hands-on executor for this r
    It passes `--dangerously-skip-permissions` (owner-approved, worktree only), enforces the timeout and kills the process tree.
 3. Read `.ai/logs/<task>-agy-*.status.json` and the tail of the `.out.log` report.
 4. Verify independently in the worktree — agy has reported wrong test counts before:
-   - `GODOT=/d/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe bash scripts/run_tests.sh` → exact summary line and
+   - `GODOT=/d/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe bash tools/run_tests.sh` → exact summary line and
      every `[FAIL]` line.
-   - If the task touches balance: `"$GODOT" --headless --path . -s tools/simulate.gd -- --seeds=100 --humans=1,2`.
+   - If the task touches balance: `"$GODOT" --headless --path . -s tools/dev/simulate.gd -- --seeds=100 --humans=1,2`.
    - `git -C "<worktree>" status --short`; flag stray files (`scratch_*`, `run_*.sh`, `.opencode-*`).
 5. If anything fails, write `.ai/tasks/<task>-retry.md` with the exact failures and run agy once more; verify again.
    At most one retry.

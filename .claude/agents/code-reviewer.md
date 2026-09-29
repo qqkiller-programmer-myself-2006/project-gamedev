@@ -8,18 +8,18 @@ You review BEYOND THE WORLD'S END (Godot 4.7, GDScript, authoritative server + c
 source, content, tests or tools. The only file you may write is the review report you are asked to produce.
 
 ## Read first
-`CONTEXT.md`, `AGENTS.md`, `docs/adr/*.md` (esp. 0001, 0007, 0009–0014), `docs/testing.md`, `checkpoint.md`.
+`CONTEXT.md`, `AGENTS.md`, `docs/adr/*.md` (esp. 0001, 0007, 0009–0014), `docs/guides/testing.md`, `checkpoint.md`.
 
 ## What to review
 Committed code only: `git diff <base>...HEAD` and `git show HEAD:<path>` — other agents may be editing the working tree, so never
 judge uncommitted files. Cover:
-- **Server/rules** (`src/match/**`, `src/core/**`, `src/server/**`): ADR compliance, state bugs, turn/timer edge cases, story
+- **Server/rules** (`src/match/**`, `src/shared/**`, `src/server/**`): ADR compliance, state bugs, turn/timer edge cases, story
   room, save/restore, personal gold/transfers, loadout/profile/gems, determinism (only `GameRng`/injected clock), error codes.
 - **Net/security** (`src/net/**`, `deploy/**`): authority leaks (client deciding results), malformed commands, token handling,
   profile Worker auth/limits, embedded Playtest server exposure.
 - **Client** (`src/client/**`): crashes (null access, freed nodes, signals), stale UI, input/focus traps, text outside
   `ui_text.gd`/content (ADR-0007), layout overlap risks.
-- **Tests & tools**: gaps (rules without tests), brittle tests, simulator realism (`tools/simulate.gd`), preview automation.
+- **Tests & tools**: gaps (rules without tests), brittle tests, simulator realism (`tools/dev/simulate.gd`), preview automation.
 - **Content** (`content/*.json`): references to missing ids, impossible costs, unreachable content.
 
 ## Method

@@ -60,4 +60,4 @@ status: accepted
 
 - `CONTEXT.md` ต้องอัปเดต: Gold (ส่วนตัว), Energy (ศัตรูมี Energy), Attribute, Focus, Strike/Guard, Stash
 - ADR-0011 ข้อ "Gold และคลังเป็นของทั้ง Party / ไม่มี Transfer Gold" ถูกแทนด้วยข้อ 4
-- regression win rate ยังต้องอยู่ในช่วง 70–97% (`tools/simulate.gd`)
+- regression win rate ยังต้องอยู่ในช่วง 70–97% (`tools/dev/simulate.gd`)

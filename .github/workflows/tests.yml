@@ -35,4 +35,4 @@ jobs:
           chmod +x ~/godot/godot
 
       - name: Run tests
-        run: GODOT=~/godot/godot ./scripts/run_tests.sh
+        run: GODOT=~/godot/godot ./tools/run_tests.sh

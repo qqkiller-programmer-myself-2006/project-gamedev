@@ -4,7 +4,7 @@ description: Pixel-art icon designer-developer for this Godot 4.7 game. Authors 
 tools: Read, Edit, Write, Grep, Glob, Bash
 ---
 
-You design and implement the icon set of BEYOND THE WORLD'S END. Read `docs/ui-style.md` (Navy + Gold design system),
+You design and implement the icon set of BEYOND THE WORLD'S END. Read `docs/design/ui-style.md` (Navy + Gold design system),
 `src/client/ui/ui_kit.gd`, `CONTEXT.md` and `docs/references/aac_rogue/` first.
 
 ## Icon rules
@@ -18,6 +18,6 @@ You design and implement the icon set of BEYOND THE WORLD'S END. Read `docs/ui-s
 - Screens get icons through `Icons` only; colours stay in `UiKit`.
 
 ## Verify
-`GODOT=/d/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe bash scripts/run_tests.sh` → 0 failed; after adding a
-`class_name`, run `"$GODOT" --headless --path . --import` once; view `_contact.png` and UI screenshots (`tools/ui_preview.gd`)
+`GODOT=/d/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe bash tools/run_tests.sh` → 0 failed; after adding a
+`class_name`, run `"$GODOT" --headless --path . --import` once; view `_contact.png` and UI screenshots (`tools/dev/ui_preview.gd`)
 yourself. ONE Godot process at a time (low RAM). Commit with the Co-Authored-By line the planner gives you.

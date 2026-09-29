@@ -3,7 +3,7 @@ extends RefCounted
 ## Scripted player(s) that drive a Match purely through the Match interface:
 ## it reads each human session's snapshot and sends the commands a sensible
 ## player would. Used for journey tests, the full-run regression suite and
-## the pacing simulation (tools/simulate.gd).
+## the pacing simulation (tools/dev/simulate.gd).
 
 ## Default "thinking time" per kind of decision when simulating human pacing
 ## (seconds of game time before the bot answers). Tests use no delay.

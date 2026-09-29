@@ -1,6 +1,6 @@
 class_name UiKit
 extends RefCounted
-## The one client theme (Navy + Gold, docs/ui-style.md) and small widget
+## The one client theme (Navy + Gold, docs/design/ui-style.md) and small widget
 ## helpers. Screens pick a type variation from `make_theme`; they never build
 ## their own StyleBoxes or write hex colours. Colours are never the only
 ## carrier of meaning: every coloured element also has a text label.
