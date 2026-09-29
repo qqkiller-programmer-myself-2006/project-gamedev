@@ -163,6 +163,12 @@ func _drive() -> void:
 	var battle = screen._battle if screen != null else null
 	if battle != null:
 		_capture_sprite_frames(battle)
+		for child in battle.tips.get_children():
+			if child.has_meta("hint") and not child.is_queued_for_deletion():
+				if not shots.has("04_combat_hint"):
+					_shot("04_combat_hint")
+				_press(KEY_H)
+				return
 	if battle != null and battle._banner != null and battle._banner.visible and not shots.has("06_action_banner"):
 		_shot("06_action_banner")
 	if battle != null and str(battle._combat.get("result", "")) == "victory" and not shots.has("11_combat_reward"):

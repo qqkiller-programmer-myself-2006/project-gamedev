@@ -80,10 +80,13 @@ func _process(delta: float) -> void:
 		_text_label.text = _full_text.substr(0, _shown)
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_ESCAPE]:
-		# The dialogue owns these keys while it is open (Esc must not also open "Leave?").
-		get_viewport().set_input_as_handled()
+	if not (event is InputEventKey) or not event.pressed:
+		return
+	# The dialogue owns every key while open so battle and camp hotkeys cannot
+	# fire underneath it. Enter and Esc keep their overlay actions.
+	if not event.echo and event.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_ESCAPE]:
 		advance() if event.keycode != KEY_ESCAPE else skip()
+	get_viewport().set_input_as_handled()
 
 func advance() -> void:
 	if _shown < _full_text.length():

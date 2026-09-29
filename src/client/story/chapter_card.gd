@@ -69,7 +69,9 @@ func _process(delta: float) -> void:
 		queue_free()
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if reduced_motion and event is InputEventKey and event.pressed and event.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE, KEY_ESCAPE]:
-		get_viewport().set_input_as_handled()
+	if not (event is InputEventKey) or not event.pressed:
+		return
+	if reduced_motion and not event.echo and event.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE, KEY_ESCAPE]:
 		finished.emit()
 		queue_free()
+	get_viewport().set_input_as_handled()

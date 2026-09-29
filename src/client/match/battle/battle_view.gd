@@ -101,13 +101,12 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	tips.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	tips.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	tips.offset_right = -10
-	tips.offset_bottom = -10
+	# Keep tips above the action HUD rather than behind or on top of its buttons.
+	tips.offset_bottom = -190 * _app.settings.text_scale
 	tips.custom_minimum_size = Vector2(220, 0)
-	# AAC's battle view is intentionally clean; contextual hints belong to the
-	# non-combat screens and otherwise cover the battlefield/nameplates.
-	tips.visible = false
+	tips.z_index = 50
+	tips.visible = true
 	add_child(tips)
-
 	_header = UiKit.vbox(6)
 	_header.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_header.grow_horizontal = Control.GROW_DIRECTION_BOTH
@@ -178,6 +177,10 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_banner.add_child(_banner_label)
 	_banner.visible = false
 	add_child(_banner)
+
+
+func has_blocking_banner() -> bool:
+	return is_instance_valid(_banner) and _banner.visible
 
 
 ## Rebuilds everything that depends on the snapshot.

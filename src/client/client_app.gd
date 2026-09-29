@@ -12,6 +12,7 @@ signal snapshot_changed
 
 const DEFAULT_URL := "ws://127.0.0.1:8910"
 const TOKEN_PATH := "user://player_token.txt"
+const CONNECT_TIMEOUT_SECONDS := 8.0
 
 var settings: ClientSettings
 var connection: ServerConnection
@@ -23,6 +24,7 @@ var player_token := ""
 var _snapshot_server_time := 0.0
 var _snapshot_local_time := 0.0
 var _pending_action: Callable = Callable()
+var _connect_deadline := -1.0
 var _screen_holder: Control
 var _current: Control = null
 var _current_name := ""
@@ -74,8 +76,7 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	if connection != null:
-		connection.poll()
+	poll_connection()
 	if _current != null and _current.has_method("tick"):
 		_current.tick(self)
 	var now := _local_now()
@@ -114,17 +115,31 @@ func server_url() -> String:
 
 
 ## Runs `action` once connected, connecting to `url` first if needed.
-func connect_and(url: String, action: Callable) -> void:
+## `transport` is injectable so the lifecycle can be tested without a socket.
+func connect_and(url: String, action: Callable, transport: ServerConnection = null) -> void:
 	if connection != null and connection.is_open():
 		action.call()
 		return
-	_pending_action = action
-	var client := NetClient.new()
+	var client: ServerConnection = transport if transport != null else NetClient.new()
 	_use_connection(client)
+	_pending_action = action
+	_connect_deadline = _local_now() + float(options.get("connect_timeout_seconds", CONNECT_TIMEOUT_SECONDS))
 	if client.connect_to(url) != OK:
 		_on_closed("cannot_connect")
 	else:
 		toast("Connecting to %s ..." % url, 3.0)
+
+
+## Polls the active transport and fails a connection attempt that never opens.
+func poll_connection() -> void:
+	if connection == null:
+		return
+	connection.poll()
+	if connection != null and _connect_deadline >= 0.0 and not connection.is_open() and _local_now() >= _connect_deadline:
+		var timed_out := connection
+		connection = null
+		timed_out.close("connect_timeout")
+		_on_closed("connect_timeout")
 
 
 ## Plugs in an already-built connection (LocalConnection for tools).
@@ -157,15 +172,14 @@ func _load_player_token() -> String:
 
 
 func disconnect_from_server() -> void:
+	_pending_action = Callable()
+	_connect_deadline = -1.0
 	if connection != null:
 		var old := connection
 		connection = null
 		old.close("left")
 	snapshot = {}
-	if story_launcher != null:
-		story_launcher.stop()
-		story_launcher = null
-	stop_dev_playtest()
+	_stop_owned_servers()
 	_show_screen("title")
 
 
@@ -213,6 +227,8 @@ func stop_dev_playtest() -> void:
 
 
 func start_story(classes: Array = [], restore: Dictionary = {}, seed_value: int = 0) -> void:
+	_pending_action = Callable()
+	_connect_deadline = -1.0
 	if connection != null:
 		disconnect_from_server()
 	_story_classes = classes.duplicate()
@@ -223,8 +239,12 @@ func start_story(classes: Array = [], restore: Dictionary = {}, seed_value: int 
 
 
 func _use_connection(new_connection: ServerConnection) -> void:
+	_pending_action = Callable()
+	_connect_deadline = -1.0
 	if connection != null:
-		connection.close("replaced")
+		var old := connection
+		connection = null
+		old.close("replaced")
 	connection = new_connection
 	connection.opened.connect(_on_opened)
 	connection.closed.connect(_on_closed.bind(connection))
@@ -234,6 +254,7 @@ func _use_connection(new_connection: ServerConnection) -> void:
 
 
 func _on_opened(_session: int) -> void:
+	_connect_deadline = -1.0
 	if _pending_action.is_valid():
 		var action := _pending_action
 		_pending_action = Callable()
@@ -244,14 +265,25 @@ func _on_closed(reason: String, which: ServerConnection = null) -> void:
 	if which != null and which != connection:
 		return
 	connection = null
-	story_launcher = null
+	_connect_deadline = -1.0
+	_pending_action = Callable()
+	_stop_owned_servers()
 	snapshot = {}
 	_show_screen("title")
+	_show_connection_error(reason)
+
+
+func _show_connection_error(reason: String) -> void:
 	if _current is TitleScreen:
+		_current._show_multiplayer()
 		_current.show_error(UiText.error(reason))
+	else:
+		toast(UiText.error(reason))
 
 
 func _on_update(events: Array, snap: Dictionary) -> void:
+	_pending_action = Callable()
+	_connect_deadline = -1.0
 	if snap.has("time"):
 		_snapshot_server_time = float(snap["time"])
 		_snapshot_local_time = _local_now()
@@ -274,6 +306,7 @@ func _on_update(events: Array, snap: Dictionary) -> void:
 
 
 func _on_result(_id: int, _cmd: Dictionary, result: Dictionary) -> void:
+	_pending_action = Callable()
 	if not result.get("ok", false):
 		if story_launcher != null and str(_cmd.get("type", "")) in ["create_room", "restore_story"]:
 			var msg := UiText.error(str(result.get("error", "")))
@@ -292,7 +325,7 @@ func _on_result(_id: int, _cmd: Dictionary, result: Dictionary) -> void:
 			_current.show_error(message)
 		else:
 			toast(message)
-	elif story_launcher != null and str(_cmd.get("type", "")) == "create_room":
+	elif story_launcher != null and str(_cmd.get("type", "")) == "create_room" and _cmd.get("story", false):
 		if not _story_restore.is_empty():
 			send({"type": "restore_story", "save": _story_restore})
 		else:
@@ -315,6 +348,8 @@ func _screen_for(snap: Dictionary) -> String:
 
 
 func _show_screen(screen: String) -> void:
+	if screen == "title" and not _current_name.is_empty() and _current_name != "title":
+		_stop_owned_servers(true)
 	if _current != null:
 		_screen_holder.remove_child(_current)
 		_current.queue_free()
@@ -390,9 +425,10 @@ func flash(node: CanvasItem, color: Color) -> void:
 func hint(key: String) -> void:
 	if settings.seen_hints.has(key) or not UiText.HINTS.has(key):
 		return
-	close_hints()
-	settings.seen_hints.append(key)
-	settings.save()
+	# Keep the first unread hint visible. Later hints can be offered again after
+	# the player explicitly closes this one and a fresh snapshot is rendered.
+	if _has_open_hint():
+		return
 	var box := UiKit.vbox(4)
 	var head := UiKit.hbox(8)
 	head.add_child(UiKit.label("Tip", "body", UiKit.ACCENT))
@@ -405,7 +441,8 @@ func hint(key: String) -> void:
 	box.add_child(text)
 	var panel := UiKit.panel(box, "HighlightPanel")
 	panel.set_meta("hint", true)
-	var close := UiKit.button("Got it [H]", func() -> void: panel.queue_free(), false, "small")
+	panel.set_meta("hint_key", key)
+	var close := UiKit.button("Got it [H]", func() -> void: _dismiss_hint(panel), false, "small")
 	head.add_child(close)
 	if _current != null and _current.has_method("tip_slot"):
 		_current.tip_slot().add_child(panel)
@@ -414,17 +451,44 @@ func hint(key: String) -> void:
 	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 20)
 
 
-func close_hints() -> bool:
+func close_hints(mark_seen: bool = true) -> bool:
 	var closed := false
-	var holders: Array = [_overlay_holder]
-	if _current != null and _current.has_method("tip_slot"):
-		holders.append(_current.tip_slot())
-	for holder in holders:
+	for holder in _hint_holders():
 		for child in holder.get_children():
 			if child.has_meta("hint"):
-				child.queue_free()
+				if mark_seen:
+					_dismiss_hint(child)
+				else:
+					child.queue_free()
 				closed = true
 	return closed
+
+
+func _dismiss_hint(panel: Control) -> void:
+	var key := str(panel.get_meta("hint_key", ""))
+	if not key.is_empty() and not settings.seen_hints.has(key):
+		settings.seen_hints.append(key)
+		settings.save()
+	panel.queue_free()
+
+
+func _has_open_hint() -> bool:
+	for holder in _hint_holders():
+		for child in holder.get_children():
+			if child.has_meta("hint") and not child.is_queued_for_deletion():
+				return true
+	return false
+
+
+func _hint_holders() -> Array:
+	var holders: Array = []
+	if is_instance_valid(_overlay_holder):
+		holders.append(_overlay_holder)
+	if _current != null and _current.has_method("tip_slot"):
+		var slot = _current.tip_slot()
+		if is_instance_valid(slot):
+			holders.append(slot)
+	return holders
 
 
 func open_settings() -> void:
@@ -466,7 +530,25 @@ func apply_settings() -> void:
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed or event.echo:
 		return
-	if event.keycode == KEY_H and close_hints():
+	if _has_open_hint():
+		if event.keycode == KEY_H:
+			close_hints()
+		get_viewport().set_input_as_handled()
+		return
+	for overlay in _overlay_holder.get_children():
+		if overlay.is_queued_for_deletion():
+			continue
+		if overlay is SettingsPanel:
+			if event.keycode == KEY_ESCAPE:
+				overlay.queue_free()
+			get_viewport().set_input_as_handled()
+			return
+		if overlay is ConfirmDialog:
+			if event.keycode == KEY_ESCAPE:
+				overlay.close()
+			get_viewport().set_input_as_handled()
+			return
+	if _banner.visible:
 		get_viewport().set_input_as_handled()
 		return
 	if event.keycode == KEY_F2 or (event.keycode == KEY_COMMA and event.ctrl_pressed):
@@ -475,6 +557,34 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 	if _current != null and _current.has_method("handle_key") and _current.handle_key(self, event.keycode):
 		get_viewport().set_input_as_handled()
+
+
+## Stops only servers owned by this client. When returning to title from an
+## embedded mode, also close its client connection so no local work survives.
+func _stop_owned_servers(close_owned_connection: bool = false) -> void:
+	var owned_connection: ServerConnection = null
+	if story_launcher != null:
+		owned_connection = story_launcher.connection
+		var launcher := story_launcher
+		story_launcher = null
+		if close_owned_connection and connection == owned_connection:
+			connection = null
+		launcher.stop()
+	if _dev_playtest and close_owned_connection and connection != null:
+		var old := connection
+		connection = null
+		old.close("returned_to_title")
+	stop_dev_playtest()
+
+
+func _exit_tree() -> void:
+	_pending_action = Callable()
+	_connect_deadline = -1.0
+	if connection != null:
+		var old := connection
+		connection = null
+		old.close("client_closed")
+	_stop_owned_servers()
 
 
 func _build_toast() -> void:

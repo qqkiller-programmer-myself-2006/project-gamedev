@@ -47,6 +47,7 @@ const ERRORS := {
 	"invalid_save": "This story save file is broken or from a different version.",
 	"bad_message": "The server did not understand that.",
 	"cannot_connect": "Could not reach the server. Check the address and try again.",
+	"connect_timeout": "The server did not answer in time. Check the address and try again.",
 	"connection_lost": "The connection to the server was lost.",
 	"server_stopping": "The server is shutting down.",
 	"invalid_class": "Choose one of the available Classes.",

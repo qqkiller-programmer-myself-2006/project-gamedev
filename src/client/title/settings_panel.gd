@@ -77,9 +77,11 @@ func setup(app: ClientApp) -> void:
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
+	if not (event is InputEventKey) or not event.pressed:
+		return
+	if event.keycode == KEY_ESCAPE and not event.echo:
 		queue_free()
-		get_viewport().set_input_as_handled()
+	get_viewport().set_input_as_handled()
 
 
 func _save_and_apply() -> void:

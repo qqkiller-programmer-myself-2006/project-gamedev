@@ -181,10 +181,15 @@ func tick(client: ClientApp) -> void:
 
 
 func handle_key(client: ClientApp, key: int) -> bool:
-	if key == KEY_C:
-		toggle_clues()
+	if _clue_overlay != null:
+		if key in [KEY_C, KEY_ESCAPE]:
+			toggle_clues()
 		return true
-	if key == KEY_ESCAPE and _clue_overlay != null:
+	if _story_director != null and is_instance_valid(_story_director.current):
+		return true
+	if _battle_mode and _battle.has_blocking_banner():
+		return true
+	if key == KEY_C:
 		toggle_clues()
 		return true
 	if _battle_mode:
@@ -254,7 +259,7 @@ func _set_fullscreen(mode: String) -> void:
 		_panel.queue_free()
 		_panel = null
 		_panel_key = ""
-	app.close_hints()
+	app.close_hints(false)
 	if camp:
 		_camp.reset()
 	if battle or camp:
@@ -712,7 +717,14 @@ func _build_panel(view: Dictionary) -> void:
 func _scroll_to(control: Control) -> void:
 	# Wait for the containers to lay out (the list layout may have just been
 	# shown again after a fight), else the scroll overshoots.
-	await get_tree().process_frame
+	if not is_inside_tree():
+		return
+	var tree := get_tree()
+	if tree == null:
+		return
+	await tree.process_frame
+	if not is_inside_tree() or not is_instance_valid(_center_scroll):
+		return
 	if _scroll_to_top:
 		_scroll_to_top = false
 		_center_scroll.scroll_vertical = 0

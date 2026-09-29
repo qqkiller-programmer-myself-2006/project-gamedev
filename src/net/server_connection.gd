@@ -15,6 +15,12 @@ signal server_error(error: String)
 var session := 0
 
 
+## Starts an outbound connection. Local connections are started explicitly;
+## network and test transports implement this seam.
+func connect_to(_server_url: String) -> Error:
+	return ERR_UNAVAILABLE
+
+
 func poll() -> void:
 	pass
 
