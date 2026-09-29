@@ -375,7 +375,7 @@ func _status_badge(entry: Dictionary, compact: bool) -> PanelContainer:
 	line.add_child(UiKit.pixel_label(UiKit.status_tag(status), "small", color))
 	line.add_child(UiKit.pixel_label("%d" % int(entry.get("stacks", 1)), "small"))
 	var result := UiKit.panel(line)
-	result.add_theme_stylebox_override("panel", UiKit.flat_box(Color(0.05, 0.05, 0.06, 0.92), color, 1, 3))
+	result.add_theme_stylebox_override("panel", UiKit.flat_box(UiKit.STATUS_BG, color, 1, 3))
 	result.tooltip_text = "%s: %s stack(s), %s turn(s) left" % [entry.get("name", status), entry.get("stacks", 1), entry.get("turns", 0)]
 	return result
 

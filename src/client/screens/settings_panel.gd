@@ -11,7 +11,7 @@ func setup(app: ClientApp) -> void:
 	_app = app
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var dim := ColorRect.new()
-	dim.color = Color(0, 0, 0, 0.6)
+	dim.color = Color(UiKit.BG, 0.72)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 	var center := CenterContainer.new()
@@ -19,7 +19,7 @@ func setup(app: ClientApp) -> void:
 	add_child(center)
 	var box := UiKit.vbox(12)
 	box.custom_minimum_size = Vector2(520, 0)
-	center.add_child(UiKit.panel(box, "HighlightPanel"))
+	center.add_child(UiKit.panel(box))
 	box.add_child(UiKit.label("Settings", "title", UiKit.ACCENT))
 
 	box.add_child(UiKit.label("Text size", "heading"))
@@ -29,11 +29,14 @@ func setup(app: ClientApp) -> void:
 	for i in ClientSettings.TEXT_SCALES.size():
 		var scale: float = ClientSettings.TEXT_SCALES[i]
 		var current := is_equal_approx(scale, app.settings.text_scale)
-		var button := UiKit.button(("> %s" if current else "%s") % names[i], func() -> void:
+		var button := UiKit.button(names[i], func() -> void:
 			app.settings.text_scale = scale
 			_save_and_apply()
 			UiKit.clear(self)
-			setup(app))
+			setup(app), false, "selected" if current else "secondary")
+		button.set_meta("focus_id", "size_%d" % i)
+		if current:
+			button.tooltip_text = "Current text size"
 		sizes.add_child(button)
 		if current:
 			first_button = button
@@ -68,7 +71,7 @@ func setup(app: ClientApp) -> void:
 	box.add_child(volume_row)
 	box.add_child(UiKit.label("Every sound cue also appears on screen as a banner or log line.", "dim"))
 
-	var close := UiKit.button("Close [Esc]", queue_free, true)
+	var close := UiKit.primary("Close [Esc]", queue_free)
 	box.add_child(close)
 	(first_button if first_button != null else close).grab_focus.call_deferred()
 

@@ -188,8 +188,11 @@ func handle_key(client: ClientApp, key: int) -> bool:
 		return _battle.handle_key(key)
 	if _camp_mode:
 		return _camp.handle_key(key)
-	if _panel != null and _panel.has_method("handle_key"):
-		return _panel.handle_key(self, client, key)
+	if _panel != null and _panel.has_method("handle_key") and _panel.handle_key(self, client, key):
+		return true
+	if key == KEY_ESCAPE:
+		client.confirm_leave()
+		return true
 	return false
 
 
@@ -281,26 +284,64 @@ func toggle_clues() -> void:
 	box.add_child(UiKit.label("Story Clues", "title", UiKit.ACCENT))
 	var clues: Array = match_view().get("clues", [])
 	if clues.is_empty():
-		box.add_child(UiKit.para("No clues yet. Story Events (and some fights) reveal where Father went."))
+		box.add_child(UiKit.para(UiText.EMPTY["clues"], "body", UiKit.TEXT_DIM))
 	for clue in clues:
 		var entry := UiKit.vbox(2)
 		entry.add_child(UiKit.label("%s  (Layer %d, %s)" % [clue["title"], int(clue["layer"]), clue["source"]], "heading"))
 		entry.add_child(UiKit.para(str(clue["text"])))
 		box.add_child(UiKit.panel(entry, "CardPanel"))
-	var close := UiKit.button("Close [C]", toggle_clues)
+	var close := UiKit.primary("Close [C]", toggle_clues, false)
 	box.add_child(close)
 	var center := CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var dim := ColorRect.new()
-	dim.color = Color(0, 0, 0, 0.55)
+	dim.color = Color(UiKit.BG, 0.72)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_clue_overlay = Control.new()
 	_clue_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_clue_overlay.add_child(dim)
 	_clue_overlay.add_child(center)
-	center.add_child(UiKit.panel(box, "HighlightPanel"))
+	center.add_child(UiKit.panel(box))
 	add_child(_clue_overlay)
 	close.grab_focus()
+
+
+## The ≡ and ? corner buttons of the battle and camp views, and the menu the
+## ≡ button opens (Clues, Settings, Leave). Returns the menu so Esc can toggle it.
+func build_corner_menu(host: Control) -> PanelContainer:
+	var menu := UiKit.panel(UiKit.vbox(6), "HudPanel")
+	menu.position = Vector2(10, 58)
+	menu.custom_minimum_size = Vector2(180, 0)
+	menu.visible = false
+	menu.z_index = 10
+	var items: VBoxContainer = menu.get_child(0)
+	for entry in [["Clues [C]", toggle_clues, "small"], ["Settings [F2]", app.open_settings, "small"],
+			["Leave Match", app.confirm_leave, "danger"]]:
+		var action: Callable = entry[1]
+		var item := UiKit.button(str(entry[0]), func() -> void:
+			menu.visible = false
+			action.call(), false, str(entry[2]))
+		item.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		item.set_meta("focus_id", "menu_" + str(entry[0]))
+		items.add_child(item)
+	var corner := UiKit.hbox(6)
+	corner.position = Vector2(10, 10)
+	var toggle_menu := func() -> void:
+		menu.visible = not menu.visible
+		if menu.visible:
+			UiKit.focus_first(menu)
+	for entry in [["≡", "Menu [Esc]", toggle_menu], ["?", "Clues [C]", toggle_clues]]:
+		var button := Button.new()
+		button.text = str(entry[0])
+		button.tooltip_text = str(entry[1])
+		button.theme_type_variation = "HudButton"
+		button.focus_mode = Control.FOCUS_ALL
+		button.custom_minimum_size = Vector2(40, 40)
+		button.pressed.connect(entry[2])
+		corner.add_child(button)
+	host.add_child(corner)
+	host.add_child(menu)
+	return menu
 
 
 ## A number or word that rises from a character or enemy card.
@@ -571,9 +612,7 @@ func _build_top(view: Dictionary) -> void:
 	clues.set_meta("focus_id", "clues")
 	_top.add_child(clues)
 	_top.add_child(UiKit.button("Settings [F2]", app.open_settings))
-	var leave := UiKit.button("Leave", func() -> void:
-		app.send({"type": "leave_room"})
-		app.disconnect_from_server())
+	var leave := UiKit.button("Leave [Esc]", app.confirm_leave, false, "danger")
 	leave.set_meta("focus_id", "leave")
 	_top.add_child(leave)
 

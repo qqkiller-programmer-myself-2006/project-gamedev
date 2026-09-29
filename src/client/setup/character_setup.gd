@@ -4,7 +4,7 @@ extends Control
 
 class TreeLinks extends Control:
 	func _draw() -> void:
-		var ink := Color("#a8a9b5")
+		var ink := UiKit.TEXT_DIM
 		var w := size.x / 3.0
 		var h := size.y / 3.0
 		for row in [0, 1]:
@@ -17,8 +17,8 @@ class ClassMark extends Control:
 	var class_id := "rogue"
 	func _draw() -> void:
 		var center := size * 0.5
-		var pale := Color("#e9e9fa")
-		var shadow := Color("#0e1322")
+		var pale := UiKit.TEXT
+		var shadow := UiKit.BG
 		if class_id == "guardian":
 			var shield := PackedVector2Array([center + Vector2(-40, -46), center + Vector2(40, -46), center + Vector2(34, 16), center + Vector2(0, 54), center + Vector2(-34, 16)])
 			draw_colored_polygon(shield, pale)
@@ -117,11 +117,7 @@ func setup(app: ClientApp, finish: Callable) -> void:
 
 
 func _draw() -> void:
-	for i in 24:
-		var tone := 0.09 + float(i) * 0.002
-		draw_rect(Rect2(0, float(i) * size.y / 24.0, size.x, size.y / 24.0 + 1), Color(tone + 0.045, tone * 0.66, tone * 0.48))
-	for i in 12:
-		draw_line(Vector2(0, float(i) * 70.0), Vector2(size.x, float(i) * 70.0), Color(0.05, 0.025, 0.015, 0.24), 3)
+	draw_rect(Rect2(Vector2.ZERO, size), UiKit.BG)
 
 
 func _build_shell() -> void:
@@ -138,16 +134,11 @@ func _build_shell() -> void:
 		button.text = ICONS[i]
 		button.custom_minimum_size = Vector2(72, 72)
 		button.focus_mode = Control.FOCUS_ALL
-		button.add_theme_font_size_override("font_size", int(32 * _app.settings.text_scale))
-		var medallion := UiKit.flat_box(Color("#1c2233"), Color("#b3b4c0"), 2, 8)
-		medallion.set_corner_radius_all(36)
-		button.add_theme_stylebox_override("normal", medallion)
-		var hover := UiKit.flat_box(Color("#4b5063"), Color.WHITE, 2, 8)
-		hover.set_corner_radius_all(36)
-		button.add_theme_stylebox_override("hover", hover)
+		button.theme_type_variation = "TabButton"
 		button.pressed.connect(func() -> void: _switch_tab(tab_name))
 		button.set_meta("tab", tab_name)
-		button.tooltip_text = tab_name
+		button.set_meta("focus_id", "tab_" + tab_name)
+		button.tooltip_text = "%s [%d]" % [tab_name, i + 1]
 		nav.add_child(button)
 	_content = Control.new()
 	_content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -156,14 +147,18 @@ func _build_shell() -> void:
 	_content.offset_top = 118
 	_content.offset_bottom = -88
 	add_child(_content)
-	var finish_button := _button("Finish", func() -> void: _finish.call(), true)
+	var finish_button := UiKit.primary("Finish [Esc]", func() -> void: _finish.call())
+	finish_button.set_meta("focus_id", "finish")
 	finish_button.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	finish_button.offset_left = -86
-	finish_button.offset_right = 86
+	finish_button.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	finish_button.offset_left = -110
+	finish_button.offset_right = 110
 	finish_button.offset_top = -75
 	finish_button.offset_bottom = -18
 	add_child(finish_button)
-	_gems_label = UiKit.pixel_label("◆ 0", "heading", Color("#83df76"))
+	_gems_label = UiKit.pixel_label("◆ 0", "heading", UiKit.SUCCESS)
+	_gems_label.tooltip_text = "Gems: spend them on Races, the Skill Tree and Prestige."
+	_gems_label.mouse_filter = Control.MOUSE_FILTER_PASS
 	_gems_label.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_gems_label.position = Vector2(15, -45)
 	_gems_label.size = Vector2(180, 38)
@@ -186,17 +181,21 @@ func _switch_tab(tab_name: String) -> void:
 
 
 func _render() -> void:
+	var focused := get_viewport().gui_get_focus_owner() if is_inside_tree() else null
+	var focus_id := str(focused.get_meta("focus_id", "")) if focused != null else ""
 	UiKit.clear(_content)
 	for button in get_children()[0].get_children():
 		if button is Button:
-			button.modulate = Color.WHITE if button.get_meta("tab", "") == _tab else Color(0.67, 0.68, 0.74)
+			button.theme_type_variation = "TabButtonSelected" if button.get_meta("tab", "") == _tab else "TabButton"
 	match _tab:
 		"Class": _render_class()
 		"Races": _render_races()
 		"Boons": _render_boons()
 		"Profile": _render_profile()
 		"Records": _render_records()
-	UiKit.focus_first(_content)
+	# Keep the keyboard focus where it was (a tab, a tree node, a Race...).
+	if focus_id.is_empty() or not LobbyScreen._find_and_focus(self, focus_id):
+		UiKit.focus_first(_content)
 
 
 func _render_class() -> void:
@@ -247,8 +246,13 @@ func _render_class() -> void:
 	middle.add_child(_text(str(TREE_EFFECTS.get(_node, ""))))
 	middle.add_child(_text("Cost: %s\nStatus: Unlocked" % ("MAX" if level >= 5 else str(int(node_data.get("cost", 10)) * (level + 1)))))
 	middle.add_child(UiKit.spacer())
-	var upgrade := _button("Upgrade", func() -> void: _app.send({"type": "tree_upgrade", "class": _class_id, "node": _node}))
-	upgrade.disabled = level >= 5 or int(_profile().get("gems", 0)) < int(node_data.get("cost", 10)) * (level + 1)
+	var upgrade := UiKit.primary("Upgrade", func() -> void: _app.send({"type": "tree_upgrade", "class": _class_id, "node": _node}), false)
+	var upgrade_cost := int(node_data.get("cost", 10)) * (level + 1)
+	upgrade.set_meta("focus_id", "upgrade")
+	if level >= 5:
+		UiKit.disable(upgrade, true, UiText.WHY["max_level"])
+	else:
+		UiKit.disable(upgrade, _gems() < upgrade_cost, UiText.WHY["need_gems"] % [upgrade_cost, _gems()])
 	middle.add_child(upgrade)
 	var right := _column_panel(row, 0.39)
 	var prestige := int(_profile().get("prestige", {}).get(_class_id, 0))
@@ -279,8 +283,9 @@ func _render_class() -> void:
 		var node_button := _button("✦\n%d/5" % _tree_level(node_id), func() -> void: _node = node_id; _render())
 		node_button.custom_minimum_size = Vector2(82, 76)
 		node_button.tooltip_text = node_id.replace("_", " ").capitalize()
+		node_button.set_meta("focus_id", "node_" + node_id)
 		if node_id == _node:
-			node_button.add_theme_stylebox_override("normal", UiKit.flat_box(Color("#555b70"), Color("#d5d5e0"), 2, 5))
+			node_button.theme_type_variation = "SelectedButton"
 			_tree_focus = node_button
 		grid.add_child(node_button)
 	right.add_child(UiKit.spacer())
@@ -289,12 +294,22 @@ func _render_class() -> void:
 	for node_id in TREE_ORDER:
 		if _tree_level(node_id) < 5:
 			all_max = false
-	var buy := _button("Buy Prestige\n◆ %d" % int(_meta.get("prestige", {}).get("cost", 100)), func() -> void: _app.send({"type": "buy_prestige", "class": _class_id}))
-	buy.disabled = not all_max or prestige >= 25 or int(_profile().get("gems", 0)) < 100
+	var prestige_cost := int(_meta.get("prestige", {}).get("cost", 100))
+	var buy := _button("Buy Prestige\n◆ %d" % prestige_cost, func() -> void: _app.send({"type": "buy_prestige", "class": _class_id}))
+	if prestige >= 25:
+		UiKit.disable(buy, true, UiText.WHY["prestige_max"])
+	elif not all_max:
+		UiKit.disable(buy, true, UiText.WHY["prestige_locked"])
+	else:
+		UiKit.disable(buy, _gems() < prestige_cost, UiText.WHY["need_gems"] % [prestige_cost, _gems()])
 	buy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions.add_child(buy)
-	var reset := _button("Reset Skills\n◆ %d" % int(_meta.get("reset_cost", 50)), func() -> void: _app.send({"type": "reset_tree", "class": _class_id}))
-	reset.disabled = int(_profile().get("gems", 0)) < int(_meta.get("reset_cost", 50))
+	var reset_cost := int(_meta.get("reset_cost", 50))
+	var reset := UiKit.button("Reset Skills\n◆ %d" % reset_cost, func() -> void:
+		_app.confirm("reset_skills", func() -> void: _app.send({"type": "reset_tree", "class": _class_id}),
+				[_class_id.capitalize(), reset_cost]), false, "danger")
+	reset.set_meta("focus_id", "reset")
+	UiKit.disable(reset, _gems() < reset_cost, UiText.WHY["need_gems"] % [reset_cost, _gems()])
 	reset.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions.add_child(reset)
 	right.add_child(actions)
@@ -316,7 +331,12 @@ func _render_races() -> void:
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.add_theme_font_size_override("font_size", int(UiKit.SIZES["title"] * _app.settings.text_scale))
 		button.custom_minimum_size.y = int(58 * _app.settings.text_scale)
-		button.modulate = Color(0.65, 0.67, 0.73) if not owned else Color.WHITE
+		button.set_meta("focus_id", "race_" + race)
+		if race == _race:
+			button.theme_type_variation = "SelectedButton"
+		elif not owned:
+			button.add_theme_color_override("font_color", UiKit.TEXT_DIM)
+		button.tooltip_text = "%s - owned" % race if owned else "%s - costs ◆ %d" % [race, cost]
 		list.add_child(button)
 	var space := Control.new()
 	space.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -333,14 +353,14 @@ func _render_races() -> void:
 		info.add_child(UiKit.pixel_label(str(entry[0]), "heading"))
 		info.add_child(_text(str(entry[1])))
 	var owned: bool = _profile().get("races_owned", []).has(_race)
-	var action := _button("Select" if owned else "Purchase  ◆ %d" % int(_meta.get("races", {}).get(_race, {}).get("cost", 0)), func() -> void:
+	var race_cost := int(_meta.get("races", {}).get(_race, {}).get("cost", 0))
+	var action := UiKit.primary("Select" if owned else "Purchase  ◆ %d" % race_cost, func() -> void:
 		if owned:
 			_send_loadout()
 		else:
-			_app.send({"type": "buy_race", "race": _race}))
-	action.disabled = not owned and int(_profile().get("gems", 0)) < int(_meta.get("races", {}).get(_race, {}).get("cost", 0))
-	if not owned:
-		action.add_theme_stylebox_override("normal", UiKit.flat_box(Color("#315f3f"), Color("#b8c7b9"), 2, 8))
+			_app.send({"type": "buy_race", "race": _race}), false)
+	action.set_meta("focus_id", "race_action")
+	UiKit.disable(action, not owned and _gems() < race_cost, UiText.WHY["need_gems"] % [race_cost, _gems()])
 	right.add_child(action)
 
 
@@ -366,6 +386,7 @@ func _render_boons() -> void:
 			var boon_name: String = boon
 			var button := _button(boon_name, func() -> void: _select_boon(boon_name))
 			button.set_meta("boon", boon_name)
+			button.set_meta("focus_id", "boon_" + boon_name)
 			button.add_theme_font_size_override("font_size", int(UiKit.SIZES["heading"] * _app.settings.text_scale))
 			button.custom_minimum_size.y = int(46 * _app.settings.text_scale)
 			button.visible = _search.is_empty() or boon_name.to_lower().contains(_search.to_lower())
@@ -395,7 +416,7 @@ func _render_boons() -> void:
 		remove.tooltip_text = "Remove %s" % boon_name
 		right.add_child(remove)
 	if _boons.is_empty():
-		right.add_child(_text("No Boons equipped. Choose one from the middle column."))
+		right.add_child(_text(UiText.EMPTY["boons"]))
 
 
 func _show_boon_details(boon: String) -> void:
@@ -409,10 +430,10 @@ func _show_boon_details(boon: String) -> void:
 	_boon_details.add_child(_text("Slots: %d" % slots))
 	_boon_details.add_child(_text(str(BOON_EFFECTS.get(boon, ""))))
 	var status := ""
-	var color := Color("#b3b4c0")
+	var color := UiKit.TEXT_DIM
 	if _boons.has(boon):
 		status = "Equipped. Click it on the right to remove."
-		color = Color("#83df76")
+		color = UiKit.SUCCESS
 	elif boon == "The Chosen One" and _prestige_total() < 5:
 		status = "Locked: requires 5 total Prestige (you have %d)." % _prestige_total()
 		color = UiKit.WARN
@@ -439,7 +460,7 @@ func _render_profile() -> void:
 func _render_records() -> void:
 	var panel := _column_panel(_content, 1.0)
 	panel.add_child(_heading("Records"))
-	panel.add_child(_text("No records yet"))
+	panel.add_child(_text(UiText.EMPTY["records"]))
 
 
 func _select_boon(boon: String) -> void:
@@ -503,6 +524,10 @@ func handle_key(keycode: int) -> bool:
 	if keycode == KEY_ESCAPE:
 		_finish.call()
 		return true
+	var tab := keycode - KEY_1
+	if tab >= 0 and tab < NAV.size():
+		_switch_tab(NAV[tab])
+		return true
 	return false
 
 
@@ -511,14 +536,12 @@ func handle_key(keycode: int) -> bool:
 func _column_panel(parent: Control, share: float, title: String = "") -> VBoxContainer:
 	var box := UiKit.vbox(9)
 	var panel := UiKit.panel(box)
-	panel.add_theme_stylebox_override("panel", UiKit.flat_box(Color("#1c2233"), Color("#b3b4c0"), 2, 12))
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var outer: Control = panel
 	if not title.is_empty():
 		var column := UiKit.vbox(8)
-		var tag := UiKit.panel(_center(title, "heading"))
-		tag.add_theme_stylebox_override("panel", UiKit.flat_box(Color("#2a3147"), Color("#b3b4c0"), 2, 10))
+		var tag := UiKit.panel(_center(title, "heading"), "TitleTag")
 		tag.custom_minimum_size.x = 200
 		tag.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		column.add_child(tag)
@@ -536,8 +559,7 @@ func _column_panel(parent: Control, share: float, title: String = "") -> VBoxCon
 
 func _card(parent: VBoxContainer, min_height: float) -> VBoxContainer:
 	var box := UiKit.vbox(6)
-	var panel := UiKit.panel(box)
-	panel.add_theme_stylebox_override("panel", UiKit.flat_box(Color("#242939"), Color("#9b9ca9"), 2, 8))
+	var panel := UiKit.panel(box, "CardPanel")
 	panel.custom_minimum_size.y = min_height
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	parent.add_child(panel)
@@ -570,8 +592,8 @@ func _text(value: String) -> Label:
 
 
 func _button(value: String, action: Callable, big: bool = false) -> Button:
-	var button := UiKit.button(value, action, big)
-	button.add_theme_stylebox_override("normal", UiKit.flat_box(Color("#44495b"), Color("#a9abb8"), 2, 8))
-	button.add_theme_stylebox_override("hover", UiKit.flat_box(Color("#565d73"), Color("#eeeeff"), 2, 8))
-	button.add_theme_stylebox_override("focus", UiKit.flat_box(Color(0, 0, 0, 0), Color.WHITE, 3, 8))
-	return button
+	return UiKit.button(value, action, big)
+
+
+func _gems() -> int:
+	return int(_profile().get("gems", 0))

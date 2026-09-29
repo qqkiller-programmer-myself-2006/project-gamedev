@@ -91,6 +91,41 @@ const HINTS := {
 	"boss": "Watch the warnings: the Guardian announces its heaviest blows a turn early. Defend, Protect or raise Shield Wall before they land.",
 }
 
+## Destructive actions ask first: [title, text, confirm button].
+const CONFIRM := {
+	"leave_room": ["Leave the room?", "You go back to the title screen. Your slot is played by AI until someone takes it.", "Leave room"],
+	"leave_match": ["Leave the Match?", "You go back to the title screen and your character is played by AI for the rest of this Match.", "Leave Match"],
+	"reset_skills": ["Reset Skills?", "Every Skill Tree level of the %s Class goes back to 0. This costs %d Gems.", "Reset Skills"],
+}
+
+## Empty states: what the player can do next.
+const EMPTY := {
+	"inventory": "The shared bag is empty. Win fights, open Treasure or buy from a Merchant to fill it.",
+	"stash": "Nothing in the stash yet. Items you find land here.",
+	"recipes": "No recipes to craft right now. Gather materials in fights first.",
+	"shop": "The Merchant has nothing left to sell.",
+	"search": "Nothing matches \"%s\". Clear the search to see everything.",
+	"boons": "No Boons equipped. Pick one from the middle column.",
+	"records": "No records yet. Finish a Match to start your history.",
+	"clues": "No clues yet. Story Events (and some fights) reveal where Father went.",
+}
+
+## Why a control is disabled (shown in its tooltip).
+const WHY := {
+	"voted": "You already voted. Waiting for the others.",
+	"ready": "You are ready. Waiting for the other players.",
+	"no_items": "The shared bag has no Item you can use now.",
+	"max_level": "This node is already at level 5.",
+	"need_gems": "Not enough Gems: this costs %d, you have %d.",
+	"prestige_locked": "Raise every Skill Tree node to 5/5 first.",
+	"prestige_max": "This Class has reached maximum Prestige.",
+	"invest_merchant": "Spend stat points at a Rest camp.",
+	"invest_none": "No stat points to spend. Level up to earn more.",
+	"invest_not_yours": "You can only spend your own character's points.",
+	"sold_out": "Sold out.",
+	"need_gold": "Not enough Gold: this costs %d.",
+}
+
 const STORY_TRIGGERS := ["first_combat_won", "class_gained", "story_clue", "merchant_first", "rest_first", "before_boss", "boss_won", "party_defeated"]
 
 

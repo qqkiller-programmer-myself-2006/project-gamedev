@@ -21,7 +21,7 @@ func _init(data: Dictionary = {}, reduced: bool = false) -> void:
 	_subtitle.text = str(chapter.get("subtitle", ""))
 	for label in [_title, _subtitle]:
 		label.add_theme_font_override("font", _font)
-		label.add_theme_color_override("font_outline_color", Color("10131d"))
+		label.add_theme_color_override("font_outline_color", UiKit.BG)
 		label.add_theme_constant_override("outline_size", 8)
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		add_child(label)
@@ -30,20 +30,34 @@ func _init(data: Dictionary = {}, reduced: bool = false) -> void:
 	_title.offset_right = 450
 	_title.offset_top = -165
 	_title.offset_bottom = 5
-	_title.add_theme_font_size_override("font_size", 42)
-	_title.add_theme_color_override("font_color", Color("e8c56a"))
+	_title.add_theme_font_size_override("font_size", UiKit.SIZES["huge"])
+	_title.add_theme_color_override("font_color", UiKit.GOLD)
 	_subtitle.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	_subtitle.offset_left = -450
 	_subtitle.offset_right = 450
 	_subtitle.offset_top = 72
 	_subtitle.offset_bottom = 122
-	_subtitle.add_theme_font_size_override("font_size", 23)
-	_subtitle.add_theme_color_override("font_color", Color("e1e4ed"))
+	_subtitle.add_theme_font_size_override("font_size", UiKit.SIZES["heading"])
+	_subtitle.add_theme_color_override("font_color", UiKit.TEXT)
+	if reduced_motion:
+		# Without motion the card waits for a key: say which.
+		var hint := Label.new()
+		hint.text = "Continue [Enter]"
+		hint.add_theme_font_override("font", _font)
+		hint.add_theme_font_size_override("font_size", UiKit.SIZES["small"])
+		hint.add_theme_color_override("font_color", UiKit.TEXT_DIM)
+		hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+		hint.offset_left = -450
+		hint.offset_right = 450
+		hint.offset_top = 150
+		hint.offset_bottom = 180
+		add_child(hint)
 	queue_redraw()
 
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), Color("101624"), true)
-	draw_line(Vector2(150, size.y / 2 + 110), Vector2(size.x - 150, size.y / 2 + 110), Color("8a7343"), 2)
+	draw_rect(Rect2(Vector2.ZERO, size), UiKit.BG, true)
+	draw_line(Vector2(150, size.y / 2 + 110), Vector2(size.x - 150, size.y / 2 + 110), Color(UiKit.GOLD, 0.45), 2)
 
 func _process(delta: float) -> void:
 	if reduced_motion:
@@ -54,6 +68,7 @@ func _process(delta: float) -> void:
 		queue_free()
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if reduced_motion and event is InputEventKey and event.pressed and event.keycode in [KEY_ENTER, KEY_SPACE]:
+	if reduced_motion and event is InputEventKey and event.pressed and event.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE, KEY_ESCAPE]:
+		get_viewport().set_input_as_handled()
 		finished.emit()
 		queue_free()

@@ -34,7 +34,7 @@ func _build_chrome() -> void:
 	var title := UiKit.pixel_label("BEYOND THE WORLD'S END", "huge", UiKit.ACCENT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	title.add_theme_color_override("font_outline_color", Color("#0a1020"))
+	title.add_theme_color_override("font_outline_color", UiKit.BG)
 	title.add_theme_constant_override("outline_size", 10)
 	logo.add_child(title)
 	var subtitle := UiKit.label("Forest - a co-op journey", "heading")
@@ -58,7 +58,7 @@ func _show_menu() -> void:
 	_clear_content()
 	var body := UiKit.vbox(10)
 	body.custom_minimum_size = Vector2(340, 0)
-	var panel := UiKit.panel(body, "CardPanel")
+	var panel := UiKit.panel(body)
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	panel.position = Vector2(88, 150)
 	panel.size = Vector2(390, 0)
@@ -95,7 +95,6 @@ func _show_menu() -> void:
 	body.add_child(UiKit.button("Credits", _show_credits))
 	if not OS.has_feature("web"):
 		body.add_child(UiKit.button("Quit", func() -> void: _app.stop_dev_playtest(); get_tree().quit()))
-	_navy(panel)
 	UiKit.focus_first(body)
 
 func _toggle_playtest_options() -> void:
@@ -109,7 +108,7 @@ func _show_play() -> void:
 	_clear_content()
 	var body := UiKit.vbox(12)
 	body.custom_minimum_size = Vector2(420, 0)
-	var panel := UiKit.panel(body, "CardPanel")
+	var panel := UiKit.panel(body)
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	panel.position = Vector2(88, 175)
 	panel.size = Vector2(460, 0)
@@ -124,7 +123,6 @@ func _show_play() -> void:
 	body.add_child(UiKit.label("Multiplayer · create or join a room", "body"))
 	body.add_child(UiKit.button("Multiplayer", _show_multiplayer, true))
 	body.add_child(UiKit.button("Back", _show_menu))
-	_navy(panel)
 	UiKit.focus_first(body)
 
 func _show_story_setup() -> void:
@@ -133,7 +131,7 @@ func _show_story_setup() -> void:
 	_story_picks.clear()
 	var body := UiKit.vbox(8)
 	body.custom_minimum_size = Vector2(450, 0)
-	var panel := UiKit.panel(body, "CardPanel")
+	var panel := UiKit.panel(body)
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	panel.position = Vector2(88, 175)
 	panel.size = Vector2(490, 0)
@@ -156,7 +154,6 @@ func _show_story_setup() -> void:
 		body.add_child(row)
 	body.add_child(UiKit.button("Begin Story", _begin_story, true))
 	body.add_child(UiKit.button("Back", _show_play))
-	_navy(panel)
 	UiKit.focus_first(body)
 
 func _begin_story() -> void:
@@ -170,7 +167,7 @@ func _show_multiplayer() -> void:
 	_clear_content()
 	var body := UiKit.vbox(10)
 	body.custom_minimum_size = Vector2(520, 0)
-	var panel := UiKit.panel(body, "CardPanel")
+	var panel := UiKit.panel(body)
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	panel.position = Vector2(88, 150)
 	panel.size = Vector2(560, 0)
@@ -208,7 +205,6 @@ func _show_multiplayer() -> void:
 	var back := UiKit.button("Back", _show_play)
 	back.set_meta("focus_id", "back")
 	body.add_child(back)
-	_navy(panel)
 	create.grab_focus.call_deferred()
 	if _app.options.has("auto") and not _name.text.is_empty():
 		(_join if not _code.text.is_empty() else _create).call_deferred()
@@ -218,7 +214,7 @@ func _show_credits() -> void:
 	_clear_content()
 	var body := UiKit.vbox(14)
 	body.custom_minimum_size = Vector2(420, 0)
-	var panel := UiKit.panel(body, "CardPanel")
+	var panel := UiKit.panel(body)
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	panel.position = Vector2(88, 150)
 	panel.size = Vector2(470, 0)
@@ -228,40 +224,7 @@ func _show_credits() -> void:
 	body.add_child(UiKit.label("Made with Godot 4.7", "heading"))
 	body.add_child(UiKit.para("Font: Pixelify Sans, OFL\nCharacter art by the project owner.", "body"))
 	body.add_child(UiKit.button("Back", _show_menu))
-	_navy(panel)
 	UiKit.focus_first(body)
-
-## AAC navy look shared with the Character setup screens: navy fill, light grey
-## border, corner diamonds, slate buttons with a gold focus outline.
-const NAVY := Color("#1c2233")
-const NAVY_BORDER := Color("#b3b4c0")
-const SLATE := Color("#454b5e")
-const SLATE_HOVER := Color("#58607a")
-
-func _navy(panel: PanelContainer) -> void:
-	panel.add_theme_stylebox_override("panel", UiKit.flat_box(NAVY, NAVY_BORDER, 2, 14))
-	var diamonds := CornerDiamonds.new()
-	diamonds.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	diamonds.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.add_child(diamonds)
-	_restyle_buttons(panel)
-
-func _restyle_buttons(node: Node) -> void:
-	for child in node.get_children():
-		if child is Button and not child is OptionButton and not child is CheckButton:
-			var accent: Color = NAVY_BORDER
-			if child.has_meta("dev"):
-				accent = UiKit.WARN
-			child.add_theme_stylebox_override("normal", UiKit.flat_box(SLATE, accent.darkened(0.25), 2, 4))
-			child.add_theme_stylebox_override("hover", UiKit.flat_box(SLATE_HOVER, accent, 2, 4))
-			child.add_theme_stylebox_override("pressed", UiKit.flat_box(NAVY, accent, 2, 4))
-			child.add_theme_stylebox_override("focus", UiKit.flat_box(Color(0, 0, 0, 0), UiKit.ACCENT, 2, 4))
-		_restyle_buttons(child)
-
-class CornerDiamonds extends Control:
-	func _draw() -> void:
-		for corner in [Vector2.ZERO, Vector2(size.x, 0), Vector2(0, size.y), size]:
-			draw_colored_polygon(PackedVector2Array([corner + Vector2(0, -5), corner + Vector2(5, 0), corner + Vector2(0, 5), corner + Vector2(-5, 0)]), TitleScreen.NAVY_BORDER)
 
 func _clear_content() -> void:
 	if is_instance_valid(_content):

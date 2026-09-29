@@ -421,6 +421,26 @@ func open_settings() -> void:
 	panel.setup(self)
 
 
+## Asks before a destructive action (`key` in UiText.CONFIRM; `args` fill
+## the text's %s / %d).
+func confirm(key: String, on_confirm: Callable, args: Array = []) -> void:
+	for child in _overlay_holder.get_children():
+		if child is ConfirmDialog:
+			return
+	var texts: Array = UiText.CONFIRM[key]
+	var dialog := ConfirmDialog.new()
+	_overlay_holder.add_child(dialog)
+	dialog.setup(str(texts[0]), str(texts[1]) % args if not args.is_empty() else str(texts[1]), str(texts[2]), on_confirm)
+
+
+## Leaves the room or Match after asking.
+func confirm_leave() -> void:
+	var in_match := _current_name == "match"
+	confirm("leave_match" if in_match else "leave_room", func() -> void:
+		send({"type": "leave_room"})
+		disconnect_from_server())
+
+
 func apply_settings() -> void:
 	theme = UiKit.make_theme(settings.text_scale)
 	SoundBank.set_volume(settings.volume)
