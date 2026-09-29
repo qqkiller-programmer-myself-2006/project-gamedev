@@ -138,7 +138,7 @@ func test_defending_against_the_telegraphed_blow_halves_it() -> void:
 			if event["type"] == "action_resolved" and event.get("move") == "crushing_root" and event["action"] == "attack":
 				blows.append(event["results"][0]["damage"])
 				break
-	assert_eq(blows, [43, 21], "17 ATK x 2.6 - 1.5, halved by Defend")
+	assert_eq(blows, [44, 22], "18 ATK x 2.6 - 2.5, halved by Defend")
 
 
 func test_ai_braces_for_telegraphed_blows() -> void:

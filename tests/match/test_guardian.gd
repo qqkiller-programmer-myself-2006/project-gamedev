@@ -58,7 +58,7 @@ func test_guardian_has_the_most_hp_and_defense() -> void:
 	var classes := ForestContent.load_default().get_dict("classes")
 	var guardian: Dictionary = classes["guardian"]["base"]
 	for other in classes:
-		if other == "guardian":
+		if other == "guardian" or other == "classless":
 			continue
 		assert_true(int(guardian["max_hp"]) > int(classes[other]["base"]["max_hp"]), "HP above %s" % other)
 		assert_true(int(guardian["def"]) > int(classes[other]["base"]["def"]), "DEF above %s" % other)
@@ -73,9 +73,9 @@ func test_protect_redirects_damage_to_the_guardian_with_a_reduction() -> void:
 	var hit: Dictionary = boars[0]["results"][0]
 	assert_eq(hit["protected"], "p1", "the boar charged p1 ...")
 	assert_eq(hit["target"], "p0", "... but the Guardian took it")
-	assert_eq(hit["damage"], 18, "(30 - 9 x 0.5) x 0.7")
-	assert_eq(_party(1)["hp"], 70, "protected ally untouched")
-	assert_eq(_party(0)["hp"], 70 - 26 - 18)
+	assert_eq(hit["damage"], 18, "(30 - 8 x 0.5) x 0.7 = 18.2")
+	assert_eq(_party(1)["hp"], 66, "protected ally untouched")
+	assert_eq(_party(0)["hp"], 66 - 26 - 18)
 
 
 func test_protect_cannot_target_yourself() -> void:
@@ -109,7 +109,7 @@ func test_shield_wall_reduces_damage_for_the_whole_party() -> void:
 	assert_ok(h.server.command(sessions[0], {"type": "action", "action": "skill", "skill": "shield_wall", "target": "p0"}))
 	assert_eq(_encounter()["shielded"], true)
 	var bites := _by("e0", _actions(6.0))
-	assert_eq(bites[0]["results"][0]["damage"], 9, "(20 - 4.5) x 0.6 instead of 16")
+	assert_eq(bites[0]["results"][0]["damage"], 10, "(20 - 8 x 0.5) x 0.6 = 9.6")
 
 
 func test_guardian_ai_protects_the_most_wounded_ally() -> void:

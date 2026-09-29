@@ -1002,7 +1002,7 @@
       "behavior": "boss",
       "description": "The Guardian of the Forest: ancient bark and thorn. Watch for its warnings; its heaviest blows come one turn later.",
       "stats": {
-        "max_hp": 1250,
+        "max_hp": 1450,
         "atk": 18,
         "def": 6,
         "mag": 14,
@@ -1485,7 +1485,7 @@
   },
   "class_encounters": {
     "mastery_exp": 0,
-    "pass_exp": 16
+    "pass_exp": 40
   },
   "story": {
     "events": {
