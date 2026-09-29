@@ -240,7 +240,9 @@ func _set_loadout(slot: int, cmd: Dictionary, profile: Dictionary) -> Dictionary
 	if used > 5:
 		return {"ok": false, "error": "over_capacity"}
 	slots[slot]["loadout"] = {"class": class_id, "race": race, "boons": boons.duplicate()}
-	profile["last_loadout"] = slots[slot]["loadout"].duplicate(true)
+	# In Story the player sets all five slots; only their own (host) slot is "their" loadout (review F4).
+	if not story or slot == host_slot:
+		profile["last_loadout"] = slots[slot]["loadout"].duplicate(true)
 	_emit({"type": "loadout_changed", "slot": slot, "loadout": slots[slot]["loadout"]})
 	return {"ok": true, "loadout": slots[slot]["loadout"]}
 

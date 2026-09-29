@@ -233,6 +233,11 @@ func stop_dev_playtest() -> void:
 		_embedded_server = null
 
 
+## True while the Story Match being opened comes from a save (Continue).
+func is_story_restore() -> bool:
+	return story_launcher != null and not _story_restore.is_empty()
+
+
 func start_story(classes: Array = [], restore: Dictionary = {}, seed_value: int = 0) -> void:
 	_pending_action = Callable()
 	_connect_deadline = -1.0

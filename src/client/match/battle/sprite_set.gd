@@ -55,6 +55,7 @@ static func portrait(class_id_value: String) -> Texture2D:
 	return load(ROOT + set.class_id + "/portrait.png") as Texture2D
 
 func frames(animation: String) -> Array[Texture2D]:
+	animation = _key(animation)
 	if is_enemy and not variant.is_empty() and animation == "idle":
 		var variant_path := ENEMY_ROOT + enemy_id + "/variants/" + variant + ".png"
 		var variant_texture := load(variant_path) as Texture2D
@@ -106,20 +107,29 @@ func mirrored(animation: String) -> bool:
 	return false
 
 func fps(animation: String) -> float:
+	animation = _key(animation)
 	return float(data.get("fps", {}).get(animation, 4))
 
 func baseline(animation: String) -> float:
+	animation = _key(animation)
 	if is_enemy and not variant.is_empty() and animation == "idle":
 		return canvas("idle").y
 	return float(data.get("baseline", {}).get(animation, 0))
 
 func canvas(animation: String) -> Vector2:
+	animation = _key(animation)
 	if is_enemy and not variant.is_empty() and animation == "idle":
 		var texture := load(ENEMY_ROOT + enemy_id + "/variants/" + variant + ".png") as Texture2D
 		if texture != null:
 			return Vector2(texture.get_width(), texture.get_height())
 	var size: Array = data.get("canvas", {}).get(animation, [1, 1])
 	return Vector2(float(size[0]), float(size[1]))
+
+## Enemy sheets name the death animation "die"; heroes and tokens use "dead".
+func _key(animation: String) -> String:
+	if animation == "dead" and is_enemy and not data.get("animations", {}).has("dead"):
+		return "die"
+	return animation
 
 func size_px() -> float:
 	return float(data.get("size_px", 48))

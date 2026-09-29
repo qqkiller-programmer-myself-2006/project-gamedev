@@ -169,3 +169,11 @@ func _first_combat_kinds(seed_value: int) -> Array:
 	for enemy in harness.match_view(solo[0])["encounter"]["enemies"]:
 		kinds.append(enemy["kind"])
 	return kinds
+
+
+func test_enemy_views_carry_the_sprite_from_content() -> void:
+	# The client draws the owner's enemy art only when the view names its sheet (#73 review F1).
+	_fight(["grey_wolf", "thornback_boar"])
+	var enemies: Array = _combat_view()["enemies"]
+	assert_eq(str(enemies[0]["sprite"]), "wolf", "grey_wolf uses the Wolf sheet")
+	assert_eq(str(enemies[1]["sprite"]), "", "the boar has no art yet (#75)")

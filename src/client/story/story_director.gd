@@ -15,6 +15,8 @@ var shown: Dictionary = {}
 var current: Node = null
 var last_layer := 0
 var started := false
+## Set by MatchScreen when the Match comes from a Story save (Continue); used once, for the first Match seen.
+var restoring := false
 var text_scale := 1.0
 var reduced_motion := false
 
@@ -49,16 +51,16 @@ func observe(events: Array, snapshot: Dictionary) -> void:
 	if not started and current_match > 0:
 		started = true
 		var layer := int(match_view.get("layer", match_view.get("current_layer", 0)))
-		if layer > 0:
-			# Continue: fast-forward to this layer.
-			last_layer = layer
+		# A new Match already starts at Layer 1, so only an explicit restore counts as a Continue.
+		if restoring and layer > 0:
+			# Continue: skip what came before this layer; this layer's chapter card still shows below.
 			shown["prologue"] = true
 			for i in range(1, layer):
 				shown["chapter_%s" % i] = true
 				if i == 1: shown["first_combat_won"] = true
-				# (Could fast-forward other triggers if needed, but this is enough to not replay old chapters).
 		else:
 			queue.append({"kind":"scene", "id":"prologue", "lines":content.get("prologue", [])})
+		restoring = false
 		_pump()
 
 	var layer := int(match_view.get("layer", match_view.get("current_layer", 0)))

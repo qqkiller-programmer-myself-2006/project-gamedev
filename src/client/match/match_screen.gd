@@ -101,6 +101,7 @@ func setup(client: ClientApp) -> void:
 		_story_director.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		_story_director.text_scale = app.settings.text_scale
 		_story_director.reduced_motion = app.settings.reduced_motion
+		_story_director.restoring = app.is_story_restore()
 		add_child(_story_director)
 
 

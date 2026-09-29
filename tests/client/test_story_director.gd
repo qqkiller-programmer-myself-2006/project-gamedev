@@ -66,21 +66,37 @@ func test_c13_director_resets_on_new_match_number_and_skips_prologue_on_continue
 		"prologue": [{"text": "Intro"}],
 		"chapters": [{"number": 1}, {"number": 2}, {"number": 3}]
 	}
-	# Start match 1
-	d.observe([], {"match": {"number": 1, "layer": 0}})
-	d.last_layer = 1
-	
-	# Reset to match 2, continue at layer 3
+	# Continue from a save at layer 3 (the flag comes from ClientApp.is_story_restore()).
+	d.restoring = true
 	d.observe([], {"match": {"number": 2, "layer": 3}})
 	assert_eq(d.match_number, 2)
 	assert_eq(d.last_layer, 3)
 	assert_true(d.shown.has("prologue"))
 	assert_true(d.shown.has("chapter_1"))
 	assert_true(d.shown.has("chapter_2"))
-	
-	# Verify prologue and old chapters are NOT in queue
+	var ids: Array = []
 	for item in d.queue:
-		assert_ne(item.get("id"), "prologue")
-		assert_ne(item.get("id"), "chapter_1")
-		assert_ne(item.get("id"), "chapter_2")
+		ids.append(item.get("id"))
+	assert_false(ids.has("prologue"), "no prologue on Continue")
+	assert_false(ids.has("chapter_1"))
+	assert_false(ids.has("chapter_2"))
+	assert_true(ids.has("chapter_3") or d.shown.has("chapter_3"), "the current chapter card still shows")
+	d.free()
+
+
+func test_new_story_match_at_layer_one_shows_prologue_and_chapter_one() -> void:
+	# A real new Match's first snapshot is already Layer 1 (review F2).
+	var d = StoryDirector.new()
+	d.content = {"prologue": [{"text": "Intro"}], "chapters": [{"number": 1}, {"number": 2}]}
+	d.observe([], {"match": {"number": 1, "layer": 1}})
+	var ids: Array = []
+	for item in d.queue:
+		ids.append(item.get("id"))
+	if is_instance_valid(d.current):
+		ids.append("current")
+	assert_true(ids.has("prologue") or d.shown.has("prologue") or ids.has("current"), "prologue queued or showing")
+	assert_true(d.shown.has("chapter_1"), "Chapter 1 card queued")
+	# "Start a new Match" in the same room: prologue again.
+	d.observe([], {"match": {"number": 2, "layer": 1}})
+	assert_true(d.shown.has("chapter_1"))
 	d.free()

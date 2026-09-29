@@ -16,3 +16,10 @@ func test_enemy_manifest_loads_and_every_animation_resolves() -> void:
 
 func test_unknown_enemy_sprite_returns_null_for_code_drawn_fallback() -> void:
 	assert_true(SpriteSet.for_enemy("unknown_enemy") == null)
+
+
+func test_token_dead_animation_uses_the_enemy_die_frames() -> void:
+	var sprite_set := SpriteSet.for_enemy("wolf")
+	assert_false(sprite_set.frames("dead").is_empty(), "tokens ask for 'dead'; enemy sheets call it 'die'")
+	assert_eq(sprite_set.frames("dead").size(), sprite_set.frames("die").size())
+	assert_eq(sprite_set.canvas("dead"), sprite_set.canvas("die"))

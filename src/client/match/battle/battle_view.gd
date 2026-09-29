@@ -191,9 +191,6 @@ func build(view: Dictionary, combat: Dictionary) -> void:
 	var content: Dictionary = JSON.parse_string(content_file.get_as_text()) if content_file != null else {}
 	var boss := str(encounter.get("kind", "")) == "boss"
 	var backdrop_name := str(encounter.get("backdrop", content.get("boss", {}).get("backdrop", ""))) if boss else str(content.get("journey", {}).get("backdrops", {}).get(str(view.get("layer", 1)), ""))
-	var preview_backdrops: Dictionary = _app.get_meta("preview_backdrops", {})
-	if preview_backdrops.has("boss" if boss else str(view.get("layer", 1))):
-		backdrop_name = str(preview_backdrops["boss" if boss else str(view.get("layer", 1))])
 	_backdrop.set_backdrop(backdrop_name)
 	_me = str(combat.get("actor", "")) if _screen.room_view().get("story", false) and str(combat.get("actor", "")).begins_with("p") else "p%d" % _screen.your_slot()
 	var mode_key := "%d-%s-%s-%d" % [int(view.get("layer", 0)), str(view.get("phase")), combat.get("actor", ""),
@@ -501,8 +498,7 @@ func _build_stage(view: Dictionary) -> void:
 			var enemy: Dictionary = list[i]
 			var id := str(enemy["id"])
 			var weakness: Array = enemy.get("weakness", [])
-			var preview_sprites: Dictionary = _app.get_meta("preview_enemy_sprites", {})
-			var sprite_name := str(enemy.get("sprite", preview_sprites.get(str(enemy["kind"]), "")))
+			var sprite_name := str(enemy.get("sprite", ""))
 			var data := {
 				"id": id, "side": "boss" if boss else "enemy", "name": _screen.name_of(id), "kind": enemy["kind"],
 				"hp": enemy["hp"], "max_hp": enemy["max_hp"],

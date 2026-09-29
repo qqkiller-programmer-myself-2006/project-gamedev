@@ -931,6 +931,9 @@ func _make_enemy(run: MatchRun, kind: String, index: int) -> Dictionary:
 		"row": str(data.get("row", "front")),
 		"behavior": str(data.get("behavior", "random")),
 		"description": str(data.get("description", "")),
+		# Presentation only: which sheet in assets/enemies the client draws (#73).
+		"sprite": str(data.get("sprite", "")),
+		"sprite_variant": str(data.get("sprite_variant", "")),
 		"attack": data.get("attack", {"target": "enemy", "damage": {"stat": "atk", "power": 1.0}}),
 		"weakness": data.get("weakness", []),
 		"rewards": data.get("rewards", {}),
@@ -959,6 +962,8 @@ func _enemy_views() -> Array:
 			"row": enemy["row"],
 			"weakness": enemy["weakness"],
 			"description": enemy["description"],
+			"sprite": str(enemy.get("sprite", "")),
+			"sprite_variant": str(enemy.get("sprite_variant", "")),
 			"energy": int(enemy.get("energy", 0)),
 			"energy_max": int(enemy.get("energy_max", 0)),
 			"statuses": status_book.view(enemy["id"]) if status_book != null else [],
