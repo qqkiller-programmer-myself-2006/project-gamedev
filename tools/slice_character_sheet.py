@@ -29,6 +29,11 @@ CONFIG = {
         "splash": (535, 970, 1254, 1254),
         "skills": [(540, 930, 610, 1015), (615, 930, 695, 1015),
                    (700, 930, 775, 1015), (780, 930, 860, 1015)],
+        # Attack cells are separated at the midpoints between detected body
+        # centres.  Effects may cross a midpoint, so the crop is widened by
+        # the effect allowance below only when it remains in the same group.
+        "attack_centres": ((74, 145, 220, 290), (378, 455, 535),
+                            (668, 752, 830), (1024, 1103, 1180)),
     },
     "mage": {
         "sheet": "mage_sheet.jpg", "idle_y": (71, 178), "walk_y": (275, 351),
@@ -36,9 +41,13 @@ CONFIG = {
         "dead_y": (805, 876), "dead_x": (500, 940),
         "portrait": (0, 0, 335, 560), "weapon": (30, 948, 220, 1165),
         "splash": (535, 970, 1254, 1254),
-        "skills": [(530, 925, 595, 1015), (595, 925, 660, 1015),
-                   (660, 925, 725, 1015), (725, 925, 790, 1015),
-                   (790, 925, 860, 1015)],
+        # The mage export puts the translated skill labels below the tiles;
+        # stop at the tile bottom so no label text enters the asset.
+        "skills": [(530, 925, 595, 1000), (595, 925, 660, 1000),
+                   (660, 925, 725, 1000), (725, 925, 790, 1000),
+                   (790, 925, 860, 1000)],
+        "attack_centres": ((62, 145, 215, 278), (375, 455, 535),
+                            (666, 745, 812), (995, 1080, 1158)),
     },
     "swordsman": {
         "sheet": "swordsman_sheet.jpg", "idle_y": (74, 181), "walk_y": (291, 366),
@@ -46,6 +55,8 @@ CONFIG = {
         "dead_y": (848, 925), "dead_x": (500, 930),
         "portrait": (0, 0, 335, 560), "weapon": (30, 995, 220, 1175),
         "splash": (535, 940, 1254, 1254), "skills": [],
+        "attack_centres": ((68, 150, 215, 285), (370, 450, 525),
+                            (675, 740, 820), (1000, 1090, 1175)),
     },
 }
 GROUPS = (350, 555, 783, 1013, 1230)
@@ -98,6 +109,24 @@ def slot_boxes(group_bounds: tuple[int, ...], y: tuple[int, int],
             x0 = round(group_start + i * width) - overlap
             x1 = round(group_start + (i + 1) * width) + overlap
             yield (max(0, x0), y[0], min(1254, x1), y[1])
+
+
+def attack_boxes(centres: tuple[tuple[int, ...], ...], y: tuple[int, int]):
+    """Build attack crops from body centres, never from effect extents.
+
+    The source export has thin dividers and detached attack effects.  Using
+    body-centre midpoints keeps a detached arrow/slash with its nearest body
+    while preventing a neighbouring character from being included.
+    """
+    for group_start, group_end, body_centres in zip(ATTACK_GROUPS,
+                                                     ATTACK_GROUPS[1:],
+                                                     centres):
+        edges = [group_start]
+        edges.extend(round((left + right) / 2)
+                     for left, right in zip(body_centres, body_centres[1:]))
+        edges.append(group_end)
+        for x0, x1 in zip(edges, edges[1:]):
+            yield (x0, y[0], x1, y[1])
 
 
 def normalize(frames: list[Image.Image], pad: int = 3):
@@ -178,18 +207,22 @@ def process(class_name: str, cfg: dict) -> dict:
             manifest["baseline"][animation] = baseline
             offset += frame_count
 
-    raw = [trim(source, mask, box) for box in slot_boxes(ATTACK_GROUPS, cfg["attack_y"], direction_counts, 0)]
+    raw = [trim(source, mask, box)
+           for box in attack_boxes(cfg["attack_centres"], cfg["attack_y"])]
     manifest["animations"]["attack"] = {direction: [] for direction in DIRECTIONS}
+    # Normalize the complete animation together: effects make individual
+    # attack frames different widths, but every direction must still use one
+    # shared canvas and baseline during playback.
+    frames, size, baseline = normalize(raw)
+    manifest["canvas"]["attack"] = size
+    manifest["baseline"]["attack"] = baseline
     offset = 0
     for di, direction in enumerate(DIRECTIONS):
         frame_count = direction_counts[di]
-        frames, size, baseline = normalize(raw[offset:offset + frame_count])
-        for i, frame in enumerate(frames):
+        for i, frame in enumerate(frames[offset:offset + frame_count]):
             name = f"attack_{direction}_{i}"
             save(name, frame)
             manifest["animations"]["attack"][direction].append(f"{name}.png")
-        manifest["canvas"]["attack"] = size
-        manifest["baseline"]["attack"] = baseline
         offset += frame_count
 
     for animation, y_key, x_bounds, count in (("hurt", "hurt_y", (25, 430), 5),
