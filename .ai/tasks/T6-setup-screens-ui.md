@@ -50,3 +50,10 @@ border (corner diamonds), Pixelify Sans white text.
 ## Report (end your run with this, in English)
 
 - Files changed; checklist 1–7 done/partial (why); test result line; screenshot paths; what you could not match
+
+## Notes added 2026-09-29
+- Class portraits: use `assets/characters/<class>/portrait.png` (Archer, Mage, Swordsman) via `SpriteSet` if present on this branch
+  (`src/client/battle/sprite_set.gd`) or by reading `assets/characters/manifest.json`; Rogue/Guardian get a code-drawn icon.
+- The home page is now `src/client/screens/title_screen.gd` + `src/client/home/`; add the Character setup entry to the Room/lobby
+  screen as specified (not to the home page).
+- Run only ONE Godot process at a time (machine is low on RAM).
