@@ -70,7 +70,7 @@ func update(run: MatchRun) -> void:
 	if stage == "challenge":
 		_trial.update(run)
 		_advance(run)
-	elif stage == "offer" and run.clock.now() >= deadline:
+	elif stage == "offer" and deadline >= 0.0 and run.clock.now() >= deadline:
 		for slot in eligible:
 			if not decisions.has(slot):
 				_decide(run, slot, false)
@@ -174,7 +174,7 @@ func _advance(run: MatchRun) -> void:
 		done = true
 		return
 	stage = "offer"
-	deadline = run.clock.now() + run.content.get_float("rules.class_offer_seconds", 20.0)
+	deadline = -1.0 if run.story else run.clock.now() + run.content.get_float("rules.class_offer_seconds", 20.0)
 	run.emit({
 		"type": "class_offered",
 		"class": class_id,

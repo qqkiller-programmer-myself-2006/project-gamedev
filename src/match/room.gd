@@ -115,7 +115,17 @@ func start_match() -> void:
 		loadouts[i] = {"loadout": loadouts[i], "profile": slots[i].get("profile", {}).duplicate(true)}
 	if story:
 		humans.fill(true)
-	run = MatchRun.new(_rng.fork(), _clock, _content, humans, _matches_started, loadouts, story)
+		var p: Dictionary = slots[host_slot].get("profile", {})
+		var ll: Dictionary = p.get("last_loadout", {})
+		var c: String = loadouts[host_slot]["loadout"].get("class", "classless")
+		var cmd := {"class": c, "race": ll.get("race", "Human"), "boons": ll.get("boons", [])}
+		if _set_loadout(host_slot, cmd, p).get("ok", false):
+			loadouts[host_slot]["loadout"] = slots[host_slot]["loadout"].duplicate()
+		else:
+			var fallback := {"class": c, "race": "Human", "boons": []}
+			_set_loadout(host_slot, fallback, p)
+			loadouts[host_slot]["loadout"] = slots[host_slot]["loadout"].duplicate()
+	run = MatchRun.new(_rng.fork(), _clock, _content, humans, _matches_started, loadouts, story, host_slot)
 	_drain_run()
 
 
@@ -148,7 +158,7 @@ func handle_match_command(slot: int, cmd: Dictionary) -> Dictionary:
 			acting = int(actor_id.substr(1))
 			if cmd.has("slot") and int(cmd["slot"]) != acting:
 				return {"ok": false, "error": "not_your_slot"}
-		elif kind in ["invest", "equip", "unequip", "transfer_item", "transfer_gold", "buy", "craft"]:
+		elif kind in ["invest", "equip", "unequip", "transfer_item", "transfer_gold", "buy", "craft", "class_choice"]:
 			acting = int(cmd.get("slot", slot))
 			if acting < 0 or acting >= SLOT_COUNT:
 				return {"ok": false, "error": "invalid_slot"}
@@ -351,7 +361,7 @@ func snapshot_for(session_id: int) -> Dictionary:
 		"slots": slot_views,
 	}
 	if you >= 0:
-		view["profile"] = {"gems": slots[you]["profile"].get("gems", 0), "races_owned": slots[you]["profile"].get("races_owned", []).duplicate(), "class_trees": slots[you]["profile"].get("class_trees", {}).duplicate(true), "prestige": slots[you]["profile"].get("prestige", {}).duplicate(true)}
+		view["profile"] = {"gems": slots[you]["profile"].get("gems", 0), "races_owned": slots[you]["profile"].get("races_owned", []).duplicate(), "class_trees": slots[you]["profile"].get("class_trees", {}).duplicate(true), "prestige": slots[you]["profile"].get("prestige", {}).duplicate(true), "last_loadout": slots[you]["profile"].get("last_loadout", {}).duplicate(true)}
 	return view
 
 

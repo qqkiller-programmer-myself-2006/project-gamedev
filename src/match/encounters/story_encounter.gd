@@ -38,7 +38,8 @@ func start(run: MatchRun) -> void:
 	else:
 		stage = "choosing"
 		var seconds := run.content.get_float("rules.story_vote_seconds", 20.0)
-		vote = PathVote.new(run.layer, choice_options, run.clock.now() + seconds, seconds)
+		var vote_deadline: float = -1.0 if run.story else run.clock.now() + seconds
+		vote = PathVote.new(run.layer, choice_options, vote_deadline, seconds)
 		deadline = vote.deadline
 
 
@@ -66,7 +67,7 @@ func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 
 
 func update(run: MatchRun) -> void:
-	if done or run.clock.now() < deadline:
+	if done or deadline < 0.0 or run.clock.now() < deadline:
 		return
 	if stage == "choosing":
 		_resolve(run)
@@ -142,7 +143,7 @@ func _show_outcome(run: MatchRun, data: Dictionary) -> void:
 		result["healed"] = true
 	for character in run.party:
 		run.grant_exp(character["slot"], result["exp"])
-	deadline = run.clock.now() + run.content.get_float("rules.story_read_seconds", 25.0)
+	deadline = -1.0 if run.story else run.clock.now() + run.content.get_float("rules.story_read_seconds", 25.0)
 	run.emit({"type": "story_outcome", "event": event_id, "outcome": result})
 
 

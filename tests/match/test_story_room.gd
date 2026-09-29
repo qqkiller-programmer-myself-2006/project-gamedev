@@ -150,3 +150,26 @@ func test_forged_save_is_rejected() -> void:
 	missing_version.erase("version")
 	assert_rejected(restored.server.command(new_session, {"type": "restore_story", "save": missing_version}), "invalid_save")
 
+
+func test_story_room_lead_gets_last_loadout_race_and_boons() -> void:
+	var h := MatchHarness.new(104)
+	h.server.allow_story = true
+	var session := h.server.open_session()
+	
+	assert_ok(h.server.command(session, {"type": "create_room", "name": "Story", "story": true}))
+	var room = h.server._rooms[h.server._sessions[session]["room"]]
+	room.slots[0]["profile"]["races_owned"] = ["Human", "Elf"]
+	room.slots[0]["profile"]["last_loadout"] = {"race": "Elf", "boons": []}
+	room._content.data["meta"] = {"races": {"Human": {}, "Elf": {}}, "boons": {}}
+	
+	for i in CLASSES.size():
+		assert_ok(h.server.command(session, {"type": "set_loadout", "slot": i,
+			"class": CLASSES[i], "race": "Human", "boons": []}))
+	
+	room.slots[0]["profile"]["last_loadout"] = {"race": "Elf", "boons": []}
+	
+	assert_ok(h.server.command(session, {"type": "start_match"}))
+	
+	var view := h.match_view(session)
+	assert_eq(view["party"][0]["race"], "Elf")
+	assert_eq(view["party"][1]["race"], "Human")
