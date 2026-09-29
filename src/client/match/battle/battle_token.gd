@@ -29,6 +29,12 @@ const ENEMY_TINTS := {
 	"grey_wolf": Color("#9aa3ad"), "thornback_boar": Color("#a5714f"), "bramble_archer": Color("#79a150"),
 	"forest_wisp": Color("#a6e6ee"), "elder_thornwarden": Color("#5f8f43"),
 }
+const STATUS_ICONS := {
+	"bleed": "bleed", "poison": "poison", "toxin": "poison", "venom_coat": "poison",
+	"burn": "burn", "stun": "stun", "weak": "weak", "weakened": "weak", "enervation": "weak",
+	"shield": "shield", "shielded": "shield", "protect": "shield", "protected": "shield",
+	"regen": "regen", "regeneration": "regen", "dodge": "dodge", "focused": "dodge", "crit": "crit",
+}
 
 var unit_id := ""
 ## "party", "enemy" or "boss".
@@ -50,6 +56,7 @@ var animation_elapsed := 0.0
 var reduced_motion := false
 ## The player's text-size setting; nameplate names and bar captions follow it.
 var text_scale := 1.0
+var badge_height := BADGE_HEIGHT
 var _bob_time := 0.0
 ## 1-based key shown while this token is a valid target, else 0.
 var target_number := 0
@@ -77,12 +84,13 @@ func setup(data: Dictionary) -> void:
 	focus_mode = Control.FOCUS_NONE
 	disabled = true
 	var text_factor := clampf(text_scale, 0.75, 1.5)
+	badge_height = 36.0 if text_scale >= 1.4 else BADGE_HEIGHT
 	var plate_height := PLATE_HEIGHT * text_factor
 	var width := (180.0 if side == "boss" else 140.0) * text_factor
 	figure_height = 150.0 if side == "boss" else 110.0
 	if sprite_set != null and sprite_set.is_enemy:
 		figure_height = sprite_set.size_px() * 1.65
-	custom_minimum_size = Vector2(width, BADGE_HEIGHT + figure_height + plate_height)
+	custom_minimum_size = Vector2(width, badge_height + figure_height + plate_height)
 	size = custom_minimum_size
 	if side == "party":
 		outfit = PARTY_OUTFITS.get(str(data.get("name", "")), PARTY_OUTFITS["Wren"])
@@ -94,7 +102,7 @@ func setup(data: Dictionary) -> void:
 
 	_badges = UiKit.hbox(3)
 	_badges.position = Vector2(0, 0)
-	_badges.size = Vector2(width, BADGE_HEIGHT)
+	_badges.size = Vector2(width, badge_height)
 	_badges.alignment = BoxContainer.ALIGNMENT_CENTER
 	_badges.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var statuses: Array = data.get("statuses", [])
@@ -134,7 +142,7 @@ func setup(data: Dictionary) -> void:
 	plate_box.add_child(bars)
 	_plate = UiKit.panel(plate_box, "HudPanel")
 	_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_plate.position = Vector2(0, BADGE_HEIGHT + figure_height + 2)
+	_plate.position = Vector2(0, badge_height + figure_height + 2)
 	_plate.custom_minimum_size = Vector2(width, 0)
 	_plate.size = Vector2(width, plate_height)
 	add_child(_plate)
@@ -220,7 +228,7 @@ func set_target(number: int, callback: Callable) -> void:
 
 
 func _draw() -> void:
-	var center := Vector2(size.x * 0.5, BADGE_HEIGHT + figure_height - 6)
+	var center := Vector2(size.x * 0.5, badge_height + figure_height - 6)
 	var ring_color := Color(0, 0, 0, 0)
 	if target_number > 0:
 		ring_color = UiKit.ACCENT
@@ -238,8 +246,8 @@ func _draw() -> void:
 	if target_number > 0:
 		var font := UiKit.pixel_font()
 		var tag := "[%d]" % target_number
-		draw_string_outline(font, Vector2(size.x - 34, BADGE_HEIGHT + 18), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, 4, Color.BLACK)
-		draw_string(font, Vector2(size.x - 34, BADGE_HEIGHT + 18), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, UiKit.ACCENT)
+		draw_string_outline(font, Vector2(size.x - 34, badge_height + 18), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, 4, Color.BLACK)
+		draw_string(font, Vector2(size.x - 34, badge_height + 18), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, UiKit.ACCENT)
 
 
 ## Plate bars are 14 px tall at the default text size and grow with the text-size
@@ -381,11 +389,10 @@ func _status_badge(entry: Dictionary, compact: bool) -> PanelContainer:
 	var status := str(entry.get("status", ""))
 	var color := UiKit.status_color(str(entry.get("color", "")))
 	var line := UiKit.hbox(2)
-	var gem := Panel.new()
-	gem.custom_minimum_size = Vector2(8, 8)
-	gem.add_theme_stylebox_override("panel", UiKit.flat_box(color, color.lightened(0.3), 1, 0))
-	line.add_child(gem)
-	line.add_child(UiKit.pixel_label(UiKit.status_tag(status), "small", color))
+	var icon_name := str(STATUS_ICONS.get(status, "info"))
+	line.add_child(Icons.rect(icon_name, Icons.size_for_scale(text_scale)))
+	if not compact:
+		line.add_child(UiKit.pixel_label(UiKit.status_tag(status), "small", color))
 	line.add_child(UiKit.pixel_label("%d" % int(entry.get("stacks", 1)), "small"))
 	var result := UiKit.panel(line)
 	result.add_theme_stylebox_override("panel", UiKit.flat_box(UiKit.STATUS_BG, color, 1, 3))

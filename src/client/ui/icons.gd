@@ -16,6 +16,12 @@ static var _cache: Dictionary = {}
 static var _placeholder: ImageTexture
 
 
+## Icons stay at their authored 16 px size for the normal UI and switch to an
+## exact nearest-neighbour 2x scale with the Extra-large text setting.
+static func size_for_scale(text_scale: float) -> int:
+	return 32 if text_scale >= 1.4 else 16
+
+
 static func texture(name: String) -> Texture2D:
 	if _cache.has(name):
 		return _cache[name]
@@ -40,12 +46,23 @@ static func rect(name: String, px: int = 16) -> TextureRect:
 	return icon
 
 
-static func with_text(name: String, text: String, px: int = 16) -> HBoxContainer:
+static func with_text(name: String, text: String, style: String = "body", text_scale: float = 1.0,
+		color: Color = Color(0, 0, 0, 0)) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
-	row.add_child(rect(name, px))
-	row.add_child(UiKit.label(text, "body"))
+	row.add_child(rect(name, size_for_scale(text_scale)))
+	row.add_child(UiKit.pixel_label(text, style, color))
 	return row
+
+
+## Adds an icon to a text button without changing its UiKit colour or type
+## variation. Button lays the icon beside its existing accessible text.
+static func apply_to_button(button: Button, name: String, text_scale: float = 1.0) -> Button:
+	button.icon = texture(name)
+	button.expand_icon = true
+	button.add_theme_constant_override("icon_max_width", size_for_scale(text_scale))
+	button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	return button
 
 
 static func _missing_texture() -> Texture2D:

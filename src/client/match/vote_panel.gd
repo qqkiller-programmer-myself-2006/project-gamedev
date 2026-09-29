@@ -8,6 +8,11 @@ var _deadline: Variant = null
 var _countdown: Label
 var _bar: ProgressBar
 var _voted := false
+const TYPE_ICONS := {
+	"combat": "combat", "elite": "elite", "merchant": "merchant", "rest": "rest",
+	"treasure": "treasure", "story": "story", "class": "class_trial", "class_trial": "class_trial",
+	"boss": "boss", "choice": "story",
+}
 
 
 func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
@@ -61,6 +66,7 @@ func _option_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> Co
 	var index := int(option["index"])
 	var box := UiKit.vbox(6)
 	var head := UiKit.hbox(6)
+	head.add_child(Icons.rect(str(TYPE_ICONS.get(str(option["type"]), "info")), Icons.size_for_scale(app.settings.text_scale)))
 	head.add_child(UiKit.badge(UiText.type_tag(option["type"]), UiKit.ACCENT))
 	head.add_child(UiKit.label(UiText.type_label(option["type"]), "dim"))
 	box.add_child(head)
