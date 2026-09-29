@@ -135,9 +135,10 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	add_child(_header)
 
 	_center_text = UiKit.pixel_label("", "huge")
-	_center_text.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_center_text.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	_center_text.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_center_text.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_center_text.offset_top = 92
+	_center_text.offset_bottom = 148
 	_center_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_center_text.add_theme_color_override("font_outline_color", Color.BLACK)
 	_center_text.add_theme_constant_override("outline_size", 10)
@@ -161,8 +162,6 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	bottom_left.offset_left = 14
 	bottom_left.offset_bottom = -10
 	bottom_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_rewards = UiKit.vbox(0)
-	bottom_left.add_child(_rewards)
 	_log = UiKit.pixel_label("", "small", UiKit.TEXT_DIM)
 	_log.custom_minimum_size = Vector2(220, 0)
 	_log.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
@@ -171,6 +170,8 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_log.add_theme_color_override("font_outline_color", Color.BLACK)
 	_log.add_theme_constant_override("outline_size", 3)
 	bottom_left.add_child(_log)
+	_rewards = UiKit.vbox(0)
+	bottom_left.add_child(_rewards)
 	add_child(bottom_left)
 
 	_bottom = UiKit.vbox(6)
@@ -328,6 +329,28 @@ func add_log(line: String) -> void:
 		_log_lines.pop_front()
 	_log.text = "\n".join(_log_lines)
 
+## Apply a server event to the existing token animations. The server event is
+## the source of truth; this method never infers an action from local input.
+func handle_event(event: Dictionary) -> void:
+	if str(event.get("type", "")) != "action_resolved":
+		return
+	var actor := str(event.get("actor", ""))
+	var actor_token: BattleToken = _tokens.get(actor)
+	if actor_token != null:
+		actor_token.play_animation("attack")
+	for result in event.get("results", []):
+		var target := str(result.get("target", ""))
+		var token: BattleToken = _tokens.get(target)
+		if token == null:
+			continue
+		if result.has("damage"):
+			if bool(result.get("down", false)):
+				token.play_animation("dead")
+			else:
+				token.play_animation("hurt")
+		elif bool(result.get("revived", false)):
+			token.play_animation("revive")
+
 
 # --- Parts --------------------------------------------------------------------
 
@@ -470,6 +493,7 @@ func _build_stage(view: Dictionary) -> void:
 				"energy": character.get("energy", 0), "energy_max": character.get("energy_max", 6),
 				"statuses": statuses.get(id, []), "acting": _combat.get("actor", "") == id,
 				"controller": character["controller"], "you": id == _me,
+				"reduced_motion": _app.settings.reduced_motion,
 				"tooltip": "%s - Lv %d %s\nATK %d  DEF %d  MAG %d  RES %d  SPD %d" % [character["name"],
 						int(character["level"]), character["class_name"], int(character["atk"]), int(character["def"]),
 						int(character["mag"]), int(character["res"]), int(character["spd"])],
@@ -546,10 +570,10 @@ func _build_bottom(view: Dictionary) -> void:
 		_combat_grid = _card_grid(mode, choices)
 		_combat_grid.set_anchors_preset(Control.PRESET_CENTER_TOP)
 		_combat_grid.grow_horizontal = Control.GROW_DIRECTION_BOTH
-		_combat_grid.offset_left = -260
-		_combat_grid.offset_right = 260
+		_combat_grid.offset_left = -310
+		_combat_grid.offset_right = 310
 		_combat_grid.offset_top = 360
-		_combat_grid.custom_minimum_size = Vector2(520, 0)
+		_combat_grid.custom_minimum_size = Vector2(620, 0)
 		_combat_grid.visible = not _banner.visible
 		_combat_grid.z_index = 5
 		add_child(_combat_grid)
@@ -694,7 +718,7 @@ func _card(title: String, sub: String, icon: String, icon_color: Color, usable: 
 	var number := _choices.size() + 1
 	var button := Button.new()
 	button.theme_type_variation = "HudButton"
-	button.custom_minimum_size = Vector2(164, 50)
+	button.custom_minimum_size = Vector2(190, 50)
 	button.focus_mode = Control.FOCUS_ALL
 	button.disabled = not usable
 	button.tooltip_text = tip
@@ -722,7 +746,8 @@ func _card(title: String, sub: String, icon: String, icon_color: Color, usable: 
 	name_label.clip_text = true
 	text.add_child(name_label)
 	var sub_label := UiKit.pixel_label(sub, "small", UiKit.TEXT_DIM)
-	sub_label.clip_text = true
+	sub_label.add_theme_font_size_override("font_size", int(10 * _app.settings.text_scale))
+	sub_label.clip_text = false
 	text.add_child(sub_label)
 	row.add_child(text)
 	button.add_child(row)
