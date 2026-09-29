@@ -20,6 +20,9 @@ You drive the OpenAI Codex CLI as the hands-on executor for this repo. You do no
 2. Run, from the integration worktree root:
    `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .ai/run-agent.ps1 -Agent codex -Worktree "<worktree>" -TaskFile ".ai/tasks/<file>.md" -TimeoutMin <n> [-Images "<a>","<b>"] [-Network]`
    It enforces the timeout and kills the whole process tree. Never start Codex any other way.
+   Built-in stall detector: if worktree files, logs and process-tree CPU all stay still for `-IdleMin` (default 20) minutes the run
+   is killed as `stalled` and a fresh agent resumes the task in the same worktree (`-Retries 1`; add `-FallbackAgent agy` to resume
+   with the other executor). Check live runs with `powershell -File .ai/agent-status.ps1` (IDLE / DEAD flags).
 3. Read `.ai/logs/<task>-codex-*.status.json` (state must be `finished`, not `timeout-killed`) and the `.last.md` report.
 4. Verify independently in the worktree — do not trust the report:
    - `GODOT=/d/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe bash tools/run_tests.sh` → copy the exact summary line.
