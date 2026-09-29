@@ -48,6 +48,7 @@ var _banner: PanelContainer
 var _banner_label: Label
 var _banner_tween: Tween = null
 var _menu_panel: PanelContainer
+var _combat_grid: Control
 
 
 func setup(screen: MatchScreen, app: ClientApp) -> void:
@@ -68,7 +69,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	left.set_anchors_preset(Control.PRESET_LEFT_WIDE)
 	left.offset_top = 52
 	left.offset_bottom = -170
-	left.custom_minimum_size = Vector2(210, 0)
+	left.custom_minimum_size = Vector2(150, 0)
 	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -181,13 +182,14 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	add_child(_bottom)
 
 	_banner = PanelContainer.new()
-	_banner.add_theme_stylebox_override("panel", UiKit.flat_box(Color(0.16, 0.16, 0.17, 0.78), Color(0, 0, 0, 0), 0, 8))
-	_banner.set_anchors_preset(Control.PRESET_HCENTER_WIDE)
-	# Keep the stripe above the HUD even with the 1.4x text-scale setting.
-	_banner.anchor_top = 0.63
-	_banner.anchor_bottom = 0.63
+	_banner.add_theme_stylebox_override("panel", UiKit.flat_box(Color(0.18, 0.18, 0.18, 0.92), Color(0, 0, 0, 0), 0, 0))
+	_banner.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	_banner.offset_top = 550
+	_banner.offset_bottom = 620
+	_banner.pivot_offset = Vector2(640, 35)
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_banner_label = UiKit.pixel_label("", "title")
+	_banner_label.add_theme_font_size_override("font_size", int(34 * _app.settings.text_scale))
 	_banner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_banner.add_child(_banner_label)
 	_banner.visible = false
@@ -221,7 +223,7 @@ func tick() -> void:
 	_app._toast.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_app._toast.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_app._toast.grow_vertical = Control.GROW_DIRECTION_END
-	_app._toast.position.y = 64
+	_app._toast.position.y = 12
 	if _countdown == null or not is_instance_valid(_countdown):
 		return
 	if _deadline == null:
@@ -290,24 +292,34 @@ func announce(text: String) -> void:
 	_banner_label.text = text
 	_banner.visible = true
 	_banner.rotation_degrees = -1.0
-	if _bottom != null and _bottom.get_child_count() > 1:
+	_set_action_row_visible(false)
+	if _combat_grid != null and is_instance_valid(_combat_grid):
+		_combat_grid.visible = false
+	if _bottom != null and _bottom.get_child_count() > 0:
 		_bottom.get_child(0).visible = false
 	if _banner_tween != null:
 		_banner_tween.kill()
 	_banner.modulate.a = 1.0
 	_banner_tween = create_tween()
-	if _app.settings.reduced_motion:
-		_banner_tween.tween_interval(1.4)
-	else:
-		_banner.modulate.a = 0.0
-		_banner_tween.tween_property(_banner, "modulate:a", 1.0, 0.15)
-		_banner_tween.tween_interval(1.1)
+	_banner_tween.tween_interval(1.6)
+	if not _app.settings.reduced_motion:
 		_banner_tween.tween_property(_banner, "modulate:a", 0.0, 0.3)
 	_banner_tween.tween_callback(func() -> void:
 		_banner.visible = false
-		if _bottom != null and _bottom.get_child_count() > 1:
+		_set_action_row_visible(true)
+		if _combat_grid != null and is_instance_valid(_combat_grid):
+			_combat_grid.visible = true
+		if _bottom != null and _bottom.get_child_count() > 0:
 			_bottom.get_child(0).visible = true
 	)
+
+
+func _set_action_row_visible(visible: bool) -> void:
+	if _bottom == null:
+		return
+	for node in _bottom.find_children("*", "Control", true, false):
+		if node.has_meta("combat_action_row"):
+			node.visible = visible
 
 
 func add_log(line: String) -> void:
@@ -388,14 +400,15 @@ func _build_timeline(view: Dictionary) -> void:
 		var unit := _unit(view, str(id))
 		if unit.is_empty():
 			continue
-		var entry := UiKit.vbox(1)
+		var entry := UiKit.vbox(2)
+		entry.custom_minimum_size = Vector2(150, 46)
 		var acted := not remaining.has(id)
 		var is_actor: bool = id == actor
 		var head := UiKit.vbox(0)
 		var tag := _controller_tag(str(id), unit)
 		var color := UiKit.ACCENT if is_actor else (UiKit.TEXT_DIM if acted else UiKit.TEXT)
 		var name_label := UiKit.pixel_label(("> " if is_actor else "") + _screen.name_of(str(id)) + " (%d)" % int(unit.get("level", 1)), "small", color)
-		name_label.add_theme_font_size_override("font_size", int(12 * _app.settings.text_scale))
+		name_label.add_theme_font_size_override("font_size", int(11 * _app.settings.text_scale))
 		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		name_label.clip_text = true
 		head.add_child(name_label)
@@ -403,17 +416,17 @@ func _build_timeline(view: Dictionary) -> void:
 		entry.add_child(head)
 		var hp_bar := UiKit.stat_bar(hp, int(unit.get("max_hp", 1)), UiKit.BAR_HP,
 				"DOWN" if hp <= 0 else "%d/%d" % [hp, int(unit.get("max_hp", 1))], 10, "small")
-		hp_bar.get_child(0).add_theme_font_size_override("font_size", int(9 * _app.settings.text_scale))
+		hp_bar.get_child(0).add_theme_font_size_override("font_size", int(8 * _app.settings.text_scale))
 		entry.add_child(hp_bar)
 		if unit.has("energy"):
 			var energy_bar := UiKit.stat_bar(int(unit["energy"]), int(unit.get("energy_max", 6)), UiKit.BAR_ENERGY,
 					"%d/%d" % [int(unit["energy"]), int(unit.get("energy_max", 6))], 10, "small")
-			energy_bar.get_child(0).add_theme_font_size_override("font_size", int(9 * _app.settings.text_scale))
+			energy_bar.get_child(0).add_theme_font_size_override("font_size", int(8 * _app.settings.text_scale))
 			entry.add_child(energy_bar)
 		var card := UiKit.panel(entry, "HudPanel")
 		if is_actor:
 			card.add_theme_stylebox_override("panel", UiKit.flat_box(UiKit.HUD_BG, UiKit.ACCENT, 2, 6))
-		card.modulate = Color(1, 1, 1, 0.55) if hp <= 0 or acted else Color.WHITE
+		card.modulate = Color(1, 1, 1, 0.6) if hp <= 0 or acted else Color.WHITE
 		card.tooltip_text = "%s (%s) - %s - Speed %d - HP %d/%d%s%s" % [tag[0], _screen.name_of(str(id)), tag[2],
 				int(unit.get("spd", 0)), hp, int(unit.get("max_hp", 1)),
 				(", Energy %d/%d" % [int(unit["energy"]), int(unit.get("energy_max", 6))]) if unit.has("energy") else "",
@@ -443,28 +456,33 @@ func _build_stage(view: Dictionary) -> void:
 	_spots.clear()
 	var statuses: Dictionary = _combat.get("statuses", {})
 	var party: Array = view.get("party", [])
-	## Three staggered columns, clear of the header and the HUD.
-	var formation := {0: [0.28, 0.04], 1: [0.20, 0.17], 2: [0.32, 0.30], 3: [0.20, 0.40], 4: [0.45, 0.17]}
-	for character in party:
-		var slot := int(character["slot"])
-		var id := "p%d" % slot
-		var data := {
-			"id": id, "side": "party", "name": character["name"], "kind": character["class"],
-			"hp": character["hp"], "max_hp": character["max_hp"],
-			"energy": character.get("energy", 0), "energy_max": character.get("energy_max", 6),
-			"statuses": statuses.get(id, []), "acting": _combat.get("actor", "") == id,
-			"controller": character["controller"], "you": id == _me,
-			"tooltip": "%s - Lv %d %s\nATK %d  DEF %d  MAG %d  RES %d  SPD %d" % [character["name"],
-					int(character["level"]), character["class_name"], int(character["atk"]), int(character["def"]),
-					int(character["mag"]), int(character["res"]), int(character["spd"])],
-		}
-		_spots[id] = formation.get(slot, [0.25, 0.3])
-		_add_token(data)
+	## Fixed slots are expressed in the 1280x720 design coordinate system.
+	## Add the back row last so it is painted on top of the front row.
+	var party_front: Array = party.filter(func(c): return int(c.get("slot", 0)) < 3)
+	var party_back: Array = party.filter(func(c): return int(c.get("slot", 0)) >= 3)
+	for group in [party_front, party_back]:
+		for character in group:
+			var slot := int(character["slot"])
+			var id := "p%d" % slot
+			var data := {
+				"id": id, "side": "party", "name": character["name"], "kind": character["class"],
+				"hp": character["hp"], "max_hp": character["max_hp"],
+				"energy": character.get("energy", 0), "energy_max": character.get("energy_max", 6),
+				"statuses": statuses.get(id, []), "acting": _combat.get("actor", "") == id,
+				"controller": character["controller"], "you": id == _me,
+				"tooltip": "%s - Lv %d %s\nATK %d  DEF %d  MAG %d  RES %d  SPD %d" % [character["name"],
+						int(character["level"]), character["class_name"], int(character["atk"]), int(character["def"]),
+						int(character["mag"]), int(character["res"]), int(character["spd"])],
+			}
+			var px: float = [300.0, 460.0, 620.0][slot] if slot < 3 else [380.0, 540.0][slot - 3]
+			var py: float = 300.0 if slot < 3 else 480.0
+			_spots[id] = [px / 1280.0, py / 720.0]
+			_add_token(data)
 	var enemies: Array = _combat.get("enemies", [])
 	var fronts: Array = enemies.filter(func(e): return e["row"] == "front")
 	var backs: Array = enemies.filter(func(e): return e["row"] != "front")
 	var boss: bool = view.get("encounter") != null and view["encounter"].get("kind") == "boss"
-	for group in [[fronts, 0.57], [backs, 0.73]]:
+	for group in [[fronts, [800.0, 960.0, 1120.0], 300.0], [backs, [880.0, 1040.0], 480.0]]:
 		var list: Array = group[0]
 		for i in list.size():
 			var enemy: Dictionary = list[i]
@@ -481,8 +499,9 @@ func _build_stage(view: Dictionary) -> void:
 		}
 			if not enemy.has("energy"):
 				data.erase("energy")
-			var y := 0.32 if list.size() == 1 else 0.16 + i * (0.36 / float(list.size() - 1))
-			_spots[id] = [float(group[1]) - (0.03 if boss else 0.0), 0.20 if boss else y]
+			var ex := 960.0 if boss else float(group[1][i])
+			var ey := 440.0 if boss else float(group[2])
+			_spots[id] = [ex / 1280.0, ey / 720.0]
 			_add_token(data)
 	var targets := _current_targets()
 	for i in targets.size():
@@ -509,20 +528,31 @@ func _place_tokens() -> void:
 	for id in _tokens:
 		var token: BattleToken = _tokens[id]
 		var spot: Array = _spots.get(id, [0.5, 0.3])
-		token.position = Vector2(area.x * float(spot[0]), area.y * float(spot[1]))
+		var feet_offset := float(BattleToken.BADGE_HEIGHT + token.figure_height - 6.0)
+		token.position = Vector2(area.x * float(spot[0]) - token.size.x * 0.5, area.y * float(spot[1]) - feet_offset)
 
 
 func _build_bottom(view: Dictionary) -> void:
 	UiKit.clear(_bottom)
+	if _combat_grid != null and is_instance_valid(_combat_grid):
+		_combat_grid.queue_free()
+	_combat_grid = null
 	_countdown = null
 	var me := _unit(view, _me)
 	var mode := _screen.combat_mode
 	var your_turn: bool = _combat.get("your_turn", false) and str(_combat.get("result", "")).is_empty()
 	var choices: Dictionary = _combat.get("choices", {})
 	if your_turn and mode in ["skills", "items"]:
-		var grid := _card_grid(mode, choices)
-		grid.visible = not _banner.visible
-		_bottom.add_child(grid)
+		_combat_grid = _card_grid(mode, choices)
+		_combat_grid.set_anchors_preset(Control.PRESET_CENTER_TOP)
+		_combat_grid.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		_combat_grid.offset_left = -260
+		_combat_grid.offset_right = 260
+		_combat_grid.offset_top = 360
+		_combat_grid.custom_minimum_size = Vector2(520, 0)
+		_combat_grid.visible = not _banner.visible
+		_combat_grid.z_index = 5
+		add_child(_combat_grid)
 	elif your_turn and not mode.is_empty():
 		var caption := UiKit.pixel_label("Choose a target on the field (1-%d), Esc to go back" % _choices.size(), "body", UiKit.ACCENT)
 		caption.add_theme_color_override("font_outline_color", Color.BLACK)
@@ -556,6 +586,7 @@ func _build_bottom(view: Dictionary) -> void:
 		hud.add_child(bars)
 	if your_turn:
 		var actions := UiKit.hbox(8)
+		actions.set_meta("combat_action_row", true)
 		var has_skills: bool = not choices.get("skills", {}).is_empty()
 		actions.add_child(_action_button("Fight [F]", "fight", func() -> void: _set_mode("skills"), mode == "skills" or mode == "attack" or mode.begins_with("skill:")))
 		var item := _action_button("Items [I]", "items", func() -> void: _set_mode("items"), mode == "items" or mode.begins_with("item:"))
@@ -570,7 +601,9 @@ func _build_bottom(view: Dictionary) -> void:
 		if has_skills:
 			_app.hint("energy")
 	else:
-		hud.add_child(_centered(UiKit.pixel_label(_waiting_text(), "body", UiKit.TEXT_DIM)))
+		# The non-actor HUD is intentionally only the compact header and bars.
+		# Waiting text belongs in the event log, not in the bottom action area.
+		pass
 	if not _combat.get("statuses", {}).is_empty():
 		_app.hint("dot")
 	var row := UiKit.hbox(8)
@@ -661,7 +694,7 @@ func _card(title: String, sub: String, icon: String, icon_color: Color, usable: 
 	var number := _choices.size() + 1
 	var button := Button.new()
 	button.theme_type_variation = "HudButton"
-	button.custom_minimum_size = Vector2(164, 58)
+	button.custom_minimum_size = Vector2(164, 50)
 	button.focus_mode = Control.FOCUS_ALL
 	button.disabled = not usable
 	button.tooltip_text = tip

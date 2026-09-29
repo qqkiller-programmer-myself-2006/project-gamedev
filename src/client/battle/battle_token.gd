@@ -7,8 +7,8 @@ extends Button
 ## Button so a valid target can be clicked, or focused and confirmed with
 ## Enter.
 
-const BADGE_HEIGHT := 30.0
-const PLATE_HEIGHT := 66.0
+const BADGE_HEIGHT := 18.0
+const PLATE_HEIGHT := 36.0
 
 const PARTY_OUTFITS := {
 	"Arin": {"shirt": Color("#d85b52"), "pants": Color("#3f547a"), "hair": Color("#e7c08d")},
@@ -60,8 +60,8 @@ func setup(data: Dictionary) -> void:
 	text = ""
 	focus_mode = Control.FOCUS_NONE
 	disabled = true
-	var width := 240.0 if side == "boss" else 174.0
-	figure_height = 190.0 if side == "boss" else 126.0
+	var width := 140.0
+	figure_height = 150.0 if side == "boss" else 110.0
 	custom_minimum_size = Vector2(width, BADGE_HEIGHT + figure_height + PLATE_HEIGHT)
 	size = custom_minimum_size
 	if side == "party":
@@ -84,7 +84,7 @@ func setup(data: Dictionary) -> void:
 		_badges.add_child(_status_badge(entry, compact))
 	add_child(_badges)
 
-	var plate_box := UiKit.vbox(2)
+	var plate_box := UiKit.vbox(1)
 	plate_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var who := str(data.get("name", unit_id))
 	if bool(data.get("you", false)):
@@ -94,21 +94,23 @@ func setup(data: Dictionary) -> void:
 	var name_label := UiKit.pixel_label(who, "small", UiKit.ACCENT if bool(data.get("you", false)) else UiKit.TEXT)
 	name_label.clip_text = true
 	plate_box.add_child(name_label)
-	var bars := UiKit.vbox(2)
+	var bars := UiKit.hbox(0)
+	bars.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var hp_bar := UiKit.stat_bar(int(data.get("hp", 0)), int(data.get("max_hp", 1)), UiKit.BAR_HP,
-			"%d/%d" % [int(data.get("hp", 0)), int(data.get("max_hp", 1))] if not down else "DOWN", 18)
+			"%d/%d" % [int(data.get("hp", 0)), int(data.get("max_hp", 1))] if not down else "DOWN", 14, "small")
 	hp_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bars.add_child(hp_bar)
 	if data.has("energy"):
 		var energy := UiKit.stat_bar(int(data["energy"]), int(data.get("energy_max", 6)), UiKit.BAR_ENERGY,
-				"%d/%d" % [int(data["energy"]), int(data.get("energy_max", 6))], 18)
+				"%d/%d" % [int(data["energy"]), int(data.get("energy_max", 6))], 14, "small")
+		energy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bars.add_child(energy)
 	plate_box.add_child(bars)
 	_plate = UiKit.panel(plate_box, "HudPanel")
 	_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_plate.position = Vector2(0, BADGE_HEIGHT + figure_height + 2)
 	_plate.custom_minimum_size = Vector2(width, 0)
-	_plate.size = Vector2(width, PLATE_HEIGHT - 2)
+	_plate.size = Vector2(width, PLATE_HEIGHT)
 	add_child(_plate)
 	tooltip_text = str(data.get("tooltip", ""))
 	modulate = Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
@@ -151,7 +153,7 @@ func _draw_figure(feet: Vector2) -> void:
 	var dark := tint.darkened(0.45)
 	match side:
 		"party":
-			_draw_humanoid(feet, outfit.get("shirt", body), dark, 1.55)
+			_draw_humanoid(feet, outfit.get("shirt", body), dark, 1.35)
 		"enemy":
 			_draw_enemy(feet, body, dark)
 		"boss":
