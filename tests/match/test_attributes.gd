@@ -8,7 +8,7 @@ func test_derived_stats_at_level_1_equal_old_stats() -> void:
 		"archer": {"max_hp": 40, "atk": 10, "def": 3, "mag": 3, "res": 3, "spd": 15, "crit": 0.25},
 		"mage": {"max_hp": 34, "atk": 5, "def": 2, "mag": 13, "res": 6, "spd": 9, "crit": 0.05},
 		"guardian": {"max_hp": 66, "atk": 8, "def": 8, "mag": 2, "res": 6, "spd": 7, "crit": 0.05},
-		"rogue": {"max_hp": 38, "atk": 10, "def": 3, "mag": 3, "res": 3, "spd": 12, "crit": 0.18}
+		"assassin": {"max_hp": 38, "atk": 10, "def": 3, "mag": 3, "res": 3, "spd": 12, "crit": 0.18}
 	}
 	
 	for class_id in old_stats.keys():

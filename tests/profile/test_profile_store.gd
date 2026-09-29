@@ -18,11 +18,11 @@ class FakeSender extends RefCounted:
 
 func test_memory_store_normalizes_and_round_trips() -> void:
 	var store := MemoryProfileStore.new()
-	store.save_profile("a", {"gems": 7, "class_trees": {"rogue": {"might": 2}}})
+	store.save_profile("a", {"gems": 7, "class_trees": {"assassin": {"might": 2}}})
 	var profile := store.load_profile("a")
 	assert_eq(profile["gems"], 7)
 	assert_true(profile["races_owned"].has("Human"))
-	assert_eq(profile["class_trees"]["rogue"]["might"], 2)
+	assert_eq(profile["class_trees"]["assassin"]["might"], 2)
 
 
 func test_file_store_round_trip_in_a_temp_directory() -> void:
@@ -82,3 +82,15 @@ func test_http_sender_retries_failed_save_then_succeeds() -> void:
 		OS.delay_msec(10)
 	sender.stop()
 	assert_eq(sender.attempts, 2)
+
+
+func test_legacy_rogue_profile_keys_migrate_to_assassin() -> void:
+	var normalized := ProfileStore.normalize({
+		"class_trees": {"rogue": {"might": 2}},
+		"prestige": {"rogue": 3},
+		"last_loadout": {"class": "rogue", "race": "Elf"},
+	})
+	assert_eq(normalized["class_trees"]["assassin"]["might"], 2)
+	assert_false(normalized["class_trees"].has("rogue"))
+	assert_eq(normalized["prestige"]["assassin"], 3)
+	assert_eq(normalized["last_loadout"]["class"], "assassin")

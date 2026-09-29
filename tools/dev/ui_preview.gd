@@ -8,7 +8,7 @@ extends SceneTree
 ##
 ## Options: --out=DIR  --seed=N  --speed=X (game seconds per real second)
 ##          --scale=1.2 (text size)  --reduced-motion
-##          --class=rogue (every Class Encounter teaches that Class)
+##          --class=assassin (every Class Encounter teaches that Class)
 ##          --setup-only (capture Room and Character setup, then exit)
 ##          --resolution=1920x1080 (window size; the UI stretches from 1280x720)
 

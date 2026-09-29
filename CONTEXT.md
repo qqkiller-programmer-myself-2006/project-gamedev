@@ -12,7 +12,7 @@ Races, Boons, per-Class skill trees, Prestige, and Gems are authoritative
 server-side metadata in `content/forest.json`. Gems are earned per passed
 Layer, Guardian victory, Story Clue, and eligible Class Encounter, then saved
 through the injected `ProfileStore` for token-bearing sessions. Missing tokens
-use a session-only profile. Enervation is a Boon, not a Rogue passive; status
+use a session-only profile. Enervation is a Boon, not a Assassin passive; status
 resistance is a derived stat.
 
 คำศัพท์และขอบเขตที่ใช้ร่วมกันสำหรับ vertical slice ของเกม BEYOND THE WORLD'S END ซึ่งเป็น online fantasy turn-based RPG แบบ co-op
@@ -92,10 +92,10 @@ _Avoid_: ability, spell (เมื่อหมายถึง action ในร�
 _Avoid_: mana, MP, SP, stamina
 
 **Tier 1 Class**:
-Class ระดับแรกของ Forest vertical slice ได้แก่ Swordsman, Archer, Mage, Guardian และ Rogue (ADR-0010)
+Class ระดับแรกของ Forest vertical slice ได้แก่ Swordsman, Archer, Mage, Guardian และ Assassin (ADR-0010)
 _Avoid_: starter class (เพราะผู้เล่นไม่ได้เริ่มเกมด้วย Class)
 
-**Rogue**:
+**Assassin**:
 Tier 1 Class สาย Melee DoT ที่ใช้มีดและยาพิษติด DoT หลายชนิดบนเป้าเดียว แล้วปิดด้วย Skill ที่แรงขึ้นตามจำนวนชนิด DoT บนเป้า; มี passive Enervation (ADR-0010)
 _Avoid_: assassin, thief
 
@@ -118,7 +118,7 @@ Status effect ที่ทำ damage ตอนเริ่ม turn ของต�
 _Avoid_: poison (เมื่อหมายถึง DoT ทุกชนิด), tick effect
 
 **Enervation**:
-passive ของ Rogue: damage ตรงแรงขึ้น 5% ต่อชนิด DoT บนเป้า (ไม่เกิน ×1.4), DoT ที่ Rogue ติดแรงขึ้น 15% และ Rogue รับ damage จาก DoT มากขึ้น ×1.15
+passive ของ Assassin: damage ตรงแรงขึ้น 5% ต่อชนิด DoT บนเป้า (ไม่เกิน ×1.4), DoT ที่ Assassin ติดแรงขึ้น 15% และ Assassin รับ damage จาก DoT มากขึ้น ×1.15
 _Avoid_: boon, perk (slice นี้ไม่มีระบบ Boon)
 
 **Path Voting**:

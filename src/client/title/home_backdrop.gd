@@ -17,9 +17,9 @@ const GROUND := Color("#0b131e")
 const GROUND_EDGE := Color("#18263a")
 const FIRE_X := 0.68
 const GROUND_Y := 0.80
-const SPRITE_SCALE := 2.0
+const SPRITE_SCALE := 1.35
 ## [class, frame, x as a fraction of the width]; the Swordsman faces the fire from the left.
-const PARTY := [["swordsman", "idle_right.png", 0.56], ["archer", "idle_left.png", 0.79], ["mage", "idle_left.png", 0.89]]
+const PARTY := [["swordsman", "idle", 0.48], ["guardian", "idle", 0.61], ["archer", "idle", 0.74], ["mage", "idle", 0.84], ["assassin", "idle", 0.94]]
 
 
 func setup(reduced: bool) -> void:
@@ -27,9 +27,13 @@ func setup(reduced: bool) -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_process(not reduced_motion)
 	for item in PARTY:
-		var texture := load("res://assets/heroes/%s/%s" % [item[0], item[1]]) as Texture2D
-		if texture == null:
+		var sprite_set := SpriteSet.for_class(str(item[0]))
+		if sprite_set == null:
 			continue
+		var frames := sprite_set.frames(str(item[1]))
+		if frames.is_empty():
+			continue
+		var texture := frames[0]
 		var sprite := TextureRect.new()
 		sprite.texture = texture
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST

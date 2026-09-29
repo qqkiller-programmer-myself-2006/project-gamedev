@@ -1,3 +1,5 @@
+Renamed Assassin on 2026-09-29, #74.
+
 ---
 status: accepted — Enervation is now a Boon equipped before the Match; Rogue has no Enervation class passive.
 ---

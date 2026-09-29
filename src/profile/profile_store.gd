@@ -24,6 +24,17 @@ static func normalize(profile: Dictionary) -> Dictionary:
 	var out := EMPTY_PROFILE.duplicate(true)
 	for key in profile:
 		out[key] = profile[key].duplicate(true) if profile[key] is Dictionary or profile[key] is Array else profile[key]
+	for field in ["class_trees", "prestige"]:
+		var values: Dictionary = out.get(field, {})
+		if values.has("rogue"):
+			if not values.has("assassin"):
+				values["assassin"] = values["rogue"]
+			values.erase("rogue")
+		out[field] = values
+	var loadout: Dictionary = out.get("last_loadout", {})
+	if loadout.get("class", "") == "rogue":
+		loadout["class"] = "assassin"
+	out["last_loadout"] = loadout
 	if not out["races_owned"].has("Human"):
 		out["races_owned"].push_front("Human")
 	return out

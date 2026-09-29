@@ -193,6 +193,8 @@ func handle_setup_command(slot: int, cmd: Dictionary) -> Dictionary:
 
 func _set_loadout(slot: int, cmd: Dictionary, profile: Dictionary) -> Dictionary:
 	var class_id := str(cmd.get("class", ""))
+	if class_id == "rogue":
+		class_id = "assassin"
 	var race := str(cmd.get("race", ""))
 	var boons: Array = cmd.get("boons", [])
 	if _content.get_dict("classes.%s" % class_id).is_empty() or class_id == "classless":
