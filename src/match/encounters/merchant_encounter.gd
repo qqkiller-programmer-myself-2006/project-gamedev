@@ -16,7 +16,7 @@ func start(run: MatchRun) -> void:
 		var item := str(entry["item"])
 		stock.append({"item": item, "remaining": int(entry.get("quantity", 1)),
 				"price": run.content.get_int("items.%s.price" % item)})
-	deadline = run.clock.now() + run.content.get_float("encounters.merchant.seconds", 45.0)
+	deadline = -1.0 if run.story else run.clock.now() + run.content.get_float("encounters.merchant.seconds", 45.0)
 	run.emit({"type": "merchant_opened", "stock": _stock_view(run), "deadline": deadline})
 	run.collect_ai_gold()
 
@@ -54,7 +54,7 @@ func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 
 
 func update(run: MatchRun) -> void:
-	if not done and run.clock.now() >= deadline:
+	if not done and deadline >= 0.0 and run.clock.now() >= deadline:
 		_close(run)
 
 

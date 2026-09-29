@@ -57,10 +57,11 @@ var _phase_deadline := -1.0
 var _pending_option: Dictionary = {}
 var _loadouts: Array = []
 var story := false
+var story_host := 0
 var _layer_start: Dictionary = {}
 
 
-func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array[bool], match_number: int, loadouts: Array = [], story_mode: bool = false) -> void:
+func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array[bool], match_number: int, loadouts: Array = [], story_mode: bool = false, host_slot: int = 0) -> void:
 	rng = match_rng
 	clock = match_clock
 	content = forest
@@ -68,6 +69,7 @@ func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array
 	number = match_number
 	_loadouts = loadouts.duplicate(true)
 	story = story_mode
+	story_host = host_slot
 	_started_at = clock.now()
 	_create_party()
 	gold = content.get_int("party.starting_gold", 0)
@@ -93,12 +95,14 @@ func humans() -> Array[bool]:
 
 func voters() -> Array[bool]:
 	if story:
-		return [true, false, false, false, false]
+		var arr: Array[bool] = [false, false, false, false, false]
+		arr[story_host] = true
+		return arr
 	return _humans
 
 
 func needs_ready(slot: int) -> bool:
-	return is_human(slot) and (not story or slot == 0)
+	return is_human(slot) and (not story or slot == story_host)
 
 
 ## A slot changes between human and AI control mid-Match.

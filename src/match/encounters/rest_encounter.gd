@@ -22,7 +22,7 @@ func start(run: MatchRun) -> void:
 		var amount := int(round(character["max_hp"] * ratio))
 		character["hp"] = mini(character["max_hp"], maxi(1, character["hp"] + amount))
 		healed.append({"slot": character["slot"], "amount": character["hp"] - before, "hp": character["hp"]})
-	deadline = run.clock.now() + run.content.get_float("encounters.rest.seconds", 60.0)
+	deadline = -1.0 if run.story else run.clock.now() + run.content.get_float("encounters.rest.seconds", 60.0)
 	run.emit({"type": "rested", "healed": healed, "deadline": deadline})
 	_close_if_everyone_ready(run)
 	run.collect_ai_gold()
@@ -75,7 +75,7 @@ func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 
 
 func update(run: MatchRun) -> void:
-	if not done and run.clock.now() >= deadline:
+	if not done and deadline >= 0.0 and run.clock.now() >= deadline:
 		_close(run)
 
 

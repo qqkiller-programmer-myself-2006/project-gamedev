@@ -127,6 +127,21 @@ func test_outcome_rewards_come_from_content() -> void:
 	assert_eq(_view()["party"][0]["exp"], 10)
 
 
+func test_story_outcome_with_gold_and_no_clue_pays_gold() -> void:
+	var event := {
+		"story": {
+			"events": {
+				"gold_no_clue": {
+					"outcome": {"gold": 50, "text": "You found some gold."}
+				}
+			}
+		}
+	}
+	_start("gold_no_clue", 1, event)
+	h.take_route(sessions, "story")
+	assert_eq(_view()["gold"], 50, "Gold should be granted even without a clue")
+
+
 func test_reading_ends_when_everyone_is_ready_or_time_runs_out() -> void:
 	_start("carved_stone", 2)
 	h.take_route(sessions, "story")
