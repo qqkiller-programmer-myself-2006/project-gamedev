@@ -201,7 +201,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 ## Rebuilds everything that depends on the snapshot.
 func build(view: Dictionary, combat: Dictionary) -> void:
 	_combat = combat
-	_me = "p%d" % _screen.your_slot()
+	_me = str(combat.get("actor", "")) if _screen.room_view().get("story", false) and str(combat.get("actor", "")).begins_with("p") else "p%d" % _screen.your_slot()
 	var mode_key := "%d-%s-%s-%d" % [int(view.get("layer", 0)), str(view.get("phase")), combat.get("actor", ""),
 			int(combat.get("round", 0))]
 	if _screen.combat_mode_key != mode_key:
@@ -598,7 +598,7 @@ func _build_bottom(view: Dictionary) -> void:
 	var info := UiKit.hbox(12)
 	if not me.is_empty():
 		var exp_text := "(%d/%d)" % [int(me.get("exp", 0)), int(me.get("exp_next", 0))] if int(me.get("exp_next", 0)) > 0 else "(MAX)"
-		info.add_child(UiKit.pixel_label("%s Lvl %d %s" % [me.get("class_name", ""), int(me.get("level", 1)), exp_text], "heading"))
+		info.add_child(UiKit.pixel_label("%s · %s Lvl %d %s" % [me.get("name", ""), me.get("class_name", ""), int(me.get("level", 1)), exp_text], "heading"))
 	info.add_child(UiKit.spacer())
 	_countdown = UiKit.pixel_label("", "heading")
 	info.add_child(_countdown)

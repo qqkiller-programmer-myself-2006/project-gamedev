@@ -9,6 +9,7 @@ const SLOT_COUNT := 5
 enum State { LOBBY, IN_MATCH, CLOSED }
 
 var code: String
+var story := false
 var state: State = State.LOBBY
 var host_slot := -1
 ## Each slot: {"session": int (0 = nobody), "name": String}
@@ -112,13 +113,47 @@ func start_match() -> void:
 		loadouts.append(slot.get("loadout", {}).duplicate(true))
 	for i in loadouts.size():
 		loadouts[i] = {"loadout": loadouts[i], "profile": slots[i].get("profile", {}).duplicate(true)}
-	run = MatchRun.new(_rng.fork(), _clock, _content, humans, _matches_started, loadouts)
+	if story:
+		humans.fill(true)
+	run = MatchRun.new(_rng.fork(), _clock, _content, humans, _matches_started, loadouts, story)
 	_drain_run()
+
+
+func restore_story(data: Dictionary) -> bool:
+	if not story or state != State.LOBBY or not MatchRun.valid_story_save(data, _content):
+		return false
+	start_match()
+	run.restore_layer_start(data)
+	_drain_run()
+	return true
 
 
 ## Routes an in-Match command from the human in `slot`.
 func handle_match_command(slot: int, cmd: Dictionary) -> Dictionary:
-	var result := run.handle(slot, cmd)
+	var acting := slot
+	if story:
+		if slot != host_slot:
+			return {"ok": false, "error": "not_your_slot"}
+		var kind := str(cmd.get("type", ""))
+		if kind == "action":
+			var actor_id := ""
+			if run.encounter is CombatEncounter:
+				actor_id = str(run.encounter.actor)
+			elif run.encounter is ClassEncounter and run.encounter.stage == "challenge":
+				actor_id = str(run.encounter._trial.actor)
+			if not actor_id.begins_with("p"):
+				return {"ok": false, "error": "not_your_turn"}
+			acting = int(actor_id.substr(1))
+			if cmd.has("slot") and int(cmd["slot"]) != acting:
+				return {"ok": false, "error": "not_your_slot"}
+		elif kind in ["invest", "equip", "unequip", "transfer_item", "transfer_gold", "buy", "craft"]:
+			acting = int(cmd.get("slot", slot))
+			if acting < 0 or acting >= SLOT_COUNT:
+				return {"ok": false, "error": "invalid_slot"}
+	var routed := cmd.duplicate()
+	if story and str(cmd.get("type", "")) == "action":
+		routed["slot"] = acting
+	var result := run.handle(acting, routed)
 	_drain_run()
 	return result
 
@@ -140,7 +175,12 @@ func handle_setup_command(slot: int, cmd: Dictionary) -> Dictionary:
 	var kind := str(cmd.get("type", ""))
 	match kind:
 		"set_loadout":
-			return _set_loadout(slot, cmd, profile)
+			var target := int(cmd.get("slot", slot)) if story else slot
+			if target < 0 or target >= SLOT_COUNT:
+				return {"ok": false, "error": "invalid_slot"}
+			if story and target != host_slot and (str(cmd.get("race", "Human")) != "Human" or not cmd.get("boons", []).is_empty()):
+				return {"ok": false, "error": "invalid_loadout"}
+			return _set_loadout(target, cmd, profile)
 		"buy_race":
 			return _buy_race(slot, str(cmd.get("race", "")), profile)
 		"tree_upgrade":
@@ -261,13 +301,13 @@ func snapshot_for(session_id: int) -> Dictionary:
 	var slot_views: Array = []
 	var members: Array = _content.get_array("party.members")
 	for i in SLOT_COUNT:
-		var human: bool = slots[i]["session"] != 0
+		var human: bool = slots[i]["session"] != 0 or (story and human_count() > 0)
 		var member: Dictionary = members[i] if i < members.size() else {}
 		slot_views.append({
 			"index": i,
 			"character_name": str(member.get("name", "Hero %d" % (i + 1))),
 			"controller": "human" if human else "ai",
-			"owner_name": slots[i]["name"],
+			"owner_name": slots[host_slot]["name"] if story and host_slot >= 0 else slots[i]["name"],
 			"is_host": i == host_slot,
 			"is_you": i == you,
 			"loadout": slots[i].get("loadout", {}).duplicate(true),
@@ -277,6 +317,7 @@ func snapshot_for(session_id: int) -> Dictionary:
 		"state": _state_name(),
 		"host_slot": host_slot,
 		"your_slot": you,
+		"story": story,
 		"slots": slot_views,
 	}
 	if you >= 0:

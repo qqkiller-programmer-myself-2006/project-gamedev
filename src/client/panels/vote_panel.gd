@@ -18,7 +18,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	var me := screen.your_slot()
 	_voted = vote["voted_slots"].has(me)
 	add_child(UiKit.para("Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])], "title"))
-	add_child(UiKit.para("Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random.", "dim"))
+	add_child(UiKit.para("Choose one path for the Party." if view.get("story", false) else "Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random.", "dim"))
 	var row := UiKit.flow(12)
 	for option in _options:
 		row.add_child(_option_card(screen, app, option))
@@ -33,12 +33,15 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_bar.custom_minimum_size = Vector2(0, 14)
 	timer_row.add_child(_bar)
-	add_child(timer_row)
+	if not view.get("story", false):
+		add_child(timer_row)
 	tick(screen, app)
 	app.hint("vote")
 
 
 func tick(screen: MatchScreen, app: ClientApp) -> void:
+	if _deadline == null or float(_deadline) < 0.0:
+		return
 	var left := app.seconds_left(_deadline)
 	_bar.value = left
 	_countdown.text = "Vote closes in %ds%s" % [ceili(left), "  - hurry!" if left <= 5.0 else ""]
@@ -100,6 +103,8 @@ static func _voter_status(screen: MatchScreen, view: Dictionary, vote: Dictionar
 	var waiting: Array[String] = []
 	var slots: Array = screen.room_view().get("slots", [])
 	for character in view["party"]:
+		if view.get("story", false) and int(character["slot"]) != 0:
+			continue
 		if character["controller"] != "human":
 			continue
 		var slot := int(character["slot"])

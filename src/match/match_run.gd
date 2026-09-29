@@ -56,15 +56,18 @@ var _started_at := 0.0
 var _phase_deadline := -1.0
 var _pending_option: Dictionary = {}
 var _loadouts: Array = []
+var story := false
+var _layer_start: Dictionary = {}
 
 
-func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array[bool], match_number: int, loadouts: Array = []) -> void:
+func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array[bool], match_number: int, loadouts: Array = [], story_mode: bool = false) -> void:
 	rng = match_rng
 	clock = match_clock
 	content = forest
 	_humans = humans.duplicate()
 	number = match_number
 	_loadouts = loadouts.duplicate(true)
+	story = story_mode
 	_started_at = clock.now()
 	_create_party()
 	gold = content.get_int("party.starting_gold", 0)
@@ -88,6 +91,16 @@ func humans() -> Array[bool]:
 	return _humans
 
 
+func voters() -> Array[bool]:
+	if story:
+		return [true, false, false, false, false]
+	return _humans
+
+
+func needs_ready(slot: int) -> bool:
+	return is_human(slot) and (not story or slot == 0)
+
+
 ## A slot changes between human and AI control mid-Match.
 func set_human(slot: int, human: bool) -> void:
 	if _humans[slot] == human:
@@ -97,7 +110,7 @@ func set_human(slot: int, human: bool) -> void:
 		emit({"type": "slot_ai_takeover", "slot": slot, "character": party[slot]["name"]})
 	if phase == "voting" and vote != null:
 		vote.forget(slot)
-		if vote.everyone_voted(_humans):
+		if vote.everyone_voted(voters()):
 			_resolve_vote()
 	elif phase in ["encounter", "boss"] and encounter != null:
 		encounter.on_control_changed(self, slot)
@@ -119,7 +132,7 @@ func update() -> void:
 	var now: float = clock.now()
 	match phase:
 		"voting":
-			if now >= vote.deadline:
+			if vote.deadline >= 0.0 and now >= vote.deadline:
 				_resolve_vote()
 		"travel":
 			if now >= _phase_deadline:
@@ -142,6 +155,7 @@ func emit(event: Dictionary) -> void:
 func snapshot(viewer_slot: int) -> Dictionary:
 	return {
 		"number": number,
+		"story": story,
 		"phase": phase,
 		"layer": layer,
 		"layers_total": routes.size(),
@@ -531,10 +545,62 @@ func _begin_layer(next_layer: int) -> void:
 	phase = "voting"
 	encounter = null
 	var seconds := content.get_float("rules.vote_seconds", 20.0)
-	var deadline: float = clock.now() + seconds
+	var deadline: float = -1.0 if story else clock.now() + seconds
 	vote = PathVote.new(layer, routes[layer - 1], deadline, seconds)
 	var view := vote.view()
 	emit({"type": "vote_started", "layer": layer, "options": view["options"], "deadline": deadline})
+	if story:
+		_layer_start = {
+			"seed": rng.save_state()["seed"], "rng": rng.save_state(), "layer": layer,
+			"route": routes.duplicate(true), "party": party.duplicate(true),
+			"stash": inventory.duplicate(true), "gold": gold,
+			"clues": clues.duplicate(true), "classes_discovered": classes_discovered.duplicate(),
+			"enemies_defeated": enemies_defeated, "layers_passed": layers_passed,
+			"gems_earned": gems_earned.duplicate(), "last_vote": last_vote.duplicate(true),
+		}
+		emit({"type": "story_layer_started", "layer": layer})
+
+
+func export_layer_start() -> Dictionary:
+	return _layer_start.duplicate(true) if story else {}
+
+
+static func valid_story_save(data: Dictionary, forest: ForestContent) -> bool:
+	var route = data.get("route")
+	var saved_party = data.get("party")
+	var next_layer := int(data.get("layer", 0))
+	if not (route is Array) or not (saved_party is Array) or saved_party.size() != PARTY_SIZE:
+		return false
+	if next_layer < 1 or next_layer > route.size() or route.size() != forest.get_int("journey.layers", 5):
+		return false
+	if not (data.get("rng") is Dictionary) or not (data.get("stash") is Dictionary) or not (data.get("clues") is Array):
+		return false
+	for character in saved_party:
+		if not (character is Dictionary) or not character.has("class") or not character.has("hp"):
+			return false
+	return true
+
+
+func restore_layer_start(data: Dictionary) -> void:
+	routes = data["route"].duplicate(true)
+	party.clear()
+	for character in data["party"]:
+		party.append(character.duplicate(true))
+	inventory = data["stash"].duplicate(true)
+	gold = int(data["gold"])
+	clues.clear()
+	for clue in data["clues"]:
+		clues.append(clue.duplicate(true))
+	classes_discovered.clear()
+	for class_id in data.get("classes_discovered", []):
+		classes_discovered.append(str(class_id))
+	enemies_defeated = int(data.get("enemies_defeated", 0))
+	layers_passed = int(data.get("layers_passed", 0))
+	for i in gems_earned.size():
+		gems_earned[i] = int(data.get("gems_earned", [0, 0, 0, 0, 0])[i])
+	last_vote = data.get("last_vote", {}).duplicate(true)
+	rng.restore_state(data["rng"])
+	_begin_layer(int(data["layer"]))
 
 
 func _handle_vote(slot: int, cmd: Dictionary) -> Dictionary:
@@ -544,7 +610,7 @@ func _handle_vote(slot: int, cmd: Dictionary) -> Dictionary:
 	if not error.is_empty():
 		return {"ok": false, "error": error}
 	emit({"type": "vote_cast", "layer": layer, "slot": slot})
-	if vote.everyone_voted(_humans):
+	if vote.everyone_voted(voters()):
 		_resolve_vote()
 	return {"ok": true}
 
@@ -673,7 +739,16 @@ func _end_match(outcome: String) -> void:
 func _encounter_view(viewer_slot: int) -> Variant:
 	if phase not in ["encounter", "boss"] or encounter == null:
 		return null
-	var view := encounter.view(self, viewer_slot)
+	var actor_slot := viewer_slot
+	if story:
+		var actor_id := ""
+		if encounter is CombatEncounter:
+			actor_id = str(encounter.actor)
+		elif encounter is ClassEncounter and encounter.stage == "challenge":
+			actor_id = str(encounter._trial.actor)
+		if actor_id.begins_with("p"):
+			actor_slot = int(actor_id.substr(1))
+	var view := encounter.view(self, actor_slot)
 	view["type"] = encounter.option["type"]
 	view["name"] = encounter.option["name"]
 	return view

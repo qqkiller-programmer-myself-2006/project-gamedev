@@ -68,6 +68,7 @@ func act(session: int) -> void:
 	if view == null or snap["room"] == null:
 		return
 	var slot: int = snap["room"]["your_slot"]
+	var story: bool = snap["room"].get("story", false)
 	if slot < 0:
 		return
 	match view["phase"]:
@@ -78,6 +79,11 @@ func act(session: int) -> void:
 		"encounter", "boss":
 			var encounter = view["encounter"]
 			if encounter != null:
+				if story:
+					var combat: Dictionary = encounter.get("trial", {}) if encounter.get("kind") == "class" and encounter.get("stage") == "challenge" else encounter
+					var actor := str(combat.get("actor", ""))
+					if actor.begins_with("p"):
+						slot = int(actor.substr(1))
 				_act_in_encounter(session, slot, view, encounter)
 
 
@@ -145,7 +151,11 @@ func _act_in_encounter(session: int, slot: int, view: Dictionary, encounter: Dic
 				_send(session, {"type": "ready"})
 		"rest":
 			if not encounter["you_are_ready"] and _ready_to(session, "rest", tag + "-camp"):
-				_camp(session, slot, view, encounter)
+				if view.get("story", false):
+					for party_slot in 5:
+						_camp(session, party_slot, view, encounter)
+				else:
+					_camp(session, slot, view, encounter)
 				_send(session, {"type": "ready"})
 		"merchant":
 			if not encounter["you_are_ready"] and _ready_to(session, "merchant", tag + "-shop"):
@@ -184,12 +194,12 @@ func _camp(session: int, slot: int, view: Dictionary, encounter: Dictionary) -> 
 		for gear_slot in encounter["gear_slots"]:
 			if str(gear_slot).begins_with(entry["gear_slot"]) and not me["gear"].has(gear_slot) \
 					and not taken.has(gear_slot):
-				_send(session, {"type": "equip", "item": entry["item"], "gear_slot": gear_slot})
+				_send(session, {"type": "equip", "slot": slot, "item": entry["item"], "gear_slot": gear_slot})
 				taken[gear_slot] = true
 				break
 	var stat := str({"mage": "int", "guardian": "con", "classless": "con", "archer": "dex", "rogue": "dex"}.get(me["class"], "str"))
 	for i in int(me["points"]):
-		_send(session, {"type": "invest", "stat": stat})
+		_send(session, {"type": "invest", "slot": slot, "stat": stat})
 
 
 func _shop(session: int, encounter: Dictionary) -> void:

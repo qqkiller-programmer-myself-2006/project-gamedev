@@ -80,3 +80,12 @@ func fork() -> GameRng:
 	var hi := _rng.randi()
 	var lo := _rng.randi()
 	return GameRng.new((hi << 31) ^ lo)
+
+
+func save_state() -> Dictionary:
+	return {"seed": str(_rng.seed), "state": str(_rng.state)}
+
+
+func restore_state(data: Dictionary) -> void:
+	_rng.seed = int(str(data.get("seed", "0")))
+	_rng.state = int(str(data.get("state", "0")))
