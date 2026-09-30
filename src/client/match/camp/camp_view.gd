@@ -13,7 +13,6 @@ var _ready := false
 var _deadline: Variant = null
 var _countdown: Label
 var _region: Label
-var _backdrop: BattleBackdrop
 var _encounter_label: Label
 var _encounter_icon: TextureRect
 var _columns: HBoxContainer
@@ -124,7 +123,6 @@ func build(view: Dictionary, encounter: Dictionary) -> void:
 	# T34: build() tears down _columns/_bottom, so remember scroll positions
 	# and the focused control first and restore them after the rebuild.
 	var camp_state := _snapshot_camp_state()
-	_backdrop.set_backdrop(str(_content.get("journey", {}).get("backdrops", {}).get(str(view.get("layer", 1)), "")))
 	_region.text = "%s (%d/%d)" % [UiText.region_of(view), int(view.get("layer", 0)), int(view.get("layers_total", 5))]
 	var backdrop_name := backdrop_for_layer(_content, int(view.get("layer", 1)))
 	_backdrop.set_backdrop(backdrop_name)
