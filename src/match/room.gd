@@ -393,7 +393,7 @@ func _persist_match_rewards() -> void:
 		var profile: Dictionary = slots[i]["profile"]
 		profile["gems"] = int(profile.get("gems", 0)) + earned
 		slots[i]["profile"] = ProfileStore.normalize(profile)
-		_profiles.save_profile_async(token, slots[i]["profile"])
+		_profiles.save_profile_async(token, slots[i]["profile"], int(slots[i]["session"]))
 
 
 func _emit(event: Dictionary) -> void:

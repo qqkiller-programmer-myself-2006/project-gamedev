@@ -63,6 +63,7 @@ func open_session() -> int:
 func close_session(session_id: int) -> void:
 	if not _sessions.has(session_id):
 		return
+	_profiles.forget_session(session_id)
 	var room := _room_of(session_id)
 	if room != null:
 		room.leave(session_id, "disconnected")
@@ -120,7 +121,7 @@ func command(session_id: int, cmd: Dictionary) -> Dictionary:
 			var setup_result := setup_room.handle_setup_command(setup_room.slot_of(session_id), cmd)
 			if setup_result.get("ok", false):
 				if not setup_room.story and not str(_sessions[session_id]["token"]).is_empty():
-					_profiles.save_profile_async(str(_sessions[session_id]["token"]), setup_room.profile_of(setup_room.slot_of(session_id)))
+					_profiles.save_profile_async(str(_sessions[session_id]["token"]), setup_room.slots[setup_room.slot_of(session_id)]["profile"], session_id)
 			_flush(setup_room)
 			return setup_result
 		return _reject("unknown_command")
@@ -136,6 +137,10 @@ func command(session_id: int, cmd: Dictionary) -> Dictionary:
 
 ## Processes timers that are due at the injected clock's current time.
 func update() -> void:
+	for failure in _profiles.take_save_failures():
+		var session_id := int(failure.get("session_id", 0))
+		if _sessions.has(session_id) and str(_sessions[session_id].get("token", "")) == str(failure.get("token", "")):
+			_sessions[session_id]["events"].append({"type": "profile_save_failed", "status": failure.get("status", 0)})
 	for code in _rooms.keys():
 		var room: Room = _rooms[code]
 		room.update()

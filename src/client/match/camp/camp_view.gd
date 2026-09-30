@@ -101,13 +101,14 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_hide_button.offset_bottom = -12
 	_hide_button.custom_minimum_size = Vector2(110, 40)
 	add_child(_hide_button)
-	# Tips sit low over the Inventory column, which has room at its bottom,
-	# so they never cover Ready, the recipes or the character's stats.
+	# Dock the compact, scrollable Tip in the footer beside Ready.
 	tips = UiKit.vbox(6)
-	tips.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	tips.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	tips.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	tips.grow_horizontal = Control.GROW_DIRECTION_END
 	tips.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	tips.offset_bottom = -120
+	tips.offset_left = 24
+	tips.offset_right = 24
+	tips.offset_bottom = -6
 	add_child(tips)
 	_menu_panel = screen.build_corner_menu(self)
 

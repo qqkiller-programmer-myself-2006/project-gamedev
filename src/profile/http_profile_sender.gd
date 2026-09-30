@@ -3,10 +3,13 @@ extends RefCounted
 ## Synchronous bounded GETs plus a single background worker for fire-and-forget saves.
 
 const TIMEOUT_SECONDS := 3.0
+const GET_TIMEOUT_SECONDS := 1.0
 var _mutex := Mutex.new()
 var _semaphore := Semaphore.new()
-var _pending: Dictionary = {}
+var _pending: Array[Dictionary] = []
+var _save_results: Array[Dictionary] = []
 var _stopping := false
+var _drain_deadline := 0
 var _thread := Thread.new()
 
 func _init() -> void:
@@ -16,38 +19,66 @@ func request(method: String, url: String, headers: Dictionary, body: String) -> 
 	return _perform(method, url, headers, body)
 
 func enqueue_save(url: String, headers: Dictionary, body: String) -> void:
+	enqueue_save_with_context(url, headers, body, 0)
+
+func enqueue_save_with_context(url: String, headers: Dictionary, body: String, session_id: int) -> void:
 	_mutex.lock()
 	if not _stopping:
-		_pending[url] = {"url": url, "headers": headers.duplicate(), "body": body}
+		_pending.append({"url": url, "headers": headers.duplicate(), "body": body, "session_id": session_id})
 		_semaphore.post()
 	_mutex.unlock()
 
 func stop() -> void:
 	_mutex.lock()
 	_stopping = true
+	_drain_deadline = Time.get_ticks_msec() + 2000
 	_semaphore.post()
 	_mutex.unlock()
 	if _thread.is_started():
 		_thread.wait_to_finish()
 
+func take_save_results() -> Array[Dictionary]:
+	_mutex.lock()
+	var results := _save_results.duplicate(true)
+	_save_results.clear()
+	_mutex.unlock()
+	return results
+
 func _save_worker() -> void:
 	while true:
 		_semaphore.wait()
 		_mutex.lock()
-		if _stopping:
+		if _stopping and _pending.is_empty():
 			_mutex.unlock()
 			return
-		var batch := _pending.values()
+		var batch := _pending.duplicate()
 		_pending.clear()
 		_mutex.unlock()
 		for item in batch:
+			if _stopping and Time.get_ticks_msec() >= _drain_deadline:
+				return
+			var last_status := 0
 			for attempt in 4:
 				var response := _perform("PUT", item.url, item.headers, item.body)
-				if int(response.get("status", 0)) in [200, 204]:
+				var status := int(response.get("status", 0))
+				last_status = status
+				if status in [200, 204]:
+					break
+				if status >= 400 and status < 500:
 					break
 				if attempt < 3:
 					if not _wait_or_stop(500 * (1 << attempt)):
 						return
+			_mutex.lock()
+			_save_results.append({"url": item.url, "status": last_status, "session_id": item.session_id})
+			_mutex.unlock()
+		if _stopping:
+			_mutex.lock()
+			var has_more := not _pending.is_empty()
+			_mutex.unlock()
+			if not has_more:
+				return
+			_semaphore.post()
 
 func _wait_or_stop(milliseconds: int) -> bool:
 	var remaining := milliseconds
@@ -80,11 +111,12 @@ func _perform(method: String, url: String, headers: Dictionary, body: String) ->
 	if client.connect_to_host(host, port, tls) != OK:
 		return {"status": 0, "body": null}
 	var started := Time.get_ticks_msec()
+	var timeout_ms := int((GET_TIMEOUT_SECONDS if method == "GET" else TIMEOUT_SECONDS) * 1000.0)
 	while client.get_status() in [HTTPClient.STATUS_RESOLVING, HTTPClient.STATUS_CONNECTING]:
-		if _stopping:
+		if _stopping and Time.get_ticks_msec() >= _drain_deadline:
 			return {"status": 0, "body": null}
 		client.poll()
-		if Time.get_ticks_msec() - started >= TIMEOUT_SECONDS * 1000:
+		if Time.get_ticks_msec() - started >= timeout_ms:
 			return {"status": 0, "body": null}
 		OS.delay_msec(5)
 	var packed_headers := PackedStringArray()
@@ -94,23 +126,23 @@ func _perform(method: String, url: String, headers: Dictionary, body: String) ->
 	if client.request(verb, path, packed_headers, body) != OK:
 		return {"status": 0, "body": null}
 	while client.get_status() == HTTPClient.STATUS_REQUESTING:
-		if _stopping:
+		if _stopping and Time.get_ticks_msec() >= _drain_deadline:
 			return {"status": 0, "body": null}
 		client.poll()
-		if Time.get_ticks_msec() - started >= TIMEOUT_SECONDS * 1000:
+		if Time.get_ticks_msec() - started >= timeout_ms:
 			return {"status": 0, "body": null}
 		OS.delay_msec(5)
 	if not client.has_response():
 		return {"status": 0, "body": null}
 	var bytes := PackedByteArray()
 	while client.get_status() == HTTPClient.STATUS_BODY:
-		if _stopping:
+		if _stopping and Time.get_ticks_msec() >= _drain_deadline:
 			return {"status": 0, "body": null}
 		client.poll()
 		var chunk := client.read_response_body_chunk()
 		if not chunk.is_empty():
 			bytes.append_array(chunk)
-		if Time.get_ticks_msec() - started >= TIMEOUT_SECONDS * 1000:
+		if Time.get_ticks_msec() - started >= timeout_ms:
 			return {"status": 0, "body": null}
 		OS.delay_msec(5)
 	var text := bytes.get_string_from_utf8()

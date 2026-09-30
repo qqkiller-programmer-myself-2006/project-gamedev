@@ -17,7 +17,7 @@ Save/Continue ได้ และผู้เล่นคุมตัวละ�
 - **Story balance**: ศัตรูทั่วไปยังได้ Energy +1 ตั้งแต่ turn แรกตาม ADR-0012 แต่ cap ที่ 1
   (`rules.story_enemy_energy_max`) เพื่อให้ win rate ของโหมดที่ผู้เล่นคนเดียวคุมทั้ง 5 ตัวอยู่ในช่วง 70–92%; Multiplayer
   ใช้ `rules.enemy_energy_max` ตามเดิม และยังใช้ท่าพิเศษที่ต้องการ 2–3 Energy
-- **Loadout**: ก่อนเริ่ม ผู้เล่นเลือก Class ให้ตัวละครทั้ง 5 ตัว (Race/Boons ใช้ของ profile ผู้เล่นกับตัวที่เลือกเป็นตัวหลัก, ตัวอื่นใช้ค่าเริ่มต้น)
+- **Loadout**: ก่อนเริ่ม ผู้เล่นเลือก Class ให้ตัวละครทั้ง 5 ตัว ปัจจุบัน Story แบบ offline ใช้ profile ในหน่วยความจำที่แยกจาก multiplayer ดังนั้นทุกตัวใช้ Human และไม่มี Boons หรือ class-tree meta แม้ผู้เล่นจะปลดล็อกสิ่งเหล่านี้ใน profile ออนไลน์แล้ว
 - **เนื้อเรื่อง** (ข้อมูลใน `content/story_mode.json`): prologue, การ์ดบท (Chapter) ทุก Layer, บทสนทนาตาม trigger
   (หลัง Combat แรก, หลังได้ Class, ก่อน Guardian Boss, เมื่อพบ Story Clue) และ epilogue ชนะ/แพ้ ใช้ตัวละครใน `CONTEXT.md`
   (Arin, Bram, Cora, Dain, Wren) และเรื่องการเดินทางของพ่อ

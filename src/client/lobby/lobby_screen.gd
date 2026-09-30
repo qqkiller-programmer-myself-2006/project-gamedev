@@ -33,6 +33,8 @@ func show_events(app: ClientApp, events: Array) -> void:
 				app.toast("%s left. Their slot is AI controlled now." % event["name"])
 			"host_changed":
 				app.toast("%s is now the Host." % event["name"])
+			"profile_unavailable":
+				app.toast(UiText.error("profile_unavailable"), 6.0)
 
 
 func refresh(app: ClientApp, force: bool = false) -> void:

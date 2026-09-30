@@ -13,7 +13,8 @@ extends SceneTree
 ##          --resolution=1920x1080 (window size; the UI stretches from 1280x720)
 
 var out_dir := "build/ui"
-var speed := 4.0
+var speed := 10.0
+const MAX_RUN_FRAMES := 60 * 60 * 15
 var harness: MatchHarness
 var app: ClientApp
 var local: LocalConnection
@@ -26,6 +27,8 @@ var _last_key := ""
 var _done_at := -1
 var _setup_only := false
 var _sprite_idle_after := 0.0
+var _used_focus := false
+var _used_item := false
 
 
 func _initialize() -> void:
@@ -145,8 +148,9 @@ func _process(delta: float) -> bool:
 	if _done_at > 0:
 		return frame > _done_at
 	_drive()
-	if frame > 60 * 60 * 8:
-		printerr("ui_preview: gave up after %d frames" % frame)
+	if frame > MAX_RUN_FRAMES:
+		printerr("ui_preview: no Summary screen after %d frames" % frame)
+		quit(1)
 		return true
 	return false
 
@@ -224,11 +228,18 @@ func _situation(view: Dictionary) -> String:
 				var mode := _screen().combat_mode if _screen() != null else ""
 				if mode == "skills":
 					return prefix + "_skills"
-				return prefix + ("_targets" if mode == "attack" or mode.begins_with("skill:") else "_turn")
+				if mode == "items":
+					return prefix + "_items"
+				return prefix + ("_targets" if mode == "attack" or mode.begins_with("skill:") or mode.begins_with("item:") else "_turn")
 			return ""
 		"class":
 			if encounter["stage"] == "challenge":
-				return "05_class_challenge" if encounter["trial"]["your_turn"] else ""
+				if not encounter["trial"]["your_turn"]:
+					return ""
+				var mode := _screen().combat_mode if _screen() != null else ""
+				if mode == "skills":
+					return "05_class_challenge_skills"
+				return "05_class_challenge_targets" if mode == "attack" or mode.begins_with("skill:") else "05_class_challenge_turn"
 			return "05_class_offer" if encounter["offer"]["you_can_decide"] else ""
 		"merchant":
 			return "08_merchant" if not encounter["you_are_ready"] else ""
@@ -255,27 +266,38 @@ func _act(key: String, view: Dictionary) -> void:
 				if option["type"] == "rest":
 					pick = option["index"]
 		_press(KEY_1 + pick)
-	elif key.ends_with("_turn") or key == "05_class_challenge":
+	elif key.ends_with("_turn"):
 		var encounter: Dictionary = view["encounter"]
 		var combat: Dictionary = MatchScreen.combat_of(encounter)
 		var threat: Dictionary = combat.get("boss", {}).get("telegraph", {})
-		if threat.get("target", "") == "p0":
-			_press(KEY_D)
-		elif not combat["choices"]["skills"].is_empty() and frame % 2 == 0:
-			_press(KEY_S)
+		var choices: Dictionary = combat.get("choices", {})
+		if choices.get("focus", false) and not _used_focus and threat.is_empty():
+			_used_focus = true
+			_press(KEY_O)
+		elif not choices.get("items", {}).is_empty() and not _used_item and threat.is_empty():
+			_used_item = true
+			_press(KEY_I)
 		else:
-			_press(KEY_A)
+			_press(KEY_F)
 	elif key.ends_with("_skills"):
-		# Cards: 1 Attack, 2 Defend, then Skills; pick the first ready Skill.
-		var skills: Dictionary = MatchScreen.combat_of(view["encounter"])["choices"]["skills"]
+		# Fight [F] opens cards: 1 Strike, 2 Guard, then Skills.
+		var combat: Dictionary = MatchScreen.combat_of(view["encounter"])
+		var threat: Dictionary = combat.get("boss", {}).get("telegraph", {})
+		if threat.get("target", "") in ["p0", "all"]:
+			_press(KEY_2)
+			return
+		var skills: Dictionary = combat.get("choices", {}).get("skills", {})
+		var picked := 1 # Strike is the safe fallback when no Skill is ready.
 		var number := 3
-		var picked := 1
 		for skill in skills:
 			if skills[skill]["cooldown"] == 0 and skills[skill].get("affordable", true) and not skills[skill]["targets"].is_empty():
 				picked = number
 				break
 			number += 1
 		_press(KEY_1 + picked - 1)
+	elif key.ends_with("_items"):
+		var items: Dictionary = MatchScreen.combat_of(view["encounter"]).get("choices", {}).get("items", {})
+		_press(KEY_1 if not items.is_empty() else KEY_ESCAPE)
 	elif key.ends_with("_targets"):
 		_press(KEY_1)
 	elif key == "05_class_offer":

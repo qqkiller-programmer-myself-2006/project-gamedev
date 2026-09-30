@@ -19,6 +19,8 @@ var _listening := false
 
 
 func configure(options: Dictionary) -> void:
+	if profile_store is D1ProfileStore and profile_store.sender is HttpProfileSender:
+		profile_store.sender.stop()
 	port = int(options.get("port", port))
 	var seed_value := int(options.get("seed", Time.get_unix_time_from_system() * 1000.0))
 	var profile_url := str(options.get("profile-url", OS.get_environment("PROFILE_URL")))

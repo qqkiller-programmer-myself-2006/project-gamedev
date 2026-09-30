@@ -117,7 +117,12 @@ func tip_slot() -> Container:
 func tip_width() -> float:
 	if _battle_mode:
 		return 210.0
-	return 420.0 if _camp_mode else 520.0
+	return 390.0 if _camp_mode else 520.0
+
+
+## The camp footer has space for one scrollable line beside Ready.
+func tip_body_height() -> float:
+	return 16.0 if _camp_mode else 92.0
 
 
 func match_view() -> Dictionary:

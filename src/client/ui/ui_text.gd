@@ -5,6 +5,8 @@ extends RefCounted
 
 const ERRORS := {
 	"profile_unavailable": "Your profile could not be loaded. Progress will not be saved this session.",
+	"profile_changed_elsewhere": "Your profile changed in another session. This session's latest progress was not saved. Rejoin to refresh it.",
+	"profile_save_failed": "Your profile could not be saved. Rejoin and check your progress before continuing.",
 	"invalid_name": "Please enter a display name.",
 	"invalid_code": "Room codes are 6 letters or numbers, like K7PQ2M.",
 	"room_not_found": "No room uses that code. Check it with your friend.",

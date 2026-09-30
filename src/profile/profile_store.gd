@@ -17,8 +17,15 @@ func save_profile(_token: String, _profile: Dictionary) -> void:
 	pass
 
 ## Store writes are fire-and-forget from the Match's point of view.
-func save_profile_async(token: String, profile: Dictionary) -> void:
+func save_profile_async(token: String, profile: Dictionary, _session_id: int = 0) -> void:
 	save_profile(token, profile)
+
+## Completed background write failures, drained by MatchServer on its main loop.
+func take_save_failures() -> Array[Dictionary]:
+	return []
+
+func forget_session(_session_id: int) -> void:
+	pass
 
 static func normalize(profile: Dictionary) -> Dictionary:
 	var out := EMPTY_PROFILE.duplicate(true)

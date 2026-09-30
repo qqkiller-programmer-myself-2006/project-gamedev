@@ -34,6 +34,7 @@ var _previous_tokens: Dictionary = {}
 var _stage: Control
 var _backdrop: BattleBackdrop
 var _timeline: VBoxContainer
+var _timeline_scroll: ScrollContainer
 var _region: Label
 var _region_sub: Label
 var _header: VBoxContainer
@@ -71,7 +72,9 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	left.custom_minimum_size = Vector2(150, 0)
 	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var scroll := ScrollContainer.new()
+	_timeline_scroll = scroll
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.follow_focus = true
 	_timeline = UiKit.vbox(4)
 	_timeline.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(_timeline)
@@ -427,6 +430,7 @@ func _build_timeline(view: Dictionary) -> void:
 					"%d/%d" % [int(unit["energy"]), int(unit.get("energy_max", 6))], 12, "tiny")
 			entry.add_child(energy_bar)
 		var card := UiKit.panel(entry, "HudHighlightPanel" if is_actor else "HudPanel")
+		card.set_meta("actor_id", str(id))
 		card.modulate = Color(1, 1, 1, 0.6) if hp <= 0 or acted else Color.WHITE
 		card.tooltip_text = "%s (%s) - %s - Speed %d - HP %d/%d%s%s" % [tag[0], _screen.name_of(str(id)), tag[2],
 				int(unit.get("spd", 0)), hp, int(unit.get("max_hp", 1)),
@@ -436,6 +440,20 @@ func _build_timeline(view: Dictionary) -> void:
 		if is_actor and actor != _last_actor:
 			_app.fade_in(card, 0.3)
 	_last_actor = actor
+	# Layout is resolved at the end of the frame; scroll only after the new
+	# cards have their final sizes (including the selected text scale).
+	if is_inside_tree():
+		call_deferred("_show_current_actor")
+
+
+func _show_current_actor() -> void:
+	if not is_instance_valid(_timeline_scroll):
+		return
+	var actor := str(_combat.get("actor", ""))
+	for card in _timeline.get_children():
+		if card.get_meta("actor_id", "") == actor:
+			_timeline_scroll.ensure_control_visible(card)
+			return
 
 
 ## [short tag, colour, long name] for who controls a timeline entry.

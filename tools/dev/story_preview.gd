@@ -106,16 +106,34 @@ func _full_preview() -> void:
 		if option["type"] == "combat":
 			combat_option = int(option["index"])
 			break
-	if combat_option >= 0:
-		app.send({"type": "vote", "option": combat_option})
-		for _i in 900:
-			await process_frame
-			var encounter = app.snapshot.get("match", {}).get("encounter", {})
-			if encounter is Dictionary and encounter.get("kind", "") == "combat" and str(encounter.get("actor", "")).begins_with("p"):
-				break
-		await _settle()
-		app._toast_until = 0.0
-		_shot("05_story_battle")
+	if combat_option < 0:
+		printerr("story_preview: no Combat route in the opening vote")
+		quit(1)
+		return
+	app.send({"type": "vote", "option": combat_option})
+	var battle_ready := false
+	for _i in 900:
+		await process_frame
+		var match_view: Dictionary = app.snapshot.get("match", {})
+		var encounter = match_view.get("encounter", {})
+		# Require the rendered action window, after travel and Story overlays.
+		if str(match_view.get("phase", "")) in ["encounter", "boss"] \
+				and encounter is Dictionary \
+				and encounter.get("kind", "") == "combat" \
+				and encounter.get("your_turn", false) \
+				and match_screen._battle_mode \
+				and match_screen._battle != null \
+				and match_screen._battle.visible \
+				and not is_instance_valid(match_screen._story_director.current):
+			battle_ready = true
+			break
+	if not battle_ready:
+		printerr("story_preview: first combat never reached a visible human action window")
+		quit(1)
+		return
+	await _settle()
+	app._toast_until = 0.0
+	_shot("05_story_battle")
 	app.story_save.clear()
 	app.disconnect_from_server()
 	app.queue_free()

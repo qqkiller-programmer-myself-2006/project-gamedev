@@ -320,6 +320,9 @@ func _on_update(events: Array, snap: Dictionary) -> void:
 		_current.refresh(self)
 	if _current != null and _current.has_method("show_events") and not events.is_empty():
 		_current.show_events(self, events)
+	for event in events:
+		if str(event.get("type", "")) == "profile_save_failed":
+			toast(UiText.error("profile_changed_elsewhere" if int(event.get("status", 0)) == 409 else "profile_save_failed"), 8.0)
 	snapshot_changed.emit()
 
 
@@ -461,7 +464,21 @@ func hint(key: String) -> void:
 	if _current != null and _current.has_method("tip_width"):
 		width = _current.tip_width()
 	var text := UiKit.para(UiText.HINTS[key], "small", UiKit.TEXT, width)
-	box.add_child(text)
+	# Every screen uses the same bounded, scrollable Tip body. Long translated
+	# hints can grow inside this area without moving the panel over other UI.
+	var body := ScrollContainer.new()
+	body.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	body.custom_minimum_size = Vector2(width, 0)
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	body.add_child(text)
+	box.add_child(body)
+	var body_height := 92.0
+	if _current != null and _current.has_method("tip_body_height"):
+		body_height = _current.tip_body_height()
+	var max_body_height := body_height * settings.text_scale
+	text.resized.connect(func() -> void:
+		body.custom_minimum_size.y = minf(text.size.y, max_body_height)
+	)
 	var panel := UiKit.panel(box, "HighlightPanel")
 	panel.set_meta("hint", true)
 	panel.set_meta("hint_key", key)
