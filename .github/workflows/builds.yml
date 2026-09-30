@@ -59,7 +59,7 @@ jobs:
       - name: DIAG server start (temporary)
         continue-on-error: true
         run: |
-          timeout 25 ~/godot/godot --headless --verbose --path . -- --server --port=18999 > /tmp/diag.log 2>&1; echo "exit=$?"
+          set +e; timeout 25 ~/godot/godot --headless --verbose --path . -- --server --port=18999 > /tmp/diag.log 2>&1; echo "exit=$?"
           tail -60 /tmp/diag.log
 
       - name: Cross-platform smoke test (headless server + browser build + PC client)
