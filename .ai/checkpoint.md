@@ -119,3 +119,7 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - 2026-09-30 06:15: merged T27 playtest jump (5e6088d, Claude) + T28 #41-#43 (526436c..b6d2490, Claude) → ปิด #41 #42 #43. final review `docs/review/2026-09-30-final-review.md` (0 P0, 3 P1, 17 P2). **Claude แก้ P1 เอง**: F1 ศัตรูไม่มี sprite ในเกมจริง (server ไม่ส่ง sprite — ui_preview มี map ปิดบังไว้, ลบแล้ว), F3 dead→die, F2 story prologue/บทที่ 1 ไม่ขึ้น (flag restoring ชัดเจน), F4 บางส่วน → **362/362**. P2 ที่เหลือ → #76. เปิดเกมใหม่ให้เจ้าของ (jump=cave, assassin)
 - ถัดไป: #54 QA (1920x1080 + large text ทุกหน้า, README, web export check, manifest ใน export) + PR เข้า main; Codex กลับ 08:24, agy ~07:35
 - 2026-09-30 07:30: merged T29 QA polish (a3e14f1) → **368/368**; exports Web+Windows ตรวจแล้ว (deploy/ ออกจาก export); README สรุป final build; **เปิด PR #77 เข้า main** (ยังไม่ merge). **Claude ถึง usage limit** — ต่อ: เช็ค CI ของ PR #77, #76 P2s, เจ้าของงานเล่นทดสอบ + deploy Worker (#55) + ภาพบอส (#75), ปิด #54 หลัง sign-off
+- 2026-09-30 09:30: PR #77 merged by owner (main d91c5f9). Full QA pass on branch `claude/qa-full-review`: tests 368/368; CI builds
+  was red on main since #72 (web_smoke.mjs ROOT pointed at tools/) → fixed + diagnostics, CI green on the branch; sim 240 matches
+  human pace, win 75-90%, no softlocks, boss ~half of match time. Report: docs/review/2026-09-30-full-qa-report.md (B1-B9, U1-U34,
+  S1-S5, P-1, T1-T3). WAITING for owner to pick which items to fix. PR for the branch not opened yet.
