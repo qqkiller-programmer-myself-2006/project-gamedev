@@ -86,7 +86,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	region_box.offset_right = -14
 	region_box.offset_top = 6
 	region_box.alignment = BoxContainer.ALIGNMENT_END
-	_region = UiKit.pixel_label("", "title")
+	_region = UiKit.number_label("", "title")
 	_region.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_region.add_theme_color_override("font_outline_color", UiKit.BG)
 	_region.add_theme_constant_override("outline_size", 6)
@@ -126,7 +126,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_center_text.add_theme_color_override("font_outline_color", Color.BLACK)
 	_center_text.add_theme_constant_override("outline_size", 10)
 	add_child(_center_text)
-	_turn_notice = UiKit.pixel_label("", "body", UiKit.ACCENT)
+	_turn_notice = UiKit.number_label("", "body", UiKit.ACCENT)
 	_turn_notice.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_turn_notice.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_turn_notice.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -576,7 +576,7 @@ func _build_bottom(view: Dictionary) -> void:
 		var exp_text := "(%d/%d)" % [int(me.get("exp", 0)), int(me.get("exp_next", 0))] if int(me.get("exp_next", 0)) > 0 else "(MAX)"
 		info.add_child(UiKit.pixel_label("%s · %s Lvl %d %s" % [me.get("name", ""), me.get("class_name", ""), int(me.get("level", 1)), exp_text], "heading"))
 	info.add_child(UiKit.spacer())
-	_countdown = UiKit.pixel_label("", "heading")
+	_countdown = UiKit.number_label("", "heading")
 	info.add_child(_countdown)
 	info.add_child(UiKit.spacer())
 	var gold := int(me.get("gold", view.get("gold", 0))) if not me.is_empty() else int(view.get("gold", 0))

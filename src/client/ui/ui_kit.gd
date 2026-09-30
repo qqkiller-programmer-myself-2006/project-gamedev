@@ -50,17 +50,34 @@ const STATUS_TAGS := {"bleed": "BLD", "poison": "PSN", "toxin": "TOX", "venom_co
 
 ## Base font sizes per label style; multiplied by the text-size setting.
 const SIZES := {"tiny": 11, "small": 15, "body": 18, "heading": 23, "title": 34, "huge": 52}
-## Pixelify Sans (OFL, assets/fonts/OFL.txt) for headings, buttons, names
-## and numbers; long text keeps the default font so it stays easy to read.
+## Pixelify Sans (OFL, assets/fonts/OFL.txt) for headings, buttons and names.
+## Numeric labels use the Godot body font: its digits are deliberately easier
+## to distinguish at a glance than Pixelify's 5/S and 7/1.
 const PIXEL_FONT_PATH := "res://assets/fonts/PixelifySans.ttf"
+const NO_LIGATURES := {"liga": 0, "clig": 0, "dlig": 0}
+## Story files load the TTF directly; `.import` is not tracked, so apply overrides here.
 
 static var _pixel_font: Font = null
+static var _number_font: Font = null
 
 
 static func pixel_font() -> Font:
 	if _pixel_font == null:
-		_pixel_font = load(PIXEL_FONT_PATH)
+		var file: FontFile = load(PIXEL_FONT_PATH)
+		file.opentype_feature_overrides = NO_LIGATURES
+		var variation := FontVariation.new()
+		variation.base_font = file
+		variation.opentype_features = NO_LIGATURES
+		_pixel_font = variation
 	return _pixel_font
+
+
+## The default body font has unambiguous numeric glyphs. Keep this in one
+## place so screens do not have to choose a font for every stat or cost.
+static func number_font() -> Font:
+	if _number_font == null:
+		_number_font = ThemeDB.fallback_font
+	return _number_font
 
 
 static func make_theme(scale: float) -> Theme:
@@ -308,11 +325,27 @@ class DiamondBox extends StyleBox:
 					corner + Vector2(0, diamond), corner + Vector2(-diamond, 0)]), PackedColorArray([diamond_color]))
 
 
-## A single-line label in the pixel font.
+## A single-line label whose numeric strings use the digit-safe body font.
+## This is the central routing point so para(), badge() and every caller share
+## the same rule.
 static func pixel_label(text: String, style: String = "body", color: Color = Color(0, 0, 0, 0)) -> Label:
 	var node := label(text, style, color)
 	node.theme_type_variation = "Pixel" + style.capitalize() + "Label"
 	return node
+
+
+static func number_label(text: String, style: String = "body", color: Color = Color(0, 0, 0, 0)) -> Label:
+	var node := label(text, style, color)
+	node.add_theme_font_override("font", number_font())
+	return node
+
+
+static func _has_digit(text: String) -> bool:
+	for i in text.length():
+		var code := text.unicode_at(i)
+		if code >= 48 and code <= 57:
+			return true
+	return false
 
 
 ## A bar with its numbers written on it (HP in red, Energy in blue...).
@@ -402,6 +435,8 @@ static func label(text: String, style: String = "body", color: Color = Color(0, 
 	var node := Label.new()
 	node.text = text
 	node.theme_type_variation = "DimLabel" if style == "dim" else style.capitalize() + "Label"
+	if _has_digit(text):
+		node.add_theme_font_override("font", number_font())
 	if color.a > 0.0:
 		node.add_theme_color_override("font_color", color)
 	return node
@@ -424,6 +459,8 @@ static func button(text: String, callback: Callable, big: bool = false, kind: St
 	node.text = text
 	node.focus_mode = Control.FOCUS_ALL
 	node.theme_type_variation = button_variation(kind, big)
+	if _has_digit(text):
+		node.add_theme_font_override("font", number_font())
 	node.pressed.connect(callback)
 	return node
 
