@@ -41,7 +41,10 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 		decline.set_meta("focus_id", "decline")
 		row.add_child(decline)
 		add_child(row)
-		add_child(UiKit.para("Declining keeps you Classless; you can take a Class at a later Class Encounter. Silence counts as declining.", "dim"))
+		if ClientApp.has_timer(_offer.get("deadline")):
+			add_child(UiKit.para("Declining keeps you Classless; you can take a Class at a later Class Encounter. Silence counts as declining.", "dim"))
+		else:
+			add_child(UiKit.para("Declining keeps you Classless; you can take a Class at a later Class Encounter.", "dim"))
 		app.hint("class_offer")
 	elif not _offer["eligible"].has(screen.your_slot()):
 		add_child(UiKit.label("Your character already has a Class.", "dim"))
@@ -59,11 +62,13 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 func tick(screen: MatchScreen, app: ClientApp) -> void:
 	if _combat != null:
 		_combat.tick(screen, app)
-	elif _countdown != null and not _offer.is_empty():
+	elif _countdown != null and not _offer.is_empty() and ClientApp.has_timer(_offer.get("deadline")):
 		var left := app.seconds_left(_offer["deadline"])
 		_countdown.text = "Offer closes in %ds" % ceili(left)
 		if _offer["you_can_decide"]:
 			screen.warn_if_short(_offer["deadline"], left)
+	elif _countdown != null:
+		_countdown.text = ""
 
 
 func handle_key(screen: MatchScreen, app: ClientApp, key: int) -> bool:

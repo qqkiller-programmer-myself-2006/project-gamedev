@@ -15,6 +15,9 @@ var shown: Dictionary = {}
 var current: Node = null
 var last_layer := 0
 var started := false
+## The new-story prologue and opening chapter must finish before Layer 1's
+## first path choice is exposed. Continue restores skip this gate.
+var opening_presentation_pending := false
 ## Set by MatchScreen when the Match comes from a Story save (Continue); used once, for the first Match seen.
 var restoring := false
 var text_scale := 1.0
@@ -47,6 +50,7 @@ func observe(events: Array, snapshot: Dictionary) -> void:
 			current.queue_free()
 			current = null
 		last_layer = 0
+		opening_presentation_pending = false
 
 	if not started and current_match > 0:
 		started = true
@@ -60,6 +64,7 @@ func observe(events: Array, snapshot: Dictionary) -> void:
 				if i == 1: shown["first_combat_won"] = true
 		else:
 			queue.append({"kind":"scene", "id":"prologue", "lines":content.get("prologue", [])})
+			opening_presentation_pending = layer == 1
 		restoring = false
 		_pump()
 
@@ -138,7 +143,7 @@ func _is_decision_pending() -> bool:
 	return false
 
 func _pump() -> void:
-	if is_instance_valid(current) or queue.is_empty() or _is_decision_pending():
+	if is_instance_valid(current) or queue.is_empty() or (_is_decision_pending() and not opening_presentation_pending):
 		return
 	var item: Dictionary = queue.pop_front()
 	if item.kind == "card":
@@ -154,6 +159,11 @@ func _pump() -> void:
 	presentation_started.emit(item)
 
 func _on_finished(item: Dictionary) -> void:
-	presentation_finished.emit(item)
 	current = null
+	if opening_presentation_pending and str(item.get("id", "")) == "chapter_1":
+		opening_presentation_pending = false
+	elif opening_presentation_pending and queue.is_empty():
+		# Content may omit chapter cards in a test or a future build.
+		opening_presentation_pending = false
 	_pump()
+	presentation_finished.emit(item)

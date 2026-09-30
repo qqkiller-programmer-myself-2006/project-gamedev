@@ -100,3 +100,18 @@ func test_new_story_match_at_layer_one_shows_prologue_and_chapter_one() -> void:
 	d.observe([], {"match": {"number": 2, "layer": 1}})
 	assert_true(d.shown.has("chapter_1"))
 	d.free()
+
+
+func test_new_story_shows_prologue_before_first_path_panel() -> void:
+	var d = StoryDirector.new()
+	d.content = {"prologue": [{"text": "Intro"}], "chapters": [{"number": 1, "title": "First"}]}
+	var snapshot := {"match": {"number": 1, "layer": 1, "phase": "voting", "vote": {"you_can_vote": true}}}
+	d.observe([], snapshot)
+	assert_true(is_instance_valid(d.current), "prologue starts while the first path is pending")
+	assert_eq(d.current.lines[0]["text"], "Intro")
+	assert_true(d._is_decision_pending())
+	d._on_finished({"id": "prologue"})
+	assert_true(is_instance_valid(d.current), "chapter card follows the prologue")
+	d._on_finished({"id": "chapter_1"})
+	assert_eq(d.current, null, "first path remains after the opening cards")
+	d.free()

@@ -22,13 +22,15 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	_deadline = vote["deadline"]
 	var me := screen.your_slot()
 	_voted = vote["voted_slots"].has(me)
-	add_child(UiKit.para("Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])], "title"))
-	add_child(UiKit.para("Choose one path for the Party." if view.get("story", false) else "Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random.", "dim"))
+	var solo := ClientApp.is_story_view(view)
+	add_child(UiKit.para("Choose your path" if solo else "Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])], "title"))
+	add_child(UiKit.para("Choose one path." if solo else "Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random.", "dim"))
 	var row := UiKit.flow(12)
 	for option in _options:
 		row.add_child(_option_card(screen, app, option))
 	add_child(row)
-	add_child(UiKit.para(_voter_status(screen, view, vote)))
+	if not solo:
+		add_child(UiKit.para(_voter_status(screen, view, vote)))
 	var timer_row := UiKit.hbox(10)
 	_countdown = UiKit.label("", "heading")
 	timer_row.add_child(_countdown)
@@ -41,7 +43,8 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	if not view.get("story", false):
 		add_child(timer_row)
 	tick(screen, app)
-	app.hint("vote")
+	if not solo:
+		app.hint("vote")
 
 
 func tick(screen: MatchScreen, app: ClientApp) -> void:
@@ -74,14 +77,17 @@ func _option_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> Co
 	box.add_child(UiKit.para(str(option["hint"])))
 	box.add_child(UiKit.para(str(UiText.TYPE_HELP.get(option["type"], "")), "dim"))
 	box.add_child(UiKit.spacer())
-	var voters: Array = option.get("voters", [])
-	var tally := UiKit.flow(4)
-	tally.add_child(UiKit.label("Votes: %d" % voters.size(), "heading" if not voters.is_empty() else "dim"))
-	for slot in voters:
-		tally.add_child(UiKit.badge(_voter_name(screen, int(slot)), UiKit.ALLY))
-	box.add_child(tally)
+	var solo := ClientApp.is_story_view(screen.match_view())
+	if not solo:
+		var voters: Array = option.get("voters", [])
+		var tally := UiKit.flow(4)
+		tally.add_child(UiKit.label("Votes: %d" % voters.size(), "heading" if not voters.is_empty() else "dim"))
+		for slot in voters:
+			tally.add_child(UiKit.badge(_voter_name(screen, int(slot)), UiKit.ALLY))
+		box.add_child(tally)
 	var mine: bool = screen.get_meta("my_vote_%d" % int(screen.match_view()["layer"]), -1) == index
-	var text := "Your vote" if mine else ("[%d] Vote for this path" % (index + 1))
+	var text := ("Chosen" if mine else "[%d] Choose this path" % (index + 1)) if solo \
+		else ("Your vote" if mine else "[%d] Vote for this path" % (index + 1))
 	var button := UiKit.button(text, func() -> void: _vote(screen, app, index), false, "selected" if mine else "secondary")
 	UiKit.disable(button, _voted, UiText.WHY["voted"])
 	button.set_meta("focus_id", "vote_%d" % index)

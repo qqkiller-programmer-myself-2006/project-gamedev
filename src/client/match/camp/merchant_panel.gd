@@ -40,6 +40,9 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 
 
 func tick(_screen: MatchScreen, app: ClientApp) -> void:
+	if not ClientApp.has_timer(_deadline):
+		_countdown.text = ""
+		return
 	_countdown.text = "Shop closes in %ds" % ceili(app.seconds_left(_deadline))
 
 
