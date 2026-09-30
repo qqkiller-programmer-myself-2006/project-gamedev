@@ -41,13 +41,16 @@ func tick(_screen: MatchScreen, app: ClientApp) -> void:
 
 func _build_travel(view: Dictionary) -> void:
 	var result: Dictionary = view.get("last_vote", {})
-	add_child(UiKit.label("The Party sets off...", "title"))
+	var solo := ClientApp.is_story_view(view)
+	add_child(UiKit.label("The journey continues..." if solo else "The Party sets off...", "title"))
 	if result.is_empty():
 		return
 	var head := UiKit.hbox(8)
 	head.add_child(UiKit.badge(UiText.type_tag(result["type"]), UiKit.ACCENT))
 	head.add_child(UiKit.label("Next: %s (%s)" % [result["name"], UiText.type_label(result["type"])], "heading"))
 	add_child(head)
+	if solo:
+		return
 	var tally: Array = result["tally"]
 	var parts: Array[String] = []
 	for i in tally.size():

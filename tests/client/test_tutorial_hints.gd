@@ -119,6 +119,12 @@ func test_battle_tick_waiting_turn_deadline_and_story() -> void:
 	app.free()
 
 
+func test_story_deadlines_have_no_timer() -> void:
+	assert_false(ClientApp.has_timer(null), "null deadlines are untimed")
+	assert_false(ClientApp.has_timer(-1.0), "negative deadlines are untimed")
+	assert_true(ClientApp.has_timer(10.0), "positive deadlines remain timed")
+
+
 func test_action_banner_keeps_hud_and_match_keys_flow_through() -> void:
 	var app := ClientApp.new()
 	app.settings = ClientSettings.new()
