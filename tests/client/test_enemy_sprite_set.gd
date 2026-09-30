@@ -46,6 +46,24 @@ func test_elder_thornwarden_boss_idle_has_six_frames() -> void:
 		assert_true(frame != null, "boss idle frame should load")
 
 
+func test_owner_enemy_sheets_load_with_alpha_and_transparent_corners() -> void:
+	for enemy_id in ["old_swordsman", "shrine_spirit", "thornback_boar", "veteran_hunter"]:
+		var sprite_set := SpriteSet.for_enemy(enemy_id)
+		assert_true(sprite_set != null, "%s should resolve" % enemy_id)
+		for animation in ["idle", "attack"]:
+			var frames := sprite_set.frames(animation)
+			assert_false(frames.is_empty(), "%s/%s should have frames" % [enemy_id, animation])
+			for frame in frames:
+				assert_true(frame != null, "%s/%s texture should load" % [enemy_id, animation])
+				var image := frame.get_image()
+				assert_true(image != null and image.get_used_rect().has_area(),
+						"%s/%s should contain visible alpha" % [enemy_id, animation])
+				assert_eq(image.get_pixel(0, 0).a, 0.0,
+						"%s/%s top-left corner should be transparent" % [enemy_id, animation])
+				assert_eq(image.get_pixel(image.get_width() - 1, image.get_height() - 1).a, 0.0,
+						"%s/%s bottom-right corner should be transparent" % [enemy_id, animation])
+
+
 func test_bram_classless_idle_and_attack_have_six_frames() -> void:
 	var sprite_set := SpriteSet.for_class("classless")
 	assert_true(sprite_set != null, "classless should resolve to the Bram sprite set")

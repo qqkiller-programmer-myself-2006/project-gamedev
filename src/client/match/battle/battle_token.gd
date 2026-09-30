@@ -28,6 +28,8 @@ const CLASS_GLYPHS := {
 const ENEMY_TINTS := {
 	"grey_wolf": Color("#9aa3ad"), "thornback_boar": Color("#a5714f"), "bramble_archer": Color("#79a150"),
 	"forest_wisp": Color("#a6e6ee"), "elder_thornwarden": Color("#5f8f43"),
+	"old_swordsman": Color("#67835a"), "veteran_hunter": Color("#78904c"),
+	"shrine_spirit": Color("#6ebbb0"),
 }
 const STATUS_ICONS := {
 	"bleed": "bleed", "poison": "poison", "toxin": "poison", "venom_coat": "poison",
