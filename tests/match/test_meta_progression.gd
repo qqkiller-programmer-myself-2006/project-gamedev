@@ -42,8 +42,8 @@ func test_match_end_awards_gems_and_persists_them() -> void:
 	bot.choose_route = MatchBot.sensible_route
 	var view := bot.play_to_end(3600.0)
 	assert_true(view["summary"].has("gems_earned"))
-	assert_true(int(view["summary"]["gems_earned"][0]) > 0)
-	assert_eq(store.load_profile(TOKEN)["gems"], int(view["summary"]["gems_earned"][0]))
+	assert_eq(int(view["summary"]["gems_earned"][0]), 100)
+	assert_eq(store.load_profile(TOKEN)["gems"], 100)
 
 
 func test_reset_empty_tree_charges_nothing() -> void:
@@ -55,3 +55,24 @@ func test_reset_empty_tree_charges_nothing() -> void:
 			"nothing_to_reset")
 	assert_eq(h.room_view(session)["profile"]["gems"], before)
 	assert_eq(UiText.error("nothing_to_reset"), "No Skill Tree levels to reset for this Class.")
+
+func test_level_up_stat_points_growth() -> void:
+	var store := _profile(0)
+	store.profiles[TOKEN]["class_trees"] = {"assassin": {"stat_points": 5}}
+	var h := MatchHarness.new(24, {}, store)
+	var session := _room(h)
+	assert_ok(h.server.command(session, {"type": "set_loadout", "class": "assassin", "race": "Human", "boons": []}))
+	assert_ok(h.server.command(session, {"type": "start_match"}))
+
+	var view := h.match_view(session)
+	var character = view["party"][0]
+	assert_eq(character["points"], 5) # 5 from the starting node
+
+	var run = h.server._rooms[h.server._sessions[session].room].run
+	run.grant_exp(0, run._exp_to_next(1)) # Level up to 2
+
+	view = h.match_view(session)
+	character = view["party"][0]
+	var pts_per_lvl = h.content.get_int("leveling.points_per_level", 0)
+	assert_eq(character["level"], 2)
+	assert_eq(character["points"], 5 + pts_per_lvl + 1) # +1 from Human level 2

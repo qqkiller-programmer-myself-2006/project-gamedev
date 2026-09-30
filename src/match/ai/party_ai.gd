@@ -34,7 +34,7 @@ static func decide(run: MatchRun, combat: CombatEncounter, slot: int) -> Diction
 	var id := CombatEncounter._pid(slot)
 	var ratio := float(me["hp"]) / float(me["max_hp"])
 	if ratio < LOW_HP:
-		var item := _healing_item(run)
+		var item := _healing_item(run, me) if not combat.trial else ""
 		if not item.is_empty():
 			return {"actor": id, "action": "item", "item": item,
 					"profile": run.content.get_dict("items.%s.use" % item), "targets": [id]}
@@ -46,7 +46,7 @@ static func decide(run: MatchRun, combat: CombatEncounter, slot: int) -> Diction
 		var reaction := _react_to_threat(run, combat, id, preset, threat, ratio)
 		if not reaction.is_empty():
 			return reaction
-			
+
 	var cheapest := -1
 	for skill in combat.class_skills(run, id):
 		var cost = combat.skill_energy(run, skill)
@@ -54,7 +54,7 @@ static func decide(run: MatchRun, combat: CombatEncounter, slot: int) -> Diction
 			cheapest = cost
 	if cheapest > 0 and int(me.get("energy", run.content.get_int("rules.energy_start", 1))) < cheapest:
 		return {"actor": id, "action": "focus"}
-		
+
 	match preset:
 		"swordsman":
 			var slash := _ready_skill(run, combat, id, "power_slash")
@@ -190,13 +190,19 @@ static func weakest(run: MatchRun, combat: CombatEncounter, targets: Array[Strin
 			best_hp = hp
 	return best
 
-
-## The cheapest Item in the shared inventory that heals an ally, or "".
-static func _healing_item(run: MatchRun) -> String:
+## Returns the ID of the best healing item available in the Stash or the character's Consumable slot, or "" if none.
+static func _healing_item(run: MatchRun, me: Dictionary) -> String:
 	var best := ""
 	var best_heal := 0
-	for item in run.inventory:
-		if int(run.inventory[item]) <= 0:
+	var stash := run.inventory.duplicate()
+	if me.get("consumable") != null:
+		var slot_item = str(me["consumable"]["item"])
+		var slot_count = int(me["consumable"]["count"])
+		if slot_count > 0:
+			stash[slot_item] = int(stash.get(slot_item, 0)) + slot_count
+
+	for item in stash:
+		if int(stash[item]) <= 0:
 			continue
 		var use := run.content.get_dict("items.%s.use" % item)
 		if str(use.get("target", "")) != "ally" or not use.has("heal"):

@@ -26,6 +26,24 @@ func test_command_from_unknown_session_is_rejected() -> void:
 	var h := MatchHarness.new()
 	assert_rejected(h.server.command(999, {"type": "anything"}), "unknown_session")
 
+func test_malformed_numeric_and_string_fields_are_rejected() -> void:
+	var h := MatchHarness.new()
+	var sessions := h.start_with_humans(2)
+	var s0 = sessions[0]
+
+	var b1 = h.server.snapshot(s0)
+	
+	# MatchServer.command rejects invalid types immediately before checking match state,
+	# so we can test all fields right at the start.
+	assert_rejected(h.server.command(s0, {"type": "class_choice", "accept": [1]}), "bad_message")
+	assert_rejected(h.server.command(s0, {"type": "vote", "option": [1]}), "bad_message")
+	assert_rejected(h.server.command(s0, {"type": "transfer_gold", "amount": {}}), "bad_message")
+	assert_rejected(h.server.command(s0, {"type": "transfer_gold", "to": "1"}), "bad_message")
+	assert_rejected(h.server.command(s0, {"type": "action", "slot": []}), "bad_message")
+	assert_rejected(h.server.command(s0, {"type": "event_choice", "layer": "3"}), "bad_message")
+
+	assert_eq(h.server.snapshot(s0), b1)
+
 
 ## Plays a fixed script and records everything a client could observe.
 func _scripted_run(seed_value: int) -> Array:
