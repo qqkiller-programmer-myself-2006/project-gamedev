@@ -182,3 +182,47 @@ func test_statuses_are_cleared_after_a_failed_challenge() -> void:
 	assert_eq(_of("combat_ended")[0]["result"], "timeout")
 	assert_eq(_of("class_challenge_ended")[0]["passed"], false)
 	_assert_next_combat_is_clean("failed challenge")
+
+
+## The running Combat with dodge and block turned off on the Party, so direct
+## hits land for their exact amount.
+func _steady_combat() -> CombatEncounter:
+	_start_combat({})
+	var run = h.server._rooms[h.code].run
+	for character in run.party:
+		if character.has("derived"):
+			character["derived"]["dodge"] = 0.0
+			character["derived"]["block"] = 0.0
+	return run.encounter
+
+
+func test_death_from_a_direct_hit_clears_guard_states_and_statuses() -> void:
+	var combat := _steady_combat()
+	var run = h.server._rooms[h.code].run
+	combat.shields["p0"] = 0.6
+	combat.defending["p0"] = true
+	combat.focusing["p0"] = true
+	combat.protected["p1"] = {"by": "p0", "multiplier": 0.5}
+	combat.status_book.apply("p0", "smolder", 1, 99)
+
+	var out: Dictionary = combat._hit(run, "e0", run.party[0], {"amount": 9999})
+
+	assert_true(out.get("down", false), "the hit is lethal")
+	assert_false(combat.shields.has("p0"), "Shield Wall ends with its Guardian")
+	assert_false(combat.defending.has("p0"), "Guard ends on death")
+	assert_false(combat.focusing.has("p0"), "Focus ends on death")
+	assert_false(combat.protected.has("p1"), "Protect from the fallen hero ends")
+	assert_eq(combat.status_book.view("p0"), [], "Statuses end on death, so a revive starts clean")
+
+
+func test_allies_take_full_damage_again_after_the_shield_wall_guardian_falls() -> void:
+	var combat := _steady_combat()
+	var run = h.server._rooms[h.code].run
+	var ally: Dictionary = run.party[1]
+	ally["hp"] = 1000
+	ally["max_hp"] = 1000
+	combat.shields["p0"] = 0.6
+
+	assert_eq(combat._hit(run, "e0", ally, {"amount": 100})["damage"], 60, "Shield Wall reduces the hit")
+	combat._hit(run, "e0", run.party[0], {"amount": 9999})
+	assert_eq(combat._hit(run, "e0", ally, {"amount": 100})["damage"], 100, "no Shield Wall once the Guardian is down")

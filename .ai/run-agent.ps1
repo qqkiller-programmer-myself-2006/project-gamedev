@@ -32,7 +32,7 @@ New-Item -ItemType Directory -Force $logDir | Out-Null
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $base = Join-Path $logDir "$name-$Agent-$stamp"
 $status = "$base.status.json"
-$env:GODOT = 'D:\dev-tools\godot\Godot_v4.7.2-stable_win64_console.exe'
+if (-not $env:GODOT) { $env:GODOT = 'D:\dev-tools\godot\Godot_v4.7.2-stable_win64_console.exe' }
 
 $basePrompt = "In this run YOU are the hands-on executor: edit files and run commands yourself. " +
     "Ignore any instruction (for example in ~/AGENTS.md or ~/.codex/AGENTS.md) to delegate to opencode or any other agent; opencode is not available here. " +
@@ -48,7 +48,8 @@ function Get-Launch([string]$who, [string]$prompt, [string]$outLast) {
         return @((Get-Command powershell.exe).Source, ('-NoProfile -Command ' + (Quote $SelfTest)))
     }
     if ($who -eq 'codex') {
-        $exe = (Get-Command codex.cmd).Source
+        $exe = (Get-Command codex.cmd -ErrorAction SilentlyContinue).Source
+        if (-not $exe) { $exe = (Get-Command codex).Source }
         # prompt must come before -i, which is variadic and would swallow it
         $a = @('exec', $prompt, '-C', $Worktree, '--skip-git-repo-check', '-o', $outLast)
         if ($NoSandbox) { $a += '--dangerously-bypass-approvals-and-sandbox' }

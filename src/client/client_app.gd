@@ -548,10 +548,11 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed or event.echo:
 		return
 	if _has_open_hint():
-		if event.keycode == KEY_H:
+		if event.keycode == KEY_H or event.keycode == KEY_ESCAPE:
 			close_hints()
-		get_viewport().set_input_as_handled()
-		return
+			if is_inside_tree():
+				get_viewport().set_input_as_handled()
+			return
 	for overlay in _overlay_holder.get_children():
 		if overlay.is_queued_for_deletion():
 			continue
@@ -566,14 +567,16 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 	if _banner.visible:
-		get_viewport().set_input_as_handled()
+		if is_inside_tree():
+			get_viewport().set_input_as_handled()
 		return
 	if event.keycode == KEY_F2 or (event.keycode == KEY_COMMA and event.ctrl_pressed):
 		open_settings()
 		get_viewport().set_input_as_handled()
 		return
 	if _current != null and _current.has_method("handle_key") and _current.handle_key(self, event.keycode):
-		get_viewport().set_input_as_handled()
+		if is_inside_tree():
+			get_viewport().set_input_as_handled()
 
 
 ## Stops only servers owned by this client. When returning to title from an

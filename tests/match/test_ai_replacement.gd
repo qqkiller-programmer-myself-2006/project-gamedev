@@ -186,3 +186,35 @@ func test_room_and_match_close_after_every_human_leaves() -> void:
 	h.advance(10.5)
 	var late := h.server.open_session()
 	assert_rejected(h.server.command(late, {"type": "join_room", "code": code, "name": "Late"}), "room_closed")
+
+
+func test_ai_uses_own_consumable_slot_before_stash() -> void:
+	_combat(1, _two_boars(50, {"herb": 0}))
+	# Give p1 a personal herb
+	h.server._rooms[h.code].run.party[1]["consumable"] = {"item": "herb", "count": 1}
+	var events := _play(12.0)
+	var p1 := _actions_of(events, "p1")
+	assert_eq(p1[0]["action"], "attack")
+	assert_eq(p1[1]["action"], "item")
+	assert_eq(p1[1]["item"], "herb")
+
+func test_ai_does_not_use_healing_items_in_trial() -> void:
+	h = MatchHarness.new(8, MatchHarness.merge([MatchHarness.class_and_combat("swordsman"), MatchHarness.EXACT_DAMAGE,
+			{"party": {"starting_inventory": {"herb": 5}}}]))
+	sessions = h.start_with_humans(1)
+	var run = h.server._rooms[h.code].run
+	run.party[0]["hp"] = 0
+	run.party[1]["hp"] = 10
+	run.party[1]["max_hp"] = 100
+
+	h.take_route(sessions, "class")
+
+	var stash_before = run.inventory.get("herb", 0)
+	var events := _play(12.0)
+	var p1 := _actions_of(events, "p1")
+	assert_true(p1.size() > 0, "p1 should have taken an action")
+	for action in p1:
+		assert_ne(action["action"], "item", "in trial, AI does not use items")
+
+	assert_eq(run.inventory.get("herb", 0), stash_before, "Stash count should be unchanged")
+

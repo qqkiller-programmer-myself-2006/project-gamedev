@@ -75,6 +75,17 @@ func close_session(session_id: int) -> void:
 func command(session_id: int, cmd: Dictionary) -> Dictionary:
 	if not _sessions.has(session_id):
 		return _reject("unknown_session")
+
+	# Reject wrong types for fields that could crash the server.
+	for k in cmd:
+		var v: Variant = cmd[k]
+		if k in ["slot", "option", "to", "amount", "layer"]:
+			if typeof(v) != TYPE_INT and typeof(v) != TYPE_FLOAT:
+				return _reject("bad_message")
+		elif k == "accept":
+			if typeof(v) != TYPE_BOOL:
+				return _reject("bad_message")
+
 	var kind := str(cmd.get("type", ""))
 	match kind:
 		"create_room":

@@ -188,8 +188,6 @@ func handle_key(client: ClientApp, key: int) -> bool:
 		return true
 	if _story_director != null and is_instance_valid(_story_director.current):
 		return true
-	if _battle_mode and _battle.has_blocking_banner():
-		return true
 	if key == KEY_C:
 		toggle_clues()
 		return true
