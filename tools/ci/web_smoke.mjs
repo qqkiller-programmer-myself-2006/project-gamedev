@@ -27,7 +27,8 @@ function run(args, onLine) {
   const child = spawn(GODOT, args, { cwd: ROOT });
   children.push(child);
   let buffer = '';
-  const exited = new Promise((done) => child.on('exit', (code) => done(code)));
+  let errBuffer = '';
+  const exited = new Promise((done) => child.on('exit', (code) => { console.log(`   [godot] exited with ${code}`); done(code); }));
   child.stdout.on('data', (chunk) => {
     buffer += chunk;
     let index;
@@ -35,6 +36,16 @@ function run(args, onLine) {
       const line = buffer.slice(0, index).trim();
       buffer = buffer.slice(index + 1);
       if (line) { console.log(`   [godot] ${line}`); onLine?.(line); }
+    }
+  });
+  // Script errors go to stderr; without this a server that fails to start is silent.
+  child.stderr.on('data', (chunk) => {
+    errBuffer += chunk;
+    let index;
+    while ((index = errBuffer.indexOf('\n')) >= 0) {
+      const line = errBuffer.slice(0, index).trim();
+      errBuffer = errBuffer.slice(index + 1);
+      if (line) console.log(`   [godot:err] ${line}`);
     }
   });
   return { child, exited };
@@ -63,11 +74,14 @@ let failed = false;
 try {
   await new Promise((done) => http.listen(HTTP_PORT, '127.0.0.1', done));
   console.log(`web build on http://127.0.0.1:${HTTP_PORT}, server on ${WS_URL}`);
-  const server = run(['--headless', '--path', '.', '--', '--server', `--port=${WS_PORT}`]);
-  await new Promise((r) => setTimeout(r, 1500));
+  let listening = false;
+  const server = run(['--headless', '--path', '.', '--', '--server', `--port=${WS_PORT}`],
+    (line) => { if (line.startsWith('GameServer: listening')) listening = true; });
+  await waitFor(async () => listening, 'server to listen', 30000);
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   page.on('pageerror', (e) => console.log(`   [browser error] ${e.message}`));
+  page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log(`   [browser ${m.type()}] ${m.text()}`); });
   const state = () => page.evaluate(() => window.__forest || null);
 
   console.log('A. browser hosts, PC joins');
