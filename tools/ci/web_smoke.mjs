@@ -83,7 +83,7 @@ try {
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   page.on('pageerror', (e) => console.log(`   [browser error] ${e.message}`));
-  page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log(`   [browser ${m.type()}] ${m.text()}`); });
+  page.on('console', (m) => { if (m.type() === 'error') console.log(`   [browser ${m.type()}] ${m.text()}`); });
   const state = () => page.evaluate(() => window.__forest || null);
 
   console.log('A. browser hosts, PC joins');
