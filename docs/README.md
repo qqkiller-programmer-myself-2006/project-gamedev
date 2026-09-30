@@ -21,5 +21,5 @@ Start with [`../CONTEXT.md`](../CONTEXT.md) (domain words) and [`../AGENTS.md`](
 
 ## References
 - [agents/](agents/) — issue tracker, triage labels and domain-doc rules for AI agents
-- [references/aac_rogue/](references/aac_rogue/) — reference screenshots the game's screens and rules must match
+- [references/aac_rogue/](references/aac_rogue/README.md) — canonical AAC reference set: source notes plus the numbered 01–11 screenshots; add future AAC reference material here
 - [screenshots/](screenshots/) — current screenshots of every screen
