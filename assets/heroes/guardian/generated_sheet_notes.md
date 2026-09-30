@@ -20,3 +20,5 @@ canvas/baseline values in `assets/heroes/manifest.json` are unchanged.
 these files; every other direction, class, canvas, baseline, and fps entry is
 untouched. Note: the bottom-right cell carries a slash-effect tail at its
 left edge exactly as laid out in the source sheet.
+
+**Not in use.** These generated frames depict a different-looking character (purple hair, dark-blue armor) than the Guardian portrait and v2 sheets, so the manifest points back at the v2 `idle_right.png` / `attack_right_0..9.png`. `tests/client/test_hero_sprite_set.gd` blocks "generated" files from re-entering the manifest.
