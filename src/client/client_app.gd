@@ -97,6 +97,12 @@ func seconds_left(deadline: Variant) -> float:
 		return 0.0
 	return maxf(0.0, float(deadline) - server_now())
 
+static func is_story_view(view: Dictionary) -> bool:
+	return bool(view.get("story", false))
+
+static func has_timer(deadline: Variant) -> bool:
+	return deadline != null and float(deadline) >= 0.0
+
 
 # --- Connection ---------------------------------------------------------------
 

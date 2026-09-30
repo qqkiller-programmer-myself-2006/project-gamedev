@@ -487,7 +487,9 @@ func _stat(label: String, value: String, icon_name: String = "") -> Control:
 
 func _build_bottom() -> void:
 	UiKit.clear(_bottom)
-	var ready := UiKit.primary("Ready (%d/%d) [R]" % [int(_encounter.get("ready", []).size()), maxi(1, int(_encounter.get("humans", 1)))], func() -> void: _app.send({"type": "ready"}), false)
+	var story := ClientApp.is_story_view(_screen.room_view())
+	var ready_text := "Ready [R]" if story else "Ready (%d/%d) [R]" % [int(_encounter.get("ready", []).size()), maxi(1, int(_encounter.get("humans", 1)))]
+	var ready := UiKit.primary(ready_text, func() -> void: _app.send({"type": "ready"}), false)
 	Icons.apply_to_button(ready, "ready", _app.settings.text_scale)
 	UiKit.disable(ready, _ready, UiText.WHY["ready"])
 	ready.custom_minimum_size = Vector2(280, 44)
@@ -499,7 +501,10 @@ func _build_bottom() -> void:
 	_bottom.add_child(_countdown)
 
 func tick() -> void:
-	if _countdown == null or _deadline == null: return
+	if _countdown == null or not ClientApp.has_timer(_deadline):
+		if _countdown != null:
+			_countdown.text = ""
+		return
 	var left := _app.seconds_left(_deadline)
 	_countdown.text = "%ds" % ceili(left)
 	_countdown.add_theme_color_override("font_color", UiKit.WARN if left <= 5.0 else UiKit.TEXT)

@@ -102,6 +102,7 @@ func setup(client: ClientApp) -> void:
 		_story_director.text_scale = app.settings.text_scale
 		_story_director.reduced_motion = app.settings.reduced_motion
 		_story_director.restoring = app.is_story_restore()
+		_story_director.presentation_finished.connect(_on_story_presentation_finished)
 		add_child(_story_director)
 
 
@@ -167,7 +168,8 @@ func refresh(client: ClientApp, force: bool = false) -> void:
 	_build_panel(view)
 	if not _restore_focus(focus_id):
 		UiKit.focus_first(_center)
-	var focused := get_viewport().gui_get_focus_owner()
+	var viewport := get_viewport()
+	var focused = viewport.gui_get_focus_owner() if viewport != null else null
 	if focused != null and _center.is_ancestor_of(focused):
 		_scroll_to.call_deferred(focused)
 
@@ -206,11 +208,21 @@ func handle_key(client: ClientApp, key: int) -> bool:
 func show_events(client: ClientApp, events: Array) -> void:
 	if _story_director != null:
 		_story_director.observe(events, client.snapshot)
+		_sync_story_presentation_visibility()
 	for event in events:
 		var line := describe(event)
 		if not line.is_empty():
 			_add_log(line)
 		_feedback(client, event)
+
+func _on_story_presentation_finished(_item: Dictionary) -> void:
+	_sync_story_presentation_visibility()
+	refresh(app, true)
+
+func _sync_story_presentation_visibility() -> void:
+	if _panel == null or _story_director == null:
+		return
+	_panel.visible = not is_instance_valid(_story_director.current)
 
 
 ## Warns once per deadline when a countdown the player owns gets short.
@@ -388,6 +400,8 @@ func describe(event: Dictionary) -> String:
 		"profile_unavailable":
 			return UiText.error("profile_unavailable")
 		"player_joined":
+			if ClientApp.is_story_view(room_view()):
+				return ""
 			return "%s joined (slot %d)." % [event["name"], int(event["slot"]) + 1]
 		"player_left":
 			var why := "lost connection" if event["reason"] == "disconnected" else "left"
@@ -395,6 +409,8 @@ func describe(event: Dictionary) -> String:
 		"slot_ai_takeover":
 			return "AI takes over %s." % event["character"]
 		"host_changed":
+			if ClientApp.is_story_view(room_view()):
+				return ""
 			return "%s is now the Host." % event["name"]
 		"match_started":
 			return "The journey into the Forest begins."
@@ -555,8 +571,9 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 			if event["result"] == "victory" and int(rewards.get("exp", 0)) > 0:
 				_announce(client, "Victory! +%d EXP, +%d Gold" % [int(rewards["exp"]), int(rewards.get("gold", 0))], 2.5, "good")
 		"player_joined":
-			client.toast("%s joined." % event["name"])
-			client.sounds.play("click")
+			if not ClientApp.is_story_view(room_view()):
+				client.toast("%s joined." % event["name"])
+				client.sounds.play("click")
 		"profile_unavailable":
 			client.toast(UiText.error("profile_unavailable"), 6.0)
 		"treasure_found":
@@ -645,15 +662,17 @@ func _build_party(view: Dictionary) -> void:
 		head.add_child(UiKit.spacer())
 		if slot == your_slot():
 			head.add_child(UiKit.badge("YOU", UiKit.GOOD))
-		head.add_child(UiKit.badge("PLAYER" if character["controller"] == "human" else "AI",
-				UiKit.ALLY if character["controller"] == "human" else UiKit.TEXT_DIM))
+		if not ClientApp.is_story_view(view):
+			head.add_child(UiKit.badge("PLAYER" if character["controller"] == "human" else "AI",
+					UiKit.ALLY if character["controller"] == "human" else UiKit.TEXT_DIM))
 		card.add_child(head)
 		card.add_child(UiKit.hp_bar(int(character["hp"]), int(character["max_hp"])))
 		var info := UiKit.hbox(4)
-		var owner := "AI controlled"
-		if character["controller"] == "human" and slot < slots.size():
-			owner = str(slots[slot]["owner_name"])
-		info.add_child(UiKit.label(owner, "dim"))
+		if not ClientApp.is_story_view(view):
+			var owner := "AI controlled"
+			if character["controller"] == "human" and slot < slots.size():
+				owner = str(slots[slot]["owner_name"])
+			info.add_child(UiKit.label(owner, "dim"))
 		info.add_child(UiKit.spacer())
 		if int(character["hp"]) <= 0:
 			info.add_child(UiKit.badge("DOWN", UiKit.ENEMY))
@@ -711,6 +730,7 @@ func _build_panel(view: Dictionary) -> void:
 		_center_scroll.scroll_vertical = 0
 		_scroll_to_top = true
 		app.fade_in(_panel, 0.25, Vector2(16, 0))
+	_sync_story_presentation_visibility()
 
 
 func _scroll_to(control: Control) -> void:
@@ -740,7 +760,8 @@ func _add_log(line: String) -> void:
 
 
 func _focused_id() -> String:
-	var focused := get_viewport().gui_get_focus_owner()
+	var viewport := get_viewport()
+	var focused = viewport.gui_get_focus_owner() if viewport != null else null
 	return str(focused.get_meta("focus_id", "")) if focused != null else ""
 
 

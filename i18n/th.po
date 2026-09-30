@@ -1,0 +1,1427 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: beyond-the-worlds-end\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: th\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: content/forest.json:story.events.ranger_hut.choices[0].outcome.text
+msgid "\"He asked about the Guardian of the Forest. Said he had to get past it, whatever it cost. I never saw him come back.\""
+msgstr "\"เขาถามถึงผู้พิทักษ์แห่งป่า บอกว่าต้องผ่านมันไปให้ได้ไม่ว่าต้องแลกด้วยอะไร แต่ข้าไม่เคยเห็นเขากลับมาอีก\""
+
+#: content/forest.json:encounters.merchant.greeting
+msgid "\"Herbs, tonics, a little fire in a jar. Coin first, friends.\""
+msgstr "\"สมุนไพร ยาบำรุง ไฟใส่ขวดอีกนิดหน่อย จ่ายเงินก่อนนะสหาย\""
+
+#: content/forest.json:classes.archer.challenge.fail
+msgid "\"Too slow. The forest does not wait for anyone.\""
+msgstr "\"ช้าเกินไป ป่าไม่เคยรอใคร\""
+
+#: content/forest.json:story.events.ranger_hut.choices[1].outcome.text
+msgid "\"You were carrying his journal, lad, and shaking. You kept saying: it asks for a life. Then you slept for three days.\""
+msgstr "\"เจ้าหอบสมุดบันทึกของเขามา ตัวสั่นเทา พูดซ้ำอยู่ว่า มันเรียกร้องชีวิตหนึ่ง แล้วเจ้าก็หลับไปสามวัน\""
+
+#: content/forest.json:story.events.hollow_tree.outcome.text
+msgid "'If the Chalice asks a price, I will pay it. Not you. Not the children. Never the children.'"
+msgstr "'หากจอกศักดิ์สิทธิ์เรียกร้องราคา ฉันจะจ่ายเอง ไม่ใช่เธอ ไม่ใช่ลูก ๆ ไม่มีวันเป็นลูก ๆ'"
+
+#: content/forest.json:meta.class_tree.swiftness.text
+msgid "+1 Initiative per two levels."
+msgstr "+1 ชิงจังหวะทุก 2 ระดับ"
+
+#: content/forest.json:meta.passives.adaptable.text
+msgid "+1 attribute point at every even level."
+msgstr "+1 แต้มคุณลักษณะทุกระดับคู่"
+
+#: content/forest.json:meta.class_tree.reserves.text
+msgid "+1 starting Energy at level 5."
+msgstr "+1 พลังงานเริ่มต้นที่ระดับ 5"
+
+#: content/forest.json:meta.passives.tidal.text
+msgid "+1 starting Energy in Combat."
+msgstr "+1 พลังงานเริ่มต้นในการต่อสู้"
+
+#: content/forest.json:meta.class_tree.stat_points.text
+msgid "+1 starting attribute point per level."
+msgstr "+1 แต้มคุณลักษณะเริ่มต้นต่อระดับ"
+
+#: content/forest.json:meta.passives.versatile.text
+msgid "+1 to every attribute."
+msgstr "+1 ให้คุณลักษณะทุกค่า"
+
+#: content/forest.json:meta.class_tree.precision.text
+msgid "+1% critical chance per level."
+msgstr "+1% โอกาสคริติคอลต่อระดับ"
+
+#: content/forest.json:meta.passives.scrappy.text
+msgid "+10% Gold from rewards."
+msgstr "+10% ทองจากรางวัล"
+
+#: content/forest.json:meta.passives.moonlit.text
+msgid "+10% magic damage."
+msgstr "+10% ความเสียหายเวท"
+
+#: content/forest.json:meta.passives.dwarven_resilience.text
+msgid "+10% max HP and +10% Status resistance."
+msgstr "+10% พลังชีวิตสูงสุด และ +10% ต้านทานสถานะ"
+
+#: content/forest.json:meta.passives.grace.text
+msgid "+2 DEX."
+msgstr "+2 ความว่องไว"
+
+#: content/forest.json:meta.boons["The%20Chosen%20One"].text
+msgid "+2 to every attribute. Requires 5 total Prestige."
+msgstr "+2 ให้คุณลักษณะทุกค่า ต้องมีเกียรติยศรวม 5"
+
+#: content/forest.json:meta.class_tree.might.text
+msgid "+2% direct damage per level."
+msgstr "+2% ความเสียหายตรงต่อระดับ"
+
+#: content/forest.json:meta.class_tree.vitality.text
+msgid "+2% max HP per level."
+msgstr "+2% พลังชีวิตสูงสุดต่อระดับ"
+
+#: content/forest.json:meta.boons["Daredevil%20Impulse"].text
+msgid "+25% damage while HP is 30% or lower."
+msgstr "+25% ความเสียหายเมื่อพลังชีวิตเหลือ 30% หรือน้อยกว่า"
+
+#: content/forest.json:meta.boons["Potential:%20Bunny"].text
+msgid "+3 Initiative and +15% Dodge."
+msgstr "+3 ชิงจังหวะ และ +15% หลบหลีก"
+
+#: content/forest.json:meta.boons.Alert.text
+msgid "+3 Initiative; +5% Block and Dodge for the first two turns."
+msgstr "+3 ชิงจังหวะ; +5% ปัดป้องและหลบหลีกใน 2 เทิร์นแรก"
+
+#: content/forest.json:meta.passives.small_target.text
+msgid "+5% Dodge."
+msgstr "+5% หลบหลีก"
+
+#: content/forest.json:meta.passives.keen_eyes.text
+msgid "+5% critical chance."
+msgstr "+5% โอกาสคริติคอล"
+
+#: content/forest.json:meta.passives.frail.text
+msgid "-10% max HP."
+msgstr "-10% พลังชีวิตสูงสุด"
+
+#: content/forest.json:meta.boons["Energy%20Conserver"].text
+msgid "15% chance to gain one extra Energy at turn start."
+msgstr "โอกาส 15% ที่จะได้พลังงานเพิ่ม 1 หน่วยเมื่อเริ่มเทิร์น"
+
+#: content/forest.json:meta.passives.undying.text
+msgid "5% Lifesteal."
+msgstr "ดูดพลังชีวิต 5%"
+
+#: content/forest.json:story.clues.wolf_collar.text
+msgid "A brass token from the western port, found among the wolves' leavings. Father bought passage there once."
+msgstr "เหรียญทองเหลืองจากท่าเรือตะวันตก พบในซากที่หมาป่าทิ้งไว้ พ่อเคยซื้อตั๋วผ่านทางที่นั่น"
+
+#: content/forest.json:skills.aimed_shot.description
+msgid "A careful ranged shot at 140% ATK that always lands a critical hit. Reaches the back row. Costs 2 Energy. Cooldown: 2 turns."
+msgstr "ยิงระยะไกลอย่างแม่นยำที่พลังโจมตี 140% และติดคริติคอลเสมอ ยิงถึงแถวหลัง ใช้พลังงาน 2 หน่วย คูลดาวน์ 2 เทิร์น"
+
+#: content/forest.json:journey.sites.merchant[0].hint
+msgid "A cart with a lantern. Gold can buy help here."
+msgstr "เกวียนติดโคมไฟ ทองซื้อความช่วยเหลือที่นี่ได้"
+
+#: content/forest.json:enemies.giant_spider.description
+msgid "A cavern spider that weakens its prey with venomous webs."
+msgstr "แมงมุมถ้ำที่ทำให้เหยื่ออ่อนแอด้วยใยพิษ"
+
+#: content/forest.json:items.boar_tusk.description
+msgid "A curved, heavy tusk. Crafting material."
+msgstr "เขี้ยวโค้งหนัก วัตถุดิบคราฟต์"
+
+#: content/forest.json:journey.sites.rest[1].hint
+msgid "A dry shelter inside a giant tree."
+msgstr "ที่พักแห้งภายในต้นไม้ยักษ์"
+
+#: content/forest.json:enemies.kobold.description
+msgid "A fast spear skirmisher that darts in before foes can react."
+msgstr "นักรบหอกว่องไวที่พุ่งเข้าหาศัตรูก่อนพวกมันจะทันตั้งตัว"
+
+#: content/forest.json:skills.power_slash.description
+msgid "A heavy melee strike dealing 180% ATK damage to one enemy. Costs 2 Energy. Cooldown: 2 turns."
+msgstr "ฟาดระยะประชิดรุนแรง สร้างความเสียหายพลังโจมตี 180% แก่ศัตรูหนึ่งตัว ใช้พลังงาน 2 หน่วย คูลดาวน์ 2 เทิร์น"
+
+#: content/forest.json:enemies.stone_sentinel.description
+msgid "A living statue with a slow, crushing blow."
+msgstr "รูปปั้นมีชีวิตที่โจมตีช้าแต่บดขยี้รุนแรง"
+
+#: content/forest.json:classes.assassin.challenge.intro
+msgid "A masked outlaw drops from a branch, dagger already spinning. \"Quick hands, quiet feet. Cut me before I tire of this, and I'll show you the rest.\""
+msgstr "โจรสวมหน้ากากร่วงจากกิ่งไม้ มีดกำลังหมุนอยู่ในมือ \"มือไว เท้าเงียบ จัดการข้าก่อนข้าจะเบื่อ แล้วข้าจะสอนที่เหลือให้\""
+
+#: content/story_mode.json:scenes.merchant_first[0].text
+msgid "A merchant in a forest this deep? I am not asking questions."
+msgstr "พ่อค้าในป่าลึกขนาดนี้หรือ ฉันไม่ถามดีกว่า"
+
+#: content/forest.json:journey.sites.class[3].hint
+msgid "A moss-covered golem blocks the path."
+msgstr "โกเลมที่มีมอสปกคลุมขวางทางอยู่"
+
+#: content/forest.json:skills.stab.description
+msgid "A piercing stab at 130% ATK that ignores half the target's DEF and causes Bleed. Costs 1 Energy. Cooldown: 4 turns."
+msgstr "แทงทะลวงที่พลังโจมตี 130% เมินพลังป้องกันของเป้าหมายครึ่งหนึ่งและทำให้เลือดไหล ใช้พลังงาน 1 หน่วย คูลดาวน์ 4 เทิร์น"
+
+#: content/forest.json:enemies.masked_outlaw.description
+msgid "A quick blade that strikes twice when its Energy is full."
+msgstr "คมดาบว่องไวที่ฟันสองครั้งเมื่อพลังงานเต็ม"
+
+#: content/story_mode.json:scenes.rest_first[0].text
+msgid "A quiet camp at last. Let the wounds close before we go on."
+msgstr "ในที่สุดก็ได้ค่ายเงียบสงบ ปล่อยให้บาดแผลสมานก่อนเดินทางต่อ"
+
+#: content/forest.json:enemies.old_swordsman.description
+msgid "A retired blade master testing your resolve. He will not truly hurt you."
+msgstr "จอมดาบชราที่เกษียณแล้วกำลังทดสอบความมุ่งมั่นของเจ้า เขาจะไม่ทำร้ายเจ้าจริง ๆ"
+
+#: content/forest.json:story.events.old_campfire.text
+msgid "A ring of blackened stones sits under a pine. The rope still tied to a branch uses Father's double knot, the one he taught all of you. Two bedrolls were pressed into the moss here long ago."
+msgstr "กองหินดำเป็นวงอยู่ใต้ต้นสน เชือกที่ผูกกับกิ่งไม้ยังเป็นเงื่อนสองชั้นของพ่อ เงื่อนที่เขาสอนพวกเจ้าทุกคน ที่นี่เคยมีที่นอนสองผืนกดอยู่บนมอสเมื่อนานมาแล้ว"
+
+#: content/forest.json:story.clues.torn_cloak.text
+msgid "A scrap of Father's grey cloak caught on thorns, heading deeper into the Forest."
+msgstr "เศษเสื้อคลุมสีเทาของพ่อเกี่ยวอยู่กับหนาม มุ่งลึกเข้าไปในป่า"
+
+#: content/forest.json:enemies.veteran_hunter.description
+msgid "A seasoned hunter testing your speed. Her blunt arrows sting but will not truly hurt you."
+msgstr "พรานช่ำชองกำลังทดสอบความเร็วของเจ้า ลูกธนูทื่อของนางแสบไม่น้อยแต่ไม่ทำร้ายจริง"
+
+#: content/forest.json:enemies.skeleton.description
+msgid "A shielded swordsman whose bones blunt physical blows."
+msgstr "นักดาบถือโล่ที่กระดูกช่วยลดทอนการโจมตีกายภาพ"
+
+#: content/forest.json:items.wolf_pelt.description
+msgid "A thick grey pelt. Crafting material."
+msgstr "หนังสีเทาผืนหนา วัตถุดิบคราฟต์"
+
+#: content/forest.json:journey.sites.class[4].hint
+msgid "A thief watches from the ferns, twirling a dagger."
+msgstr "โจรคนหนึ่งเฝ้ามองจากพุ่มเฟิร์น พลิกมีดเล่นไปมา"
+
+#: content/forest.json:enemies.minotaur.description
+msgid "A towering brute that charges the strongest foe with crushing force."
+msgstr "อสูรร่างยักษ์พุ่งเข้าใส่ศัตรูที่แข็งแกร่งที่สุดด้วยแรงบดขยี้"
+
+#: content/story_mode.json:chapters[0].subtitle
+msgid "A trail of old ash leads into the Forest."
+msgstr "ร่องรอยเถ้าถ่านเก่านำเข้าสู่ป่า"
+
+#: content/forest.json:story.clues.guardian_mark.text
+msgid "A traveller's shield scored by huge claws. The Guardian has stopped others before you."
+msgstr "โล่ของนักเดินทางมีรอยกรงเล็บขนาดใหญ่ ผู้พิทักษ์เคยหยุดคนอื่นมาก่อนเจ้า"
+
+#: content/story_mode.json:scenes.class_gained[2].text
+msgid "A useful promise. We still have a long road ahead."
+msgstr "คำสัญญาที่มีประโยชน์ เรายังมีเส้นทางอีกยาวไกล"
+
+#: content/forest.json:classes.archer.challenge.intro
+msgid "A veteran hunter strings her bow. \"Hunters strike first and never miss twice. Show me you can keep up.\""
+msgstr "พรานมากประสบการณ์ขึ้นสายธนู \"นักล่าต้องโจมตีก่อนและพลาดซ้ำสองไม่ได้ แสดงให้ข้าเห็นว่าเจ้าตามทัน\""
+
+#: content/forest.json:story.clues.carved_map.text
+msgid "A wave, a lighthouse and an upside-down cup: the road leads past the last lighthouse, beyond the sea."
+msgstr "คลื่น ประภาคาร และถ้วยคว่ำ เส้นทางทอดผ่านประภาคารสุดท้ายออกไปไกลกว่าทะเล"
+
+#: content/forest.json:journey.sites.treasure[0].name
+msgid "Abandoned Cabin"
+msgstr "กระท่อมร้าง"
+
+#: content/forest.json:meta.passives.adaptable.name
+msgid "Adaptable"
+msgstr "ปรับตัวเก่ง"
+
+#: content/forest.json:skills.aimed_shot.name
+msgid "Aimed Shot"
+msgstr "ยิงเล็งเป้า"
+
+#: content/forest.json:meta.boons.Alert
+msgid "Alert"
+msgstr "ตื่นตัว"
+
+#: content/forest.json:encounters.treasure.text
+msgid "Among the dust and leaves, something useful catches the light."
+msgstr "ท่ามกลางฝุ่นและใบไม้ มีบางสิ่งมีประโยชน์สะท้อนแสง"
+
+#: content/forest.json:skills.frost_lance.description
+msgid "An ice spear at 160% MAG against one enemy anywhere on the field. Costs 1 Energy. Cooldown: 1 turn."
+msgstr "หอกน้ำแข็งพลังเวท 160% ใส่ศัตรูหนึ่งตัวที่ใดก็ได้ในสนาม ใช้พลังงาน 1 หน่วย คูลดาวน์ 1 เทิร์น"
+
+#: content/forest.json:enemies.shrine_spirit.description
+msgid "An old guardian flame. It tests the mind, not the body, and will not truly hurt you."
+msgstr "เปลวไฟผู้พิทักษ์โบราณ มันทดสอบจิตใจไม่ใช่ร่างกาย และไม่ทำร้ายเจ้าจริง ๆ"
+
+#: content/forest.json:classes.swordsman.challenge.intro
+msgid "An old man lowers his practice blade. \"Land enough blows before I tire of you, and I will teach you the sword.\""
+msgstr "ชายชราลดดาบฝึกลง \"ฟันให้ได้มากพอก่อนข้าจะเบื่อ แล้วข้าจะสอนวิชาดาบให้เจ้า\""
+
+#: content/forest.json:journey.sites.class[0].hint
+msgid "An old man practises forms outside his hut."
+msgstr "ชายชราฝึกกระบวนท่าอยู่นอกกระท่อม"
+
+#: content/forest.json:story.events.ranger_hut.text
+msgid "An old ranger squints at the Party, then at Wren. \"You. You were with him, the man with the map. Three winters ago. You were half dead when you came back through here.\" Wren has no memory of it."
+msgstr "พรานชราหรี่ตามองกลุ่ม แล้วมองเรน \"เจ้า เจ้าเคยไปกับเขา ชายผู้ถือแผนที่ เมื่อสามฤดูหนาวก่อน เจ้ากลับมาที่นี่ในสภาพใกล้ตาย\" เรนจำเรื่องนั้นไม่ได้เลย"
+
+#: content/forest.json:journey.sites.treasure[1].hint
+msgid "An overturned cart half-buried in leaves."
+msgstr "เกวียนคว่ำถูกใบไม้กลบไปครึ่งหนึ่ง"
+
+#: content/story_mode.json:prologue[3].text
+msgid "And Wren went with him. Wren came back alone, carrying the journal but no memory of the road."
+msgstr "เรนไปกับเขาด้วย เรนกลับมาเพียงลำพัง ถือสมุดบันทึกไว้แต่จำเส้นทางไม่ได้เลย"
+
+#: content/story_mode.json:scenes.story_clue[0].text
+msgid "Another mark from Father. A wave, a lighthouse, and an upside-down cup."
+msgstr "รอยจากพ่ออีกแล้ว คลื่น ประภาคาร และถ้วยคว่ำ"
+
+#: content/forest.json:classes.archer.name
+msgid "Archer"
+msgstr "นักธนู"
+
+#: content/forest.json:party.members[0].name
+msgid "Arin"
+msgstr "อาริน"
+
+#: content/forest.json:journey.sites.combat[3].hint
+msgid "Arrows stuck in the trees. Someone guards this road."
+msgstr "ลูกธนูปักอยู่ตามต้นไม้ มีใครบางคนเฝ้าถนนนี้"
+
+#: content/forest.json:story.events.ranger_hut.choices[0].label
+msgid "Ask about Father"
+msgstr "ถามเรื่องพ่อ"
+
+#: content/forest.json:story.events.ranger_hut.choices[1].label
+msgid "Ask about Wren"
+msgstr "ถามเรื่องเรน"
+
+#: content/forest.json:classes.assassin.name
+msgid "Assassin"
+msgstr "นักฆ่า"
+
+#: content/forest.json:classes.swordsman.description
+msgid "Balanced and dependable. Strong melee strikes, solid health."
+msgstr "สมดุลและไว้ใจได้ การโจมตีระยะประชิดแข็งแกร่ง พลังชีวิตดี"
+
+#: content/forest.json:classes.classless.role
+msgid "Beginner"
+msgstr "ผู้เริ่มต้น"
+
+#: content/forest.json:statuses.bleed.name
+msgid "Bleed"
+msgstr "เลือดไหล"
+
+#: content/forest.json:journey.sites.class[2].hint
+msgid "Blue fire flickers between the broken pillars."
+msgstr "ไฟสีน้ำเงินริบหรี่ระหว่างเสาหักพัง"
+
+#: content/forest.json:classes.mage.challenge.intro
+msgid "Blue fire gathers into a figure between the pillars. \"Words of power answer only to a steady mind. Prove yours.\""
+msgstr "ไฟสีน้ำเงินรวมตัวเป็นรูปร่างระหว่างเสา \"ถ้อยคำแห่งพลังตอบรับจิตใจที่มั่นคงเท่านั้น พิสูจน์จิตของเจ้า\""
+
+#: content/forest.json:items.boar_tusk.name
+msgid "Boar Tusk"
+msgstr "เขี้ยวหมูป่า"
+
+#: content/forest.json:items.firebomb.category
+msgid "Bombs"
+msgstr "ระเบิด"
+
+#: content/forest.json:journey.sites.combat[5].name
+msgid "Bone Pit"
+msgstr "หลุมกระดูก"
+
+#: content/forest.json:crafting.categories[0] content/forest.json:items.pelt_boots.category
+msgid "Boots"
+msgstr "รองเท้าบูต"
+
+#: content/forest.json:items.pelt_boots.description
+msgid "Boots gear: +1 SPD, +1 DEF."
+msgstr "อุปกรณ์รองเท้า: +1 ความเร็ว, +1 พลังป้องกัน"
+
+#: content/forest.json:party.members[1].name
+msgid "Bram"
+msgstr "แบรม"
+
+#: content/story_mode.json:prologue[1].text
+msgid "Bram, Cora, Dain, Wren—stay close. We find his path, then we find him."
+msgstr "แบรม โครา เดย์น เรน—อยู่ใกล้ ๆ กันไว้ เราจะตามรอยเขา แล้วตามหาเขาให้พบ"
+
+#: content/forest.json:boss.moves.bramble_lash.name
+msgid "Bramble Lash"
+msgstr "แส้หนาม"
+
+#: content/forest.json:items.bramble_quiver.name
+msgid "Bramble Quiver"
+msgstr "กระบอกธนูหนาม"
+
+#: content/forest.json:items.bramble_wood.name
+msgid "Bramble Wood"
+msgstr "ไม้หนาม"
+
+#: content/forest.json:journey.sites.combat[1].hint
+msgid "Branches rustle where there is no wind."
+msgstr "กิ่งไม้เสียดสีกันทั้งที่ไม่มีลม"
+
+#: content/forest.json:enemies.minotaur.special.name
+msgid "Bull Rush"
+msgstr "พุ่งชน"
+
+#: content/forest.json:journey.sites.story[1].name
+msgid "Carved Stone"
+msgstr "หินแกะสลัก"
+
+#: content/forest.json:boss.region content/forest.json:journey.regions["5"]
+msgid "Cave"
+msgstr "ถ้ำ"
+
+#: content/forest.json:journey.sites.combat[4].name
+msgid "Cave Mouth"
+msgstr "ปากถ้ำ"
+
+#: content/forest.json:items.tusk_charm.description
+msgid "Charm gear: +2 ATK."
+msgstr "อุปกรณ์เครื่องราง: +2 พลังโจมตี"
+
+#: content/forest.json:items.wisp_charm.description
+msgid "Charm gear: +2 MAG."
+msgstr "อุปกรณ์เครื่องราง: +2 พลังเวท"
+
+#: content/forest.json:crafting.categories[2] content/forest.json:items.tusk_charm.category content/forest.json:items.wisp_charm.category
+msgid "Charms"
+msgstr "เครื่องราง"
+
+#: content/forest.json:items.hide_jerkin.description
+msgid "Chest gear: +2 DEF, +8 Max HP."
+msgstr "อุปกรณ์เกราะอก: +2 พลังป้องกัน, +8 พลังชีวิตสูงสุด"
+
+#: content/forest.json:items.wisp_robe.description
+msgid "Chest gear: +2 MAG, +2 RES."
+msgstr "อุปกรณ์เกราะอก: +2 พลังเวท, +2 ต้านเวท"
+
+#: content/forest.json:journey.type_labels.class
+msgid "Class Encounter"
+msgstr "เหตุการณ์อาชีพ"
+
+#: content/forest.json:meta.class_tree.mastery.text
+msgid "Class Skill cooldown -1 at level 5."
+msgstr "คูลดาวน์ทักษะอาชีพ -1 ที่ระดับ 5"
+
+#: content/forest.json:classes.classless.name
+msgid "Classless"
+msgstr "ไร้อาชีพ"
+
+#: content/forest.json:story.clues.guardian_mark.title
+msgid "Claw-Marked Shield"
+msgstr "โล่รอยกรงเล็บ"
+
+#: content/forest.json:skills.prep_time.description
+msgid "Coat your weapon with poison: your next 3 damaging actions also apply Poison. Costs 1 Energy. Cooldown: 6 turns."
+msgstr "เคลือบอาวุธด้วยพิษ: การกระทำที่สร้างความเสียหาย 3 ครั้งถัดไปจะทำให้ติดพิษด้วย ใช้พลังงาน 1 หน่วย คูลดาวน์ 6 เทิร์น"
+
+#: content/forest.json:journey.sites.combat[4].hint
+msgid "Cold air rises from a cavern beneath the roots."
+msgstr "อากาศเย็นลอยขึ้นจากโพรงใต้รากไม้"
+
+#: content/forest.json:journey.sites.story[0].hint
+msgid "Cold ashes and a familiar knot in the rope. Was Father here?"
+msgstr "เถ้าถ่านเย็นกับเงื่อนเชือกที่คุ้นเคย พ่อเคยมาที่นี่หรือ"
+
+#: content/forest.json:journey.type_labels.combat
+msgid "Combat"
+msgstr "การต่อสู้"
+
+#: content/forest.json:party.members[2].name
+msgid "Cora"
+msgstr "โครา"
+
+#: content/forest.json:meta.passives.masterwork.text
+msgid "Crafted gear gains +0.75% stats per current level."
+msgstr "อุปกรณ์ที่คราฟต์ได้จะได้ค่าสถานะเพิ่ม 0.75% ต่อระดับปัจจุบัน"
+
+#: content/forest.json:meta.boons["Critical%20Healing"]
+msgid "Critical Healing"
+msgstr "เยียวยาคริติคอล"
+
+#: content/forest.json:meta.boons["Critical%20Healing"].text
+msgid "Critical hits heal you for 20% of damage dealt."
+msgstr "การโจมตีคริติคอลฟื้นพลังชีวิต 20% ของความเสียหายที่ทำได้"
+
+#: content/forest.json:boss.moves.crushing_root.name
+msgid "Crushing Root"
+msgstr "รากบดขยี้"
+
+#: content/forest.json:classes.assassin.description
+msgid "Daggers and poison. Stacks Bleed, Poison and Toxin on one enemy, then finishes it with Inject Venom. Fast and deadly, but fragile."
+msgstr "มีดสั้นและพิษ สะสมเลือดไหล พิษ และพิษร้ายใส่ศัตรูหนึ่งตัว แล้วปิดฉากด้วยฉีดพิษ เร็วและอันตรายแต่เปราะบาง"
+
+#: content/forest.json:party.members[3].name
+msgid "Dain"
+msgstr "เดย์น"
+
+#: content/forest.json:meta.boons["Daredevil%20Impulse"]
+msgid "Daredevil Impulse"
+msgstr "แรงกระตุ้นบ้าระห่ำ"
+
+#: content/forest.json:journey.sites.combat[1].name
+msgid "Dark Thicket"
+msgstr "พงมืด"
+
+#: content/forest.json:items.firebomb.description
+msgid "Deals 18 fire damage to every enemy."
+msgstr "สร้างความเสียหายไฟ 18 แก่ศัตรูทุกตัว"
+
+#: content/forest.json:story.events.carved_stone.text
+msgid "Deep marks are cut into a standing stone: a wave, a lighthouse, and a cup drawn upside down. Beneath them, a single letter: E. Father's initial."
+msgstr "รอยลึกถูกสลักบนศิลาตั้งตรง: คลื่น ประภาคาร และถ้วยคว่ำ ใต้รอยเหล่านั้นมีอักษรตัวเดียว: E อักษรย่อชื่อของพ่อ"
+
+#: content/forest.json:enemies.masked_outlaw.special.name
+msgid "Double Strike"
+msgstr "ฟันซ้ำ"
+
+#: content/forest.json:skills.inject_venom.description
+msgid "Drive venom into one enemy: 100% ATK plus 40% for each different DoT on it, then 2 stacks of Toxin. Costs 2 Energy. Cooldown: 6 turns."
+msgstr "ฉีดพิษใส่ศัตรูหนึ่งตัว: พลังโจมตี 100% บวก 40% ต่อความเสียหายต่อเนื่องแต่ละชนิดที่ติดอยู่ จากนั้นทำให้ติดพิษร้าย 2 ชั้น ใช้พลังงาน 2 หน่วย คูลดาวน์ 6 เทิร์น"
+
+#: content/forest.json:meta.races.Dwarf
+msgid "Dwarf"
+msgstr "คนแคระ"
+
+#: content/forest.json:meta.passives.dwarven_resilience.name
+msgid "Dwarven Resilience"
+msgstr "ความทรหดของคนแคระ"
+
+#: content/forest.json:boss.name content/forest.json:enemies.elder_thornwarden.name
+msgid "Elder Thornwarden"
+msgstr "ธอร์นวอร์เดนผู้เฒ่า"
+
+#: content/forest.json:party.members[0].role
+msgid "Eldest sibling"
+msgstr "ลูกคนโต"
+
+#: content/forest.json:meta.races.Elf
+msgid "Elf"
+msgstr "เอลฟ์"
+
+#: content/forest.json:meta.boons["Energy%20Conserver"]
+msgid "Energy Conserver"
+msgstr "ผู้ประหยัดพลังงาน"
+
+#: content/forest.json:meta.boons.Enervation
+msgid "Enervation"
+msgstr "อ่อนแรง"
+
+#: content/forest.json:story.clues.tin_cup.text
+msgid "Engraved with Mother's name. He carried it the whole way."
+msgstr "สลักชื่อแม่ไว้ เขาถือมันไปตลอดทาง"
+
+#: content/story_mode.json:chapters[5].subtitle
+msgid "Face the Elder Thornwarden in the cave beneath the Forest."
+msgstr "เผชิญหน้ากับธอร์นวอร์เดนผู้เฒ่าในถ้ำใต้ป่า"
+
+#: content/forest.json:items.wisp_dust.description
+msgid "Faintly glowing dust. Crafting material."
+msgstr "ฝุ่นเรืองแสงจาง ๆ วัตถุดิบคราฟต์"
+
+#: content/forest.json:journey.sites.treasure[1].name
+msgid "Fallen Cart"
+msgstr "เกวียนล้ม"
+
+#: content/forest.json:enemies.grey_wolf.description
+msgid "Fast and relentless. Always goes for whoever is weakest."
+msgstr "รวดเร็วและไม่หยุดยั้ง มุ่งเล่นงานผู้ที่อ่อนแอที่สุดเสมอ"
+
+#: content/story_mode.json:scenes.first_combat_won[2].text
+msgid "Father always followed water west. I can almost see his lantern."
+msgstr "พ่อมักเดินตามสายน้ำไปทางตะวันตก ฉันแทบมองเห็นโคมไฟของเขาอยู่แล้ว"
+
+#: content/story_mode.json:scenes.before_boss[3].text
+msgid "Father crossed this gate—or tried to. We finish what he began."
+msgstr "พ่อข้ามประตูนี้ไป—หรือพยายามจะข้าม เราจะสานต่อสิ่งที่เขาเริ่มไว้"
+
+#: content/forest.json:story.clues.journal_page.text
+msgid "Father followed the stream west with a companion he called 'W.'"
+msgstr "พ่อตามลำธารไปทางตะวันตกกับสหายที่เขาเรียกว่า 'ร.'"
+
+#: content/story_mode.json:chapters[1].subtitle
+msgid "Father left signs, but something followed them."
+msgstr "พ่อทิ้งร่องรอยไว้ แต่มีบางสิ่งตามรอยพวกมันมา"
+
+#: content/forest.json:story.events.carved_stone.outcome.text
+msgid "Father marked the way west: past the sea, past the last lighthouse. But why would he draw the Chalice upside down?"
+msgstr "พ่อทิ้งเครื่องหมายบอกทางไปตะวันตก ผ่านทะเล ผ่านประภาคารสุดท้าย แต่ทำไมเขาถึงวาดจอกศักดิ์สิทธิ์คว่ำลง"
+
+#: content/forest.json:story.clues.ranger_account.text
+msgid "Father meant to get past the Guardian of the Forest, whatever it cost."
+msgstr "พ่อตั้งใจจะผ่านผู้พิทักษ์แห่งป่าไปให้ได้ ไม่ว่าต้องแลกด้วยอะไร"
+
+#: content/story_mode.json:scenes.class_gained[1].text
+msgid "Father said a Class was a promise: to choose how you protect the people beside you."
+msgstr "พ่อบอกว่าอาชีพคือคำสัญญา: การเลือกว่าจะปกป้องผู้คนข้างกายอย่างไร"
+
+#: content/story_mode.json:scenes.merchant_first[2].text
+msgid "Father traded for supplies before the Guardian. He knew the way would be hard."
+msgstr "พ่อแลกเสบียงก่อนถึงผู้พิทักษ์ เขารู้ว่าหนทางจะยากลำบาก"
+
+#: content/story_mode.json:scenes.party_defeated[1].text
+msgid "Father waited three winters. We can gather our strength and try again."
+msgstr "พ่อรอมาสามฤดูหนาว เรารวบรวมกำลังแล้วลองใหม่ได้"
+
+#: content/forest.json:story.clues.unsent_letter.text
+msgid "Father was ready to pay the Chalice's price himself: 'Never the children.'"
+msgstr "พ่อพร้อมจ่ายราคาของจอกศักดิ์สิทธิ์เอง: 'ไม่มีวันเป็นลูก ๆ'"
+
+#: content/forest.json:story.clues.tin_cup.title
+msgid "Father's Tin Cup"
+msgstr "ถ้วยดีบุกของพ่อ"
+
+#: content/forest.json:party.members[4].role
+msgid "Father's apprentice"
+msgstr "ศิษย์ของพ่อ"
+
+#: content/forest.json:skills.fireball.description
+msgid "Fire magic at 110% MAG that hits every enemy, front and back row. Burns enemies weak to fire harder. Costs 2 Energy. Cooldown: 2 turns."
+msgstr "เวทไฟพลังเวท 110% โจมตีศัตรูทุกตัวทั้งแถวหน้าและหลัง เผาศัตรูที่แพ้ไฟได้รุนแรงขึ้น ใช้พลังงาน 2 หน่วย คูลดาวน์ 2 เทิร์น"
+
+#: content/forest.json:skills.fireball.name
+msgid "Fireball"
+msgstr "ลูกไฟ"
+
+#: content/forest.json:items.firebomb.name
+msgid "Firebomb"
+msgstr "ระเบิดเพลิง"
+
+#: content/forest.json:journey.sites.combat[0].name
+msgid "Follow the Stream"
+msgstr "ตามลำธาร"
+
+#: content/forest.json:journey.regions["1"] content/forest.json:journey.regions["2"] content/forest.json:journey.regions["3"] content/forest.json:journey.regions["4"]
+msgid "Forest"
+msgstr "ป่า"
+
+#: content/forest.json:items.tonic.name
+msgid "Forest Tonic"
+msgstr "ยาบำรุงแห่งป่า"
+
+#: content/forest.json:classes.mage.description
+msgid "Fragile but devastating. Magic ignores armour and Fireball strikes every enemy at once."
+msgstr "เปราะบางแต่ทำลายล้าง เวทมนตร์ไม่สนเกราะ และลูกไฟโจมตีศัตรูทุกตัวพร้อมกัน"
+
+#: content/forest.json:meta.passives.frail.name
+msgid "Frail"
+msgstr "เปราะบาง"
+
+#: content/forest.json:journey.sites.combat[0].hint
+msgid "Fresh tracks in the mud. Something hunts along the water."
+msgstr "รอยเท้าสดในโคลน มีบางสิ่งล่าเหยื่ออยู่ริมน้ำ"
+
+#: content/forest.json:skills.frost_lance.name
+msgid "Frost Lance"
+msgstr "หอกน้ำแข็ง"
+
+#: content/forest.json:enemies.giant_spider.name
+msgid "Giant Spider"
+msgstr "แมงมุมยักษ์"
+
+#: content/forest.json:enemies.bramble_archer.name
+msgid "Goblin"
+msgstr "ก็อบลิน"
+
+#: content/forest.json:enemies.stone_sentinel.name
+msgid "Golem"
+msgstr "โกเลม"
+
+#: content/forest.json:journey.sites.class[3].name
+msgid "Golem Watch"
+msgstr "ยามโกเลม"
+
+#: content/forest.json:meta.passives.grace.name
+msgid "Grace"
+msgstr "สง่างาม"
+
+#: content/forest.json:skills.protect.description
+msgid "Guard one ally until your next turn: attacks aimed at them hit you instead, with 30% less damage. Costs 1 Energy. No cooldown."
+msgstr "คุ้มกันพันธมิตรหนึ่งคนจนถึงเทิร์นถัดไปของตน: การโจมตีที่เล็งเป้าหมายนั้นจะมาโดนตัวเองแทน โดยเสียหายน้อยลง 30% ใช้พลังงาน 1 หน่วย ไม่มีคูลดาวน์"
+
+#: content/forest.json:classes.guardian.name
+msgid "Guardian"
+msgstr "ผู้พิทักษ์"
+
+#: content/story_mode.json:chapters[5].title
+msgid "Guardian Beneath the Forest"
+msgstr "ผู้พิทักษ์ใต้ผืนป่า"
+
+#: content/forest.json:boss.title
+msgid "Guardian of the Forest"
+msgstr "ผู้พิทักษ์แห่งป่า"
+
+#: content/story_mode.json:scenes.story_clue[1].text
+msgid "He was pointing beyond the Forest. Past the last lighthouse."
+msgstr "เขากำลังชี้ไปยังนอกป่า เลยประภาคารสุดท้ายไป"
+
+#: content/story_mode.json:prologue[2].text
+msgid "He went west with a map and a stubborn plan. That sounds like him."
+msgstr "เขาไปทางตะวันตกพร้อมแผนที่และแผนดื้อรั้น ฟังดูเป็นเขาจริง ๆ"
+
+#: content/forest.json:items.herb.name
+msgid "Healing Herb"
+msgstr "สมุนไพรรักษา"
+
+#: content/forest.json:boss.phases[2].name
+msgid "Heartwood Fury"
+msgstr "โทสะแก่นไม้"
+
+#: content/forest.json:enemies.thornback_boar.special.name
+msgid "Heavy Charge"
+msgstr "พุ่งชนหนัก"
+
+#: content/forest.json:journey.sites.merchant[1].hint
+msgid "Herbs and tonics traded for coin."
+msgstr "สมุนไพรและยาบำรุงแลกกับเหรียญ"
+
+#: content/forest.json:items.hide_jerkin.name
+msgid "Hide Jerkin"
+msgstr "เสื้อหนัง"
+
+#: content/forest.json:journey.sites.rest[1].name
+msgid "Hollow Oak"
+msgstr "ต้นโอ๊กกลวง"
+
+#: content/forest.json:journey.sites.story[3].name
+msgid "Hollow Tree"
+msgstr "ต้นไม้กลวง"
+
+#: content/forest.json:journey.sites.combat[2].hint
+msgid "Howling close by. A fight is certain."
+msgstr "เสียงหอนอยู่ใกล้มาก การต่อสู้หลีกเลี่ยงไม่ได้"
+
+#: content/forest.json:meta.races.Human
+msgid "Human"
+msgstr "มนุษย์"
+
+#: content/forest.json:journey.sites.class[1].name
+msgid "Hunter Camp"
+msgstr "ค่ายพราน"
+
+#: content/forest.json:journey.sites.class[1].hint
+msgid "Hunters test newcomers with bow and blade."
+msgstr "เหล่าพรานทดสอบผู้มาใหม่ด้วยธนูและดาบ"
+
+#: content/story_mode.json:scenes.before_boss[1].text
+msgid "I came this far before. I remember the green eyes. I remember running."
+msgstr "ฉันเคยมาถึงตรงนี้ก่อน จำดวงตาสีเขียวได้ จำได้ว่าตัวเองวิ่งหนี"
+
+#: content/story_mode.json:scenes.boss_won[2].text
+msgid "I remember his voice now: Keep going. Don't wait for me."
+msgstr "ตอนนี้ฉันจำเสียงของเขาได้แล้ว: ไปต่อ อย่ารอฉัน"
+
+#: content/story_mode.json:prologue[5].text
+msgid "I remember leaving with him. After that… only trees, thorns, and a voice asking for a life."
+msgstr "ฉันจำได้ว่าออกเดินทางกับเขา หลังจากนั้น… เหลือเพียงต้นไม้ หนาม และเสียงที่เรียกร้องชีวิตหนึ่ง"
+
+#: content/forest.json:skills.inject_venom.name
+msgid "Inject Venom"
+msgstr "ฉีดพิษ"
+
+#: content/forest.json:story.events.hollow_tree.text
+msgid "Inside a lightning-split oak, wrapped in oilcloth, is a letter addressed to Mother in Father's hand. It was never sent."
+msgstr "ในต้นโอ๊กที่ถูกฟ้าผ่าแยกออก มีจดหมายห่อผ้าน้ำมันเขียนถึงแม่ด้วยลายมือพ่อ มันไม่เคยถูกส่ง"
+
+#: content/forest.json:boss.phases[2].text
+msgid "Its glowing heart is laid bare. The Thornwarden fights with everything it has left!"
+msgstr "หัวใจเรืองแสงถูกเปิดเผย ธอร์นวอร์เดนต่อสู้ด้วยทุกสิ่งที่เหลืออยู่"
+
+#: content/forest.json:meta.passives.keen_eyes.name
+msgid "Keen Eyes"
+msgstr "ดวงตาเฉียบคม"
+
+#: content/forest.json:enemies.kobold.name content/forest.json:meta.races.Kobold
+msgid "Kobold"
+msgstr "โคโบลด์"
+
+#: content/forest.json:story.events.ranger_hut.choices[1].hint
+msgid "Learn what happened to Wren."
+msgstr "ฟังว่าเกิดอะไรขึ้นกับเรน"
+
+#: content/forest.json:story.events.ranger_hut.choices[0].hint
+msgid "Learn where he went."
+msgstr "ฟังว่าเขาไปทางไหน"
+
+#: content/story_mode.json:scenes.first_combat_won[1].text
+msgid "Look at those tracks. They point deeper in, toward the stream."
+msgstr "ดูรอยเท้านั่นสิ มันชี้ลึกเข้าไปทางลำธาร"
+
+#: content/forest.json:story.events.old_campfire.choices[0].hint
+msgid "Look for anything he left behind."
+msgstr "ค้นหาสิ่งที่เขาทิ้งไว้"
+
+#: content/forest.json:statuses.poison.description
+msgid "Loses 2 HP per stack at the start of each of its turns, ignoring armour. Lasts 4 turns; stacks up to 5."
+msgstr "เสียพลังชีวิต 2 ต่อชั้นเมื่อเริ่มเทิร์นของตน โดยไม่สนเกราะ นาน 4 เทิร์น; สะสมได้สูงสุด 5 ชั้น"
+
+#: content/forest.json:statuses.bleed.description
+msgid "Loses 3 HP per stack at the start of each of its turns, ignoring armour. Lasts 3 turns; stacks up to 5."
+msgstr "เสียพลังชีวิต 3 ต่อชั้นเมื่อเริ่มเทิร์นของตน โดยไม่สนเกราะ นาน 3 เทิร์น; สะสมได้สูงสุด 5 ชั้น"
+
+#: content/forest.json:statuses.toxin.description
+msgid "Loses 5 HP per stack at the start of each of its turns, ignoring armour. Lasts 2 turns; stacks up to 3."
+msgstr "เสียพลังชีวิต 5 ต่อชั้นเมื่อเริ่มเทิร์นของตน โดยไม่สนเกราะ นาน 2 เทิร์น; สะสมได้สูงสุด 3 ชั้น"
+
+#: content/forest.json:ending.defeat.title
+msgid "Lost in the Forest"
+msgstr "หลงทางในป่า"
+
+#: content/forest.json:meta.races.Lunaeia
+msgid "Lunaeia"
+msgstr "ลูนาเอีย"
+
+#: content/forest.json:classes.mage.name
+msgid "Mage"
+msgstr "นักเวท"
+
+#: content/forest.json:classes.mage.role
+msgid "Magic DPS / AoE"
+msgstr "สายเวท / โจมตีหมู่"
+
+#: content/forest.json:journey.sites.story[1].hint
+msgid "Marks cut into a stone by a careful hand."
+msgstr "รอยถูกตัดลงบนศิลาด้วยมือที่ประณีต"
+
+#: content/story_mode.json:chapters[1].title
+msgid "Marks in the Bark"
+msgstr "รอยบนเปลือกไม้"
+
+#: content/forest.json:meta.passives.masterwork.name
+msgid "Masterwork"
+msgstr "ผลงานชั้นครู"
+
+#: content/forest.json:items.boar_tusk.category content/forest.json:items.bramble_wood.category content/forest.json:items.wisp_dust.category content/forest.json:items.wolf_pelt.category
+msgid "Materials"
+msgstr "วัสดุ"
+
+#: content/forest.json:classes.swordsman.role
+msgid "Melee DPS"
+msgstr "สายโจมตีประชิด"
+
+#: content/forest.json:classes.assassin.role
+msgid "Melee DoT"
+msgstr "สายประชิด / ความเสียหายต่อเนื่อง"
+
+#: content/forest.json:enemies.forest_wisp.support.name
+msgid "Mend"
+msgstr "รักษา"
+
+#: content/forest.json:enemies.forest_wisp.description
+msgid "Mends wounded allies and hurls spirit fire when none need healing."
+msgstr "รักษาพันธมิตรที่บาดเจ็บ และขว้างไฟวิญญาณเมื่อไม่มีใครต้องรักษา"
+
+#: content/forest.json:journey.type_labels.merchant
+msgid "Merchant"
+msgstr "พ่อค้า"
+
+#: content/forest.json:enemies.minotaur.name
+msgid "Minotaur"
+msgstr "มิโนทอร์"
+
+#: content/forest.json:meta.passives.moonlit.name
+msgid "Moonlit"
+msgstr "แสงจันทร์"
+
+#: content/forest.json:meta.boons.Enervation.text
+msgid "More direct damage per DoT type; stronger outgoing DoTs, but more incoming DoT damage."
+msgstr "ความเสียหายตรงเพิ่มขึ้นตามชนิดความเสียหายต่อเนื่อง; ความเสียหายต่อเนื่องที่ทำได้แรงขึ้น แต่รับความเสียหายต่อเนื่องมากขึ้น"
+
+#: content/story_mode.json:scenes.party_defeated[2].text
+msgid "Next time, we reach the Guardian in the cave together."
+msgstr "คราวหน้าเราจะไปถึงผู้พิทักษ์ในถ้ำด้วยกัน"
+
+#: content/forest.json:classes.classless.description
+msgid "No special training yet. Can Attack, Defend and use Items."
+msgstr "ยังไม่มีการฝึกพิเศษ โจมตี ป้องกัน และใช้ไอเทมได้"
+
+#: content/forest.json:journey.sites.treasure[0].hint
+msgid "Nobody has lived here for years. Maybe something was left behind."
+msgstr "ไม่มีใครอาศัยที่นี่มาหลายปีแล้ว บางทีอาจมีของถูกทิ้งไว้"
+
+#: content/forest.json:journey.sites.story[0].name
+msgid "Old Campfire"
+msgstr "กองไฟเก่า"
+
+#: content/forest.json:enemies.old_swordsman.name
+msgid "Old Swordsman"
+msgstr "จอมดาบชรา"
+
+#: content/forest.json:journey.sites.class[0].name
+msgid "Old Swordsman's Hut"
+msgstr "กระท่อมจอมดาบชรา"
+
+#: content/forest.json:journey.sites.combat[5].hint
+msgid "Old bones crunch beneath your feet in the dark."
+msgstr "กระดูกเก่ากรอบแกรบใต้เท้าในความมืด"
+
+#: content/forest.json:meta.boons["Will%20of%20Thiacdemo"].text
+msgid "Once per Combat, survive a lethal hit at 1 HP."
+msgstr "หนึ่งครั้งต่อการต่อสู้ รอดจากการโจมตีถึงตายโดยเหลือพลังชีวิต 1"
+
+#: content/story_mode.json:scenes.first_combat_won[0].text
+msgid "One fight down. The Forest is testing us already."
+msgstr "ชนะการต่อสู้ไปหนึ่งครั้ง ป่ากำลังทดสอบเราแล้ว"
+
+#: content/forest.json:journey.sites.combat[3].name
+msgid "Overgrown Road"
+msgstr "ถนนรกชัฏ"
+
+#: content/story_mode.json:chapters[3].title
+msgid "Past the Last Light"
+msgstr "เลยแสงสุดท้าย"
+
+#: content/forest.json:items.pelt_boots.name
+msgid "Pelt Boots"
+msgstr "รองเท้าหนังสัตว์"
+
+#: content/forest.json:statuses.poison.name
+msgid "Poison"
+msgstr "พิษ"
+
+#: content/forest.json:skills.poke_up.name
+msgid "Poke Up"
+msgstr "แทงซ้ำ"
+
+#: content/forest.json:meta.boons["Potential:%20Bunny"]
+msgid "Potential: Bunny"
+msgstr "ศักยภาพ: กระต่าย"
+
+#: content/forest.json:skills.power_slash.name
+msgid "Power Slash"
+msgstr "ฟันทรงพลัง"
+
+#: content/forest.json:skills.prep_time.name content/forest.json:statuses.venom_coat.name
+msgid "Prep Time"
+msgstr "เตรียมพิษ"
+
+#: content/forest.json:skills.protect.name
+msgid "Protect"
+msgstr "คุ้มครอง"
+
+#: content/forest.json:journey.sites.rest[0].name
+msgid "Quiet Glade"
+msgstr "ลานป่าเงียบสงบ"
+
+#: content/forest.json:party.members[1].bio
+msgid "Quiet and stubborn. Carries Father's old map."
+msgstr "เงียบขรึมและดื้อรั้น ถือแผนที่เก่าของพ่อ"
+
+#: content/forest.json:crafting.categories[4] content/forest.json:items.bramble_quiver.category
+msgid "Quivers"
+msgstr "กระบอกธนู"
+
+#: content/forest.json:skills.shield_wall.description
+msgid "Raise your shield for everyone: the whole Party takes 40% less damage until your next turn. Costs 2 Energy. Cooldown: 3 turns."
+msgstr "ชูโล่ปกป้องทุกคน: ทั้งกลุ่มรับความเสียหายน้อยลง 40% จนถึงเทิร์นถัดไป ใช้พลังงาน 2 หน่วย คูลดาวน์ 3 เทิร์น"
+
+#: content/forest.json:classes.archer.role
+msgid "Ranged DPS"
+msgstr "สายโจมตีไกล"
+
+#: content/forest.json:journey.sites.story[2].name
+msgid "Ranger's Hut"
+msgstr "กระท่อมพราน"
+
+#: content/forest.json:party.members[2].bio
+msgid "Reads every page of Father's journal twice."
+msgstr "อ่านทุกหน้าของสมุดบันทึกพ่อซ้ำสองครั้ง"
+
+#: content/forest.json:enemies.grey_wolf.special.name
+msgid "Rend"
+msgstr "ฉีกกระชาก"
+
+#: content/forest.json:journey.type_labels.rest
+msgid "Rest"
+msgstr "พัก"
+
+#: content/forest.json:story.events.old_campfire.choices[1].label
+msgid "Rest by the old fire"
+msgstr "พักข้างกองไฟเก่า"
+
+#: content/story_mode.json:scenes.rest_first[2].text
+msgid "Rest while we can. Tomorrow, the trail climbs."
+msgstr "พักเท่าที่ทำได้ พรุ่งนี้เส้นทางจะสูงชันขึ้น"
+
+#: content/forest.json:items.herb.description
+msgid "Restores 30 HP to one ally."
+msgstr "ฟื้นพลังชีวิต 30 ให้พันธมิตรหนึ่งคน"
+
+#: content/forest.json:items.tonic.description
+msgid "Restores 70 HP to one ally."
+msgstr "ฟื้นพลังชีวิต 70 ให้พันธมิตรหนึ่งคน"
+
+#: content/forest.json:items.spirit_bloom.description
+msgid "Revives a fallen ally with 40% HP."
+msgstr "ชุบชีวิตพันธมิตรที่ล้มด้วยพลังชีวิต 40%"
+
+#: content/forest.json:crafting.categories[1] content/forest.json:items.hide_jerkin.category content/forest.json:items.wisp_robe.category
+msgid "Robes"
+msgstr "เสื้อคลุม"
+
+#: content/forest.json:boss.phases[0].name
+msgid "Rooted Sentinel"
+msgstr "ผู้เฝ้าหยั่งราก"
+
+#: content/forest.json:boss.moves.crushing_root.telegraph
+msgid "Roots coil beneath {target}. Something huge is coming next turn!"
+msgstr "รากไม้เลื้อยอยู่ใต้ {target} มีบางสิ่งมหึมากำลังมาในเทิร์นหน้า!"
+
+#: content/forest.json:journey.sites.class[2].name
+msgid "Ruined Shrine"
+msgstr "ศาลเจ้าพัง"
+
+#: content/forest.json:story.clues.journal_page.title
+msgid "Scorched Journal Page"
+msgstr "หน้าสมุดบันทึกไหม้เกรียม"
+
+#: content/forest.json:meta.passives.scrappy.name
+msgid "Scrappy"
+msgstr "ใจสู้"
+
+#: content/forest.json:story.events.old_campfire.choices[0].label
+msgid "Search the ashes"
+msgstr "ค้นหาในกองเถ้า"
+
+#: content/forest.json:party.members[1].role
+msgid "Second sibling"
+msgstr "ลูกคนรอง"
+
+#: content/forest.json:classes.archer.challenge.pass
+msgid "She lowers her bow with a grin. \"Fast hands. Take this bow, it has waited for someone like you.\""
+msgstr "นางลดคันธนูลงพร้อมรอยยิ้ม \"มือไวดี รับธนูนี้ไป มันรอคนอย่างเจ้ามานานแล้ว\""
+
+#: content/forest.json:enemies.skeleton.special.name
+msgid "Shield Bash"
+msgstr "กระแทกโล่"
+
+#: content/forest.json:skills.shield_wall.name
+msgid "Shield Wall"
+msgstr "กำแพงโล่"
+
+#: content/forest.json:enemies.bramble_archer.description
+msgid "Shoots from the back row; melee cannot reach it while the front row stands."
+msgstr "ยิงจากแถวหลัง; การโจมตีระยะประชิดเอื้อมไม่ถึงตราบใดที่แถวหน้ายังยืนอยู่"
+
+#: content/forest.json:enemies.shrine_spirit.name
+msgid "Shrine Spirit"
+msgstr "วิญญาณศาลเจ้า"
+
+#: content/forest.json:journey.sites.combat[6].hint
+msgid "Silken strands tremble across the cave passage."
+msgstr "เส้นใยไหมสั่นไหวข้ามทางผ่านในถ้ำ"
+
+#: content/forest.json:enemies.skeleton.name
+msgid "Skeleton"
+msgstr "โครงกระดูก"
+
+#: content/forest.json:enemies.forest_wisp.name
+msgid "Slime"
+msgstr "สไลม์"
+
+#: content/forest.json:enemies.thornback_boar.description
+msgid "Slow and armoured. Charges whoever looks the strongest. Fears fire."
+msgstr "เชื่องช้าและหุ้มเกราะ พุ่งใส่ผู้ที่ดูแข็งแกร่งที่สุด หวาดกลัวไฟ"
+
+#: content/forest.json:meta.passives.small_target.name
+msgid "Small Target"
+msgstr "เป้าหมายเล็ก"
+
+#: content/forest.json:journey.sites.rest[0].hint
+msgid "Soft moss and clean water. A place to recover."
+msgstr "มอสนุ่มกับน้ำสะอาด ที่สำหรับฟื้นกำลัง"
+
+#: content/forest.json:journey.sites.story[2].hint
+msgid "Someone who remembers travellers lives here."
+msgstr "คนที่จำเหล่านักเดินทางได้อาศัยอยู่ที่นี่"
+
+#: content/forest.json:journey.sites.story[3].hint
+msgid "Something is tucked deep inside a lightning-split tree."
+msgstr "มีบางสิ่งซ่อนอยู่ลึกในต้นไม้ที่ถูกฟ้าผ่าแยก"
+
+#: content/forest.json:enemies.kobold.special.name
+msgid "Spear Rush"
+msgstr "พุ่งหอก"
+
+#: content/story_mode.json:scenes.merchant_first[1].text
+msgid "Spend the Party's Gold carefully. We may not see another stall."
+msgstr "ใช้ทองของกลุ่มอย่างระมัดระวัง เราอาจไม่เจอแผงค้าอีก"
+
+#: content/forest.json:journey.sites.combat[6].name
+msgid "Spider Hollow"
+msgstr "โพรงแมงมุม"
+
+#: content/forest.json:items.spirit_bloom.name
+msgid "Spirit Bloom"
+msgstr "บุปผาวิญญาณ"
+
+#: content/forest.json:items.bramble_wood.description
+msgid "Springy, thorny wood. Crafting material."
+msgstr "ไม้หนามยืดหยุ่น วัตถุดิบคราฟต์"
+
+#: content/forest.json:skills.stab.name
+msgid "Stab"
+msgstr "แทง"
+
+#: content/forest.json:journey.type_labels.story
+msgid "Story Event"
+msgstr "เหตุการณ์เนื้อเรื่อง"
+
+#: content/forest.json:classes.swordsman.name
+msgid "Swordsman"
+msgstr "นักดาบ"
+
+#: content/forest.json:story.events.old_campfire.choices[1].hint
+msgid "Take a moment to recover here."
+msgstr "ใช้เวลาฟื้นกำลังสักครู่"
+
+#: content/forest.json:classes.guardian.role
+msgid "Tank / Defense"
+msgstr "แทงก์ / ป้องกัน"
+
+#: content/story_mode.json:scenes.class_gained[0].text
+msgid "That power answered you. It is yours now."
+msgstr "พลังนั้นตอบรับเธอแล้ว ตอนนี้มันเป็นของเธอ"
+
+#: content/forest.json:story.clues.carved_map.title content/forest.json:story.events.carved_stone.title
+msgid "The Carved Stone"
+msgstr "หินแกะสลัก"
+
+#: content/forest.json:meta.boons["The%20Chosen%20One"]
+msgid "The Chosen One"
+msgstr "ผู้ถูกเลือก"
+
+#: content/story_mode.json:scenes.boss_won[0].text
+msgid "The Elder Thornwarden sinks into the earth, becoming an old tree once more."
+msgstr "ธอร์นวอร์เดนผู้เฒ่าจมลงสู่ผืนดิน กลับกลายเป็นต้นไม้เก่าอีกครั้ง"
+
+#: content/story_mode.json:chapters[0].title
+msgid "The First Trees"
+msgstr "ต้นไม้แรกเริ่ม"
+
+#: content/forest.json:ending.victory.title
+msgid "The Forest Falls Silent"
+msgstr "ป่ากลับคืนสู่ความเงียบ"
+
+#: content/forest.json:ending.defeat.text
+msgid "The Forest closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
+msgstr "ป่าปิดล้อมกลุ่มไว้ ที่ไกลออกไปแม่ยังคงรออยู่ รวบรวมกำลังแล้วลองใหม่"
+
+#: content/story_mode.json:prologue[0].text
+msgid "The Forest has kept Father's trail for three long winters."
+msgstr "ป่าเก็บร่องรอยของพ่อไว้นานถึงสามฤดูหนาว"
+
+#: content/story_mode.json:chapters[2].title
+msgid "The Forgotten Road"
+msgstr "ถนนที่ถูกลืม"
+
+#: content/forest.json:enemies.elder_thornwarden.description
+msgid "The Guardian of the Forest: ancient bark and thorn. Watch for its warnings; its heaviest blows come one turn later."
+msgstr "ผู้พิทักษ์แห่งป่า: เปลือกไม้และหนามโบราณ จับตาสัญญาณเตือนให้ดี การโจมตีที่หนักที่สุดจะตามมาในเทิร์นถัดไป"
+
+#: content/story_mode.json:chapters[4].title
+msgid "The Guardian's Gate"
+msgstr "ประตูของผู้พิทักษ์"
+
+#: content/forest.json:story.events.hollow_tree.title
+msgid "The Hollow Tree"
+msgstr "ต้นไม้กลวง"
+
+#: content/forest.json:story.events.old_campfire.title
+msgid "The Old Campfire"
+msgstr "กองไฟเก่า"
+
+#: content/forest.json:encounters.rest.text
+msgid "The Party makes camp. Wounds are bandaged; there is time to craft, change gear and train before moving on."
+msgstr "กลุ่มตั้งค่าย บาดแผลได้รับการพันไว้ มีเวลาคราฟต์ เปลี่ยนอุปกรณ์ และฝึกฝนก่อนเดินทางต่อ"
+
+#: content/forest.json:classes.guardian.description
+msgid "The Party's shield. The most HP and Defense of any Class; protects allies and blunts incoming damage."
+msgstr "โล่ของกลุ่ม มีพลังชีวิตและพลังป้องกันสูงที่สุดในทุกอาชีพ ปกป้องพันธมิตรและลดทอนความเสียหายที่ได้รับ"
+
+#: content/forest.json:story.clues.ranger_account.title
+msgid "The Ranger's Account"
+msgstr "บันทึกของพราน"
+
+#: content/forest.json:story.events.ranger_hut.title
+msgid "The Ranger's Hut"
+msgstr "กระท่อมพราน"
+
+#: content/forest.json:boss.phases[1].text
+msgid "The Thornwarden roars. Its bark splits and blood-red blossoms burst open. It moves faster now!"
+msgstr "ธอร์นวอร์เดนคำราม เปลือกไม้แยกออก ดอกไม้สีแดงดุจเลือดผลิบาน มันเคลื่อนที่เร็วขึ้นแล้ว!"
+
+#: content/forest.json:ending.victory.text
+msgid "The Thornwarden sinks to its knees and becomes an old tree once more. In the roots lies a rusted compass with Father's initials, still pointing west, toward the sea. Wren holds it and, for a moment, remembers a voice: \"Keep going. Don't wait for me.\" The road beyond the Forest is open."
+msgstr "ธอร์นวอร์เดนทรุดเข่าลงและกลายเป็นต้นไม้เก่าอีกครั้ง ในรากมีเข็มทิศขึ้นสนิมสลักอักษรย่อของพ่อ ชี้ไปทางตะวันตกสู่ทะเล เรนถือมันไว้และจำเสียงหนึ่งได้ชั่วขณะ: \"ไปต่อ อย่ารอฉัน\" เส้นทางเลยป่าเปิดออกแล้ว"
+
+#: content/forest.json:story.clues.unsent_letter.title
+msgid "The Unsent Letter"
+msgstr "จดหมายที่ไม่ได้ส่ง"
+
+#: content/story_mode.json:scenes.party_defeated[0].text
+msgid "The cave beneath the Forest closes around the fallen Party."
+msgstr "ถ้ำใต้ป่าปิดล้อมกลุ่มที่ล้มลง"
+
+#: content/story_mode.json:chapters[4].subtitle
+msgid "The cave beneath the Forest will not yield its secrets freely."
+msgstr "ถ้ำใต้ป่าจะไม่ยอมเปิดเผยความลับโดยง่าย"
+
+#: content/story_mode.json:scenes.story_clue[2].text
+msgid "The cup… I remember him saying the Chalice asks a price."
+msgstr "ถ้วยนั่น… ฉันจำได้ว่าเขาพูดว่าจอกศักดิ์สิทธิ์เรียกร้องราคา"
+
+#: content/forest.json:party.members[0].bio
+msgid "The eldest. Promised Mother she would bring everyone home."
+msgstr "ลูกคนโต ให้สัญญากับแม่ว่าจะพาทุกคนกลับบ้าน"
+
+#: content/forest.json:classes.archer.description
+msgid "The fastest of the Party. Shoots any enemy, even in the back row, and often lands critical hits."
+msgstr "สมาชิกที่เร็วที่สุดของกลุ่ม ยิงศัตรูตัวใดก็ได้แม้อยู่แถวหลัง และมักติดคริติคอล"
+
+#: content/forest.json:classes.mage.challenge.fail
+msgid "The fire gutters out. \"Your mind wanders. Return when it is still.\""
+msgstr "ไฟมอดดับ \"จิตใจเจ้าวอกแวก กลับมาเมื่อมันสงบนิ่ง\""
+
+#: content/forest.json:classes.mage.challenge.pass
+msgid "The flames bow low. \"The old words are yours now. Use them gently.\""
+msgstr "เปลวไฟก้มต่ำ \"ถ้อยคำโบราณเป็นของเจ้าแล้ว จงใช้มันอย่างอ่อนโยน\""
+
+#: content/forest.json:classes.swordsman.challenge.pass
+msgid "The old man laughs and bows. \"You have the spirit of the blade.\""
+msgstr "ชายชราหัวเราะและโค้งคำนับ \"เจ้ามีจิตวิญญาณของคมดาบ\""
+
+#: content/forest.json:classes.swordsman.challenge.fail
+msgid "The old man sheathes his sword. \"Not yet. Come back when your arms are stronger.\""
+msgstr "ชายชราชักดาบเข้าฝัก \"ยังไม่ใช่ กลับมาเมื่อแขนของเจ้าแข็งแรงกว่านี้\""
+
+#: content/forest.json:classes.assassin.challenge.pass
+msgid "The outlaw pulls down the mask and grins. \"Not bad. Take these vials, and never fight fair.\""
+msgstr "โจรถอดหน้ากากลงและยิ้มกว้าง \"ไม่เลวนี่ รับขวดยาไป และอย่าต่อสู้อย่างยุติธรรมเด็ดขาด\""
+
+#: content/forest.json:classes.assassin.challenge.fail
+msgid "The outlaw vanishes into the ferns. \"Too slow. Find me when you've learned to strike first.\""
+msgstr "โจรหายเข้าไปในเฟิร์น \"ช้าเกินไป ตามหาข้าเมื่อเจ้าเรียนรู้ที่จะโจมตีก่อนแล้ว\""
+
+#: content/story_mode.json:scenes.before_boss[0].text
+msgid "The roots part, revealing a cave blackened by old fire."
+msgstr "รากไม้แยกออก เผยให้เห็นถ้ำที่ดำไหม้ด้วยไฟเก่า"
+
+#: content/forest.json:classes.guardian.challenge.fail
+msgid "The sentinel does not move. \"You are not yet a wall. Return when you are.\""
+msgstr "อัศวินหินไม่ขยับ \"เจ้ายังไม่ใช่กำแพง กลับมาเมื่อเจ้าเป็นได้แล้ว\""
+
+#: content/forest.json:classes.guardian.challenge.pass
+msgid "The sentinel kneels and offers its shield. \"Stand before those you love. That is the Guardian's oath.\""
+msgstr "อัศวินหินคุกเข่าและยื่นโล่ให้ \"จงยืนหยัดปกป้องผู้ที่เจ้ารัก นั่นคือคำสาบานของผู้พิทักษ์\""
+
+#: content/forest.json:classes.guardian.challenge.intro
+msgid "The stone knight raises its shield. \"None pass who cannot stand firm. Strike me, and endure my answer.\""
+msgstr "อัศวินหินยกโล่ขึ้น \"ผู้ที่ยืนหยัดไม่มั่นคงจะผ่านไปไม่ได้ จงโจมตีข้าและทนรับการตอบโต้\""
+
+#: content/forest.json:boss.intro
+msgid "The trees part. A figure of bark and thorn rises, taller than the pines, eyes glowing green. \"Many have come seeking the sea. Few have passed. None have returned.\""
+msgstr "ต้นไม้แยกออก ร่างจากเปลือกไม้และหนามผุดสูงกว่ายอดสน ดวงตาเรืองแสงสีเขียว \"ผู้คนมากมายมาที่นี่เพื่อตามหาทะเล มีน้อยคนที่ผ่านไปได้ และไม่มีใครกลับมา\""
+
+#: content/story_mode.json:chapters[3].subtitle
+msgid "The way west narrows beneath thorn and shadow."
+msgstr "เส้นทางตะวันตกแคบลงใต้หนามและเงามืด"
+
+#: content/story_mode.json:scenes.before_boss[2].text
+msgid "Then this time we stand together."
+msgstr "คราวนี้เราจะยืนหยัดไปด้วยกัน"
+
+#: content/story_mode.json:scenes.first_combat_won[3].text
+msgid "Then we follow it too. Nobody gets left behind this time."
+msgstr "ถ้าอย่างนั้นเราตามมันไปด้วย ไม่มีใครถูกทิ้งไว้ข้างหลังคราวนี้"
+
+#: content/story_mode.json:prologue[4].text
+msgid "Then we search every Layer until the Forest gives us an answer."
+msgstr "ถ้าอย่างนั้นเราจะค้นหาทุกชั้น จนกว่าป่าจะให้คำตอบ"
+
+#: content/story_mode.json:scenes.boss_won[1].text
+msgid "There—in the roots. A compass, still pointing west."
+msgstr "ตรงนั้น—ในรากไม้ มีเข็มทิศที่ยังชี้ไปทางตะวันตก"
+
+#: content/forest.json:enemies.masked_outlaw.name
+msgid "Thief"
+msgstr "โจร"
+
+#: content/forest.json:journey.sites.class[4].name
+msgid "Thief Hideout"
+msgstr "ที่ซ่อนโจร"
+
+#: content/forest.json:party.members[2].role
+msgid "Third sibling"
+msgstr "ลูกคนที่สาม"
+
+#: content/story_mode.json:scenes.rest_first[1].text
+msgid "This feels familiar. Two bedrolls beneath a pine… and Father's knot in the rope."
+msgstr "ที่นี่คุ้นเคยเหลือเกิน ที่นอนสองผืนใต้ต้นสน… และเงื่อนเชือกของพ่อ"
+
+#: content/forest.json:boss.moves.thorn_storm.name
+msgid "Thorn Storm"
+msgstr "พายุหนาม"
+
+#: content/forest.json:enemies.thornback_boar.name
+msgid "Thornback Boar"
+msgstr "หมูป่าหนามหลัง"
+
+#: content/forest.json:boss.moves.thorn_storm.telegraph
+msgid "Thorns rise around the whole Party. Brace yourselves before its next turn!"
+msgstr "หนามผุดขึ้นรอบกลุ่ม จงเตรียมรับมือก่อนเทิร์นถัดไปของมัน!"
+
+#: content/forest.json:skills.poke_up.description
+msgid "Three quick stabs at 55% ATK each on one enemy; every stab causes Bleed. Costs 2 Energy. Cooldown: 3 turns."
+msgstr "แทงเร็วสามครั้งที่พลังโจมตี 55% ต่อครั้งใส่ศัตรูหนึ่งตัว ทุกครั้งทำให้เลือดไหล ใช้พลังงาน 2 หน่วย คูลดาวน์ 3 เทิร์น"
+
+#: content/forest.json:meta.passives.tidal.name
+msgid "Tidal"
+msgstr "กระแสน้ำ"
+
+#: content/story_mode.json:prologue[6].text
+msgid "Together, the Party steps beneath the ancient boughs."
+msgstr "กลุ่มก้าวเข้าใต้กิ่งไม้โบราณไปพร้อมกัน"
+
+#: content/forest.json:party.members[3].bio
+msgid "Too young to remember Father's face, old enough to follow his road."
+msgstr "เด็กเกินกว่าจะจำหน้าพ่อได้ แต่โตพอจะเดินตามเส้นทางของเขา"
+
+#: content/forest.json:story.clues.torn_cloak.title
+msgid "Torn Grey Cloak"
+msgstr "เสื้อคลุมสีเทาขาดวิ่น"
+
+#: content/forest.json:statuses.toxin.name
+msgid "Toxin"
+msgstr "พิษร้าย"
+
+#: content/forest.json:journey.sites.merchant[1].name
+msgid "Trapper's Stall"
+msgstr "แผงพรานดักสัตว์"
+
+#: content/forest.json:party.members[4].bio
+msgid "Travelled with Father three years ago and came back alone, remembering nothing past the Forest."
+msgstr "เดินทางไปกับพ่อเมื่อสามปีก่อนแล้วกลับมาเพียงลำพัง จำอะไรที่เลยป่าไปไม่ได้เลย"
+
+#: content/forest.json:story.clues.wolf_collar.title
+msgid "Traveller's Token"
+msgstr "เหรียญนักเดินทาง"
+
+#: content/forest.json:journey.sites.merchant[0].name
+msgid "Travelling Merchant"
+msgstr "พ่อค้าเร่"
+
+#: content/forest.json:journey.type_labels.treasure
+msgid "Treasure"
+msgstr "สมบัติ"
+
+#: content/forest.json:items.tusk_charm.name
+msgid "Tusk Charm"
+msgstr "เครื่องรางเขี้ยว"
+
+#: content/forest.json:story.events.old_campfire.choices[0].outcome.text
+msgid "Under the ashes lies a scorched page from Father's journal: 'West along the stream. W. keeps up better than I do.'"
+msgstr "ใต้เถ้าถ่านมีหน้าสมุดบันทึกของพ่อที่ไหม้เกรียม: 'ไปทางตะวันตกตามลำธาร ร. ตามทันได้ดีกว่าฉันเสียอีก'"
+
+#: content/forest.json:meta.passives.undying.name
+msgid "Undying"
+msgstr "อมตะ"
+
+#: content/forest.json:enemies.giant_spider.special.name
+msgid "Venom Web"
+msgstr "ใยพิษ"
+
+#: content/forest.json:meta.passives.versatile.name
+msgid "Versatile"
+msgstr "อเนกประสงค์"
+
+#: content/forest.json:enemies.veteran_hunter.name
+msgid "Veteran Hunter"
+msgstr "พรานชำนาญ"
+
+#: content/forest.json:crafting.categories[3] content/forest.json:items.herb.category content/forest.json:items.spirit_bloom.category content/forest.json:items.tonic.category
+msgid "Vials"
+msgstr "ขวดยา"
+
+#: content/story_mode.json:scenes.story_clue[3].text
+msgid "We learn the price before anyone pays it. Keep moving."
+msgstr "เราจะรู้ราคาก่อนที่ใครจะจ่าย เดินหน้าต่อไป"
+
+#: content/story_mode.json:scenes.boss_won[3].text
+msgid "We will find him. The road beyond the Forest is open."
+msgstr "เราจะตามหาเขาให้พบ เส้นทางเลยป่าเปิดอยู่"
+
+#: content/forest.json:statuses.venom_coat.description
+msgid "Weapon coated: the next 3 damaging actions also apply Poison."
+msgstr "เคลือบอาวุธแล้ว: การกระทำที่สร้างความเสียหาย 3 ครั้งถัดไปจะทำให้ติดพิษด้วย"
+
+#: content/forest.json:items.bramble_quiver.description
+msgid "Weapon gear: +1 SPD, +5% Crit."
+msgstr "อุปกรณ์อาวุธ: +1 ความเร็ว, +5% คริติคอล"
+
+#: content/forest.json:meta.boons["Will%20of%20Thiacdemo"]
+msgid "Will of Thiacdemo"
+msgstr "เจตจำนงแห่งธีแอกเดโม"
+
+#: content/forest.json:items.wisp_charm.name
+msgid "Wisp Charm"
+msgstr "เครื่องรางวิสป์"
+
+#: content/forest.json:items.wisp_dust.name
+msgid "Wisp Dust"
+msgstr "ฝุ่นวิสป์"
+
+#: content/forest.json:items.wisp_robe.name
+msgid "Wisp-thread Robe"
+msgstr "เสื้อคลุมใยวิสป์"
+
+#: content/forest.json:meta.races.Withered
+msgid "Withered"
+msgstr "ผู้เหี่ยวเฉา"
+
+#: content/forest.json:enemies.grey_wolf.name
+msgid "Wolf"
+msgstr "หมาป่า"
+
+#: content/forest.json:items.wolf_pelt.name
+msgid "Wolf Pelt"
+msgstr "หนังหมาป่า"
+
+#: content/forest.json:journey.sites.combat[2].name
+msgid "Wolf Trail"
+msgstr "เส้นทางหมาป่า"
+
+#: content/forest.json:boss.phases[1].name
+msgid "Wrathful Bloom"
+msgstr "บุปผาพิโรธ"
+
+#: content/forest.json:party.members[4].name
+msgid "Wren"
+msgstr "เรน"
+
+#: content/forest.json:story.clues.wren_return.text
+msgid "Wren came back half dead, carrying Father's journal and repeating: 'It asks for a life.'"
+msgstr "เรนกลับมาในสภาพใกล้ตาย ถือสมุดบันทึกของพ่อและพูดซ้ำว่า: 'มันเรียกร้องชีวิตหนึ่ง'"
+
+#: content/forest.json:story.clues.wren_return.title
+msgid "Wren's Return"
+msgstr "การกลับมาของเรน"
+
+#: content/story_mode.json:chapters[2].subtitle
+msgid "Wren's missing memories begin to stir."
+msgstr "ความทรงจำที่หายไปของเรนเริ่มฟื้นคืน"
+
+#: content/forest.json:story.events.old_campfire.choices[1].outcome.text
+msgid "You rekindle the fire and rest where Father once rested. Tucked under a stone you find his tin cup, engraved with Mother's name."
+msgstr "จุดไฟขึ้นใหม่และพักในที่ที่พ่อเคยพัก ใต้ก้อนหินมีถ้วยดีบุกของเขาซ่อนอยู่ สลักชื่อแม่ไว้"
+
+#: content/forest.json:party.members[3].role
+msgid "Youngest sibling"
+msgstr "ลูกคนสุดท้อง"
+

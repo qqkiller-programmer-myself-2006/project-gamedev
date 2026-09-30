@@ -92,7 +92,8 @@ The authored 16×16 pixel icons in `assets/icons/` use the Navy + Gold tokens an
 ## Checking a UI change
 
 ```bash
-GODOT=/d/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe
+# Set GODOT to a local Godot 4.7 console binary, or leave it as `godot` on PATH.
+GODOT="${GODOT:-godot}"
 "$GODOT" --path . -s tools/dev/ui_preview.gd -- --out=build/ux --seed=3 --speed=10          # add --scale=1.4, --seed=11,
                                                                                     # --class=mage, --resolution=1920x1080
 "$GODOT" --path . -s tools/dev/story_preview.gd -- --out=build/ux_story --full

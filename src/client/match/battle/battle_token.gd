@@ -248,7 +248,7 @@ func _draw() -> void:
 		_draw_ellipse(center, size.x * 0.42, 13.0, ring_color, false, 3.0)
 	_draw_figure(center)
 	if target_number > 0:
-		var font := UiKit.pixel_font()
+		var font := UiKit.number_font()
 		var tag := "[%d]" % target_number
 		draw_string_outline(font, Vector2(size.x - 34, badge_height + 18), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, 4, Color.BLACK)
 		draw_string(font, Vector2(size.x - 34, badge_height + 18), tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, UiKit.ACCENT)
