@@ -161,7 +161,7 @@ func _build_your_turn(screen: MatchScreen, app: ClientApp, view: Dictionary) -> 
 		UiKit.disable(item, choices.get("items", {}).is_empty(), UiText.WHY["no_items"])
 		actions.add_child(item)
 		add_child(actions)
-		add_child(UiKit.para("Defend halves damage until your next turn. Items come from the Party's shared bag.", "dim"))
+		add_child(UiKit.para("Defend halves damage until your next turn. Items use your personal Gold and consumable slot.", "dim"))
 		app.hint("combat")
 		for character in view.get("party", []):
 			if "p%d" % int(character["slot"]) == _me and character["class"] != "classless":

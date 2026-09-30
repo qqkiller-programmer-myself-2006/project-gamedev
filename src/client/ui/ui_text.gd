@@ -97,11 +97,12 @@ const TYPE_HELP := {
 
 const HINTS := {
 	"vote": "Path Voting: every player has one vote and AI never votes. The most votes wins; ties are broken at random. Press 1-3 to vote.",
-	"combat": "Your turn! [A] Attack, [S] Skill (needs a Class), [D] Defend halves damage until your next turn, [I] Item uses the Party's shared bag. You have 15 seconds; if time runs out you Defend.",
-	"skill": "You have a Class now. [S] opens your Skills; each Skill costs Energy and has a cooldown counted in your own turns.",
+	"combat": "Your turn! Fight [F] opens your attacks, Items [I] uses your personal Gold and consumable slot, and Focus [O] restores Energy when available. In timed Combats you have 15 seconds; if time runs out you Defend.",
+	"combat_story": "Your turn! Fight [F] opens your attacks, Items [I] uses your personal Gold and consumable slot, and Focus [O] restores Energy when available. Story turns have no countdown.",
+	"skill": "You have a Class now. Fight [F] opens your Skills; each Skill costs Energy and has a cooldown counted in your own turns.",
 	"class_offer": "Accept [Y] to take this Class, or Decline [N] to stay Classless and wait for another. Several characters can share a Class.",
 	"merchant": "Each character buys with their own Gold, and you can Transfer Gold to a friend. Press [R] when you are done; the shop closes when everyone is ready.",
-	"energy": "Energy (the blue bar) pays for Skills: you start each Combat with 1 and regain 1 every later turn, up to 6. Attack, Defend and Items are free.",
+	"energy": "Energy (the blue bar) pays for Skills: you start each Combat with 1 and regain 1 every later turn, up to 6. Strike, Guard, Focus and Items are free.",
 	"dot": "DoTs (Bleed BLD, Poison PSN, Toxin TOX) hurt at the start of each of their holder's turns, ignoring armour. The badge shows stacks (x) and turns left (t).",
 	"rest": "Camp: craft from materials on the left, equip gear from the shared bag in the middle, and spend stat points on the right. Press [R] when you are done; the camp moves on when every player is Ready.",
 	"boss": "Watch the warnings: the Guardian announces its heaviest blows a turn early. Defend, Protect or raise Shield Wall before they land.",
