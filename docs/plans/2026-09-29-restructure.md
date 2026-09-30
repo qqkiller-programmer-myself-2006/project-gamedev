@@ -62,30 +62,28 @@ docs/
 ```
 
 ## เหตุผลที่การย้ายนี้ปลอดภัยใน Godot
-- 69 scripts use `class_name`; those names are global, so code that uses the class does not care where the file is.
-- Only ~35 literal `res://` paths exist (tests' directory lists, `main.tscn`, `project.godot` main scene, sprite/portrait roots,
-  font path, content path, preview tools). Every one is listed by `git grep -n "res://"` and gets updated.
-- Every script has a `.uid` file: it moves with its script (`git mv a.gd b.gd` and `git mv a.gd.uid b.gd.uid`), so `.tscn`
-  uid references keep working. Asset `.import` files move with their asset, then `godot --headless --import` refreshes them.
-- `export_presets.cfg` excludes `tests/*, tools/*, docs/*, build/*`; add `art_source/*` too (and `.gdignore` keeps it out).
+- 69 สคริปต์ใช้ `class_name`; ชื่อเหล่านี้เป็นชื่อสากล ดังนั้นโค้ดที่ใช้คลาสจึงไม่สนใจว่าไฟล์อยู่ที่ไหน
+- มีพาธ `res://` ที่เขียนตรง ๆ เพียงประมาณ 35 จุด (รายชื่อไดเรกทอรีในชุดทดสอบ, `main.tscn`, ฉากหลักใน `project.godot`, โฟลเดอร์หลักของสไปรต์/ภาพตัวละคร, พาธฟอนต์และข้อมูลเกม, เครื่องมือสร้างภาพตัวอย่าง) ใช้ `git grep -n "res://"` ระบุทุกจุดและอัปเดตให้ครบ
+- ทุกสคริปต์มีไฟล์ `.uid` ที่ย้ายไปพร้อมกัน (`git mv a.gd b.gd` และ `git mv a.gd.uid b.gd.uid`) การอ้างอิง UID ใน `.tscn` จึงยังใช้ได้ ไฟล์ `.import` ย้ายตามภาพ แล้วใช้ `godot --headless --import` สร้างข้อมูลนำเข้าใหม่
+- `export_presets.cfg` ไม่รวม `tests/*, tools/*, docs/*, build/*`; เพิ่ม `art_source/*` ด้วย (และ `.gdignore` จะป้องกันไว้)
 
 ## ลำดับดำเนินการ (หนึ่ง commit ต่อขั้น และ test ต้องผ่านทุกขั้น)
-1. Freeze: no other executor running; all branches merged (done: #59, #62, #63, #64).
-2. Delete `docs/.agents`, `docs/.aider-desk`, `docs/.claude` (duplicate skills), `hello_world.txt`; move `checkpoint.md` to `.ai/`.
-3. `scripts/run_tests.sh` → `tools/run_tests.sh`; split `tools/` into `dev/ art/ ci/`; update CI, README, docs, agents.
-4. `src/core` → `src/shared` + `src/profile`; `src/match` loose helpers → `src/match/rules/`.
-5. `src/client` regrouped by screen as in the tree.
-6. `tests/` mirror `src/`.
-7. `assets/characters` → `assets/heroes`; raw sheets → `art_source/heroes` with `.gdignore`.
-8. `docs/` grouped + `docs/README.md` index; fix every link.
-9. Verify (below), update `AGENTS.md`/`CONTEXT.md` "where things live", README tree.
+1. หยุดงานอื่นชั่วคราว: ไม่มีผู้ลงมือรายอื่นกำลังทำงาน และรวมทุก branch แล้ว (เสร็จ: #59, #62, #63, #64)
+2. ลบ `docs/.agents`, `docs/.aider-desk`, `docs/.claude` (ทักษะที่ซ้ำกัน), `hello_world.txt`; ย้าย `checkpoint.md` ไปที่ `.ai/`
+3. `scripts/run_tests.sh` → `tools/run_tests.sh`; แยก `tools/` ออกเป็น `dev/ art/ ci/`; อัปเดต CI, README, เอกสาร, ตัวแทน
+4. `src/core` → `src/shared` + `src/profile`; `src/match` ตัวช่วยหลวม → `src/match/rules/`
+5. `src/client` จัดกลุ่มใหม่ตามหน้าจอเช่นเดียวกับในแผนผัง
+6. จัด `tests/` ให้มีโครงสร้างตรงกับ `src/`
+7. `assets/characters` → `assets/heroes`; แผ่นงานดิบ → `art_source/heroes` พร้อม `.gdignore`
+8. `docs/` จัดกลุ่ม + ดัชนี `docs/README.md`; แก้ไขทุกลิงค์
+9. ตรวจสอบ (ด้านล่าง) อัปเดต `AGENTS.md`/`CONTEXT.md` "ที่ซึ่งสิ่งต่างๆ อาศัยอยู่" แผนผัง README
 
 ## ตรวจสอบ (ต้องผ่านทั้งหมดก่อน merge)
-- `git grep` for every old path (outside `docs/review`, `.ai/tasks`, `.ai/checkpoint.md` history) returns nothing.
-- `godot --headless --path . --import` has no errors; `bash tools/run_tests.sh` → same count as before, 0 failed
-  (includes the compile-every-script test and the no-engine-randomness scan).
-- `tools/dev/ui_preview.gd` produces every screenshot; `tools/dev/simulate.gd --seeds=10` runs.
-- The game opens (`--dev --playtest`) and a Playtest match starts; export check: `--export-release "Windows"` if templates exist.
+- `git grep` หาพาธเก่าทุกพาธไม่พบผลลัพธ์ ยกเว้นเอกสารประวัติใน `docs/review`, `.ai/tasks`, `.ai/checkpoint.md`
+- `godot --headless --path . --import` ไม่มีข้อผิดพลาด `bash tools/run_tests.sh` → นับเหมือนเดิม 0 ล้มเหลว
+  (รวมการทดสอบคอมไพล์ทุกสคริปต์และการตรวจว่าโค้ดไม่ใช้ระบบสุ่มของเอนจินโดยตรง)
+- `tools/dev/ui_preview.gd` สร้างภาพหน้าจอครบ; `tools/dev/simulate.gd --seeds=10` ทำงานสำเร็จ
+- เกมเปิดได้ด้วย `--dev --playtest` และเริ่มแมตช์ทดสอบได้; ตรวจการส่งออกด้วย `--export-release "Windows"` หากมีเทมเพลต
 
 ## งานหลังจากนี้
 งานภาพ (ตามการตัดสินใจของเจ้าของงานวันที่ 2026-09-29): สร้างชีตฮีโร่ใหม่สำหรับ Archer/Mage/Swordsman/Guardian และ Assassin (เปลี่ยนชื่อ Rogue เป็น Assassin); เปลี่ยนชื่อศัตรูป่าให้ตรงกับภาพ (Grey Wolf→Wolf, Masked Outlaw→Thief, Stone Sentinel→Golem, Forest Wisp→Slime, Bramble Archer→Goblin โดยคงค่าสถานะเดิม); ย้ายชั้นสุดท้ายและบอสเข้าไปในถ้ำ พร้อม Kobold, Minotaur, Skeleton, Giant Spider; เพิ่มฉากหลังการต่อสู้ของป่าและถ้ำ
