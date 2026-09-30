@@ -13,8 +13,8 @@ config_version=5
 config/name="Beyond the World's End"
 config/description="Forest vertical slice of BEYOND THE WORLD'S END, an online co-op turn-based RPG."
 run/main_scene="res://src/app/main.tscn"
-run/flush_stdout_on_print=true
 config/features=PackedStringArray("4.7")
+run/flush_stdout_on_print=true
 
 [display]
 
@@ -27,8 +27,3 @@ window/stretch/aspect="expand"
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-
-[debug]
-
-gdscript/warnings/untyped_declaration=0
-gdscript/warnings/inferred_declaration=0
