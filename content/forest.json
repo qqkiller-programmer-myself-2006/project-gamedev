@@ -1084,7 +1084,8 @@
             "element": "physical"
           }
         }
-      }
+      },
+      "sprite": "thornback_boar"
     },
     "bramble_archer": {
       "name": "Goblin",
@@ -1197,7 +1198,8 @@
         }
       },
       "weakness": [],
-      "rewards": {}
+      "rewards": {},
+      "sprite": "old_swordsman"
     },
     "veteran_hunter": {
       "name": "Veteran Hunter",
@@ -1223,7 +1225,8 @@
         }
       },
       "weakness": [],
-      "rewards": {}
+      "rewards": {},
+      "sprite": "veteran_hunter"
     },
     "shrine_spirit": {
       "name": "Shrine Spirit",
@@ -1249,7 +1252,8 @@
         }
       },
       "weakness": [],
-      "rewards": {}
+      "rewards": {},
+      "sprite": "shrine_spirit"
     },
     "stone_sentinel": {
       "name": "Golem",

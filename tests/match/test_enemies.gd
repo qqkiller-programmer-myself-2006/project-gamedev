@@ -176,4 +176,4 @@ func test_enemy_views_carry_the_sprite_from_content() -> void:
 	_fight(["grey_wolf", "thornback_boar"])
 	var enemies: Array = _combat_view()["enemies"]
 	assert_eq(str(enemies[0]["sprite"]), "wolf", "grey_wolf uses the Wolf sheet")
-	assert_eq(str(enemies[1]["sprite"]), "", "the boar has no art yet (#75)")
+	assert_eq(str(enemies[1]["sprite"]), "thornback_boar", "the boar uses its owner-supplied sheet (#75)")
