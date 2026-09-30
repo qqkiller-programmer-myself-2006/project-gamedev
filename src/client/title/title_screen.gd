@@ -89,6 +89,7 @@ func _show_play() -> void:
 	body.custom_minimum_size = Vector2(420, 0)
 	body.add_child(UiKit.label("CHOOSE YOUR JOURNEY", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.label("Story · offline, control all five", "body"))
+	body.add_child(UiKit.para("Story uses an isolated profile: Human only, with no online Races, Boons, or class-tree bonuses.", "dim"))
 	_status = UiKit.para("", "body", UiKit.WARN)
 	_status.visible = false
 	body.add_child(_status)

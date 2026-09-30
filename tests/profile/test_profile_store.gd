@@ -151,6 +151,26 @@ func test_d1_serializes_one_sessions_saves_and_stops_after_conflict() -> void:
 	assert_eq(sender.calls.size(), 2)
 
 
+func test_d1_same_token_sessions_cannot_overwrite_a_newer_profile() -> void:
+	var sender := ManualSender.new()
+	var store := D1ProfileStore.new("https://profiles.example", "secret", sender)
+	var first := {"version": 5, "gems": 10, "races_owned": ["Human"]}
+	var second := {"version": 5, "gems": 3, "races_owned": ["Human"]}
+	store.save_profile_async("same-token", first, 21)
+	store.save_profile_async("same-token", second, 22)
+	assert_eq(JSON.parse_string(sender.calls[0]["body"])["version"], 6)
+	assert_eq(JSON.parse_string(sender.calls[1]["body"])["version"], 6,
+		"both sessions write from their loaded version so the stale session cannot outbid the newer one")
+	sender.finish_call(0, 204)
+	assert_eq(store.take_save_failures().size(), 0)
+	sender.finish_call(1, 409)
+	var failures := store.take_save_failures()
+	assert_eq(failures.size(), 1)
+	assert_eq(failures[0]["session_id"], 22)
+	store.save_profile_async("same-token", second, 22)
+	assert_eq(sender.calls.size(), 2, "a stale session does not retry and overwrite the accepted profile")
+
+
 func test_http_sender_retries_failed_save_then_succeeds() -> void:
 	var sender := RetryHttpSender.new()
 	sender.enqueue_save("https://profiles.example/profiles/token", {}, "{}")
@@ -178,6 +198,42 @@ func test_http_sender_drains_queued_saves_on_stop() -> void:
 	sender.enqueue_save("https://profiles.example/profiles/b", {}, "{}")
 	sender.stop()
 	assert_eq(sender.saved_urls.size(), 2)
+
+
+func test_profile_get_timeout_is_bounded_to_one_second() -> void:
+	assert_true(HttpProfileSender.GET_TIMEOUT_SECONDS <= 1.0,
+		"profile loads must remain bounded so joins do not stall the server for multiple seconds")
+
+
+func test_export_presets_exclude_deploy_and_include_art_manifests() -> void:
+	var config := FileAccess.get_file_as_string("res://export_presets.cfg")
+	var presets := 0
+	var include_filter := ""
+	var exclude_filter := ""
+	for line in config.split("\n"):
+		if line.begins_with("[preset."):
+			if line.ends_with(".options]"):
+				continue
+			if presets > 0:
+				_assert_export_filters(include_filter, exclude_filter, presets - 1)
+			presets += 1
+			include_filter = ""
+			exclude_filter = ""
+		elif line.begins_with("include_filter="):
+			include_filter = line.trim_prefix("include_filter=").trim_prefix('"').trim_suffix('"')
+		elif line.begins_with("exclude_filter="):
+			exclude_filter = line.trim_prefix("exclude_filter=").trim_prefix('"').trim_suffix('"')
+	if presets > 0:
+		_assert_export_filters(include_filter, exclude_filter, presets - 1)
+	assert_eq(presets, 3, "all release presets are checked")
+
+
+func _assert_export_filters(include_filter: String, exclude_filter: String, preset_index: int) -> void:
+	assert_true(exclude_filter.split(", ").has("deploy/*"), "preset %d excludes deploy output" % preset_index)
+	assert_true(include_filter.split(", ").has("assets/heroes/manifest.json"),
+		"preset %d ships the hero manifest" % preset_index)
+	assert_true(include_filter.split(", ").has("assets/enemies/manifest.json"),
+		"preset %d ships the enemy manifest" % preset_index)
 
 
 func test_match_server_delivers_save_failure_to_owning_session() -> void:

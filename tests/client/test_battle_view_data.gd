@@ -31,3 +31,11 @@ func test_party_view_carries_exp_to_next_level() -> void:
 func test_party_view_carries_crit_for_the_camp_stat_sheet() -> void:
 	var me: Dictionary = h.match_view(sessions[0])["party"][0]
 	assert_eq(me["crit"], 0.0, "Classless crit pinned to 0 by EXACT_DAMAGE")
+
+
+func test_battle_backdrop_uses_cached_content_by_layer_and_boss() -> void:
+	var battle := BattleView.new()
+	battle._content = {"journey": {"backdrops": {"5": "cave"}}, "boss": {"backdrop": "guardian"}}
+	assert_eq(battle._backdrop_name({"layer": 5}, {}), "cave")
+	assert_eq(battle._backdrop_name({"layer": 1}, {"kind": "boss"}), "guardian")
+	battle.free()
