@@ -106,6 +106,12 @@ func test_crafting_without_materials_is_rejected_and_changes_nothing() -> void:
 	assert_rejected(_cmd({"type": "craft", "recipe": "golden_crown"}), "invalid_recipe")
 	assert_eq(_view()["inventory"], before)
 
+func test_craft_requires_exact_recipe_id() -> void:
+	_camp()
+	var before: Array = _view()["inventory"]
+	assert_rejected(_cmd({"type": "craft", "recipe": "pelt_boots.materials"}), "invalid_recipe")
+	assert_eq(_view()["inventory"], before)
+
 
 func test_camp_commands_only_work_in_a_camp() -> void:
 	_camp()

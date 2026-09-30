@@ -287,10 +287,7 @@ func _tick_statuses(run: MatchRun, id: String) -> bool:
 				"name": tick["name"], "damage": tick["damage"], "color": tick["color"], "hp": unit["hp"],
 				"down": down, "survived": survived})
 		if down:
-			defeated_by[id] = str(tick.get("applier", ""))
-			if id.begins_with(ENEMY_PREFIX):
-				defeated_kinds.append(str(unit["kind"]))
-			status_book.clear_unit(id)
+			_handle_death(run, id, str(tick.get("applier", "")))
 			break
 	if unit["hp"] > 0:
 		for status in outcome["expired"]:
@@ -298,6 +295,21 @@ func _tick_statuses(run: MatchRun, id: String) -> bool:
 		return true
 	_after_action(run)
 	return false
+
+
+## Cleans up statuses, shields, and target links when a unit is removed from combat.
+func _handle_death(run: MatchRun, id: String, source: String) -> void:
+	defeated_by[id] = source
+	if id.begins_with(ENEMY_PREFIX):
+		defeated_kinds.append(str(_unit(run, id)["kind"]))
+	status_book.clear_unit(id)
+	shields.erase(id)
+	defending.erase(id)
+	focusing.erase(id)
+	protected.erase(id)
+	for ally in protected.keys():
+		if protected[ally]["by"] == id:
+			protected.erase(ally)
 
 
 ## Class passive of a Party character (e.g. Enervation), or {}.
@@ -752,6 +764,7 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary,
 	var weak: bool = target.get("weakness", []).has(element)
 	if weak:
 		amount *= rules.get_float("rules.weakness_multiplier", 1.5)
+	amount *= 1.0 - float(target.get("resistances", {}).get(element, 0.0))
 	var passive := _passive(run, source)
 	if passive.has("dot_bonus"):
 		amount *= minf(float(passive.get("dot_bonus_cap", 1.4)), 1.0 + float(passive["dot_bonus"]) * dots)
@@ -791,9 +804,7 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary,
 		out["survived"] = true
 	if target["hp"] <= 0:
 		out["down"] = true
-		defeated_by[target_id] = source
-		if target_id.begins_with(ENEMY_PREFIX):
-			defeated_kinds.append(str(target["kind"]))
+		_handle_death(run, target_id, source)
 	return out
 
 
@@ -936,6 +947,7 @@ func _make_enemy(run: MatchRun, kind: String, index: int) -> Dictionary:
 		"sprite_variant": str(data.get("sprite_variant", "")),
 		"attack": data.get("attack", {"target": "enemy", "damage": {"stat": "atk", "power": 1.0}}),
 		"weakness": data.get("weakness", []),
+		"resistances": data.get("resistances", {}),
 		"rewards": data.get("rewards", {}),
 	}
 	for stat in ["max_hp", "atk", "def", "mag", "res", "spd"]:
@@ -966,7 +978,7 @@ func _enemy_views() -> Array:
 			"sprite_variant": str(enemy.get("sprite_variant", "")),
 			"energy": int(enemy.get("energy", 0)),
 			"energy_max": int(enemy.get("energy_max", 0)),
-			"statuses": status_book.view(enemy["id"]) if status_book != null else [],
+			"statuses": status_book.view(enemy["id"]) if status_book != null and enemy["hp"] > 0 else [],
 		})
 	return out
 

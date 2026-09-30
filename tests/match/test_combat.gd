@@ -227,3 +227,26 @@ func test_party_wipe_ends_match_in_defeat_with_summary() -> void:
 	assert_eq(view["summary"]["result"], "defeat")
 	assert_eq(view["summary"]["layer"], 1)
 	assert_eq(h.room_view(sessions[0])["state"], "lobby", "room is back to the lobby")
+
+
+func test_skeleton_resists_physical_damage() -> void:
+	h = MatchHarness.new(4, MatchHarness.merge([MatchHarness.ALL_COMBAT, MatchHarness.EXACT_DAMAGE,
+			{"encounters": {"combat": {"groups": [{"id": "trio", "enemies": ["skeleton"], "layers": [1, 5]}]}}},
+			{"items": {"physbomb": {"name": "Physbomb", "use": {"target": "enemy", "damage": {"amount": 100, "element": "physical"}}}},
+			"party": {"starting_inventory": {"physbomb": 1}}}]))
+	sessions = h.start_with_humans(1)
+	h.enter_first_encounter(sessions)
+
+	var view = _combat_view()
+	while not view.get("your_turn", false):
+		h.advance(0.1, 0.1)
+		view = _combat_view()
+
+	h.server.command(sessions[0], {"type": "action", "action": "item", "item": "physbomb", "target": "e0"})
+	h.advance(1.0, 0.1)
+	var actions = []
+	for event in h.server.take_events(sessions[0]):
+		if event["type"] == "action_resolved":
+			actions.append(event)
+	var hit = actions[0]["results"][0]
+	assert_eq(hit["damage"], 80, "100 physical damage reduced to 80 due to skeleton resistance")

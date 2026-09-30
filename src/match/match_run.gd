@@ -314,7 +314,6 @@ func grant_exp(slot: int, amount: int) -> void:
 		var old_max: int = character["max_hp"]
 		character["level"] += 1
 		character["points"] = int(character.get("points", 0)) + content.get_int("leveling.points_per_level", 0)
-		character["points"] += _tree_level(character, "stat_points")
 		if str(character.get("race", "")) == "Human" and int(character["level"]) % 2 == 0:
 			character["points"] += 1
 		_apply_stats(character)
@@ -440,9 +439,10 @@ func _energy_bonus(character: Dictionary) -> int:
 
 ## Crafts `recipe` from the shared inventory. Returns "" or an error code.
 func craft(slot: int, recipe: String) -> String:
-	var data := content.get_dict("crafting.recipes.%s" % recipe)
-	if data.is_empty():
+	var recipes := content.get_dict("crafting.recipes")
+	if not recipes.has(recipe):
 		return "invalid_recipe"
+	var data: Dictionary = recipes[recipe]
 	var materials: Dictionary = data.get("materials", {})
 	for item in materials:
 		if int(inventory.get(item, 0)) < int(materials[item]):
@@ -849,7 +849,8 @@ func _after_encounter_step() -> void:
 		if encounter.result == "defeat":
 			_end_match("defeat")
 			return
-	layers_passed += 1
+	if phase != "boss":
+		layers_passed += 1
 	if phase == "boss":
 		_end_match("victory")
 		return
