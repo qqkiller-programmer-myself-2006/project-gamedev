@@ -48,23 +48,30 @@ func test_merchant_offers_content_stock_with_prices() -> void:
 		items.append([entry["item"], entry["price"], entry["remaining"]])
 		assert_false(str(entry["name"]).is_empty())
 		assert_false(str(entry["description"]).is_empty())
-	assert_eq(items, [["herb", 12, 5], ["tonic", 28, 2], ["spirit_bloom", 40, 1], ["firebomb", 24, 2]])
+	assert_eq(items, [["herb", 12, 5], ["tonic", 27, 2], ["spirit_bloom", 39, 1], ["firebomb", 23, 2]])
 
 
-func test_buying_spends_shared_gold_and_fills_shared_inventory() -> void:
-	_shop(50, 2)
+func test_buying_spends_personal_gold_and_fills_shared_inventory() -> void:
+	_shop(100, 2)  # 100 split among 5 chars; AI gold collected to 2 humans → 50 each
 	h.server.take_events(sessions[1])
-	assert_ok(h.server.command(sessions[0], {"type": "buy", "item": "tonic"}))
-	assert_ok(h.server.command(sessions[1], {"type": "buy", "item": "herb"}), "any human buys from the same purse")
-	assert_eq(_view(sessions[1])["gold"], 50 - 28 - 12)
+	var first_purchase := h.server.command(sessions[0], {"type": "buy", "item": "tonic"})
+	var second_purchase := h.server.command(sessions[1], {"type": "buy", "item": "herb"})
+	assert_ok(first_purchase)
+	assert_ok(second_purchase, "each human buys from own purse")
+	assert_eq(first_purchase["gold"], 23, "purchase result reports the buyer's purse")
+	assert_eq(second_purchase["gold"], 38, "each buyer gets their own remaining Gold")
+	assert_eq(_view(sessions[1])["party"][0]["gold"], 50 - 27, "buyer's personal gold drops")
+	assert_eq(_view(sessions[1])["party"][1]["gold"], 50 - 12, "second buyer's personal gold drops")
+	assert_eq(_view(sessions[1])["gold"], 61, "run Gold is derived from every personal purse")
 	assert_eq(_count("tonic", sessions[1]), 1)
 	assert_eq(_count("herb", sessions[1]), 4, "3 starting herbs + 1")
 	assert_eq(_stock("tonic")["remaining"], 1)
 	var purchases := []
 	for event in h.server.take_events(sessions[1]):
 		if event["type"] == "purchase":
-			purchases.append([event["slot"], event["item"]])
-	assert_eq(purchases, [[0, "tonic"], [1, "herb"]], "everyone sees every purchase")
+			purchases.append([event["slot"], event["item"], event["gold"]])
+	assert_eq(purchases, [[0, "tonic", 23], [1, "herb", 38]],
+			"everyone sees each purchase and the buyer's remaining Gold")
 
 
 func test_not_enough_gold_is_rejected_without_change() -> void:
@@ -83,7 +90,7 @@ func test_invalid_and_sold_out_items_are_rejected() -> void:
 	assert_rejected(h.server.command(sessions[0], {"type": "buy", "item": "dragon_egg"}), "invalid_item")
 	assert_ok(h.server.command(sessions[0], {"type": "buy", "item": "spirit_bloom"}))
 	assert_rejected(h.server.command(sessions[0], {"type": "buy", "item": "spirit_bloom"}), "out_of_stock")
-	assert_eq(_view()["gold"], 160)
+	assert_eq(_view()["party"][0]["gold"], 200 - 39)
 
 
 func test_single_player_moves_on_without_buying() -> void:
@@ -91,7 +98,7 @@ func test_single_player_moves_on_without_buying() -> void:
 	assert_ok(h.server.command(sessions[0], {"type": "ready"}))
 	var view := _view()
 	assert_eq([view["phase"], view["layer"]], ["voting", 2])
-	assert_eq(view["gold"], 100, "AI slots never spend the Party's Gold")
+	assert_eq(view["party"][0]["gold"], 100, "AI gold collected to the human, nothing spent")
 
 
 func test_shop_closes_once_every_human_is_ready() -> void:
@@ -130,24 +137,25 @@ func test_gold_won_in_combat_buys_items() -> void:
 	h.take_route(sessions, "combat")
 	h.server.command(sessions[0], {"type": "action", "action": "attack", "target": "e0"})
 	h.advance(4.0)
-	assert_eq(_view()["gold"], 20)
+	assert_eq(_view()["gold"], 20, "party earned 20 total gold")
 	h.take_route(sessions, "merchant")
+	assert_eq(_view()["party"][0]["gold"], 20, "AI gold collected to the human")
 	assert_ok(h.server.command(sessions[0], {"type": "buy", "item": "herb"}))
-	assert_eq(_view()["gold"], 8)
+	assert_eq(_view()["party"][0]["gold"], 20 - 12)
 
 
 func test_rest_restores_party_hp_by_content_ratio() -> void:
 	_start(["rest", "combat"], 1, {"enemies": {"grey_wolf": {"stats": {"max_hp": 1, "spd": 20, "atk": 20}}}})
 	h.take_route(sessions, "combat")
 	h.advance(2.0)
-	assert_eq(_view()["party"][0]["hp"], 2, "two wolf bites of 19")
+	assert_eq(_view()["party"][0]["hp"], 28, "two wolf bites of 17")
 	h.server.command(sessions[0], {"type": "action", "action": "attack", "target": "e0"})
 	h.advance(4.0)
 	h.take_route(sessions, "rest")
 	var encounter := _encounter()
 	assert_eq(encounter["kind"], "rest")
-	assert_eq(encounter["healed"][0], {"slot": 0, "amount": 24, "hp": 26}, "60% of 40 max HP")
-	assert_eq(_view()["party"][1]["hp"], 40, "never above max HP")
+	assert_eq(encounter["healed"][0], {"slot": 0, "amount": 34, "hp": 62}, "60% of 62 max HP is 37, capped at 62")
+	assert_eq(_view()["party"][1]["hp"], 62, "never above max HP")
 	h.server.command(sessions[0], {"type": "ready"})
 	assert_eq(_view()["layer"], 3, "journey continues once every player is Ready")
 

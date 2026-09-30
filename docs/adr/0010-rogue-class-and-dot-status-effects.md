@@ -1,5 +1,7 @@
+Renamed Assassin on 2026-09-29, #74.
+
 ---
-status: accepted
+status: accepted — Enervation is now a Boon equipped before the Match; Rogue has no Enervation class passive.
 ---
 
 # เพิ่ม Rogue เป็น Tier 1 Class ตัวที่ 5 พร้อมระบบ Status effect แบบ DoT (ขยาย scope ของ ADR-0003)

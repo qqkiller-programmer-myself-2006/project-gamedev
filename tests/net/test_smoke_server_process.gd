@@ -1,7 +1,7 @@
 extends TestCase
 ## Cross-process smoke test (issue #5): a real headless server process and
 ## scripted clients over real WebSockets create a room, join it and start a
-## Match. The same flow is checked in a browser by tools/web_smoke.mjs.
+## Match. The same flow is checked in a browser by tools/ci/web_smoke.mjs.
 
 var _pid := -1
 var _probes: Array = []

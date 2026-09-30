@@ -1,5 +1,20 @@
 # BEYOND THE WORLD'S END
 
+## ADR-0013 meta progression
+
+Classless is only the legacy start when a player supplies no loadout. A
+pre-match loadout selects a Tier 1 Class, an owned Race, and capacity-limited
+Boons; AI fills unclaimed Classes from `party.ai_class_order`. Class Encounters
+award EXP and Gems to characters that already have a Class, while Classless
+characters may still accept the offered Class.
+
+Races, Boons, per-Class skill trees, Prestige, and Gems are authoritative
+server-side metadata in `content/forest.json`. Gems are earned per passed
+Layer, Guardian victory, Story Clue, and eligible Class Encounter, then saved
+through the injected `ProfileStore` for token-bearing sessions. Missing tokens
+use a session-only profile. Enervation is a Boon, not a Assassin passive; status
+resistance is a derived stat.
+
 คำศัพท์และขอบเขตที่ใช้ร่วมกันสำหรับ vertical slice ของเกม BEYOND THE WORLD'S END ซึ่งเป็น online fantasy turn-based RPG แบบ co-op
 
 ## Game structure
@@ -73,14 +88,14 @@ action เฉพาะ Class ที่ใช้ Energy ตามค่าที�
 _Avoid_: ability, spell (เมื่อหมายถึง action ในระบบ)
 
 **Energy**:
-พลังของตัวละครใน Party ที่ใช้จ่ายค่า Skill: เริ่ม Combat ที่ 1 (ใช้ได้ใน turn แรก), ได้ +1 ตอนเริ่มทุก turn ถัดไปของตัวเอง, สูงสุด 6 และรีเซ็ตทุก Combat (ADR-0009); Attack, Defend และ Item ไม่ใช้ Energy และศัตรูไม่มี Energy
+พลังของตัวละครใน Party ที่ใช้จ่ายค่า Skill: เริ่ม Combat ที่ 1 (ใช้ได้ใน turn แรก), ได้ +1 ตอนเริ่มทุก turn ถัดไปของตัวเอง, สูงสุด 6 และรีเซ็ตทุก Combat (ADR-0009); ศัตรูและ Boss ก็มี Energy เช่นกัน (เริ่ม 0, +1 ต่อ turn)
 _Avoid_: mana, MP, SP, stamina
 
 **Tier 1 Class**:
-Class ระดับแรกของ Forest vertical slice ได้แก่ Swordsman, Archer, Mage, Guardian และ Rogue (ADR-0010)
+Class ระดับแรกของ Forest vertical slice ได้แก่ Swordsman, Archer, Mage, Guardian และ Assassin (ADR-0010)
 _Avoid_: starter class (เพราะผู้เล่นไม่ได้เริ่มเกมด้วย Class)
 
-**Rogue**:
+**Assassin**:
 Tier 1 Class สาย Melee DoT ที่ใช้มีดและยาพิษติด DoT หลายชนิดบนเป้าเดียว แล้วปิดด้วย Skill ที่แรงขึ้นตามจำนวนชนิด DoT บนเป้า; มี passive Enervation (ADR-0010)
 _Avoid_: assassin, thief
 
@@ -103,7 +118,7 @@ Status effect ที่ทำ damage ตอนเริ่ม turn ของต�
 _Avoid_: poison (เมื่อหมายถึง DoT ทุกชนิด), tick effect
 
 **Enervation**:
-passive ของ Rogue: damage ตรงแรงขึ้น 5% ต่อชนิด DoT บนเป้า (ไม่เกิน ×1.4), DoT ที่ Rogue ติดแรงขึ้น 15% และ Rogue รับ damage จาก DoT มากขึ้น ×1.15
+passive ของ Assassin: damage ตรงแรงขึ้น 5% ต่อชนิด DoT บนเป้า (ไม่เกิน ×1.4), DoT ที่ Assassin ติดแรงขึ้น 15% และ Assassin รับ damage จาก DoT มากขึ้น ×1.15
 _Avoid_: boon, perk (slice นี้ไม่มีระบบ Boon)
 
 **Path Voting**:
@@ -135,11 +150,39 @@ _Avoid_: forging, smithing
 _Avoid_: equipment (เมื่อหมายถึงชิ้นของ), armour
 
 **Stat point**:
-แต้มที่ได้ทุก level-up ใช้เพิ่ม stat ของตัวละครที่ Rest camp; AI ลงแต้มใน stat หลักของ Class เอง
+แต้มที่ได้ทุก level-up ใช้เพิ่ม Attribute ของตัวละครที่ Rest camp; AI ลงแต้มใน stat หลักของ Class เอง
 _Avoid_: skill point, talent
 
+**Attribute**:
+ค่าพื้นฐานของตัวละคร (str, dex, con, int, fth, cha, lck) ที่ใช้คำนวณเป็น Derived stat และเพิ่มด้วย Stat point
+_Avoid_: primary stat, base stat
+
+**Derived stat**:
+ค่าที่คำนวณจาก Attribute และ Gear นำมาใช้ใน combat เช่น max_hp, atk, dodge, crit_damage
+_Avoid_: secondary stat, combat stat
+
+**Focus**:
+คำสั่งใน Combat ที่ให้ Energy +1 ทันที และ Dodge +10% 1 turn โดยไม่ใช้ Energy
+_Avoid_: wait, skip turn
+
+**Strike**:
+คำสั่งโจมตีปกติด้วยอาวุธ (ชื่อระบบยังเป็น attack)
+_Avoid_: attack (เมื่อหมายถึงชื่อบนจอ)
+
+**Guard**:
+คำสั่งป้องกัน (ชื่อระบบยังเป็น defend)
+_Avoid_: defend (เมื่อหมายถึงชื่อบนจอ)
+
+**Stash**:
+คลังของร่วมของ Party ที่เก็บ Item และ Material ไว้ด้วยกัน
+_Avoid_: inventory (เว้นแต่หมายถึงทั้งระบบ), bag
+
+**Consumable slot**:
+ช่องเก็บ Item ส่วนตัวของแต่ละตัวละคร (ช่องละ 1 ชิ้น) ซึ่งจะถูกเรียกใช้ก่อน Stash เสมอ
+_Avoid_: quick slot
+
 **Gold**:
-เงินร่วมของทั้ง Party (ไม่ใช่ของผู้เล่นแต่ละคน) ได้จาก Combat และ Treasure ใช้ที่ Merchant
+เงินส่วนตัวของแต่ละตัวละคร (Personal Gold) แบ่งเท่ากันจากรางวัล Combat/Treasure ใช้ซื้อของที่ Merchant และโอนให้กันได้
 _Avoid_: coins, money (ในเอกสารระบบ)
 
 **Reward**:

@@ -51,7 +51,8 @@ func _enemy_plan(run: MatchRun, enemy: Dictionary) -> Dictionary:
 	if not pending.is_empty():
 		var unleash := pending
 		pending = {}
-		return _move_plan(run, unleash["move"], unleash["target"])
+		var plan := _move_plan(run, unleash["move"], unleash["target"])
+		return plan
 	var pattern: Array = _phases(run)[phase_index].get("pattern", ["attack"])
 	var step := str(pattern[pattern_step % pattern.size()])
 	pattern_step += 1

@@ -11,3 +11,4 @@ status: accepted (Tier 1 Classes amended to 5 by ADR-0010; Equipment and craftin
 - คุณภาพของระบบและ UI/UX ต้องใกล้ระดับ production แต่จำนวน content ถูกจำกัด
 - ต้องรับรอง core flow ตั้งแต่สร้าง/เข้าห้องจนชนะ Guardian Boss บน PC และ browser
 - การเพิ่ม content นอก Forest ต้องผ่านการตัดสินใจ scope ใหม่ ไม่ควรแทรกเข้ามาใน vertical slice โดยปริยาย
+- Route data ที่มี Encounter type ซึ่งเกมไม่รองรับต้องไม่ถูกข้ามเป็นสำเร็จ: เมื่อ Party เข้า Encounter นั้น Match ส่ง event `match_error` (`error: "unsupported_encounter"`, `encounter_type`) แล้วจบด้วยผล defeat โดย summary มีคีย์ `error` และ `encounter_type` ตัวเดียวกัน (#41)

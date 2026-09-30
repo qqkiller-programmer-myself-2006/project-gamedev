@@ -1,0 +1,157 @@
+class_name SpriteSet
+extends RefCounted
+## Manifest-backed loader for the owner's class sprite sheets.
+
+const ROOT := "res://assets/heroes/"
+const MANIFEST := "res://assets/heroes/manifest.json"
+const ART_CLASSES := {"archer": true, "mage": true, "swordsman": true, "guardian": true, "assassin": true}
+const ENEMY_ROOT := "res://assets/enemies/"
+const ENEMY_MANIFEST := "res://assets/enemies/manifest.json"
+
+static var _manifest: Dictionary = {}
+static var _loaded := false
+static var _enemy_manifest: Dictionary = {}
+static var _enemy_loaded := false
+var class_id := ""
+var enemy_id := ""
+var variant := ""
+var is_enemy := false
+var data: Dictionary = {}
+
+static func for_enemy(enemy_id_value: String, variant_value: String = "") -> SpriteSet:
+	_load_enemy_manifest()
+	var key := enemy_id_value.to_lower()
+	if not _enemy_manifest.has(key):
+		return null
+	var entry: Dictionary = _enemy_manifest[key]
+	if not variant_value.is_empty() and not entry.get("variants", []).has(variant_value):
+		variant_value = ""
+	var result := SpriteSet.new()
+	result.enemy_id = key
+	result.variant = variant_value
+	result.is_enemy = true
+	result.data = entry
+	return result
+
+static func enemy_manifest() -> Dictionary:
+	_load_enemy_manifest()
+	return _enemy_manifest.duplicate(true)
+
+static func for_class(class_id_value: String) -> SpriteSet:
+	if not ART_CLASSES.has(class_id_value.to_lower()):
+		return null
+	_load_manifest()
+	if not _manifest.has(class_id_value.to_lower()):
+		return null
+	var result := SpriteSet.new()
+	result.class_id = class_id_value.to_lower()
+	result.data = _manifest[result.class_id]
+	return result
+
+static func portrait(class_id_value: String) -> Texture2D:
+	var set := for_class(class_id_value)
+	if set == null:
+		return null
+	return load(ROOT + set.class_id + "/portrait.png") as Texture2D
+
+func frames(animation: String) -> Array[Texture2D]:
+	animation = _key(animation)
+	if is_enemy and not variant.is_empty() and animation == "idle":
+		var variant_path := ENEMY_ROOT + enemy_id + "/variants/" + variant + ".png"
+		var variant_texture := load(variant_path) as Texture2D
+		if variant_texture != null:
+			return [variant_texture]
+	var listed = data.get("animations", {}).get(animation, [])
+	if is_enemy and (listed is int or listed is float):
+		var generated: Array[String] = []
+		for index in int(listed):
+			generated.append("%s_%02d.png" % [animation, index])
+		listed = generated
+	if listed is Dictionary:
+		listed = listed.get("right", listed.get("left", []))
+	elif animation == "idle" and listed is Array:
+		var facing := ""
+		for filename in listed:
+			if str(filename).contains("_right"):
+				facing = str(filename)
+				break
+		if facing.is_empty():
+			for filename in listed:
+				if str(filename).contains("_left"):
+					facing = str(filename)
+					break
+		if facing.is_empty() and not listed.is_empty():
+			facing = str(listed[0])
+		listed = [facing] if not facing.is_empty() else []
+	var result: Array[Texture2D] = []
+	for filename in listed:
+		var base := ENEMY_ROOT + enemy_id + "/" if is_enemy else ROOT + class_id + "/"
+		var texture := load(base + str(filename)) as Texture2D
+		if texture != null:
+			result.append(texture)
+	return result
+
+func mirrored(animation: String) -> bool:
+	if is_enemy:
+		return str(data.get("faces", "right")) == "right"
+	var listed = data.get("animations", {}).get(animation, [])
+	if listed is Dictionary:
+		return not listed.has("right") and listed.has("left")
+	if animation == "idle" and listed is Array:
+		var has_left := false
+		for filename in listed:
+			if str(filename).contains("_right"):
+				return false
+			has_left = has_left or str(filename).contains("_left")
+		return has_left
+	return false
+
+func fps(animation: String) -> float:
+	animation = _key(animation)
+	return float(data.get("fps", {}).get(animation, 4))
+
+func baseline(animation: String) -> float:
+	animation = _key(animation)
+	if is_enemy and not variant.is_empty() and animation == "idle":
+		return canvas("idle").y
+	return float(data.get("baseline", {}).get(animation, 0))
+
+func canvas(animation: String) -> Vector2:
+	animation = _key(animation)
+	if is_enemy and not variant.is_empty() and animation == "idle":
+		var texture := load(ENEMY_ROOT + enemy_id + "/variants/" + variant + ".png") as Texture2D
+		if texture != null:
+			return Vector2(texture.get_width(), texture.get_height())
+	var size: Array = data.get("canvas", {}).get(animation, [1, 1])
+	return Vector2(float(size[0]), float(size[1]))
+
+## Enemy sheets name the death animation "die"; heroes and tokens use "dead".
+func _key(animation: String) -> String:
+	if animation == "dead" and is_enemy and not data.get("animations", {}).has("dead"):
+		return "die"
+	return animation
+
+func size_px() -> float:
+	return float(data.get("size_px", 48))
+
+static func _load_enemy_manifest() -> void:
+	if _enemy_loaded:
+		return
+	_enemy_loaded = true
+	var file := FileAccess.open(ENEMY_MANIFEST, FileAccess.READ)
+	if file == null:
+		return
+	var parsed = JSON.parse_string(file.get_as_text())
+	if parsed is Dictionary:
+		_enemy_manifest = parsed
+
+static func _load_manifest() -> void:
+	if _loaded:
+		return
+	_loaded = true
+	var file := FileAccess.open(MANIFEST, FileAccess.READ)
+	if file == null:
+		return
+	var parsed = JSON.parse_string(file.get_as_text())
+	if parsed is Dictionary:
+		_manifest = parsed

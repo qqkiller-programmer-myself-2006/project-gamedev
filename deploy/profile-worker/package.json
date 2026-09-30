@@ -1,0 +1,12 @@
+{
+  "name": "btwe-profile-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.9",
+    "wrangler": "^3.99.0"
+  }
+}

@@ -22,9 +22,10 @@ func start(run: MatchRun) -> void:
 		var amount := int(round(character["max_hp"] * ratio))
 		character["hp"] = mini(character["max_hp"], maxi(1, character["hp"] + amount))
 		healed.append({"slot": character["slot"], "amount": character["hp"] - before, "hp": character["hp"]})
-	deadline = run.clock.now() + run.content.get_float("encounters.rest.seconds", 60.0)
+	deadline = -1.0 if run.story else run.clock.now() + run.content.get_float("encounters.rest.seconds", 60.0)
 	run.emit({"type": "rested", "healed": healed, "deadline": deadline})
 	_close_if_everyone_ready(run)
+	run.collect_ai_gold()
 
 
 func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
@@ -36,7 +37,7 @@ func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 			if ready_slots.has(slot):
 				return {"ok": false, "error": "already_ready"}
 			ready_slots.append(slot)
-			run.emit({"type": "rest_ready", "slot": slot, "ready": ready_slots.size(),
+			run.emit({"type": "rest_ready", "slot": slot, "ready": _ready_count(run),
 					"humans": _human_count(run)})
 			_close_if_everyone_ready(run)
 			return {"ok": true}
@@ -48,6 +49,24 @@ func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 			error = run.unequip(slot, str(cmd.get("gear_slot", "")))
 		"invest":
 			error = run.invest(slot, str(cmd.get("stat", "")))
+		"transfer_item":
+			error = run.transfer_item(slot, str(cmd.get("item", "")), int(cmd.get("to", -1)))
+			if error != "":
+				return {"ok": false, "error": error}
+			return {"ok": true}
+		"transfer_gold":
+			var to = int(cmd.get("to", -1))
+			var amount = int(cmd.get("amount", 0))
+			if amount <= 0:
+				return {"ok": false, "error": "invalid_amount"}
+			if to < 0 or to >= run.party.size() or to == slot:
+				return {"ok": false, "error": "invalid_target"}
+			if int(run.party[slot].get("gold", 0)) < amount:
+				return {"ok": false, "error": "not_enough_gold"}
+			run.party[slot]["gold"] = int(run.party[slot]["gold"]) - amount
+			run.party[to]["gold"] = int(run.party[to].get("gold", 0)) + amount
+			run.emit({"type": "gold_transferred", "from": slot, "to": to, "amount": amount})
+			return {"ok": true}
 		_:
 			error = "wrong_phase"
 	if not error.is_empty():
@@ -56,7 +75,7 @@ func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 
 
 func update(run: MatchRun) -> void:
-	if not done and run.clock.now() >= deadline:
+	if not done and deadline >= 0.0 and run.clock.now() >= deadline:
 		_close(run)
 
 
@@ -75,6 +94,7 @@ func view(run: MatchRun, viewer_slot: int) -> Dictionary:
 		"deadline": deadline,
 		"ends_at": deadline,
 		"ready": ready_slots.duplicate(),
+		"ready_count": _ready_count(run),
 		"humans": _human_count(run),
 		"you_are_ready": ready_slots.has(viewer_slot),
 		"recipes": _recipes_view(run),
@@ -117,7 +137,16 @@ func _recipes_view(run: MatchRun) -> Array:
 func _human_count(run: MatchRun) -> int:
 	var count := 0
 	for slot in run.humans().size():
-		if run.is_human(slot):
+		if run.needs_ready(slot):
+			count += 1
+	return count
+
+
+## Humans who pressed Ready: the x of `Ready (x/N)`.
+func _ready_count(run: MatchRun) -> int:
+	var count := 0
+	for slot in ready_slots:
+		if run.needs_ready(slot):
 			count += 1
 	return count
 
@@ -126,7 +155,7 @@ func _close_if_everyone_ready(run: MatchRun) -> void:
 	if done:
 		return
 	for slot in run.humans().size():
-		if run.is_human(slot) and not ready_slots.has(slot):
+		if run.needs_ready(slot) and not ready_slots.has(slot):
 			return
 	_close(run)
 

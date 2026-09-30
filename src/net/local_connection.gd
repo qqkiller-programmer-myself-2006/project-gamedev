@@ -28,9 +28,11 @@ func is_open() -> bool:
 func poll() -> void:
 	if not _open:
 		return
-	for pending in _pending_results:
-		result_received.emit(pending[0], pending[1], pending[2])
+	server.update()
+	var completed := _pending_results.duplicate()
 	_pending_results.clear()
+	for pending in completed:
+		result_received.emit(pending[0], pending[1], pending[2])
 	_push_update()
 
 

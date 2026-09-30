@@ -28,6 +28,7 @@ const MAX_NAME_LENGTH := 16
 var _rng: GameRng
 var _clock
 var _content: ForestContent
+var _profiles: ProfileStore
 
 var _next_session_id := 1
 ## session id -> {"events": Array, "room": String}
@@ -36,20 +37,24 @@ var _sessions: Dictionary = {}
 var _rooms: Dictionary = {}
 ## Codes of rooms that have been closed, so joining them says so.
 var _closed_codes: Dictionary = {}
+var allow_story := false
+## Dev-only commands (dev_jump). Set only by the embedded Playtest server, never online.
+var allow_dev := false
 
 
-func _init(rng: GameRng, clock, content: ForestContent) -> void:
+func _init(rng: GameRng, clock, content: ForestContent, profiles: ProfileStore = null) -> void:
 	assert(rng != null and clock != null and content != null)
 	_rng = rng
 	_clock = clock
 	_content = content
+	_profiles = profiles if profiles != null else MemoryProfileStore.new()
 
 
 ## Registers a new anonymous connection and returns its session id.
 func open_session() -> int:
 	var id := _next_session_id
 	_next_session_id += 1
-	_sessions[id] = {"events": [], "room": ""}
+	_sessions[id] = {"events": [], "room": "", "token": "", "profile": ProfileStore.normalize({})}
 	return id
 
 
@@ -80,7 +85,33 @@ func command(session_id: int, cmd: Dictionary) -> Dictionary:
 			return _leave_room(session_id)
 		"start_match":
 			return _start_match(session_id)
+		"restore_story":
+			if not allow_story:
+				return _reject("story_offline_only")
+			var story_room := _room_of(session_id)
+			if story_room == null or not story_room.story or story_room.slot_of(session_id) != story_room.host_slot:
+				return _reject("not_in_room")
+			if not (cmd.get("save") is Dictionary):
+				return _reject("invalid_save")
+			if not cmd["save"].has("version"):
+				return _reject("old_save")
+			if not story_room.restore_story(cmd["save"]):
+				return _reject("invalid_save")
+			_flush(story_room)
+			return {"ok": true}
+	if kind == "dev_jump":
+		return _dev_jump(session_id, cmd)
 	if not MatchRun.COMMANDS.has(kind):
+		if kind in ["set_loadout", "buy_race", "tree_upgrade", "buy_prestige", "reset_tree"]:
+			var setup_room := _room_of(session_id)
+			if setup_room == null:
+				return _reject("not_in_room")
+			var setup_result := setup_room.handle_setup_command(setup_room.slot_of(session_id), cmd)
+			if setup_result.get("ok", false):
+				if not setup_room.story and not str(_sessions[session_id]["token"]).is_empty():
+					_profiles.save_profile_async(str(_sessions[session_id]["token"]), setup_room.profile_of(setup_room.slot_of(session_id)))
+			_flush(setup_room)
+			return setup_result
 		return _reject("unknown_command")
 	var room := _room_of(session_id)
 	if room == null:
@@ -129,18 +160,32 @@ func snapshot(session_id: int) -> Dictionary:
 	return view
 
 
+## Only Story rooms expose a save point, at the start of the current Layer.
+func export_story(session_id: int) -> Dictionary:
+	var room := _room_of(session_id)
+	if room == null or not room.story or room.slot_of(session_id) != room.host_slot or room.run == null:
+		return {}
+	return room.run.export_layer_start()
+
+
 func _create_room(session_id: int, cmd: Dictionary) -> Dictionary:
+	if cmd.get("story", false) == true and not allow_story:
+		return _reject("story_offline_only")
 	if _room_of(session_id) != null:
 		return _reject("already_in_room")
+	if cmd.has("token") and not str(cmd.get("token", "")).is_empty() and not _valid_token(str(cmd.get("token", ""))):
+		return _reject("invalid_token")
 	var display_name := _clean_name(cmd.get("name", ""))
 	if display_name.is_empty():
 		return _reject("invalid_name")
 	var code := RoomCodes.generate(_rng)
 	while _rooms.has(code) or _closed_codes.has(code):
 		code = RoomCodes.generate(_rng)
-	var room := Room.new(code, _rng.fork(), _clock, _content)
+	var room := Room.new(code, _rng.fork(), _clock, _content, _profiles)
+	room.story = cmd.get("story", false) == true
 	_rooms[code] = room
 	var slot := room.join(session_id, display_name)
+	_set_session_profile(session_id, room, slot, cmd)
 	_sessions[session_id]["room"] = code
 	_flush(room)
 	return {"ok": true, "code": code, "slot": slot}
@@ -149,6 +194,8 @@ func _create_room(session_id: int, cmd: Dictionary) -> Dictionary:
 func _join_room(session_id: int, cmd: Dictionary) -> Dictionary:
 	if _room_of(session_id) != null:
 		return _reject("already_in_room")
+	if cmd.has("token") and not str(cmd.get("token", "")).is_empty() and not _valid_token(str(cmd.get("token", ""))):
+		return _reject("invalid_token")
 	var display_name := _clean_name(cmd.get("name", ""))
 	if display_name.is_empty():
 		return _reject("invalid_name")
@@ -160,11 +207,14 @@ func _join_room(session_id: int, cmd: Dictionary) -> Dictionary:
 	if not _rooms.has(code):
 		return _reject("room_not_found")
 	var room: Room = _rooms[code]
+	if room.story:
+		return _reject("room_closed")
 	if room.state == Room.State.IN_MATCH:
 		return _reject("match_in_progress")
 	if room.is_full():
 		return _reject("room_full")
 	var slot := room.join(session_id, display_name)
+	_set_session_profile(session_id, room, slot, cmd)
 	_sessions[session_id]["room"] = code
 	_flush(room)
 	return {"ok": true, "code": code, "slot": slot}
@@ -193,6 +243,23 @@ func _start_match(session_id: int) -> Dictionary:
 	return {"ok": true}
 
 
+## Dev Playtest only: moves the caller's Match straight to a scene (see DevJump).
+func _dev_jump(session_id: int, cmd: Dictionary) -> Dictionary:
+	if not allow_dev:
+		return _reject("dev_offline_only")
+	var room := _room_of(session_id)
+	if room == null:
+		return _reject("not_in_room")
+	if room.state != Room.State.IN_MATCH or room.run == null or room.run.is_over():
+		return _reject("wrong_phase")
+	var error := DevJump.apply(room.run, room.slot_of(session_id), str(cmd.get("target", "")),
+			int(cmd.get("layer", 0)), str(cmd.get("class", "")))
+	if not error.is_empty():
+		return _reject(error)
+	_flush(room)
+	return {"ok": true}
+
+
 func _room_of(session_id: int) -> Room:
 	if not _sessions.has(session_id):
 		return null
@@ -200,6 +267,26 @@ func _room_of(session_id: int) -> Room:
 	if code.is_empty() or not _rooms.has(code):
 		return null
 	return _rooms[code]
+
+func _set_session_profile(session_id: int, room: Room, slot: int, cmd: Dictionary) -> void:
+	var token := str(cmd.get("token", ""))
+	if not token.is_empty() and not _valid_token(token):
+		return
+	token = token.to_lower()
+	_sessions[session_id]["token"] = token
+	var profile := _profiles.load_profile(token) if not token.is_empty() else ProfileStore.normalize({})
+	_sessions[session_id]["profile"] = profile
+	room.set_profile(slot, profile, token)
+	if bool(profile.get("_unavailable", false)):
+		_sessions[session_id]["events"].append({"type": "profile_unavailable"})
+
+static func _valid_token(token: String) -> bool:
+	if token.length() != 32:
+		return false
+	for c in token:
+		if c not in "0123456789abcdefABCDEF":
+			return false
+	return true
 
 
 ## Delivers the room's pending events to every human in it.

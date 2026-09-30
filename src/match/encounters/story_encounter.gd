@@ -38,7 +38,8 @@ func start(run: MatchRun) -> void:
 	else:
 		stage = "choosing"
 		var seconds := run.content.get_float("rules.story_vote_seconds", 20.0)
-		vote = PathVote.new(run.layer, choice_options, run.clock.now() + seconds, seconds)
+		var vote_deadline: float = -1.0 if run.story else run.clock.now() + seconds
+		vote = PathVote.new(run.layer, choice_options, vote_deadline, seconds)
 		deadline = vote.deadline
 
 
@@ -51,7 +52,7 @@ func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 			if not error.is_empty():
 				return {"ok": false, "error": error}
 			run.emit({"type": "story_vote_cast", "slot": slot})
-			if vote.everyone_voted(run.humans()):
+			if vote.everyone_voted(run.voters()):
 				_resolve(run)
 			return {"ok": true}
 		"ready":
@@ -66,7 +67,7 @@ func handle(run: MatchRun, slot: int, cmd: Dictionary) -> Dictionary:
 
 
 func update(run: MatchRun) -> void:
-	if done or run.clock.now() < deadline:
+	if done or deadline < 0.0 or run.clock.now() < deadline:
 		return
 	if stage == "choosing":
 		_resolve(run)
@@ -77,7 +78,7 @@ func update(run: MatchRun) -> void:
 func on_control_changed(run: MatchRun, slot: int) -> void:
 	if stage == "choosing":
 		vote.forget(slot)
-		if vote.everyone_voted(run.humans()):
+		if vote.everyone_voted(run.voters()):
 			_resolve(run)
 	else:
 		_finish_if_everyone_ready(run)
@@ -131,7 +132,7 @@ func _show_outcome(run: MatchRun, data: Dictionary) -> void:
 			"items": data.get("items", {}), "exp": int(data.get("exp", 0)), "healed": false}
 	if data.has("clue") and run.add_clue(str(data["clue"]), "story"):
 		result["clue"] = run.clue_view(str(data["clue"]))
-	run.add_gold(result["gold"])
+	run.add_gold(result["gold"], true)
 	for item in result["items"]:
 		run.add_item(item, int(result["items"][item]))
 	if data.has("heal_ratio"):
@@ -142,7 +143,7 @@ func _show_outcome(run: MatchRun, data: Dictionary) -> void:
 		result["healed"] = true
 	for character in run.party:
 		run.grant_exp(character["slot"], result["exp"])
-	deadline = run.clock.now() + run.content.get_float("rules.story_read_seconds", 25.0)
+	deadline = -1.0 if run.story else run.clock.now() + run.content.get_float("rules.story_read_seconds", 25.0)
 	run.emit({"type": "story_outcome", "event": event_id, "outcome": result})
 
 
@@ -150,6 +151,6 @@ func _finish_if_everyone_ready(run: MatchRun) -> void:
 	if done or stage != "outcome":
 		return
 	for slot in run.humans().size():
-		if run.is_human(slot) and not ready_slots.has(slot):
+		if run.needs_ready(slot) and not ready_slots.has(slot):
 			return
 	done = true

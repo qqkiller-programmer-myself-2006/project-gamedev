@@ -1,0 +1,726 @@
+{
+  "archer": {
+    "canvas": {
+      "idle": [
+        66,
+        80
+      ],
+      "walk": [
+        84,
+        80
+      ],
+      "run": [
+        106,
+        81
+      ],
+      "attack": [
+        256,
+        92
+      ],
+      "jump": [
+        154,
+        85
+      ],
+      "hurt": [
+        96,
+        81
+      ],
+      "dead": [
+        102,
+        54
+      ]
+    },
+    "baseline": {
+      "idle": 76,
+      "walk": 75,
+      "run": 76,
+      "attack": 87,
+      "jump": 80,
+      "hurt": 76,
+      "dead": 49
+    },
+    "fps": {
+      "idle": 4,
+      "walk": 10,
+      "run": 10,
+      "attack": 12,
+      "jump": 10,
+      "hurt": 8,
+      "dead": 6
+    },
+    "animations": {
+      "idle": [
+        "idle_down.png",
+        "idle_left.png",
+        "idle_right.png",
+        "idle_up.png"
+      ],
+      "walk": {
+        "down": [
+          "walk_down_0.png",
+          "walk_down_1.png",
+          "walk_down_2.png",
+          "walk_down_3.png"
+        ],
+        "left": [
+          "walk_left_0.png",
+          "walk_left_1.png",
+          "walk_left_2.png",
+          "walk_left_3.png"
+        ],
+        "right": [
+          "walk_right_0.png",
+          "walk_right_1.png",
+          "walk_right_2.png",
+          "walk_right_3.png"
+        ],
+        "up": [
+          "walk_up_0.png",
+          "walk_up_1.png",
+          "walk_up_2.png"
+        ]
+      },
+      "run": {
+        "down": [
+          "run_down_0.png",
+          "run_down_1.png",
+          "run_down_2.png",
+          "run_down_3.png"
+        ],
+        "left": [
+          "run_left_0.png",
+          "run_left_1.png",
+          "run_left_2.png"
+        ],
+        "right": [
+          "run_right_0.png",
+          "run_right_1.png",
+          "run_right_2.png",
+          "run_right_3.png"
+        ],
+        "up": [
+          "run_up_0.png",
+          "run_up_1.png",
+          "run_up_2.png"
+        ]
+      },
+      "attack": {
+        "right": [
+          "attack_right_0.png",
+          "attack_right_1.png",
+          "attack_right_2.png",
+          "attack_right_3.png",
+          "attack_right_4.png",
+          "attack_right_5.png",
+          "attack_right_6.png",
+          "attack_right_7.png",
+          "attack_right_8.png",
+          "attack_right_9.png",
+          "attack_right_10.png",
+          "attack_right_11.png"
+        ]
+      },
+      "jump": [
+        "jump_0.png",
+        "jump_1.png",
+        "jump_2.png"
+      ],
+      "hurt": [
+        "hurt_0.png",
+        "hurt_1.png",
+        "hurt_2.png",
+        "hurt_3.png"
+      ],
+      "dead": [
+        "dead_0.png",
+        "dead_1.png",
+        "dead_2.png"
+      ]
+    },
+    "skills": [
+      "skill_0.png",
+      "skill_1.png",
+      "skill_2.png",
+      "skill_3.png",
+      "skill_4.png",
+      "skill_5.png",
+      "skill_6.png"
+    ]
+  },
+  "assassin": {
+    "canvas": {
+      "idle": [
+        80,
+        75
+      ],
+      "walk": [
+        78,
+        74
+      ],
+      "run": [
+        102,
+        77
+      ],
+      "attack": [
+        274,
+        104
+      ],
+      "jump": [
+        190,
+        80
+      ],
+      "hurt": [
+        98,
+        77
+      ],
+      "dead": [
+        100,
+        50
+      ]
+    },
+    "baseline": {
+      "idle": 70,
+      "walk": 69,
+      "run": 72,
+      "attack": 95,
+      "jump": 75,
+      "hurt": 72,
+      "dead": 45
+    },
+    "fps": {
+      "idle": 4,
+      "walk": 10,
+      "run": 10,
+      "attack": 12,
+      "jump": 10,
+      "hurt": 8,
+      "dead": 6
+    },
+    "animations": {
+      "idle": [
+        "idle_down.png",
+        "idle_left.png",
+        "idle_right.png",
+        "idle_up.png"
+      ],
+      "walk": {
+        "down": [
+          "walk_down_0.png",
+          "walk_down_1.png",
+          "walk_down_2.png",
+          "walk_down_3.png"
+        ],
+        "left": [
+          "walk_left_0.png",
+          "walk_left_1.png",
+          "walk_left_2.png",
+          "walk_left_3.png"
+        ],
+        "right": [
+          "walk_right_0.png",
+          "walk_right_1.png",
+          "walk_right_2.png",
+          "walk_right_3.png"
+        ],
+        "up": [
+          "walk_up_0.png",
+          "walk_up_1.png",
+          "walk_up_2.png"
+        ]
+      },
+      "run": {
+        "down": [
+          "run_down_0.png",
+          "run_down_1.png",
+          "run_down_2.png",
+          "run_down_3.png"
+        ],
+        "left": [
+          "run_left_0.png",
+          "run_left_1.png",
+          "run_left_2.png"
+        ],
+        "right": [
+          "run_right_0.png",
+          "run_right_1.png",
+          "run_right_2.png",
+          "run_right_3.png"
+        ],
+        "up": [
+          "run_up_0.png",
+          "run_up_1.png",
+          "run_up_2.png"
+        ]
+      },
+      "attack": {
+        "right": [
+          "attack_right_0.png",
+          "attack_right_1.png",
+          "attack_right_2.png",
+          "attack_right_3.png",
+          "attack_right_4.png",
+          "attack_right_5.png",
+          "attack_right_6.png",
+          "attack_right_7.png",
+          "attack_right_8.png",
+          "attack_right_9.png",
+          "attack_right_10.png"
+        ]
+      },
+      "jump": [
+        "jump_0.png",
+        "jump_1.png",
+        "jump_2.png"
+      ],
+      "hurt": [
+        "hurt_0.png",
+        "hurt_1.png",
+        "hurt_2.png",
+        "hurt_3.png"
+      ],
+      "dead": [
+        "dead_0.png",
+        "dead_1.png",
+        "dead_2.png"
+      ]
+    },
+    "skills": [
+      "skill_0.png",
+      "skill_1.png",
+      "skill_2.png",
+      "skill_3.png",
+      "skill_4.png",
+      "skill_5.png"
+    ]
+  },
+  "guardian": {
+    "canvas": {
+      "idle": [
+        90,
+        78
+      ],
+      "walk": [
+        82,
+        81
+      ],
+      "run": [
+        100,
+        79
+      ],
+      "attack": [
+        256,
+        106
+      ],
+      "jump": [
+        224,
+        91
+      ],
+      "hurt": [
+        90,
+        80
+      ],
+      "dead": [
+        100,
+        50
+      ]
+    },
+    "baseline": {
+      "idle": 73,
+      "walk": 76,
+      "run": 74,
+      "attack": 103,
+      "jump": 78,
+      "hurt": 75,
+      "dead": 45
+    },
+    "fps": {
+      "idle": 4,
+      "walk": 10,
+      "run": 10,
+      "attack": 12,
+      "jump": 10,
+      "hurt": 8,
+      "dead": 6
+    },
+    "animations": {
+      "idle": [
+        "idle_down.png",
+        "idle_left.png",
+        "idle_right.png",
+        "idle_up.png"
+      ],
+      "walk": {
+        "down": [
+          "walk_down_0.png",
+          "walk_down_1.png",
+          "walk_down_2.png",
+          "walk_down_3.png"
+        ],
+        "left": [
+          "walk_left_0.png",
+          "walk_left_1.png",
+          "walk_left_2.png",
+          "walk_left_3.png"
+        ],
+        "right": [
+          "walk_right_0.png",
+          "walk_right_1.png",
+          "walk_right_2.png",
+          "walk_right_3.png"
+        ],
+        "up": [
+          "walk_up_0.png",
+          "walk_up_1.png",
+          "walk_up_2.png"
+        ]
+      },
+      "run": {
+        "down": [
+          "run_down_0.png",
+          "run_down_1.png",
+          "run_down_2.png",
+          "run_down_3.png"
+        ],
+        "left": [
+          "run_left_0.png",
+          "run_left_1.png",
+          "run_left_2.png"
+        ],
+        "right": [
+          "run_right_0.png",
+          "run_right_1.png",
+          "run_right_2.png",
+          "run_right_3.png"
+        ],
+        "up": [
+          "run_up_0.png",
+          "run_up_1.png",
+          "run_up_2.png"
+        ]
+      },
+      "attack": {
+        "right": [
+          "attack_right_0.png",
+          "attack_right_1.png",
+          "attack_right_2.png",
+          "attack_right_3.png",
+          "attack_right_4.png",
+          "attack_right_5.png",
+          "attack_right_6.png",
+          "attack_right_7.png",
+          "attack_right_8.png",
+          "attack_right_9.png"
+        ]
+      },
+      "jump": [
+        "jump_0.png",
+        "jump_1.png",
+        "jump_2.png"
+      ],
+      "hurt": [
+        "hurt_0.png",
+        "hurt_1.png",
+        "hurt_2.png",
+        "hurt_3.png"
+      ],
+      "dead": [
+        "dead_0.png",
+        "dead_1.png",
+        "dead_2.png"
+      ]
+    },
+    "skills": [
+      "skill_0.png",
+      "skill_1.png",
+      "skill_2.png",
+      "skill_3.png",
+      "skill_4.png",
+      "skill_5.png"
+    ]
+  },
+  "mage": {
+    "canvas": {
+      "idle": [
+        66,
+        78
+      ],
+      "walk": [
+        78,
+        80
+      ],
+      "run": [
+        100,
+        86
+      ],
+      "attack": [
+        308,
+        103
+      ],
+      "jump": [
+        144,
+        89
+      ],
+      "hurt": [
+        104,
+        85
+      ],
+      "dead": [
+        86,
+        48
+      ]
+    },
+    "baseline": {
+      "idle": 73,
+      "walk": 75,
+      "run": 81,
+      "attack": 100,
+      "jump": 84,
+      "hurt": 80,
+      "dead": 43
+    },
+    "fps": {
+      "idle": 4,
+      "walk": 10,
+      "run": 10,
+      "attack": 12,
+      "jump": 10,
+      "hurt": 8,
+      "dead": 6
+    },
+    "animations": {
+      "idle": [
+        "idle_down.png",
+        "idle_left.png",
+        "idle_right.png",
+        "idle_up.png"
+      ],
+      "walk": {
+        "down": [
+          "walk_down_0.png",
+          "walk_down_1.png",
+          "walk_down_2.png",
+          "walk_down_3.png"
+        ],
+        "left": [
+          "walk_left_0.png",
+          "walk_left_1.png",
+          "walk_left_2.png",
+          "walk_left_3.png"
+        ],
+        "right": [
+          "walk_right_0.png",
+          "walk_right_1.png",
+          "walk_right_2.png",
+          "walk_right_3.png"
+        ],
+        "up": [
+          "walk_up_0.png",
+          "walk_up_1.png",
+          "walk_up_2.png"
+        ]
+      },
+      "run": {
+        "down": [
+          "run_down_0.png",
+          "run_down_1.png",
+          "run_down_2.png",
+          "run_down_3.png"
+        ],
+        "left": [
+          "run_left_0.png",
+          "run_left_1.png",
+          "run_left_2.png"
+        ],
+        "right": [
+          "run_right_0.png",
+          "run_right_1.png",
+          "run_right_2.png",
+          "run_right_3.png"
+        ],
+        "up": [
+          "run_up_0.png",
+          "run_up_1.png",
+          "run_up_2.png"
+        ]
+      },
+      "attack": {
+        "right": [
+          "attack_right_0.png",
+          "attack_right_1.png",
+          "attack_right_2.png",
+          "attack_right_3.png",
+          "attack_right_4.png",
+          "attack_right_5.png",
+          "attack_right_6.png",
+          "attack_right_7.png",
+          "attack_right_8.png",
+          "attack_right_9.png"
+        ]
+      },
+      "jump": [
+        "jump_0.png",
+        "jump_1.png",
+        "jump_2.png"
+      ],
+      "hurt": [
+        "hurt_0.png",
+        "hurt_1.png",
+        "hurt_2.png",
+        "hurt_3.png",
+        "hurt_4.png"
+      ],
+      "dead": [
+        "dead_0.png",
+        "dead_1.png",
+        "dead_2.png"
+      ]
+    },
+    "skills": [
+      "skill_0.png",
+      "skill_1.png",
+      "skill_2.png",
+      "skill_3.png",
+      "skill_4.png",
+      "skill_5.png",
+      "skill_6.png"
+    ]
+  },
+  "swordsman": {
+    "canvas": {
+      "idle": [
+        90,
+        81
+      ],
+      "walk": [
+        92,
+        83
+      ],
+      "run": [
+        104,
+        80
+      ],
+      "attack": [
+        252,
+        99
+      ],
+      "jump": [
+        174,
+        91
+      ],
+      "hurt": [
+        94,
+        89
+      ],
+      "dead": [
+        122,
+        48
+      ]
+    },
+    "baseline": {
+      "idle": 76,
+      "walk": 78,
+      "run": 75,
+      "attack": 94,
+      "jump": 81,
+      "hurt": 76,
+      "dead": 43
+    },
+    "fps": {
+      "idle": 4,
+      "walk": 10,
+      "run": 10,
+      "attack": 12,
+      "jump": 10,
+      "hurt": 8,
+      "dead": 6
+    },
+    "animations": {
+      "idle": [
+        "idle_down.png",
+        "idle_left.png",
+        "idle_right.png",
+        "idle_up.png"
+      ],
+      "walk": {
+        "down": [
+          "walk_down_0.png",
+          "walk_down_1.png",
+          "walk_down_2.png",
+          "walk_down_3.png"
+        ],
+        "left": [
+          "walk_left_0.png",
+          "walk_left_1.png",
+          "walk_left_2.png",
+          "walk_left_3.png"
+        ],
+        "right": [
+          "walk_right_0.png",
+          "walk_right_1.png",
+          "walk_right_2.png",
+          "walk_right_3.png"
+        ],
+        "up": [
+          "walk_up_0.png",
+          "walk_up_1.png",
+          "walk_up_2.png"
+        ]
+      },
+      "run": {
+        "down": [
+          "run_down_0.png",
+          "run_down_1.png",
+          "run_down_2.png",
+          "run_down_3.png"
+        ],
+        "left": [
+          "run_left_0.png",
+          "run_left_1.png",
+          "run_left_2.png"
+        ],
+        "right": [
+          "run_right_0.png",
+          "run_right_1.png",
+          "run_right_2.png",
+          "run_right_3.png"
+        ],
+        "up": [
+          "run_up_0.png",
+          "run_up_1.png",
+          "run_up_2.png"
+        ]
+      },
+      "attack": {
+        "right": [
+          "attack_right_0.png",
+          "attack_right_1.png",
+          "attack_right_2.png"
+        ]
+      },
+      "jump": [
+        "jump_0.png",
+        "jump_1.png",
+        "jump_2.png"
+      ],
+      "hurt": [
+        "hurt_0.png",
+        "hurt_1.png",
+        "hurt_2.png",
+        "hurt_3.png"
+      ],
+      "dead": [
+        "dead_0.png",
+        "dead_1.png",
+        "dead_2.png"
+      ]
+    },
+    "skills": [
+      "skill_0.png",
+      "skill_1.png",
+      "skill_2.png",
+      "skill_3.png",
+      "skill_4.png",
+      "skill_5.png"
+    ]
+  }
+}

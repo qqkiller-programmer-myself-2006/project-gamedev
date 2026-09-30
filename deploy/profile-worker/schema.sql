@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS profiles (
+  token TEXT PRIMARY KEY,
+  data TEXT NOT NULL,
+  version INTEGER NOT NULL DEFAULT 0,
+  updated_at INTEGER
+);

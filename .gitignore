@@ -10,3 +10,6 @@ export_credentials.cfg
 # Staging bundle filled by deploy/prepare.sh
 /deploy/server/
 /deploy/web/
+
+# AI executor logs
+.ai/logs/

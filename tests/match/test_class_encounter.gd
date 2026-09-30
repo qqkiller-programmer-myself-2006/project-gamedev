@@ -136,8 +136,8 @@ func test_accepting_gives_swordsman_stats_from_content() -> void:
 	assert_ok(h.server.command(sessions[0], {"type": "class_choice", "accept": true}))
 	var me: Dictionary = _view()["party"][0]
 	assert_eq([me["class"], me["class_name"]], ["swordsman", "Swordsman"])
-	assert_eq([me["max_hp"], me["atk"], me["def"], me["spd"]], [52, 12, 5, 10])
-	assert_eq(me["hp"], 52, "HP grows with the new max HP")
+	assert_eq([me["max_hp"], me["atk"], me["def"], me["spd"]], [48, 10, 5, 10])
+	assert_eq(me["hp"], 48, "HP grows with the new max HP")
 
 
 func test_passing_the_challenge_grants_a_little_exp_to_everyone() -> void:
@@ -249,7 +249,7 @@ func test_swordsman_power_slash_hits_hard_then_cools_down() -> void:
 	var hit: Dictionary = _events(sessions[0], "action_resolved")[0]
 	assert_eq(hit["skill"], "power_slash")
 	assert_eq(hit["energy_spent"], 2)
-	assert_eq(hit["results"][0]["damage"], 21, "12 ATK x 1.8 - 2 DEF x 0.5")
+	assert_eq(hit["results"][0]["damage"], 17, "10 ATK x 1.8 - 2 DEF x 0.5")
 	_until_my_turn()
 	assert_eq(_encounter()["choices"]["skills"]["power_slash"]["cooldown"], 2)
 	assert_eq(_encounter()["choices"]["skills"]["power_slash"]["affordable"], false)
@@ -296,7 +296,7 @@ func test_swordsman_ai_uses_power_slash_when_ready() -> void:
 		for event in h.server.take_events(sessions[0]):
 			if event["type"] == "action_resolved" and event["actor"] == "p1":
 				p1.append(event)
-	assert_eq(p1[0]["action"], "attack", "saves Energy on the first turn")
+	assert_eq(p1[0]["action"], "focus", "focuses to get Energy on the first turn")
 	assert_eq(p1[1]["action"], "skill", "slashes once it can afford it")
 	assert_eq(p1[1]["skill"], "power_slash")
 	assert_eq(p1[1]["energy_spent"], 2)

@@ -92,7 +92,7 @@ func test_archers_pick_targets_at_random() -> void:
 
 func test_wisp_heals_a_wounded_ally() -> void:
 	_fight(["thornback_boar", "forest_wisp"], {"enemies": {
-		"thornback_boar": {"stats": {"max_hp": 60, "spd": 5}},
+		"thornback_boar": {"stats": {"max_hp": 150, "spd": 5}},
 		"forest_wisp": {"stats": {"spd": 4}},
 	}})
 	h.server.command(sessions[0], {"type": "action", "action": "attack", "target": "e0"})
@@ -130,7 +130,7 @@ func test_encounter_can_have_several_enemies() -> void:
 	var names := []
 	for enemy in _combat_view()["enemies"]:
 		names.append(enemy["name"])
-	assert_eq(names, ["Thornback Boar", "Grey Wolf", "Forest Wisp"])
+	assert_eq(names, ["Thornback Boar", "Wolf", "Slime"])
 
 
 func test_enemy_view_describes_each_kind() -> void:
@@ -169,3 +169,11 @@ func _first_combat_kinds(seed_value: int) -> Array:
 	for enemy in harness.match_view(solo[0])["encounter"]["enemies"]:
 		kinds.append(enemy["kind"])
 	return kinds
+
+
+func test_enemy_views_carry_the_sprite_from_content() -> void:
+	# The client draws the owner's enemy art only when the view names its sheet (#73 review F1).
+	_fight(["grey_wolf", "thornback_boar"])
+	var enemies: Array = _combat_view()["enemies"]
+	assert_eq(str(enemies[0]["sprite"]), "wolf", "grey_wolf uses the Wolf sheet")
+	assert_eq(str(enemies[1]["sprite"]), "", "the boar has no art yet (#75)")

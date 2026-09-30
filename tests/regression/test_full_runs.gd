@@ -91,7 +91,7 @@ func test_modelled_human_pacing_stays_in_a_sane_range() -> void:
 	for seed_value in range(FIRST_SEED, FIRST_SEED + runs):
 		minutes += float(_play(seed_value, 1, true)["view"]["summary"]["elapsed"]) / 60.0
 	minutes /= runs
-	assert_between(minutes, 7.0, 35.0, "average modelled Single-player Match length (docs/balance.md)")
+	assert_between(minutes, 7.0, 35.0, "average modelled Single-player Match length (docs/design/balance.md)")
 
 
 func _check_mode(humans: int) -> void:

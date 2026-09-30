@@ -95,7 +95,7 @@ func test_boss_telegraphs_its_heavy_blow_a_turn_ahead() -> void:
 		if events[i]["type"] == "boss_telegraph" and telegraph_at == -1:
 			telegraph_at = i
 		if events[i]["type"] == "action_resolved" and events[i].get("move") == "crushing_root" \
-				and events[i]["action"] == "attack" and blow_at == -1:
+				and events[i]["action"] in ["attack", "special"] and blow_at == -1:
 			blow_at = i
 	assert_true(telegraph_at >= 0, "the Boss announces Crushing Root")
 	assert_true(blow_at > telegraph_at, "and only strikes later")
@@ -138,7 +138,7 @@ func test_defending_against_the_telegraphed_blow_halves_it() -> void:
 			if event["type"] == "action_resolved" and event.get("move") == "crushing_root" and event["action"] == "attack":
 				blows.append(event["results"][0]["damage"])
 				break
-	assert_eq(blows, [43, 21], "17 ATK x 2.6 - 1.5, halved by Defend")
+	assert_eq(blows, [49, 25], "20 ATK x 2.6 - 2.5, halved by Defend")
 
 
 func test_ai_braces_for_telegraphed_blows() -> void:

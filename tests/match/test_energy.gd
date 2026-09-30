@@ -15,12 +15,12 @@ var sessions: Array[int] = []
 
 ## Starts a Match where the whole Party takes `class_id`, then begins a
 ## Combat against two weak wolves.
-func _start(class_id: String) -> void:
+func _start(class_id: String, extra: Dictionary = {}) -> void:
 	var group := {"encounters": {"combat": {"groups": [{"id": "test",
 			"enemies": ["grey_wolf", "grey_wolf"], "layers": [1, 5]}]}}}
 	h = MatchHarness.new(5, MatchHarness.merge([MatchHarness.class_and_combat(class_id),
 			MatchHarness.EXACT_DAMAGE, WEAK_WOLVES, WHOLE_PARTY, group,
-			{"classes": {"swordsman": {"stats": {"crit": 0}}, "mage": {"stats": {"crit": 0}}}}]))
+			{"classes": {"swordsman": {"stats": {"crit": 0}}, "mage": {"stats": {"crit": 0}}}}, extra]))
 	sessions = h.start_with_humans(1)
 	h.gain_class(sessions)
 	h.take_route(sessions, "combat")
@@ -236,10 +236,30 @@ func test_energy_resets_between_combats() -> void:
 		assert_eq(_energy(sessions[0], slot), [1, 6], "next Combat resets")
 
 
-func test_enemies_have_no_energy() -> void:
-	_start("swordsman")
+func test_enemies_start_at_zero_energy_and_gain_per_turn() -> void:
+	_start("swordsman", {"enemies": {"grey_wolf": {"special": {"name": "Rend", "energy": 2,
+				"use": {"target": "enemy", "damage": {"stat": "atk", "power": 1.0}}}}}})
 	for enemy in _encounter()["enemies"]:
-		assert_false(enemy.has("energy"), "%s has no Energy" % enemy["id"])
+		assert_eq(int(enemy["energy"]), 0, "%s starts at 0 Energy" % enemy["id"])
+		assert_true(int(enemy["energy_max"]) > 0, "%s has an Energy cap" % enemy["id"])
+	h.server.take_events(sessions[0])
+	var seen := []
+	var waited := 0.0
+	while waited < 45.0 and seen.size() < 3:
+		if _encounter().get("your_turn", false):
+			var targets: Array = _encounter()["choices"]["attack"]["targets"]
+			if not targets.is_empty():
+				assert_ok(h.server.command(sessions[0], {"type": "action", "action": "attack",
+						"target": targets[0]}))
+		h.advance(0.1, 0.1)
+		waited += 0.1
+		for event in h.server.take_events(sessions[0]):
+			if event["type"] == "action_resolved" and str(event["actor"]) == "e0":
+				seen.append(event)
+	assert_true(seen.size() >= 2, "the first wolf gets repeated turns")
+	assert_eq(seen[0]["action"], "attack", "the wolf cannot afford Rend at 1 Energy")
+	assert_eq(seen[1]["action"], "special", "the wolf uses Rend on its second turn (2 Energy)")
+	assert_eq(seen[1]["energy_spent"], 2)
 
 
 func test_ai_never_uses_unaffordable_skills() -> void:

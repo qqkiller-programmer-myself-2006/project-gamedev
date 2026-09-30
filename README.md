@@ -6,44 +6,82 @@ The current goal is the Forest vertical slice described in
 
 - Domain glossary: [`CONTEXT.md`](CONTEXT.md)
 - Decisions: [`docs/adr/`](docs/adr/)
-- Product requirements: [`docs/prd.md`](docs/prd.md)
-- Testing guide: [`docs/testing.md`](docs/testing.md)
-- Running server and clients: [`docs/running.md`](docs/running.md)
-- Balance and pacing: [`docs/balance.md`](docs/balance.md)
-- Browser build: [`docs/web.md`](docs/web.md)
-- Accessibility checklist: [`docs/accessibility.md`](docs/accessibility.md)
-- Staging and QA checklist: [`docs/staging.md`](docs/staging.md)
+- Product requirements: [`docs/design/prd.md`](docs/design/prd.md)
+- Testing guide: [`docs/guides/testing.md`](docs/guides/testing.md)
+- Running server and clients: [`docs/guides/running.md`](docs/guides/running.md)
+- Balance and pacing: [`docs/design/balance.md`](docs/design/balance.md)
+- Browser build: [`docs/guides/web.md`](docs/guides/web.md)
+- Accessibility checklist: [`docs/design/accessibility.md`](docs/design/accessibility.md)
+- Staging and QA checklist: [`docs/guides/staging.md`](docs/guides/staging.md)
 
-## Project layout
+## Where things live
 
 ```text
-project.godot          Godot project (one codebase for server, PC and browser)
-content/forest.json    All Forest content, text and balance numbers
-assets/fonts/          Pixelify Sans (OFL, see OFL.txt) for headings, buttons and numbers
-src/core/              Injected dependencies: GameRng, ManualClock, SystemClock, ForestContent
-src/match/             Authoritative game logic behind the Match interface (MatchServer),
-                       including StatusBook (Status effects / DoTs)
-src/net/               Wire protocol, WebSocket server transport and client connection
-src/server/            Headless server node (GameServer)
-src/client/            Client UI: screens, per-phase panels, theme, settings, sounds
-src/client/battle/     Full-screen BattleView (fights) and CampView (Merchant / Rest)
-src/app/               Entry point: --server starts the server, otherwise the client
-tests/                 Headless tests (runner, Match tests, regression, network)
-tools/                 simulate.gd (balance), ui_preview.gd (screenshots), web_smoke.mjs
-deploy/                Staging: server container, Caddy (HTTPS + wss proxy), compose
-scripts/               Command-line helpers
-docs/references/       AAC Rogue reference screenshots the battle/camp UI follows
-docs/screenshots/      Current battle and camp screens (from tools/ui_preview.gd)
+assets/                  Imported runtime art: fonts, heroes, enemies, backgrounds, icons
+art_source/              Raw art sheets, excluded from import and export
+content/                 Forest and story JSON data
+src/app/                 Entry scene and launch options
+src/shared/              Injected RNG, clocks, and shared content loader
+src/profile/             Profile stores and HTTP sender
+src/match/               Match server, rooms, AI, encounters, and authoritative rules
+src/match/rules/         Match rule helpers
+src/net/                 Wire protocol and WebSocket transport
+src/server/              Headless server node
+src/client/ui/           Shared widgets, settings, and sounds
+src/client/title/        Title screen, home backdrop, and settings screen
+src/client/lobby/        Lobby screen and character setup
+src/client/match/        Match screen and phase panels
+src/client/match/battle/ Battle view, tokens, backdrop, sprites, and combat panel
+src/client/match/camp/   Camp view and merchant panel
+src/client/story/        Story client screens and persistence
+tests/                   Tests mirroring src, plus runner and shared support
+tools/dev/               Simulation, previews, and smoke client
+tools/art/               Art processing tools
+tools/ci/                CI browser smoke test
+tools/run_tests.sh      Headless test runner
+deploy/                  Staging server, proxy, and compose files
+docs/design/             Product, balance, UI, and accessibility docs
+docs/guides/             Running, staging, testing, and web guides
+docs/adr/                Architecture decision records
+docs/agents/             Agent process guidance
+docs/plans/              Plans
+docs/review/             Reviews
+docs/references/         Reference screenshots
+docs/screenshots/        Current game screenshots
+.ai/                     Task specs, agent runner, and checkpoint
+.claude/agents/          Agent definitions
 ```
 
 ## Quick start
 
 ```bash
 # Godot 4.7.2 must be on PATH as `godot` (or set GODOT=/path/to/godot)
-./scripts/run_tests.sh                               # all tests, headless
+./tools/run_tests.sh                               # all tests, headless
 godot --headless --path . -- --server --port=8910    # authoritative server
 godot --path . -- --url=ws://127.0.0.1:8910          # PC client (open two for co-op)
+godot --path . -- --dev --playtest --jump=boss --class=mage --seed=7   # dev: jump straight to a scene
 ```
+
+## Final build (2026-10-02): what is in the game
+
+Goal: every screen and rule matches the AAC reference images ([#47](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/47)).
+
+- **Modes:** online co-op Multiplayer (room code, 1–5 players, AI fills empty slots) and offline **Story mode**
+  (one player controls all five, story scenes, chapter cards, Save/Continue; no timers) — ADR-0014.
+- **Before the match:** pick Class, Race and Boons (ADR-0013); Skill tree, Prestige and Gems kept per player on the server
+  (Cloudflare Worker + D1, `deploy/profile-worker`; the owner deploys it — see its README).
+- **Classes:** Swordsman, Archer, Mage, Guardian, Assassin (renamed from Rogue on 2026-09-30; old profiles migrate),
+  plus Classless. Hero art from the owner's sprite sheets (`art_source/heroes/`), cut by `tools/art/slice_character_sheet.py`.
+- **Rules (ADR-0012):** 7 attributes (STR/DEX/CON/INT/FTH/CHA/LCK), Fight / Items / Focus with Strike and Guard,
+  Energy for party and enemies, personal Gold with Transfer, Consumable slot.
+- **Journey:** 5 Layers — Layers 1–4 in the forest (Wolf, Thief, Golem, Slime, Goblin), Layer 5 and the boss in a cave
+  (Kobold, Skeleton, Giant Spider, Minotaur), painted forest/cave backdrops. Boss and Thornback Boar art pending (#75).
+- **UI:** one Navy + Gold theme ([docs/design/ui-style.md](docs/design/ui-style.md)), 55 code-drawn pixel icons beside labels
+  ([docs/design/icons.md](docs/design/icons.md)), text scale up to Extra-large.
+- **Balance** (100 seeds, [docs/design/balance.md](docs/design/balance.md)): every mode wins 74–93% with bots.
+- **Quality:** 362 headless tests; reviews in [docs/review/](docs/review/).
+
+Older sections below describe earlier milestones; where they say *Rogue*, the class is now *Assassin*.
 
 ## The Match interface
 
@@ -141,7 +179,7 @@ AI ทุก preset และ `MatchBot` ตรวจ `can_afford` ก่อน�
 
 ### 3. Status effect และ DoT (#23)
 
-**โมดูลใหม่:** `StatusBook` ([`src/match/status_book.gd`](src/match/status_book.gd), 138 บรรทัด) เก็บ Status effect ของทุกตัวใน Combat หนึ่งครั้ง
+**โมดูลใหม่:** `StatusBook` ([`src/match/rules/status_book.gd`](src/match/rules/status_book.gd), 138 บรรทัด) เก็บ Status effect ของทุกตัวใน Combat หนึ่งครั้ง
 `CombatEncounter` สร้างเมื่อ Combat เริ่มและเรียก `clear()` เมื่อจบ ดังนั้น Status effect ไม่ข้าม Combat และไม่ข้าม Challenge
 
 **DoT 3 ชนิดใน content (`statuses.*`)**
@@ -258,14 +296,14 @@ Merchant และ Rest ใช้หน้า 3 คอลัมน์ตาม�
 
 ```bash
 export GODOT="/path/to/Godot_v4.7.2-stable_win64_console.exe"   # หรือให้ godot อยู่ใน PATH
-./scripts/run_tests.sh                                          # 227 test, ~90 วินาที
-./scripts/run_tests.sh --filter=rogue                           # เฉพาะ test ที่ id มีคำว่า rogue
+./tools/run_tests.sh                                          # 227 test, ~90 วินาที
+./tools/run_tests.sh --filter=assassin                        # เฉพาะ test ที่ id มีคำว่า assassin
 
 # วัด balance: เล่นเต็ม Match ด้วย bot หลาย seed
-godot --headless --path . -s tools/simulate.gd -- --seeds=100 --humans=1,2
+godot --headless --path . -s tools/dev/simulate.gd -- --seeds=100 --humans=1,2
 
-# จับภาพหน้าจอจริงของทุกหน้า (ต้องมี display) ให้ Rogue เป็น Class เดียวที่สอนได้
-godot --path . -s tools/ui_preview.gd -- --out=build/ui --seed=11 --speed=10 --class=rogue
+# จับภาพหน้าจอจริงของทุกหน้า (ต้องมี display) ให้ Assassin (เดิม Rogue) เป็น Class เดียวที่สอนได้
+godot --path . -s tools/dev/ui_preview.gd -- --out=build/ui --seed=11 --speed=10 --class=assassin
 
 # เล่นเองบน browser
 godot --headless --path . --export-release "Web" build/web/index.html
@@ -275,20 +313,20 @@ python -m http.server -d build/web 8060     # แล้วเปิด http://lo
 
 ### 8. ผลการตรวจสอบ
 
-**Test:** `./scripts/run_tests.sh` ได้ **227 passed, 0 failed** (base ก่อน PR มี 186) test ใหม่ 41 ข้อ
+**Test:** `./tools/run_tests.sh` ได้ **227 passed, 0 failed** (base ก่อน PR มี 186) test ใหม่ 41 ข้อ
 
 | ไฟล์ | จำนวน | ครอบคลุม |
 | --- | --- | --- |
 | `test_energy.gd` | 14 | ค่าเริ่มต้น/regen/เพดาน, regen ตอนหมดเวลา, ค่าใช้และ `not_enough_energy` โดยสถานะไม่เปลี่ยน, รีเซ็ตระหว่าง Combat, ศัตรูไม่มี Energy, AI ไม่ใช้เกินตัว, ทุกผู้เล่นเห็น Energy ของทุกตัว |
 | `test_status_effects.gd` | 11 | tick, stack/refresh, หลายชนิดพร้อมกัน, ลำดับก่อน Energy regen, หมดอายุ, ล้มเพราะ DoT (ศัตรูและตัวละคร), Combat จบกลาง tick, modifier ขาออก/ขาเข้า |
-| `test_rogue.gd` | 12 | ทุก Skill, Enervation ทั้ง 3 ส่วนและเพดาน, Prep Time 3 ครั้งแล้วหมด, AI, การรับ Class ที่ Bandit Hideout |
+| `test_assassin.gd` (เดิม test_rogue.gd) | 12 | ทุก Skill, Enervation ทั้ง 3 ส่วนและเพดาน, Prep Time 3 ครั้งแล้วหมด, AI, การรับ Class ที่ Bandit Hideout |
 | `test_battle_view_data.gd` | 4 | `round_order`, `spd`, `exp_next`, `crit` |
 
-test ทั้งหมดผ่าน Match interface เท่านั้น ตาม [docs/testing.md](docs/testing.md) และ test เดิมที่กระทบ (Archer/Mage, Class Encounter, Guardian) ถูกปรับให้สอดคล้องกับ Energy
+test ทั้งหมดผ่าน Match interface เท่านั้น ตาม [docs/guides/testing.md](docs/guides/testing.md) และ test เดิมที่กระทบ (Archer/Mage, Class Encounter, Guardian) ถูกปรับให้สอดคล้องกับ Energy
 
 **CI ของ PR #29:** ผ่านทั้ง 2 job (headless GDScript tests 54 วินาที; export PC/browser/server พร้อม cross-platform smoke test 1 นาที 11 วินาที)
 
-**Balance** (100 seed ต่อโหมด ไม่มี `--pace` เกณฑ์ regression 70–97%) รายละเอียดใน [docs/balance.md](docs/balance.md)
+**Balance** (100 seed ต่อโหมด ไม่มี `--pace` เกณฑ์ regression 70–97%) รายละเอียดใน [docs/design/balance.md](docs/design/balance.md)
 
 | ช่วง | Single-player | Duo co-op |
 | --- | --- | --- |
@@ -296,7 +334,7 @@ test ทั้งหมดผ่าน Match interface เท่านั้น 
 | หลังเพิ่ม Energy | 85% | 82% |
 | หลังเพิ่ม Rogue และ DoT | **90%** | **86%** |
 
-**หน้าจอ:** `tools/ui_preview.gd` เล่น Match จริงผ่านคีย์บอร์ดและจับภาพทุกหน้า ผมเทียบกับภาพอ้างอิงด้วยตาเองและแก้จุดซ้อนทับหลายรอบ
+**หน้าจอ:** `tools/dev/ui_preview.gd` เล่น Match จริงผ่านคีย์บอร์ดและจับภาพทุกหน้า ผมเทียบกับภาพอ้างอิงด้วยตาเองและแก้จุดซ้อนทับหลายรอบ
 นอกจากนั้นเล่น browser build กับ server ในเครื่องผ่านหน้าลงทะเบียน → Path Voting → Combat → เลือกเป้า ภาพอยู่ที่ [`docs/screenshots/`](docs/screenshots/)
 
 ![Skill grid](docs/screenshots/combat_skill_grid.png)
@@ -304,7 +342,7 @@ test ทั้งหมดผ่าน Match interface เท่านั้น 
 ![Camp](docs/screenshots/camp_merchant.png)
 
 **ยังไม่ได้ตรวจ:** Chrome, Edge, Firefox และ Safari บนเครื่องจริง, ที่ความละเอียด 1920×1080 และขนาดตัวหนังสือใหญ่กว่าปกติ,
-และการเล่นด้วยมนุษย์จริงเพื่อยืนยัน balance กับ pacing (checklist ใน [docs/staging.md](docs/staging.md), issue #19)
+และการเล่นด้วยมนุษย์จริงเพื่อยืนยัน balance กับ pacing (checklist ใน [docs/guides/staging.md](docs/guides/staging.md), issue #19)
 
 ### 9. ผล code review
 
@@ -362,7 +400,7 @@ Claude ประเมินเอง (เต็ม 10) โดยอิงผล
 | Test coverage | 8 | มี test ตามค่าคงที่ครบ Skill, stack, ลำดับ และ modifier; หักที่ไม่มี test ล้าง status ตอน Challenge/แพ้ (P14), ไม่มี test ฝั่ง server ของ Ready count (P11) และไม่มี test อัตโนมัติของ layout |
 | Balance | 7 | อยู่ในช่วง 70–97% แต่ Single-player ขยับขึ้นเป็น 90% วัดแบบไม่มี `--pace` และยังไม่มีคนเล่นจริง |
 | ความเหมือนภาพอ้างอิงและ acceptance ของ #25/#26 | 7 | องค์ประกอบครบตามตาราง แต่ขัดเกณฑ์ "ไม่มีส่วนทับกัน" (P1), ตัวเลขลอยซ้อนกัน (P2), ตัวละครยังเป็นรูปทรง placeholder และขาดภาพ Rest กับ 1920×1080 (P7, P8) |
-| Accessibility | 6 | สีมีตัวย่อกำกับเสมอ ใช้คีย์บอร์ดได้ และเคารพการลด motion; หักที่ยังไม่ได้ตรวจตัวหนังสือใหญ่ (P8), คำอธิบายสินค้าดูได้ผ่าน tooltip ของเมาส์เท่านั้น, ช่อง cooldown กำกวม (P4) และ [accessibility.md](docs/accessibility.md) ยังไม่ครอบคลุมหน้าจอใหม่ |
+| Accessibility | 6 | สีมีตัวย่อกำกับเสมอ ใช้คีย์บอร์ดได้ และเคารพการลด motion; หักที่ยังไม่ได้ตรวจตัวหนังสือใหญ่ (P8), คำอธิบายสินค้าดูได้ผ่าน tooltip ของเมาส์เท่านั้น, ช่อง cooldown กำกวม (P4) และ [accessibility.md](docs/design/accessibility.md) ยังไม่ครอบคลุมหน้าจอใหม่ |
 | ตามมาตรฐานของรีโป (ADR/testing) | 6 | ขัด ADR-0007 ราว 700 บรรทัด (S1, S2, P6) แม้ ADR-0001 และกติกา test ผ่านหมด |
 | Maintainability | 6.5 | `StatusBook` แยกชัดและ token เปลี่ยนเป็น sprite ได้; หักที่ dead code (S4), `battle_view.gd` 744 บรรทัด (S8) และ smell ซ้ำซ้อน (S5–S11) |
 | **รวม (เฉลี่ย)** | **7.0** | ทำงานครบตามตั๋วและผ่าน CI แต่ยังไม่ถึงระดับ production ตาม ADR-0003 ก่อนแก้รายการในหัวข้อถัดไป |
@@ -386,4 +424,4 @@ Claude ประเมินเอง (เต็ม 10) โดยอิงผล
 
 **ปรับโครงสร้าง**
 10. แยก `battle_view.gd` เป็น HUD / timeline / log / banner และรวมโค้ดซ้ำใน `combat_encounter.gd` (S5–S8, S10)
-11. ให้คนเล่นจริงเพื่อยืนยัน balance กับ pacing และตรวจบน Chrome, Edge, Firefox และ Safari ตาม checklist ของ #19 พร้อมอัปเดต `docs/accessibility.md` และ `docs/testing.md`
+11. ให้คนเล่นจริงเพื่อยืนยัน balance กับ pacing และตรวจบน Chrome, Edge, Firefox และ Safari ตาม checklist ของ #19 พร้อมอัปเดต `docs/design/accessibility.md` และ `docs/guides/testing.md`

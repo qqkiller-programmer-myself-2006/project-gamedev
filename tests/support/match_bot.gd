@@ -3,7 +3,7 @@ extends RefCounted
 ## Scripted player(s) that drive a Match purely through the Match interface:
 ## it reads each human session's snapshot and sends the commands a sensible
 ## player would. Used for journey tests, the full-run regression suite and
-## the pacing simulation (tools/simulate.gd).
+## the pacing simulation (tools/dev/simulate.gd).
 
 ## Default "thinking time" per kind of decision when simulating human pacing
 ## (seconds of game time before the bot answers). Tests use no delay.
@@ -68,6 +68,7 @@ func act(session: int) -> void:
 	if view == null or snap["room"] == null:
 		return
 	var slot: int = snap["room"]["your_slot"]
+	var story: bool = snap["room"].get("story", false)
 	if slot < 0:
 		return
 	match view["phase"]:
@@ -78,6 +79,11 @@ func act(session: int) -> void:
 		"encounter", "boss":
 			var encounter = view["encounter"]
 			if encounter != null:
+				if story:
+					var combat: Dictionary = encounter.get("trial", {}) if encounter.get("kind") == "class" and encounter.get("stage") == "challenge" else encounter
+					var actor := str(combat.get("actor", ""))
+					if actor.begins_with("p"):
+						slot = int(actor.substr(1))
 				_act_in_encounter(session, slot, view, encounter)
 
 
@@ -145,7 +151,11 @@ func _act_in_encounter(session: int, slot: int, view: Dictionary, encounter: Dic
 				_send(session, {"type": "ready"})
 		"rest":
 			if not encounter["you_are_ready"] and _ready_to(session, "rest", tag + "-camp"):
-				_camp(session, slot, view, encounter)
+				if view.get("story", false):
+					for party_slot in 5:
+						_camp(session, party_slot, view, encounter)
+				else:
+					_camp(session, slot, view, encounter)
 				_send(session, {"type": "ready"})
 		"merchant":
 			if not encounter["you_are_ready"] and _ready_to(session, "merchant", tag + "-shop"):
@@ -184,12 +194,12 @@ func _camp(session: int, slot: int, view: Dictionary, encounter: Dictionary) -> 
 		for gear_slot in encounter["gear_slots"]:
 			if str(gear_slot).begins_with(entry["gear_slot"]) and not me["gear"].has(gear_slot) \
 					and not taken.has(gear_slot):
-				_send(session, {"type": "equip", "item": entry["item"], "gear_slot": gear_slot})
+				_send(session, {"type": "equip", "slot": slot, "item": entry["item"], "gear_slot": gear_slot})
 				taken[gear_slot] = true
 				break
-	var stat := str({"mage": "mag", "guardian": "def", "classless": "max_hp"}.get(me["class"], "atk"))
+	var stat := str({"mage": "int", "guardian": "con", "classless": "con", "archer": "dex", "assassin": "dex"}.get(me["class"], "str"))
 	for i in int(me["points"]):
-		_send(session, {"type": "invest", "stat": stat})
+		_send(session, {"type": "invest", "slot": slot, "stat": stat})
 
 
 func _shop(session: int, encounter: Dictionary) -> void:
@@ -207,6 +217,20 @@ func _shop(session: int, encounter: Dictionary) -> void:
 ## 3. Use a ready Skill where it makes sense.
 ## 4. Attack the weakest enemy in reach.
 func _fight(session: int, slot: int, view: Dictionary, encounter: Dictionary) -> void:
+	if view.get("story", false):
+		var snap := harness.server.snapshot(session)
+		var room = harness.server._rooms[snap["room"]["code"]]
+		var run = room.run
+		var combat = run.encounter
+		if run.encounter is ClassEncounter:
+			combat = run.encounter._trial
+		var cmd := PartyAi.decide(run, combat, slot)
+		if not cmd.is_empty():
+			if cmd.has("targets") and cmd["targets"].size() > 0:
+				cmd["target"] = cmd["targets"][0]
+			_act(session, slot, cmd)
+			return
+	
 	var me := "p%d" % slot
 	var choices: Dictionary = encounter["choices"]
 	var skills: Dictionary = choices["skills"]

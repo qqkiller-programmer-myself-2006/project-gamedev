@@ -19,9 +19,13 @@ extends RefCounted
 const PARTY_SIZE := 5
 ## In-Match command types (routed here by MatchServer during a Match).
 const COMMANDS: Array[String] = ["vote", "action", "class_choice", "buy", "ready",
-		"craft", "equip", "unequip", "invest"]
+		"craft", "equip", "unequip", "invest", "transfer_gold", "transfer_item"]
 ## Stats a character sheet is built from (crit is a ratio, the rest integers).
 const STATS: Array[String] = ["max_hp", "atk", "def", "mag", "res", "spd"]
+## Encounter types a route option may carry. Anything else is invalid route
+## data: entering it ends the Match with a `match_error` event (see
+## `_enter_encounter`), it is never treated as completed.
+const ENCOUNTER_TYPES: Array[String] = ["combat", "class", "merchant", "rest", "treasure", "story"]
 
 var number := 1
 var phase := "voting"
@@ -33,11 +37,19 @@ var vote: PathVote = null
 var last_vote: Dictionary = {}
 var encounter: Encounter = null
 ## Party-wide resources shared by every character.
-var gold := 0
+var gold: int:
+	get:
+		var sum := 0
+		for c in party:
+			sum += int(c.get("gold", 0))
+		return sum
 var inventory: Dictionary = {}
 ## Filled when the Match ends.
 var summary: Dictionary = {}
 var enemies_defeated := 0
+## Gems earned by each Party slot during this Match.
+var gems_earned: Array[int] = [0, 0, 0, 0, 0]
+var layers_passed := 0
 ## Class ids taken by at least one character during this Match.
 var classes_discovered: Array[String] = []
 ## Story Clues found, oldest first: {"id", "title", "text", "layer", "source"}
@@ -52,17 +64,24 @@ var _outbox: Array[Dictionary] = []
 var _started_at := 0.0
 var _phase_deadline := -1.0
 var _pending_option: Dictionary = {}
+var _loadouts: Array = []
+var story := false
+var story_host := 0
+var _layer_start: Dictionary = {}
 
 
-func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array[bool], match_number: int) -> void:
+func _init(match_rng: GameRng, match_clock, forest: ForestContent, humans: Array[bool], match_number: int, loadouts: Array = [], story_mode: bool = false, host_slot: int = 0) -> void:
 	rng = match_rng
 	clock = match_clock
 	content = forest
 	_humans = humans.duplicate()
 	number = match_number
+	_loadouts = loadouts.duplicate(true)
+	story = story_mode
+	story_host = host_slot
 	_started_at = clock.now()
 	_create_party()
-	gold = content.get_int("party.starting_gold", 0)
+	add_gold(content.get_int("party.starting_gold", 0))
 	for item in content.get_dict("party.starting_inventory"):
 		add_item(item, content.get_int("party.starting_inventory.%s" % item))
 	routes = RouteGenerator.generate(rng, content)
@@ -82,6 +101,18 @@ func humans() -> Array[bool]:
 	return _humans
 
 
+func voters() -> Array[bool]:
+	if story:
+		var arr: Array[bool] = [false, false, false, false, false]
+		arr[story_host] = true
+		return arr
+	return _humans
+
+
+func needs_ready(slot: int) -> bool:
+	return is_human(slot) and (not story or slot == story_host)
+
+
 ## A slot changes between human and AI control mid-Match.
 func set_human(slot: int, human: bool) -> void:
 	if _humans[slot] == human:
@@ -91,7 +122,7 @@ func set_human(slot: int, human: bool) -> void:
 		emit({"type": "slot_ai_takeover", "slot": slot, "character": party[slot]["name"]})
 	if phase == "voting" and vote != null:
 		vote.forget(slot)
-		if vote.everyone_voted(_humans):
+		if vote.everyone_voted(voters()):
 			_resolve_vote()
 	elif phase in ["encounter", "boss"] and encounter != null:
 		encounter.on_control_changed(self, slot)
@@ -113,7 +144,7 @@ func update() -> void:
 	var now: float = clock.now()
 	match phase:
 		"voting":
-			if now >= vote.deadline:
+			if vote.deadline >= 0.0 and now >= vote.deadline:
 				_resolve_vote()
 		"travel":
 			if now >= _phase_deadline:
@@ -136,6 +167,7 @@ func emit(event: Dictionary) -> void:
 func snapshot(viewer_slot: int) -> Dictionary:
 	return {
 		"number": number,
+		"story": story,
 		"phase": phase,
 		"layer": layer,
 		"layers_total": routes.size(),
@@ -170,14 +202,67 @@ func inventory_view() -> Array:
 	return out
 
 
-func add_gold(amount: int) -> void:
-	gold += amount
+func add_gold(amount: int, reward: bool = false) -> void:
+	if amount <= 0 or party.is_empty():
+		return
+	var split = amount / party.size()
+	var remainder = amount % party.size()
+	for i in party.size():
+		var character: Dictionary = party[i]
+		var share: int = split + (remainder if i == 0 else 0)
+		var bonus := 0
+		if reward and str(character.get("race", "")) == "Kobold":
+			bonus = int(round(share * 0.1))
+		character["gold"] = int(character.get("gold", 0)) + share + bonus
 
+
+func collect_ai_gold() -> void:
+	var ai_gold := 0
+	var human_slots: Array[int] = []
+	for character in party:
+		if not is_human(character["slot"]):
+			var g = int(character.get("gold", 0))
+			if g > 0:
+				ai_gold += g
+				character["gold"] = 0
+		else:
+			human_slots.append(character["slot"])
+	if ai_gold > 0 and not human_slots.is_empty():
+		var split = ai_gold / human_slots.size()
+		var remainder = ai_gold % human_slots.size()
+		for slot in human_slots:
+			party[slot]["gold"] = int(party[slot].get("gold", 0)) + split
+		if remainder > 0:
+			party[human_slots[0]]["gold"] = int(party[human_slots[0]].get("gold", 0)) + remainder
+		emit({"type": "ai_gold_transferred", "amount": ai_gold})
 
 func add_item(item: String, count: int = 1) -> void:
 	if count <= 0:
 		return
 	inventory[item] = int(inventory.get(item, 0)) + count
+
+
+func remove_item(item: String, count: int = 1) -> bool:
+	if count <= 0:
+		return false
+	var current = int(inventory.get(item, 0))
+	if current < count:
+		return false
+	if current == count:
+		inventory.erase(item)
+	else:
+		inventory[item] = current - count
+	return true
+
+
+func award_gems(slot: int, amount: int, source: String = "") -> void:
+	if story:
+		return
+	if slot < 0 or slot >= gems_earned.size() or amount <= 0:
+		return
+	gems_earned[slot] += amount
+	emit({"type": "gems_earned", "slot": slot, "amount": amount, "source": source,
+			"total": gems_earned[slot]})
 
 
 ## Records a Story Clue once. Returns false if it was already found.
@@ -229,6 +314,9 @@ func grant_exp(slot: int, amount: int) -> void:
 		var old_max: int = character["max_hp"]
 		character["level"] += 1
 		character["points"] = int(character.get("points", 0)) + content.get_int("leveling.points_per_level", 0)
+		character["points"] += _tree_level(character, "stat_points")
+		if str(character.get("race", "")) == "Human" and int(character["level"]) % 2 == 0:
+			character["points"] += 1
 		_apply_stats(character)
 		if character["hp"] > 0:
 			character["hp"] = mini(character["max_hp"], character["hp"] + character["max_hp"] - old_max)
@@ -257,9 +345,15 @@ func party_view() -> Array:
 			"spd": c["spd"],
 			"crit": c.get("crit", 0.0),
 			"points": int(c.get("points", 0)),
+			"race": c.get("race", "") if c.has("race") else "Human",
+			"boons": c.get("boons", []).duplicate(),
 			"invested": c.get("invested", {}).duplicate(),
+			"attributes": c.get("attributes", {}).duplicate(),
+			"derived": c.get("derived", {}).duplicate(),
 			"gear": _gear_view(c),
 			"controller": "human" if _humans[c["slot"]] else "ai",
+			"gold": int(c.get("gold", 0)),
+			"consumable": c.get("consumable", null),
 		})
 	return out
 
@@ -272,6 +366,15 @@ func _exp_to_next(level: int) -> int:
 
 func _create_party() -> void:
 	var members := content.get_array("party.members")
+	var ai_order: Array = content.get_array("party.ai_class_order")
+	var claimed: Array = []
+	var has_human_loadout := false
+	for candidate in _loadouts:
+		var candidate_loadout: Dictionary = candidate.get("loadout", candidate) if candidate is Dictionary else {}
+		if candidate_loadout is Dictionary and not str(candidate_loadout.get("class", "")).is_empty():
+			has_human_loadout = true
+			claimed.append(str(candidate_loadout.get("class", "")))
+	var ai_index := 0
 	for i in PARTY_SIZE:
 		var member: Dictionary = members[i] if i < members.size() else {}
 		var character := {
@@ -284,32 +387,53 @@ func _create_party() -> void:
 			"invested": {},
 			"gear": {},
 		}
+		var entry: Dictionary = _loadouts[i] if i < _loadouts.size() and _loadouts[i] is Dictionary else {}
+		var loadout: Dictionary = entry.get("loadout", entry) if entry is Dictionary else {}
+		var profile: Dictionary = entry.get("profile", {}) if entry is Dictionary else {}
+		if not _humans[i] and has_human_loadout:
+			loadout = {}
+			while ai_index < ai_order.size() and claimed.has(str(ai_order[ai_index])): ai_index += 1
+			if ai_index < ai_order.size():
+				loadout = {"class": str(ai_order[ai_index]), "race": "Human", "boons": []}
+				claimed.append(str(ai_order[ai_index]))
+				ai_index += 1
+		if not loadout.is_empty():
+			character["class"] = str(loadout.get("class", "classless"))
+			character["race"] = str(loadout.get("race", "Human"))
+			character["boons"] = loadout.get("boons", []).duplicate()
+		character["_profile"] = ProfileStore.normalize(profile)
 		_apply_stats(character)
+		character["points"] = _tree_level(character, "stat_points")
 		character["hp"] = character["max_hp"]
-		character["energy"] = content.get_int("rules.energy_start", 1)
+		character["energy"] = content.get_int("rules.energy_start", 1) + _energy_bonus(character)
 		character["energy_max"] = content.get_int("rules.energy_max", 6)
+		character["gold"] = 0
+		character["consumable"] = null
 		party.append(character)
 
 
 ## Recomputes a character's stats from its class and level, invested stat
 ## points and equipped gear (content data).
 func _apply_stats(character: Dictionary) -> void:
-	var base := content.get_dict("classes.%s.stats" % character["class"])
-	var growth := content.get_dict("leveling.growth")
-	var invest := content.get_dict("leveling.invest")
-	var invested: Dictionary = character.get("invested", {})
-	var levels: int = character["level"] - 1
-	for stat in STATS:
-		character[stat] = int(base.get(stat, 0)) + int(growth.get(stat, 0)) * levels \
-				+ int(invest.get(stat, 0)) * int(invested.get(stat, 0))
-	character["crit"] = float(base.get("crit", 0.0))
-	for item in character.get("gear", {}).values():
-		var bonus := content.get_dict("items.%s.gear.stats" % item)
-		for stat in bonus:
-			if stat == "crit":
-				character["crit"] = float(character["crit"]) + float(bonus[stat])
-			elif STATS.has(stat):
-				character[stat] = int(character[stat]) + int(bonus[stat])
+	Attributes.recalculate(character, content)
+	var tree: Dictionary = character.get("_profile", {}).get("class_trees", {}).get(character["class"], {})
+	var prestige := int(character.get("_profile", {}).get("prestige", {}).get(character["class"], 0))
+	var hp_bonus := 0.02 * int(tree.get("vitality", 0)) + 0.01 * prestige
+	character["max_hp"] = int(round(float(character["max_hp"]) * (1.0 + hp_bonus)))
+	character["damage_multiplier"] = 1.0 + 0.02 * int(tree.get("might", 0)) + 0.01 * prestige
+	character["crit"] = float(character.get("crit", 0.0)) + 0.01 * int(tree.get("precision", 0))
+	character["derived"]["initiative"] = float(character["derived"].get("initiative", character["spd"])) + floori(int(tree.get("swiftness", 0)) / 2)
+
+
+func _tree_level(character: Dictionary, node: String) -> int:
+	return int(character.get("_profile", {}).get("class_trees", {}).get(character.get("class", ""), {}).get(node, 0))
+
+
+func _energy_bonus(character: Dictionary) -> int:
+	var bonus := 1 if _tree_level(character, "reserves") >= 5 else 0
+	if str(character.get("race", "Human")) == "Lunaeia":
+		bonus += 1
+	return bonus
 
 
 # --- Camp: crafting, gear and stat points (ADR-0011) --------------------------
@@ -452,10 +576,184 @@ func _begin_layer(next_layer: int) -> void:
 	phase = "voting"
 	encounter = null
 	var seconds := content.get_float("rules.vote_seconds", 20.0)
-	var deadline: float = clock.now() + seconds
+	var deadline: float = -1.0 if story else clock.now() + seconds
 	vote = PathVote.new(layer, routes[layer - 1], deadline, seconds)
 	var view := vote.view()
 	emit({"type": "vote_started", "layer": layer, "options": view["options"], "deadline": deadline})
+	if story:
+		_layer_start = {
+			"version": 1, "seed": rng.save_state()["seed"], "rng": rng.save_state(), "layer": layer,
+			"route": routes.duplicate(true), "party": party.duplicate(true),
+			"stash": inventory.duplicate(true), "gold": gold,
+			"clues": clues.duplicate(true), "classes_discovered": classes_discovered.duplicate(),
+			"enemies_defeated": enemies_defeated, "layers_passed": layers_passed,
+			"gems_earned": gems_earned.duplicate(), "last_vote": last_vote.duplicate(true),
+		}
+		emit({"type": "story_layer_started", "layer": layer})
+
+
+func export_layer_start() -> Dictionary:
+	return _layer_start.duplicate(true) if story else {}
+
+
+static func valid_story_save(data: Dictionary, forest: ForestContent) -> bool:
+	if int(data.get("version", -1)) != 1:
+		return false
+	var route = data.get("route")
+	var saved_party = data.get("party")
+	var next_layer := int(data.get("layer", 0))
+	if not (route is Array) or not (saved_party is Array) or saved_party.size() != PARTY_SIZE:
+		return false
+	if next_layer < 1 or next_layer > route.size() or route.size() != forest.get_int("journey.layers", 5):
+		return false
+	if not (data.get("rng") is Dictionary) or not (data.get("stash") is Dictionary) or not (data.get("clues") is Array):
+		return false
+	var gems_earned = data.get("gems_earned")
+	if not (gems_earned is Array) or gems_earned.size() != PARTY_SIZE:
+		return false
+	var saved_gold = data.get("gold")
+	if not _is_whole_number(saved_gold) or int(saved_gold) < 0 or int(saved_gold) > 1000000:
+		return false
+	var valid_clues := forest.get_dict("story.clues")
+	var seen_clues := {}
+	for clue in data["clues"]:
+		if not (clue is Dictionary) or not _has_exact_keys(clue,
+				["id", "title", "text", "layer", "source"]):
+			return false
+		if not (clue["id"] is String) or not (clue["title"] is String) \
+				or not (clue["text"] is String) or not _is_whole_number(clue["layer"]) \
+				or not (clue["source"] is String):
+			return false
+		var clue_id := str(clue["id"])
+		if not valid_clues.has(clue_id) or seen_clues.has(clue_id):
+			return false
+		var canonical: Dictionary = valid_clues[clue_id]
+		if clue["title"] != str(canonical.get("title", clue_id)) \
+				or clue["text"] != str(canonical.get("text", "")):
+			return false
+		if int(clue["layer"]) < 1 or int(clue["layer"]) > forest.get_int("journey.layers", 5) \
+				or str(clue["source"]) not in ["story", "combat"]:
+			return false
+		seen_clues[clue_id] = true
+	for item in data["stash"]:
+		if str(item).is_empty() or not forest.get_value("items.%s" % item, null):
+			return false
+		if not (data["stash"][item] is int or data["stash"][item] is float) or int(data["stash"][item]) <= 0:
+			return false
+	var max_level = forest.get_int("rules.max_level", 20)
+	var pts_per_lvl = forest.get_int("leveling.points_per_level", 0)
+	var party_gold := 0
+	for character in saved_party:
+		if not (character is Dictionary): return false
+		for key in ["class", "hp", "max_hp", "level", "points", "invested", "attributes", "gear", "gold"]:
+			if not character.has(key): return false
+		if not (character["class"] is String) or not forest.get_dict("classes").has(character["class"]):
+			return false
+		if not _is_whole_number(character["level"]) or not _is_whole_number(character["points"]) \
+				or not _is_whole_number(character["gold"]):
+			return false
+		var level = int(character["level"])
+		if level < 1 or level > max_level or int(character["points"]) < 0 \
+				or int(character["gold"]) < 0 or int(character["gold"]) > 1000000:
+			return false
+		if not (character["attributes"] is Dictionary) or not (character["invested"] is Dictionary) \
+				or not (character["gear"] is Dictionary):
+			return false
+		for gear_slot in character["gear"]:
+			var item = str(character["gear"][gear_slot])
+			if item.is_empty() or not forest.get_value("items.%s" % item, null):
+				return false
+		var consumable = character.get("consumable")
+		if consumable != null:
+			if not (consumable is Dictionary) or not consumable.has("item") or not consumable.has("count"):
+				return false
+			var item = str(consumable["item"])
+			if item.is_empty() or not forest.get_value("items.%s" % item, null):
+				return false
+		var expected_total: int = (level - 1) * pts_per_lvl
+		if str(character.get("race", "")) == "Human":
+			expected_total += floori(float(level) / 2.0)
+		var invested: Dictionary = character.get("invested", {})
+		var sum_invested := 0
+		for stat in invested:
+			if stat not in Attributes.ATTRS or not _is_whole_number(invested[stat]) or int(invested[stat]) < 0:
+				return false
+			sum_invested += int(invested[stat])
+		if sum_invested + int(character.get("points", 0)) != expected_total:
+			return false
+		var saved_boons = character.get("boons", [])
+		if not saved_boons is Array:
+			return false
+		var expected := {
+			"class": character["class"], "level": level,
+			"race": str(character.get("race", "")),
+			"boons": saved_boons.duplicate(),
+			"invested": invested.duplicate(true), "gear": character["gear"].duplicate(true),
+			"attributes": {}, "derived": {},
+		}
+		Attributes.recalculate(expected, forest)
+		var attributes: Dictionary = character["attributes"]
+		if not _has_exact_keys(attributes, Attributes.ATTRS):
+			return false
+		for stat in Attributes.ATTRS:
+			if not _is_whole_number(attributes[stat]) \
+					or int(attributes[stat]) != int(expected["attributes"][stat]):
+				return false
+		party_gold += int(character["gold"])
+	if party_gold != int(saved_gold):
+		return false
+	return true
+
+
+static func _is_whole_number(value) -> bool:
+	return value is int or (value is float and is_equal_approx(value, floorf(value)))
+
+
+static func _has_exact_keys(data: Dictionary, keys: Array) -> bool:
+	if data.size() != keys.size():
+		return false
+	for key in keys:
+		if not data.has(key):
+			return false
+	return true
+
+
+func restore_layer_start(data: Dictionary) -> void:
+	routes = data["route"].duplicate(true)
+	party.clear()
+	for character in data["party"]:
+		party.append(character.duplicate(true))
+	inventory = data["stash"].duplicate(true)
+	clues.clear()
+	for clue in data["clues"]:
+		clues.append(clue.duplicate(true))
+	classes_discovered.clear()
+	for class_id in data.get("classes_discovered", []):
+		classes_discovered.append(str(class_id))
+	enemies_defeated = int(data.get("enemies_defeated", 0))
+	layers_passed = int(data.get("layers_passed", 0))
+	for i in gems_earned.size():
+		gems_earned[i] = int(data.get("gems_earned", [0, 0, 0, 0, 0])[i])
+	last_vote = data.get("last_vote", {}).duplicate(true)
+	rng.restore_state(data["rng"])
+	_begin_layer(int(data["layer"]))
+
+
+## DEV ONLY (Playtest, see DevJump): drops the current Vote/Encounter and starts
+## `option` on `to_layer` right away; an empty option starts the Guardian Boss.
+func dev_jump(to_layer: int, option: Dictionary) -> void:
+	vote = null
+	_pending_option = {}
+	_phase_deadline = -1.0
+	if option.is_empty():
+		layer = routes.size()
+		layers_passed = routes.size()
+		_reach_boss()
+		return
+	layer = to_layer
+	layers_passed = to_layer - 1
+	_pending_option = option
+	_enter_encounter()
 
 
 func _handle_vote(slot: int, cmd: Dictionary) -> Dictionary:
@@ -465,7 +763,7 @@ func _handle_vote(slot: int, cmd: Dictionary) -> Dictionary:
 	if not error.is_empty():
 		return {"ok": false, "error": error}
 	emit({"type": "vote_cast", "layer": layer, "slot": slot})
-	if vote.everyone_voted(_humans):
+	if vote.everyone_voted(voters()):
 		_resolve_vote()
 	return {"ok": true}
 
@@ -500,7 +798,17 @@ func _resolve_vote() -> void:
 		_phase_deadline = clock.now() + travel
 
 
+## Fail fast on invalid route data: an unsupported Encounter type ends the
+## Match (as a defeat, so no client needs a new phase) with a `match_error`
+## event {error: "unsupported_encounter", encounter_type, layer} and the same
+## keys in the summary. It never counts as a completed Encounter or a passed
+## Layer.
 func _enter_encounter() -> void:
+	var type := str(_pending_option.get("type", ""))
+	if not ENCOUNTER_TYPES.has(type):
+		emit({"type": "match_error", "error": "unsupported_encounter", "encounter_type": type, "layer": layer})
+		_end_match("defeat", {"error": "unsupported_encounter", "encounter_type": type})
+		return
 	phase = "encounter"
 	encounter = _make_encounter(_pending_option)
 	emit({
@@ -513,6 +821,7 @@ func _enter_encounter() -> void:
 	_after_encounter_step()
 
 
+## Only called for a type in ENCOUNTER_TYPES (checked by `_enter_encounter`).
 func _make_encounter(option: Dictionary) -> Encounter:
 	match str(option["type"]):
 		"combat":
@@ -527,7 +836,8 @@ func _make_encounter(option: Dictionary) -> Encounter:
 			return TreasureEncounter.new(option)
 		"story":
 			return StoryEncounter.new(option)
-	return PlaceholderEncounter.new(option)
+	push_error("MatchRun: unsupported encounter type '%s'" % str(option.get("type", "")))
+	return null
 
 
 ## Moves the journey on once the current Encounter has finished.
@@ -539,6 +849,7 @@ func _after_encounter_step() -> void:
 		if encounter.result == "defeat":
 			_end_match("defeat")
 			return
+	layers_passed += 1
 	if phase == "boss":
 		_end_match("victory")
 		return
@@ -559,9 +870,15 @@ func _reach_boss() -> void:
 	_after_encounter_step()
 
 
-func _end_match(outcome: String) -> void:
+func _end_match(outcome: String, failure: Dictionary = {}) -> void:
 	var reached_boss := phase == "boss"
 	phase = outcome
+	var base_gems := layers_passed * content.get_int("meta.gems.layer", 10)
+	if outcome == "victory":
+		base_gems += content.get_int("meta.gems.boss", 50)
+	base_gems += clues.size() * content.get_int("meta.gems.story_clue", 5)
+	for slot in gems_earned.size():
+		gems_earned[slot] += base_gems
 	encounter = null
 	vote = null
 	var ending := content.get_dict("ending.%s" % outcome)
@@ -579,14 +896,48 @@ func _end_match(outcome: String) -> void:
 		"clues": clues.duplicate(true),
 		"gold": gold,
 		"party": party_view(),
+		"gems_earned": gems_earned.duplicate(),
 	}
+	summary.merge(failure)
 	emit({"type": "match_ended", "result": outcome, "summary": summary})
 
 
 func _encounter_view(viewer_slot: int) -> Variant:
 	if phase not in ["encounter", "boss"] or encounter == null:
 		return null
-	var view := encounter.view(self, viewer_slot)
+	var actor_slot := viewer_slot
+	if story:
+		var actor_id := ""
+		if encounter is CombatEncounter:
+			actor_id = str(encounter.actor)
+		elif encounter is ClassEncounter and encounter.stage == "challenge":
+			actor_id = str(encounter._trial.actor)
+		if actor_id.begins_with("p"):
+			actor_slot = int(actor_id.substr(1))
+	var view := encounter.view(self, actor_slot)
 	view["type"] = encounter.option["type"]
 	view["name"] = encounter.option["name"]
 	return view
+
+func transfer_item(slot: int, item: String, to: int) -> String:
+	if str(content.get_value("items.%s.kind" % item, "")) != "consumable":
+		return "not_consumable"
+	if to < 0 or to >= party.size():
+		return "invalid_target"
+	if not remove_item(item, 1):
+		return "not_in_stash"
+	var target_char = party[to]
+	if target_char["consumable"] != null:
+		var current = target_char["consumable"]
+		if current["item"] == item:
+			current["count"] = int(current["count"]) + 1
+		else:
+			# Swap
+			var old_item = current["item"]
+			var old_count = current["count"]
+			add_item(old_item, old_count)
+			target_char["consumable"] = {"item": item, "count": 1}
+	else:
+		target_char["consumable"] = {"item": item, "count": 1}
+	emit({"type": "item_transferred", "from": slot, "to": to, "item": item})
+	return ""
