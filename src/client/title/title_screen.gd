@@ -10,6 +10,9 @@ var _seed: LineEdit
 var _content: Control
 var _view := "menu"
 var _story_picks: Array[OptionButton] = []
+var _story_preview_portrait: TextureRect
+var _story_preview_name: Label
+var _story_preview_class: Label
 ## DEV Playtest panel: [DevJump target, label] and the player's Class ("" = keep Classless).
 const PLAYTEST_STARTS := [
 	["journey", "Journey start"], ["combat", "Combat (Layer 1)"], ["merchant", "Merchant"],
@@ -180,17 +183,43 @@ func _show_story_setup() -> void:
 	_view = "story_setup"
 	_clear_content()
 	_story_picks.clear()
+	_story_preview_portrait = null
+	_story_preview_name = null
+	_story_preview_class = null
 	var body := UiKit.vbox(8)
-	body.custom_minimum_size = Vector2(450, 0)
-	var panel := UiKit.panel(body)
-	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var scroll := ScrollContainer.new()
+	scroll.name = "StorySetupScroll"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.follow_focus = true
+	scroll.add_child(body)
+	var panel := UiKit.panel(scroll)
+	# Responsive: stretch across the viewport (capped) so the roster and the
+	# framed preview sit side-by-side at 1280x720 and wrap at narrow widths.
+	panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	panel.anchor_bottom = 1.0
+	var margin := 88.0
+	var vw := get_viewport_rect().size.x
+	if vw > 0.0:
+		margin = maxf(24.0, minf(88.0, (vw - 1020.0) / 2.0))
+	panel.offset_left = margin
+	panel.offset_right = -margin
+	panel.offset_top = _top(175)
+	panel.offset_bottom = -24
 	panel.set_meta("base_y", 175.0)
-	panel.position = Vector2(88, _top(175))
-	panel.size = Vector2(490, 0)
 	add_child(panel)
 	_content = panel
 	body.add_child(UiKit.label("STORY PARTY", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.para("Choose a Class for every traveller.", "dim"))
+	var columns := UiKit.flow(12)
+	columns.set_meta("story_columns", true)
+	body.add_child(columns)
+	var roster := UiKit.vbox(8)
+	roster.custom_minimum_size = Vector2(420, 0)
+	roster.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	columns.add_child(roster)
 	for i in STORY_NAMES.size():
 		var row := UiKit.hbox(10)
 		var name_label := UiKit.label(STORY_NAMES[i], "body")
@@ -201,16 +230,75 @@ func _show_story_setup() -> void:
 		for class_id in STORY_CLASSES:
 			pick.add_item(class_id.capitalize())
 		pick.select(i)
+		pick.set_meta("story_index", i)
 		_story_picks.append(pick)
 		row.add_child(pick)
-		body.add_child(row)
+		roster.add_child(row)
+		var row_index := i
+		pick.item_selected.connect(_on_story_pick_changed.bind(row_index))
+		pick.focus_entered.connect(_on_story_pick_focused.bind(row_index))
+		pick.mouse_entered.connect(_on_story_pick_focused.bind(row_index))
+	var preview_body := UiKit.vbox(8)
+	preview_body.custom_minimum_size = Vector2(260, 0)
+	preview_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var preview_panel := UiKit.panel(preview_body, "HighlightPanel")
+	preview_panel.name = "StoryPreview"
+	preview_panel.custom_minimum_size = Vector2(280, 0)
+	preview_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	columns.add_child(preview_panel)
+	_story_preview_name = UiKit.pixel_label(STORY_NAMES[0], "heading", UiKit.ACCENT)
+	_story_preview_name.name = "StoryPreviewName"
+	_story_preview_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	preview_body.add_child(_story_preview_name)
+	_story_preview_portrait = TextureRect.new()
+	_story_preview_portrait.name = "StoryPreviewPortrait"
+	_story_preview_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_story_preview_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_story_preview_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_story_preview_portrait.custom_minimum_size = Vector2(220, 220)
+	_story_preview_portrait.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_story_preview_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	preview_body.add_child(_story_preview_portrait)
+	_story_preview_class = UiKit.pixel_label("", "body")
+	_story_preview_class.name = "StoryPreviewClass"
+	_story_preview_class.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	preview_body.add_child(_story_preview_class)
 	var begin := UiKit.primary("Begin Story", _begin_story)
 	Icons.apply_to_button(begin, "story_mode", _app.settings.text_scale)
 	body.add_child(begin)
 	var back := UiKit.button("Back [Esc]", _show_play)
 	Icons.apply_to_button(back, "back", _app.settings.text_scale)
 	body.add_child(back)
+	_update_story_preview(0)
 	UiKit.focus_first(body)
+
+static func _story_portrait_path(class_id: String) -> String:
+	return "res://assets/heroes/%s/portrait.png" % class_id
+
+func _on_story_pick_changed(_selected: int, row: int) -> void:
+	_update_story_preview(row)
+
+func _on_story_pick_focused(row: int) -> void:
+	_update_story_preview(row)
+
+func _update_story_preview(row: int) -> void:
+	if _story_picks.is_empty():
+		return
+	var index := clampi(row, 0, _story_picks.size() - 1)
+	var pick := _story_picks[index]
+	if not is_instance_valid(pick):
+		return
+	var class_id: String = STORY_CLASSES[clampi(pick.selected, 0, STORY_CLASSES.size() - 1)]
+	if is_instance_valid(_story_preview_name):
+		_story_preview_name.text = STORY_NAMES[index]
+	if is_instance_valid(_story_preview_class):
+		_story_preview_class.text = class_id.capitalize()
+	if is_instance_valid(_story_preview_portrait):
+		var path := _story_portrait_path(class_id)
+		if ResourceLoader.exists(path):
+			_story_preview_portrait.texture = load(path)
+		else:
+			_story_preview_portrait.texture = null
 
 func _begin_story() -> void:
 	var classes := []
@@ -297,7 +385,14 @@ func _top(y: float) -> float:
 func _notification(what: int) -> void:
 	# The text size can change while the title is open (Settings).
 	if what == NOTIFICATION_THEME_CHANGED and _app != null and is_instance_valid(_content):
-		_content.position.y = _top(float(_content.get_meta("base_y", 150.0)))
+		var top := _top(float(_content.get_meta("base_y", 150.0)))
+		if _view == "story_setup":
+			# Story setup panel is anchored TOP_WIDE with a finite height
+			# (offset_bottom stays at -24); only move the top so text-scale
+			# changes keep it anchored without collapsing it.
+			_content.offset_top = top
+		else:
+			_content.position.y = top
 
 func _clear_content() -> void:
 	if is_instance_valid(_content):
