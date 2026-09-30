@@ -208,6 +208,8 @@ func _process(delta: float) -> void:
 		_set_animation("idle")
 		return
 	animation_elapsed += delta
+	if animation == "hurt":
+		queue_redraw()
 	var frame_time := 1.0 / maxf(1.0, sprite_set.fps(animation))
 	while animation_elapsed >= frame_time:
 		animation_elapsed -= frame_time
@@ -270,6 +272,9 @@ func _fit_bar_caption(bar: Control, factor: float) -> void:
 ## arrows/slashes/orbs, so attack borrows the run row and dead the hurt row; the
 ## character then keeps one size while effects reach past it.
 func _body_height(anim: String) -> float:
+	var override: Dictionary = sprite_set.data.get("body_height", {})
+	if override.has(anim):
+		return float(override[anim])
 	match anim:
 		"attack":
 			for reference in ["run", "walk", "idle"]:
@@ -296,12 +301,18 @@ func _draw_figure(feet: Vector2) -> void:
 		var top_left := Vector2(roundf(feet.x - canvas.x * scale * 0.5),
 				roundf(feet.y - sprite_set.baseline(animation) * scale + bob))
 		var rect := Rect2(top_left, canvas * scale)
+		var frame_tint := Color.WHITE
+		if animation == "hurt" and bool(sprite_set.data.get("hurt_shake", false)):
+			# No dedicated hurt frames: flash red and shake instead of freezing.
+			var decay := 1.0 - float(animation_frame) / maxf(1.0, animation_frames.size())
+			rect.position.x += sin(animation_elapsed * 70.0 + animation_frame * 2.0) * 5.0 * decay
+			frame_tint = Color(1.0, 0.55, 0.55)
 		if sprite_set.mirrored(animation):
 			draw_set_transform(top_left + Vector2(rect.size.x, 0), 0.0, Vector2(-1, 1))
-			draw_texture_rect(animation_frames[animation_frame], Rect2(Vector2.ZERO, rect.size), false)
+			draw_texture_rect(animation_frames[animation_frame], Rect2(Vector2.ZERO, rect.size), false, frame_tint)
 			draw_set_transform(Vector2.ZERO)
 		else:
-			draw_texture_rect(animation_frames[animation_frame], rect, false)
+			draw_texture_rect(animation_frames[animation_frame], rect, false, frame_tint)
 		return
 	var body := tint
 	var dark := tint.darkened(0.45)

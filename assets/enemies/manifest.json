@@ -44,8 +44,16 @@
       "hurt": 455,
       "die": 455
     },
-    "size_px": 96,
+    "size_px": 128,
     "faces": "right",
+    "body_height": {
+      "attack": 362
+    },
+    "fps": {
+      "idle": 6,
+      "attack": 10
+    },
+    "hurt_shake": true,
     "variants": []
   },
   "giant_spider": {
