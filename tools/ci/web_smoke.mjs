@@ -11,11 +11,13 @@ import { spawn } from 'node:child_process';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // Resolved through NODE_PATH so a globally installed Playwright works too.
 const { chromium } = createRequire(import.meta.url)('playwright');
 const GODOT = process.env.GODOT || 'godot';
-const ROOT = resolve(new URL('..', import.meta.url).pathname);
+// This file lives in tools/ci/, so the project root is two levels up.
+const ROOT = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const WEB_DIR = join(ROOT, 'build', 'web');
 const WS_PORT = 18000 + Math.floor(Math.random() * 1000);
 const HTTP_PORT = WS_PORT + 1000;

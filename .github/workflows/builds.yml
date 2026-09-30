@@ -56,12 +56,6 @@ jobs:
           ~/godot/godot --headless --path . --export-release "Linux Server" build/server/forest-server.x86_64
           ls -la build/web build/windows build/server
 
-      - name: DIAG server start (temporary)
-        continue-on-error: true
-        run: |
-          set +e; timeout 25 ~/godot/godot --headless --verbose --path . -- --server --port=18999 > /tmp/diag.log 2>&1; echo "exit=$?"
-          tail -60 /tmp/diag.log
-
       - name: Cross-platform smoke test (headless server + browser build + PC client)
         run: |
           mkdir -p /tmp/pw && cd /tmp/pw && npm init -y >/dev/null && npm install --silent playwright@1.56.1
