@@ -114,6 +114,9 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 func build(view: Dictionary, encounter: Dictionary) -> void:
 	_encounter = encounter
 	if _inspect < 0: _inspect = maxi(0, _screen.your_slot())
+	# T34: build() tears down _columns/_bottom, so remember scroll positions
+	# and the focused control first and restore them after the rebuild.
+	var camp_state := _snapshot_camp_state()
 	_region.text = "%s (%d/%d)" % [UiText.region_of(view), int(view.get("layer", 0)), int(view.get("layers_total", 5))]
 	var merchant := str(encounter.get("kind", "")) == "merchant"
 	_encounter_icon.texture = Icons.texture("merchant") if merchant else Icons.texture("rest")
@@ -123,8 +126,99 @@ func build(view: Dictionary, encounter: Dictionary) -> void:
 	_deadline = encounter.get("deadline", encounter.get("ends_at"))
 	_build_columns(view, merchant)
 	_build_bottom()
+	_restore_camp_state(camp_state)
 	tick()
 	_app.hint("merchant" if merchant else "rest")
+
+
+## T34: the rebuild above frees every ScrollContainer and search box, so
+## capture them here (called before _build_columns) and hand the snapshot to
+## _restore_camp_state after the rebuild. Scrolls are keyed by stable
+## pre-order traversal index because the nodes themselves are freed.
+func _snapshot_camp_state() -> Dictionary:
+	var snap := {"scrolls": [], "focus_id": "", "edit_text": "", "caret": -1}
+	if is_instance_valid(_columns):
+		var scrolled: Array = []
+		_collect_scrolls(_columns, scrolled)
+		for scroll in scrolled:
+			(snap["scrolls"] as Array).append({"h": (scroll as ScrollContainer).scroll_horizontal,
+					"v": (scroll as ScrollContainer).scroll_vertical})
+	var focused: Control = null
+	var viewport := get_viewport()
+	if viewport != null:
+		focused = viewport.gui_get_focus_owner()
+	if focused != null and is_instance_valid(focused) and is_ancestor_of(focused):
+		if focused.has_meta("focus_id"):
+			snap["focus_id"] = str(focused.get_meta("focus_id"))
+		if focused is LineEdit:
+			snap["edit_text"] = focused.text
+			snap["caret"] = focused.caret_column
+		elif focused is TextEdit:
+			snap["edit_text"] = focused.text
+			snap["caret"] = (focused as TextEdit).get_caret_column((focused as TextEdit).get_caret_line())
+	return snap
+
+
+func _restore_camp_state(snap: Dictionary) -> void:
+	if snap.is_empty() or not is_instance_valid(_columns):
+		return
+	# Restore focus/text first: setting LineEdit text emits text_changed,
+	# which repopulates the list body, so scrolls must be applied after.
+	var focus_id := str(snap.get("focus_id", ""))
+	if not focus_id.is_empty():
+		var target := _find_by_focus_id(self, focus_id)
+		if target != null and is_instance_valid(target):
+			if target is LineEdit and not str(snap.get("edit_text", "")).is_empty():
+				# Search text already survives via _left_search/_inventory_search;
+				# re-apply it (and the caret) so typing continues where it left off.
+				# Block signals: the matching filter closure would needlessly
+				# rebuild the list body (and reset its scroll) for the same text.
+				(target as LineEdit).set_block_signals(true)
+				(target as LineEdit).text = str(snap["edit_text"])
+				(target as LineEdit).caret_column = clampi(int(snap.get("caret", -1)), 0, (target as LineEdit).text.length())
+				(target as LineEdit).set_block_signals(false)
+			elif target is TextEdit and snap.has("edit_text"):
+				(target as TextEdit).set_block_signals(true)
+				(target as TextEdit).text = str(snap["edit_text"])
+				(target as TextEdit).set_block_signals(false)
+			if target is Control and (target as Control).focus_mode != Control.FOCUS_NONE and (target as Control).is_inside_tree():
+				(target as Control).grab_focus()
+				(target as Control).call_deferred("grab_focus")
+	var fresh: Array = []
+	_collect_scrolls(_columns, fresh)
+	var wanted: Array = snap.get("scrolls", [])
+	for i in mini(wanted.size(), fresh.size()):
+		var entry: Dictionary = wanted[i]
+		var scroll: ScrollContainer = fresh[i]
+		scroll.scroll_horizontal = int(entry.get("h", 0))
+		scroll.scroll_vertical = int(entry.get("v", 0))
+		# Layout settles after build; re-apply once ready so positions stick.
+		scroll.set_deferred("scroll_horizontal", int(entry.get("h", 0)))
+		scroll.set_deferred("scroll_vertical", int(entry.get("v", 0)))
+
+
+## T34: shortcut suppression predicate. CodeEdit extends TextEdit,
+## so `is TextEdit` covers all three text editors.
+static func _is_text_editor(node: Node) -> bool:
+	return node is LineEdit or node is TextEdit
+
+
+func _collect_scrolls(node: Node, out: Array) -> void:
+	if node is ScrollContainer:
+		out.append(node)
+	for child in node.get_children():
+		_collect_scrolls(child, out)
+
+
+func _find_by_focus_id(node: Node, focus_id: String) -> Node:
+	if node.has_meta("focus_id") and str(node.get_meta("focus_id")) == focus_id:
+		return node
+	for child in node.get_children():
+		var found := _find_by_focus_id(child, focus_id)
+		if found != null:
+			return found
+	return null
+
 
 func _build_columns(view: Dictionary, merchant: bool) -> void:
 	UiKit.clear(_columns)
@@ -211,11 +305,12 @@ func _scroll_body(body: Control) -> ScrollContainer:
 	scroll.add_child(body)
 	return scroll
 
-func _search_box(text: String, on_change: Callable) -> LineEdit:
+func _search_box(text: String, on_change: Callable, focus_id: String) -> LineEdit:
 	var search := LineEdit.new()
 	search.placeholder_text = "Search..."
 	search.text = text
 	search.clear_button_enabled = true
+	search.set_meta("focus_id", focus_id)
 	search.text_changed.connect(on_change)
 	return search
 
@@ -229,7 +324,7 @@ func _left_panel(view: Dictionary, merchant: bool) -> Control:
 	var body := UiKit.vbox(5)
 	root.add_child(_search_box(_left_search, func(value: String) -> void:
 		_left_search = value
-		_populate_left(view, merchant, body)))
+		_populate_left(view, merchant, body), "camp_search_left"))
 	root.add_child(_scroll_body(body))
 	_populate_left(view, merchant, body)
 	return root
@@ -327,7 +422,7 @@ func _inventory_panel(view: Dictionary) -> Control:
 	var body := UiKit.vbox(5)
 	root.add_child(_search_box(_inventory_search, func(value: String) -> void:
 		_inventory_search = value
-		_populate_inventory(view, body)))
+		_populate_inventory(view, body), "camp_search_inventory"))
 	root.add_child(_scroll_body(body))
 	_populate_inventory(view, body)
 	var you := _character(view, _acting_slot())
@@ -510,8 +605,11 @@ func tick() -> void:
 	_countdown.add_theme_color_override("font_color", UiKit.WARN if left <= 5.0 else UiKit.TEXT)
 
 func handle_key(key: int) -> bool:
-	var focused := get_viewport().gui_get_focus_owner()
-	if focused is LineEdit:
+	var viewport := get_viewport()
+	var focused: Control = viewport.gui_get_focus_owner() if viewport != null else null
+	# T34: while a text editor has focus, typing must never fire camp
+	# shortcuts (r = Ready, 1-9 = buy/craft). Swallow everything except Esc.
+	if _is_text_editor(focused):
 		if key == KEY_ESCAPE:
 			focused.release_focus()
 			focus_default()
@@ -541,6 +639,8 @@ func handle_key(key: int) -> bool:
 func reset() -> void:
 	_inspect = -1
 	_category = ""
+	_left_search = ""
+	_inventory_search = ""
 	_left_mode = "craft"
 	_inventory_mode = "inventory"
 	_close_invest_panel()
