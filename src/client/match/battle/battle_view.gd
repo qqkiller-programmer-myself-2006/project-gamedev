@@ -167,20 +167,18 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 
 	_banner = PanelContainer.new()
 	_banner.theme_type_variation = "BannerPanel"
-	_banner.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	_banner.offset_top = 550
-	_banner.offset_bottom = 620
-	_banner.pivot_offset = Vector2(640, 35)
+	_banner.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_banner.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_banner.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_banner.offset_top = -280
+	_banner.offset_bottom = -210
+	_banner.resized.connect(func() -> void: _banner.pivot_offset = _banner.size * 0.5)
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_banner_label = UiKit.pixel_label("", "title")
 	_banner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_banner.add_child(_banner_label)
 	_banner.visible = false
 	add_child(_banner)
-
-
-func has_blocking_banner() -> bool:
-	return is_instance_valid(_banner) and _banner.visible
 
 
 ## Rebuilds everything that depends on the snapshot.
@@ -213,7 +211,11 @@ func build(view: Dictionary, combat: Dictionary) -> void:
 func tick() -> void:
 	if _countdown == null or not is_instance_valid(_countdown):
 		return
-	if _deadline == null:
+	if not _combat.get("your_turn", false):
+		_countdown.text = _waiting_text()
+		_countdown.remove_theme_color_override("font_color")
+		return
+	if _deadline == null or float(_deadline) < 0.0:
 		_countdown.text = ""
 		return
 	var left := _app.seconds_left(_deadline)
@@ -284,26 +286,17 @@ func announce(text: String) -> void:
 	_banner_label.text = text
 	_banner.visible = true
 	_banner.rotation_degrees = -1.0
-	_set_action_row_visible(false)
-	if _combat_grid != null and is_instance_valid(_combat_grid):
-		_combat_grid.visible = false
-	if _bottom != null and _bottom.get_child_count() > 0:
-		_bottom.get_child(0).visible = false
 	if _banner_tween != null:
 		_banner_tween.kill()
 	_banner.modulate.a = 1.0
-	_banner_tween = create_tween()
-	_banner_tween.tween_interval(1.6)
-	if not _app.settings.reduced_motion:
-		_banner_tween.tween_property(_banner, "modulate:a", 0.0, 0.3)
-	_banner_tween.tween_callback(func() -> void:
-		_banner.visible = false
-		_set_action_row_visible(true)
-		if _combat_grid != null and is_instance_valid(_combat_grid):
-			_combat_grid.visible = true
-		if _bottom != null and _bottom.get_child_count() > 0:
-			_bottom.get_child(0).visible = true
-	)
+	if is_inside_tree():
+		_banner_tween = create_tween()
+		_banner_tween.tween_interval(0.9 if _app.settings.reduced_motion else 0.6)
+		if not _app.settings.reduced_motion:
+			_banner_tween.tween_property(_banner, "modulate:a", 0.0, 0.3)
+		_banner_tween.tween_callback(func() -> void:
+			_banner.visible = false
+		)
 
 
 func _set_action_row_visible(visible: bool) -> void:
@@ -381,7 +374,7 @@ func _build_header(view: Dictionary) -> void:
 			var box := UiKit.vbox(2)
 			var target := "the whole Party" if telegraph["target"] == "all" else _screen.name_of(str(telegraph["target"]))
 			box.add_child(UiKit.para("WARNING: %s next turn, aimed at %s!" % [telegraph["name"], target], "body", UiKit.WARN))
-			var advice := "Defend [D] to halve it"
+			var advice := "Guard to halve it"
 			advice += ", or raise Shield Wall." if telegraph["target"] == "all" else ", or have a Guardian Protect them."
 			box.add_child(UiKit.para(advice, "small"))
 			_header.add_child(UiKit.panel(box, "HudWarnPanel"))
@@ -605,8 +598,6 @@ func _build_bottom(view: Dictionary) -> void:
 	if your_turn:
 		var actions := UiKit.hbox(8)
 		actions.set_meta("combat_action_row", true)
-		# A rebuild during an action banner must keep the HUD collapsed under it.
-		actions.visible = not (_banner != null and _banner.visible)
 		var has_skills: bool = not choices.get("skills", {}).is_empty()
 		var fight := _action_button("Fight [F]", "fight", func() -> void: _set_mode("skills"), mode == "skills" or mode == "attack" or mode.begins_with("skill:"))
 		Icons.apply_to_button(fight, "fight", _app.settings.text_scale)
@@ -621,7 +612,7 @@ func _build_bottom(view: Dictionary) -> void:
 		focus.tooltip_text = UiText.WHY["focus_unavailable"] if focus.disabled else UiText.WHY["focus_ready"]
 		actions.add_child(focus)
 		hud.add_child(actions)
-		_app.hint("combat")
+		_app.hint("combat_story" if _deadline == null or float(_deadline) < 0.0 else "combat")
 		if has_skills:
 			_app.hint("energy")
 	else:
