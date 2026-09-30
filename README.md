@@ -22,7 +22,8 @@ Godot 4.7.2 on Windows:
 - **Headless suite: 416 passed, 1 failed** (160 s). The one failure is
   `test_story_path_choice_hides_vote_status_and_multiplayer_keeps_it`. It is a
   stale test, not a game bug: since PR #98 the voter status reads
-  "Ready N of M." but the test still looks for "Voted:". Tracked in
+  "Ready N of M." but the test still looked for "Voted:". Fixed in the same PR as
+  this README update (assertion now checks "Ready"). Tracked in
   [#91](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/91).
 - **Bot simulation** (`tools/dev/simulate.gd --seeds=20`): 1 human 15/20 (75%),
   2 humans 13/20 (65%), 0 rejected commands. Every defeat was at the Guardian
