@@ -1303,7 +1303,8 @@
         "fire"
       ],
       "rewards": {},
-      "energy_max": 6
+      "energy_max": 6,
+      "sprite": "elder_thornwarden"
     },
     "masked_outlaw": {
       "name": "Thief",

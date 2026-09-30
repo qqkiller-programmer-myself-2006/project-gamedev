@@ -463,5 +463,28 @@
     "size_px": 48,
     "faces": "right",
     "variants": []
+  },
+  "elder_thornwarden": {
+    "animations": {
+      "idle": 6,
+      "attack": 6
+    },
+    "canvas": {
+      "idle": [
+        363,
+        460
+      ],
+      "attack": [
+        604,
+        363
+      ]
+    },
+    "baseline": {
+      "idle": 454,
+      "attack": 357
+    },
+    "size_px": 64,
+    "faces": "right",
+    "variants": []
   }
 }

@@ -38,13 +38,17 @@ static func enemy_manifest() -> Dictionary:
 	return _enemy_manifest.duplicate(true)
 
 static func for_class(class_id_value: String) -> SpriteSet:
-	if not ART_CLASSES.has(class_id_value.to_lower()):
+	var key := class_id_value.to_lower()
+	var manifest_key := key
+	if key == "classless":
+		manifest_key = "bram"
+	elif not ART_CLASSES.has(key):
 		return null
 	_load_manifest()
-	if not _manifest.has(class_id_value.to_lower()):
+	if not _manifest.has(manifest_key):
 		return null
 	var result := SpriteSet.new()
-	result.class_id = class_id_value.to_lower()
+	result.class_id = manifest_key
 	result.data = _manifest[result.class_id]
 	return result
 
@@ -69,7 +73,7 @@ func frames(animation: String) -> Array[Texture2D]:
 		listed = generated
 	if listed is Dictionary:
 		listed = listed.get("right", listed.get("left", []))
-	elif animation == "idle" and listed is Array:
+	elif animation == "idle" and listed is Array and not is_enemy:
 		var facing := ""
 		for filename in listed:
 			if str(filename).contains("_right"):
@@ -89,6 +93,8 @@ func frames(animation: String) -> Array[Texture2D]:
 		var texture := load(base + str(filename)) as Texture2D
 		if texture != null:
 			result.append(texture)
+	if result.is_empty() and not is_enemy and class_id == "bram" and (animation == "hurt" or animation == "dead"):
+		return frames("idle")
 	return result
 
 func mirrored(animation: String) -> bool:

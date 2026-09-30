@@ -722,5 +722,48 @@
       "skill_4.png",
       "skill_5.png"
     ]
+  },
+  "bram": {
+    "canvas": {
+      "idle": [
+        414,
+        446
+      ],
+      "attack": [
+        584,
+        350
+      ]
+    },
+    "baseline": {
+      "idle": 440,
+      "attack": 344
+    },
+    "fps": {
+      "idle": 6,
+      "attack": 12
+    },
+    "animations": {
+      "idle": {
+        "left": [
+          "idle_0.png",
+          "idle_1.png",
+          "idle_2.png",
+          "idle_3.png",
+          "idle_4.png",
+          "idle_5.png"
+        ]
+      },
+      "attack": {
+        "left": [
+          "attack_0.png",
+          "attack_1.png",
+          "attack_2.png",
+          "attack_3.png",
+          "attack_4.png",
+          "attack_5.png"
+        ]
+      }
+    },
+    "skills": []
   }
 }
