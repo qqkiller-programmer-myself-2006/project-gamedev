@@ -118,7 +118,7 @@ for ($attempt = 0; $attempt -le $Retries; $attempt++) {
         if ($p.HasExited) { $state = 'finished'; break }
         foreach ($e in @(Get-Event | Where-Object { $_.SourceIdentifier -like "$srcId-*" })) {
             $path = [string]$e.SourceEventArgs.FullPath
-            if ($path -notmatch '[\\/]\.(git|godot)([\\/]|$)') { $lastActivity = Get-Date; $lastWhy = 'files' }
+            if ($path -notmatch '[\\/]\.(git|godot)([\\/]|$)' -and $path -notmatch '[\\/]\.ai[\\/]logs([\\/]|$)') { $lastActivity = Get-Date; $lastWhy = 'files' }
             Remove-Event -EventIdentifier $e.EventIdentifier
         }
         $logSize = 0
@@ -156,7 +156,8 @@ for ($attempt = 0; $attempt -le $Retries; $attempt++) {
     break
 }
 
-Write-Status @{ agent = $Agent; task = $TaskFile; worktree = $Worktree; started = $started.ToString('s');
+$actualAgent = if ($attempts.Count -gt 0) { $attempts[-1].agent } else { $Agent }
+Write-Status @{ agent = $actualAgent; task = $TaskFile; worktree = $Worktree; started = $started.ToString('s');
     ended = (Get-Date).ToString('s'); minutes = [math]::Round(((Get-Date) - $started).TotalMinutes, 1);
     state = $state; exit = $code; attempts = $attempts }
-Write-Output "[$Agent] $TaskFile -> $state (exit $code, attempts $($attempts.Count)) log: $($attempts[-1].log)"
+Write-Output "[$actualAgent] $TaskFile -> $state (exit $code, attempts $($attempts.Count)) log: $($attempts[-1].log)"
