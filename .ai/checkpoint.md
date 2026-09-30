@@ -123,3 +123,4 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
   was red on main since #72 (web_smoke.mjs ROOT pointed at tools/) → fixed + diagnostics, CI green on the branch; sim 240 matches
   human pace, win 75-90%, no softlocks, boss ~half of match time. Report: docs/review/2026-09-30-full-qa-report.md (B1-B9, U1-U34,
   S1-S5, P-1, T1-T3). WAITING for owner to pick which items to fix. PR for the branch not opened yet.
+- 2026-09-30 10:00: opened GitHub tracking issue #91 + findings #78-#90 (all Todo on Project #8, #91 under #47) and PR #92 (CI smoke fix + QA report, not merged). Next: wait for owner to pick items; check CI on #92 via ccd_pr; do not merge without owner OK.
