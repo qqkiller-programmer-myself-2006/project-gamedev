@@ -1,65 +1,65 @@
-# Pixel icon set
+# ชุดไอคอนพิกเซล
 
-Icons are authored in `tools/art/make_icons.py` as native 16×16 pixel grids and displayed with nearest-neighbour filtering. Only the fill is authored: the generator adds the 1-px `#0a1020` outline around every silhouette and lights uppercase colours from the top-left (highlight on up/left edges, shadow on down/right edges), so the whole set shares one outline weight and one light direction. Colours come from the Navy + Gold palette in `ui-style.md` plus the HP/Energy bar colours, at most 5 per icon besides the outline. Every icon used by the UI should stay beside its text or have a tooltip. The `con` icon is stored as `_con.png` because `CON` is a reserved Windows device name; `Icons.texture("con")` handles that mapping.
+สร้างไอคอนใน `tools/art/make_icons.py` ด้วยตารางพิกเซลขนาด 16×16 และแสดงผลด้วยการกรองแบบ nearest-neighbour ผู้สร้างระบายเฉพาะพื้นที่ด้านใน จากนั้นเติมเส้นขอบหนา 1 พิกเซลสี `#0a1020` รอบเงารูปทรง และใส่แสงจากมุมซ้ายบน (ไฮไลต์ที่ขอบบน/ซ้าย เงาที่ขอบล่าง/ขวา) เพื่อให้ไอคอนทั้งหมดใช้ความหนาเส้นขอบและทิศทางแสงเดียวกัน สีมาจากชุดสี Navy + Gold ใน `ui-style.md` และสีแถบ HP/Energy โดยใช้ได้ไม่เกิน 5 สีต่อไอคอนนอกเหนือจากสีเส้นขอบ ไอคอนทุกชิ้นที่ UI ใช้ควรวางข้างข้อความหรือมี tooltip กำกับ ไอคอน `con` จัดเก็บเป็น `_con.png` เพราะ `CON` เป็นชื่ออุปกรณ์ที่สงวนไว้ใน Windows; `Icons.texture("con")` จัดการการแมปชื่อนี้ให้
 
-The generator refuses to write the set if two icons have identical pixels, if two alpha silhouettes differ in fewer than 16 pixels, if an icon uses more than 5 colours besides the outline, if it has fewer than 20 bright pixels, or if a fill pixel touches the 16×16 border (no room for the outline).
+ตัวสร้างจะไม่เขียนชุดไอคอน หากมีไอคอนสองชิ้นที่พิกเซลเหมือนกัน เงารูปทรง alpha ต่างกันน้อยกว่า 16 พิกเซล ไอคอนใช้สีเกิน 5 สี (ไม่นับเส้นขอบ) มีพิกเซลสว่างน้อยกว่า 20 จุด หรือพิกเซลระบายด้านในแตะขอบตาราง 16×16 (ไม่มีพื้นที่สำหรับเส้นขอบ)
 
-| Icon | Picture | Meaning and use |
+| ไอคอน | ภาพ | ความหมายและการใช้งาน |
 | --- | --- | --- |
-| `fight` | One raised sword | Battle Fight action. |
-| `items` | Backpack | Battle Items action. |
-| `focus` | Blue-irised eye | Battle Focus action. |
-| `strike` | Three slash marks | Basic skill card. |
-| `guard` | Gold heater shield with a white plus | Guard skill card. |
-| `defend` | Tall silver tower shield, gold rim and boss | Defend action and skill card. |
-| `flee` | Running figure with motion lines | Flee action. |
-| `skill` | Blue four-point spark with a twinkle | Skill menu and cards. |
-| `ready` | Green circle with a check breaking out of it | Camp readiness. |
-| `transfer` | Gold arrow out, white arrow back | Camp item and gold transfer. |
-| `hp` | Red heart | HP display and bars. |
-| `energy` | Blue crystal with a bolt | Energy display and bars. |
-| `gold` | Coin stack with a coin in front | Currency displays and rewards. |
-| `gems` | Brilliant-cut blue gem | Gem currency and costs. |
-| `exp` | Green five-point star | Experience and rewards. |
-| `level` | Gold up arrow over a step | Character level. |
-| `str` | Flexed arm | Strength attribute. |
-| `dex` | Winged boot | Dexterity attribute. |
-| `con` | Heart guarded by a shield | Constitution attribute. |
-| `int` | Brain | Intelligence attribute. |
-| `fth` | White cross on a rayed gold sun | Faith attribute. |
-| `cha` | Speech bubble with a heart | Charisma attribute. |
-| `lck` | Four-leaf clover | Luck attribute. |
-| `poison` | Green drop with bubbles | Status badge. |
-| `bleed` | Large and small blood drops | Status badge. |
-| `burn` | Layered flame | Status badge. |
-| `stun` | Lightning bolt | Status badge. |
-| `weak` | Broken sword with a red down arrow | Status badge. |
-| `shield` | Blue kite shield | Status badge. |
-| `regen` | Green heart with a plus | Status badge. |
-| `dodge` | Swerving blue arrow with speed lines | Status badge. |
-| `crit` | Orange starburst with an exclamation mark | Status badge. |
-| `weapon` | Diagonal sword | Equipment slot. |
-| `armor` | Breastplate with a belt | Equipment slot. |
-| `accessory` | Pendant on a chain | Accessory slots. |
-| `consumable` | Red potion bottle | Consumable slot. |
-| `combat` | Crossed swords | Combat path vote. |
-| `elite` | Horned skull | Elite path vote. |
-| `merchant` | Market stall with a striped awning | Merchant encounter. |
-| `rest` | Campfire on crossed logs | Rest encounter. |
-| `treasure` | Chest with a lock | Treasure path and reward. |
-| `story` | Open book with a bookmark | Story encounter. |
-| `class_trial` | Challenge banner on a pole | Class trial encounter. |
-| `boss` | Crowned skull with red eyes | Boss encounter. |
-| `play` | Bold play triangle | Title menu. |
-| `multiplayer` | Two party members | Title menu. |
-| `story_mode` | Closed blue book with a bookmark | Title menu. |
-| `settings` | Gear | Settings menu. |
-| `credits` | Scroll of names | Credits menu. |
-| `back` | Bold left arrow | Submenus. |
-| `quit` | Power symbol | Title menu. |
-| `save` | Floppy disk | Save controls. |
-| `lock` | Padlock | Locked options and rewards. |
-| `info` | Bold letter i | Help and tooltips. |
-| `warning` | Alert triangle | Caution notices. |
+| `fight` | ดาบชูขึ้นหนึ่งเล่ม | แอ็กชัน Fight ในการต่อสู้ |
+| `items` | เป้สะพายหลัง | แอ็กชัน Items ในการต่อสู้ |
+| `focus` | ดวงตาที่มีม่านตาสีน้ำเงิน | แอ็กชัน Focus ในการต่อสู้ |
+| `strike` | รอยฟันสามขีด | การ์ดทักษะพื้นฐาน |
+| `guard` | โล่ทรงหยดน้ำสีทอง มีเครื่องหมายบวกสีขาว | การ์ดทักษะ Guard |
+| `defend` | โล่ทรงสูงสีเงิน ขอบทอง และปุ่มกลางโล่ | แอ็กชันและการ์ดทักษะ Defend |
+| `flee` | คนกำลังวิ่งพร้อมเส้นแสดงการเคลื่อนไหว | แอ็กชันหนี |
+| `skill` | ประกายสี่แฉกสีน้ำเงินพร้อมประกายเล็ก | เมนูและการ์ดทักษะ |
+| `ready` | วงกลมสีเขียวที่มีเครื่องหมายถูกยื่นออกมา | สถานะพร้อมของค่ายพัก |
+| `transfer` | ลูกศรสีทองชี้ออกและลูกศรสีขาวชี้กลับ | การโอนไอเทมและทองในค่ายพัก |
+| `hp` | หัวใจสีแดง | การแสดงพลังชีวิตและแถบพลังชีวิต |
+| `energy` | ผลึกสีน้ำเงินพร้อมสายฟ้า | การแสดงพลังงานและแถบพลังงาน |
+| `gold` | กองเหรียญและเหรียญด้านหน้า | การแสดงสกุลเงินและรางวัล |
+| `gems` | อัญมณีสีน้ำเงินเจียระไน | สกุลเงินอัญมณีและค่าใช้จ่าย |
+| `exp` | ดาวสีเขียวห้าแฉก | ค่าประสบการณ์และรางวัล |
+| `level` | ลูกศรขึ้นสีทองเหนือขั้นบันได | ระดับตัวละคร |
+| `str` | แขนเกร็งกล้ามเนื้อ | คุณลักษณะพละกำลัง |
+| `dex` | รองเท้าบูตติดปีก | คุณลักษณะความว่องไว |
+| `con` | หัวใจที่มีโล่ป้องกัน | คุณลักษณะความทรหด |
+| `int` | สมอง | คุณลักษณะสติปัญญา |
+| `fth` | กากบาทสีขาวบนดวงอาทิตย์สีทองที่มีรัศมี | คุณลักษณะศรัทธา |
+| `cha` | กล่องคำพูดพร้อมรูปหัวใจ | คุณลักษณะเสน่ห์ |
+| `lck` | โคลเวอร์สี่แฉก | คุณลักษณะโชค |
+| `poison` | หยดสีเขียวพร้อมฟอง | ป้ายสถานะ |
+| `bleed` | หยดเลือดขนาดใหญ่และเล็ก | ป้ายสถานะ |
+| `burn` | เปลวไฟซ้อนชั้น | ป้ายสถานะ |
+| `stun` | สายฟ้า | ป้ายสถานะ |
+| `weak` | ดาบหักพร้อมลูกศรลงสีแดง | ป้ายสถานะ |
+| `shield` | โล่ทรงว่าวสีน้ำเงิน | ป้ายสถานะ |
+| `regen` | หัวใจสีเขียวพร้อมเครื่องหมายบวก | ป้ายสถานะ |
+| `dodge` | ลูกศรสีน้ำเงินหักเลี้ยวพร้อมเส้นความเร็ว | ป้ายสถานะ |
+| `crit` | แสงแฉกสีส้มพร้อมเครื่องหมายอัศเจรีย์ | ป้ายสถานะ |
+| `weapon` | ดาบวางแนวทแยง | ช่องอุปกรณ์ |
+| `armor` | เกราะอกพร้อมเข็มขัด | ช่องอุปกรณ์ |
+| `accessory` | จี้ห้อยโซ่ | ช่องเครื่องประดับ |
+| `consumable` | ขวดยาสีแดง | ช่องไอเทมใช้แล้วหมดไป |
+| `combat` | ดาบไขว้ | การโหวตเส้นทางต่อสู้ |
+| `elite` | กะโหลกมีเขา | การโหวตเส้นทางชั้นยอด |
+| `merchant` | แผงตลาดพร้อมกันสาดลายทาง | เหตุการณ์พ่อค้า |
+| `rest` | กองไฟบนท่อนไม้ไขว้ | เหตุการณ์พัก |
+| `treasure` | หีบพร้อมกุญแจ | เส้นทางและรางวัลสมบัติ |
+| `story` | หนังสือเปิดอยู่พร้อมที่คั่น | เหตุการณ์เนื้อเรื่อง |
+| `class_trial` | ธงประลองบนเสา | เหตุการณ์ประลองอาชีพ |
+| `boss` | กะโหลกสวมมงกุฎและดวงตาสีแดง | เหตุการณ์บอส |
+| `play` | สามเหลี่ยมเล่นขนาดใหญ่ | เมนูหลัก |
+| `multiplayer` | สมาชิกกลุ่มสองคน | เมนูหลัก |
+| `story_mode` | หนังสือสีน้ำเงินปิดอยู่พร้อมที่คั่น | เมนูหลัก |
+| `settings` | เฟือง | เมนูตั้งค่า |
+| `credits` | ม้วนรายชื่อ | เมนูเครดิต |
+| `back` | ลูกศรซ้ายขนาดใหญ่ | เมนูย่อย |
+| `quit` | สัญลักษณ์เปิด/ปิด | เมนูหลัก |
+| `save` | แผ่นดิสก์ | ปุ่มควบคุมการบันทึก |
+| `lock` | แม่กุญแจ | ตัวเลือกและรางวัลที่ล็อกไว้ |
+| `info` | ตัวอักษร i ขนาดใหญ่ | คำช่วยเหลือและ tooltip |
+| `warning` | สามเหลี่ยมแจ้งเตือน | ข้อความแจ้งเตือนข้อควรระวัง |
 
-Regenerate the PNGs and the labelled contact sheet (`assets/icons/_contact.png`, every icon at 1× and 3× on navy) by running `python tools/art/make_icons.py` from the repository root. Godot PNG import metadata is generated with `Godot --headless --path . --import`.
+สร้างไฟล์ PNG และ contact sheet ที่มีป้ายกำกับใหม่ (`assets/icons/_contact.png` แสดงทุกไอคอนบนพื้นสีน้ำเงินเข้มที่ขนาด 1× และ 3×) โดยเรียก `python tools/art/make_icons.py` จาก root ของรีโป ข้อมูลนำเข้า PNG ของ Godot สร้างด้วย `Godot --headless --path . --import`

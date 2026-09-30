@@ -1,22 +1,21 @@
-# Plan: simpler folder structure (owner request 2026-09-29)
+# แผน: จัดโครงสร้างโฟลเดอร์ให้ง่ายขึ้น (คำขอเจ้าของงาน 2026-09-29)
 
-Goal: a new maintainer can find any file by guessing its folder. One place per kind of thing, folders named after what the
-player sees (client) or the rule they own (server), no duplicates, no junk at the root. **No behaviour changes.**
+เป้าหมาย: ผู้ดูแลคนใหม่หาไฟล์ได้โดยเดาจากโฟลเดอร์ จัดแต่ละประเภทไว้ที่เดียว ตั้งชื่อโฟลเดอร์ตามสิ่งที่ผู้เล่นเห็น (client) หรือกติกาที่ดูแล (server) ไม่มีไฟล์ซ้ำหรือไฟล์ขยะที่ root **ไม่เปลี่ยนพฤติกรรมเกม**
 
-## What is wrong today
-| Problem | Where |
+## ปัญหาของโครงสร้างเดิม
+| ปัญหา | ตำแหน่ง |
 | --- | --- |
-| 340 of the 368 files in `docs/` are three identical copies of old agent skills (`docs/.agents/skills`, `docs/.aider-desk/skills`, `docs/.claude/skills`). Newer copies live in `~/.claude/skills`. | `docs/` |
-| Loose files at the root: `hello_world.txt` (connection test), `checkpoint.md` (planner notes) | root |
-| `scripts/` holds one file; `tools/` mixes Godot scripts, Python and Node | `scripts/`, `tools/` |
-| `src/core` mixes three things: determinism helpers (RNG, clocks), the content loader, and profile storage (4 stores + HTTP sender) | `src/core` |
-| Client folders do not match screens: `camp_view` is in `battle/`, `settings_panel` in `screens/`, the title backdrop in `home/`, the character setup alone in `setup/`, combat/merchant panels in `panels/` away from the screen that shows them | `src/client` |
-| Five loose rule helpers next to the match server | `src/match` |
-| Raw art sheets live inside `assets/`, so Godot imports and exports them | `assets/characters/source` |
-| Tests do not mirror `src` (`test_battle_view_data` is under `tests/match`, story client tests under `tests/client`, profile tests under `tests/core`) | `tests/` |
-| Nine loose docs with no grouping | `docs/*.md` |
+| ใน `docs/` มี 340 จาก 368 ไฟล์เป็นสำเนาทักษะ agent เก่าสามชุดที่เหมือนกัน (`docs/.agents/skills`, `docs/.aider-desk/skills`, `docs/.claude/skills`) โดยสำเนาใหม่กว่าอยู่ใน `~/.claude/skills` | `docs/` |
+| มีไฟล์เดี่ยวที่ root: `hello_world.txt` (ทดสอบการเชื่อมต่อ), `checkpoint.md` (บันทึกผู้วางแผน) | root |
+| `scripts/` มีไฟล์เดียว; `tools/` ปะปนสคริปต์ Godot, Python และ Node | `scripts/`, `tools/` |
+| `src/core` รวมของสามประเภท: ตัวช่วยให้ผลทำงานคงที่ (RNG, clocks), ตัวโหลด content และที่เก็บโปรไฟล์ (store 4 แบบ + HTTP sender) | `src/core` |
+| โฟลเดอร์ client ไม่ตรงกับหน้าจอ: `camp_view` อยู่ใน `battle/`, `settings_panel` อยู่ใน `screens/`, ฉากหลังหน้าแรกอยู่ใน `home/`, หน้าเลือกตัวละครแยกเดี่ยวใน `setup/`, ส่วน combat/merchant อยู่ใน `panels/` ห่างจากหน้าจอที่แสดงผล | `src/client` |
+| มีตัวช่วยกติกา 5 ไฟล์วางเดี่ยวข้าง match server | `src/match` |
+| ชีตภาพต้นฉบับอยู่ใน `assets/` ทำให้ Godot นำเข้าและส่งออกไฟล์เหล่านั้นด้วย | `assets/characters/source` |
+| tests ไม่ได้จัดโครงสร้างให้ตรงกับ `src` (`test_battle_view_data` อยู่ใน `tests/match`, test ของ story client อยู่ใน `tests/client`, test profile อยู่ใน `tests/core`) | `tests/` |
+| มีเอกสารเดี่ยว 9 ไฟล์ที่ยังไม่ได้จัดกลุ่ม | `docs/*.md` |
 
-## Target tree
+## โครงสร้างเป้าหมาย
 ```
 project.godot  export_presets.cfg  README.md  AGENTS.md  CLAUDE.md  CONTEXT.md
 assets/                      runtime art only (imported by Godot)
@@ -62,7 +61,7 @@ docs/
 .claude/agents/              subagent definitions
 ```
 
-## Why this is safe in Godot
+## เหตุผลที่การย้ายนี้ปลอดภัยใน Godot
 - 69 scripts use `class_name`; those names are global, so code that uses the class does not care where the file is.
 - Only ~35 literal `res://` paths exist (tests' directory lists, `main.tscn`, `project.godot` main scene, sprite/portrait roots,
   font path, content path, preview tools). Every one is listed by `git grep -n "res://"` and gets updated.
@@ -70,7 +69,7 @@ docs/
   uid references keep working. Asset `.import` files move with their asset, then `godot --headless --import` refreshes them.
 - `export_presets.cfg` excludes `tests/*, tools/*, docs/*, build/*`; add `art_source/*` too (and `.gdignore` keeps it out).
 
-## Order (one commit per step, tests green after every step)
+## ลำดับดำเนินการ (หนึ่ง commit ต่อขั้น และ test ต้องผ่านทุกขั้น)
 1. Freeze: no other executor running; all branches merged (done: #59, #62, #63, #64).
 2. Delete `docs/.agents`, `docs/.aider-desk`, `docs/.claude` (duplicate skills), `hello_world.txt`; move `checkpoint.md` to `.ai/`.
 3. `scripts/run_tests.sh` → `tools/run_tests.sh`; split `tools/` into `dev/ art/ ci/`; update CI, README, docs, agents.
@@ -81,15 +80,12 @@ docs/
 8. `docs/` grouped + `docs/README.md` index; fix every link.
 9. Verify (below), update `AGENTS.md`/`CONTEXT.md` "where things live", README tree.
 
-## Verify (all must pass before merge)
+## ตรวจสอบ (ต้องผ่านทั้งหมดก่อน merge)
 - `git grep` for every old path (outside `docs/review`, `.ai/tasks`, `.ai/checkpoint.md` history) returns nothing.
 - `godot --headless --path . --import` has no errors; `bash tools/run_tests.sh` → same count as before, 0 failed
   (includes the compile-every-script test and the no-engine-randomness scan).
 - `tools/dev/ui_preview.gd` produces every screenshot; `tools/dev/simulate.gd --seeds=10` runs.
 - The game opens (`--dev --playtest`) and a Playtest match starts; export check: `--export-release "Windows"` if templates exist.
 
-## After this
-Art work (owner decisions 2026-09-29): new hero sheets for Archer/Mage/Swordsman/Guardian + Assassin (Rogue renamed to
-Assassin); forest enemies renamed to match the art (Grey Wolf→Wolf, Masked Outlaw→Thief, Stone Sentinel→Golem,
-Forest Wisp→Slime, Bramble Archer→Goblin, same stats); the last Layer + boss move into a cave with Kobold, Minotaur,
-Skeleton, Giant Spider; forest and cave battle backgrounds.
+## งานหลังจากนี้
+งานภาพ (ตามการตัดสินใจของเจ้าของงานวันที่ 2026-09-29): สร้างชีตฮีโร่ใหม่สำหรับ Archer/Mage/Swordsman/Guardian และ Assassin (เปลี่ยนชื่อ Rogue เป็น Assassin); เปลี่ยนชื่อศัตรูป่าให้ตรงกับภาพ (Grey Wolf→Wolf, Masked Outlaw→Thief, Stone Sentinel→Golem, Forest Wisp→Slime, Bramble Archer→Goblin โดยคงค่าสถานะเดิม); ย้ายชั้นสุดท้ายและบอสเข้าไปในถ้ำ พร้อม Kobold, Minotaur, Skeleton, Giant Spider; เพิ่มฉากหลังการต่อสู้ของป่าและถ้ำ

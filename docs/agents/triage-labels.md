@@ -1,15 +1,13 @@
-# Triage Labels
+# Label สำหรับคัดแยกงาน
 
-The engineering skills use five canonical triage roles. These are the
-label strings used in this repository's GitHub Issues.
+skill ด้านวิศวกรรมใช้บทบาทคัดแยกมาตรฐาน 5 แบบต่อไปนี้ โดยเป็นข้อความ label ที่ใช้ใน GitHub Issues ของรีโปนี้
 
-| Label in mattpocock/skills | Label in this repository | Meaning |
+| Label ใน mattpocock/skills | Label ในรีโปนี้ | ความหมาย |
 | --- | --- | --- |
-| `needs-triage` | `needs-triage` | Maintainer needs to evaluate this issue |
-| `needs-info` | `needs-info` | Waiting on reporter for more information |
-| `ready-for-agent` | `ready-for-agent` | Fully specified, ready for an agent |
-| `ready-for-human` | `ready-for-human` | Requires human implementation |
-| `wontfix` | `wontfix` | Will not be actioned |
+| `needs-triage` | `needs-triage` | ผู้ดูแลต้องประเมิน issue นี้ |
+| `needs-info` | `needs-info` | กำลังรอผู้รายงานให้ข้อมูลเพิ่ม |
+| `ready-for-agent` | `ready-for-agent` | ระบุรายละเอียดครบ พร้อมให้ agent ทำงาน |
+| `ready-for-human` | `ready-for-human` | ต้องให้มนุษย์ลงมือทำ |
+| `wontfix` | `wontfix` | จะไม่ดำเนินการ |
 
-When a skill mentions one of these roles, use the corresponding label
-string above.
+เมื่อ skill กล่าวถึงบทบาทข้อใด ให้ใช้ข้อความ label ที่ตรงกันจากตารางด้านบน

@@ -28,15 +28,15 @@ Issues และ specs ของรีโปนี้อยู่ใน GitHub I
 ดูรายละเอียดได้ที่ `docs/agents/domain.md`
 
 
-## Where things live
+## ตำแหน่งไฟล์และโฟลเดอร์
 
-- `assets/`: imported runtime art; `art_source/`: raw sheets excluded from import/export.
-- `content/`: Forest and story data.
-- `src/app/`: entry scene; `src/shared/`: RNG, clocks, shared content; `src/profile/`: profile stores and sender.
-- `src/match/`: authoritative match, AI, encounters, and rules; `src/match/rules/`: rule helpers.
-- `src/net/`: protocol and transport; `src/server/`: headless server.
-- `src/client/ui/`: shared UI; `title/`, `lobby/`, `match/`, `story/`: player-facing screens; `match/battle/` and `match/camp/`: phase views.
-- `tests/`: mirrors `src/`, with runner and support at the root/support folder.
-- `tools/dev/`, `tools/art/`, `tools/ci/`: development, art, and CI tools; `tools/run_tests.sh`: test runner.
-- `deploy/`: staging; `docs/design/`, `docs/guides/`, `docs/adr/`, `docs/agents/`, `docs/plans/`, `docs/review/`, `docs/references/`, `docs/screenshots/`: documentation by kind.
-- `.ai/`: task specs, runner, checkpoint; `.claude/agents/`: agent definitions.
+- `assets/`: ภาพที่นำเข้าเพื่อใช้ขณะรันเกม; `art_source/`: ชีตภาพต้นฉบับที่ไม่รวมในการนำเข้าหรือส่งออก
+- `content/`: ข้อมูลป่าและเนื้อเรื่อง
+- `src/app/`: ฉากเริ่มต้น; `src/shared/`: ตัวสร้างเลขสุ่ม นาฬิกา และตัวโหลด content กลาง; `src/profile/`: ที่เก็บโปรไฟล์และตัวส่งข้อมูล
+- `src/match/`: เซิร์ฟเวอร์แมตช์, AI, เหตุการณ์ และกติกาที่เซิร์ฟเวอร์ตัดสิน; `src/match/rules/`: ตัวช่วยกติกา
+- `src/net/`: โปรโตคอลและการรับส่งข้อมูล; `src/server/`: โหนดเซิร์ฟเวอร์แบบ headless
+- `src/client/ui/`: ส่วน UI ที่ใช้ร่วมกัน; `title/`, `lobby/`, `match/`, `story/`: หน้าจอผู้เล่น; `match/battle/` และ `match/camp/`: มุมมองแต่ละช่วง
+- `tests/`: โครงสร้างสอดคล้องกับ `src/` พร้อม runner และโค้ดสนับสนุนที่ root/โฟลเดอร์ support
+- `tools/dev/`, `tools/art/`, `tools/ci/`: เครื่องมือพัฒนา งานภาพ และ CI; `tools/run_tests.sh`: ตัวรัน test
+- `deploy/`: staging; `docs/design/`, `docs/guides/`, `docs/adr/`, `docs/agents/`, `docs/plans/`, `docs/review/`, `docs/references/`, `docs/screenshots/`: เอกสารแยกตามประเภท
+- `.ai/`: ข้อกำหนดงาน ตัวรัน agent และ checkpoint; `.claude/agents/`: คำจำกัดความ agent

@@ -1,14 +1,14 @@
 ---
-status: accepted (Tier 1 Classes amended to 5 by ADR-0010; Equipment and crafting added at Rest by ADR-0011)
+status: accepted (Tier 1 Classes เพิ่มเป็น 5 ตาม ADR-0010; เพิ่ม Equipment และการคราฟต์ที่ Rest ตาม ADR-0011)
 ---
 
-# จำกัด production vertical slice ไว้ที่ Forest 5 Layers
+# จำกัด vertical slice ระดับพร้อมใช้งานจริงไว้ที่ Forest 5 ชั้น
 
-งานระยะแรกจะเป็น production-quality vertical slice ที่เล่นจบได้ภายในประมาณ 20–30 นาที ประกอบด้วย Forest 5 Layers, Encounter pool 6 ประเภท, Tier 1 Classes 4 แบบ และ Guardian Boss 1 ตัว พร้อม UI/UX ระดับสูง, motion, feedback และ accessibility; ระบบเกมเต็ม เช่น Tier 2/3, Beyond Sea, account, matchmaking, mobile, console, ranking, voice chat และ cinematic เต็มรูปแบบอยู่นอกขอบเขต.
+งานระยะแรกเป็น vertical slice ที่มีคุณภาพพร้อมใช้งานจริงและเล่นจบได้ในประมาณ 20–30 นาที ประกอบด้วย Forest 5 ชั้น, กลุ่ม Encounter 6 ประเภท, Tier 1 Class 4 แบบ และ Guardian Boss 1 ตัว พร้อม UI/UX ระดับสูง การเคลื่อนไหว สัญญาณตอบสนอง และการเข้าถึง; ระบบเกมเต็ม เช่น Tier 2/3, Beyond Sea, account, matchmaking, mobile, console, ranking, voice chat และ cinematic เต็มรูปแบบอยู่นอกขอบเขต
 
-## Consequences
+## ผลที่ตามมา
 
-- คุณภาพของระบบและ UI/UX ต้องใกล้ระดับ production แต่จำนวน content ถูกจำกัด
-- ต้องรับรอง core flow ตั้งแต่สร้าง/เข้าห้องจนชนะ Guardian Boss บน PC และ browser
-- การเพิ่ม content นอก Forest ต้องผ่านการตัดสินใจ scope ใหม่ ไม่ควรแทรกเข้ามาใน vertical slice โดยปริยาย
-- Route data ที่มี Encounter type ซึ่งเกมไม่รองรับต้องไม่ถูกข้ามเป็นสำเร็จ: เมื่อ Party เข้า Encounter นั้น Match ส่ง event `match_error` (`error: "unsupported_encounter"`, `encounter_type`) แล้วจบด้วยผล defeat โดย summary มีคีย์ `error` และ `encounter_type` ตัวเดียวกัน (#41)
+- คุณภาพของระบบและ UI/UX ต้องใกล้ระดับพร้อมใช้งานจริง แต่จำกัดปริมาณ content
+- ต้องตรวจรับลำดับการเล่นหลักตั้งแต่สร้าง/เข้าห้องจนชนะ Guardian Boss บน PC และ browser
+- การเพิ่ม content นอก Forest ต้องผ่านการตัดสินใจขอบเขตงานใหม่ ห้ามแทรกเข้า vertical slice โดยปริยาย
+- ข้อมูลเส้นทางที่มี Encounter type ซึ่งเกมไม่รองรับต้องไม่ถูกข้ามราวกับสำเร็จ: เมื่อ Party เข้า Encounter ดังกล่าว Match ส่ง event `match_error` (`error: "unsupported_encounter"`, `encounter_type`) แล้วจบด้วยผล defeat โดย summary มีคีย์ `error` และ `encounter_type` เดียวกัน (#41)

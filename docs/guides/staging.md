@@ -1,4 +1,4 @@
-# Staging และการรับรอง core flow (issue #19)
+# Staging และการตรวจรับลำดับการเล่นหลัก (issue #19)
 
 ## ภาพรวม
 
@@ -34,7 +34,7 @@
 
 อัปเดต staging: ดาวน์โหลด artifact ใหม่ → `./deploy/prepare.sh` → `docker compose up -d --build`
 
-## Checklist ของ core flow
+## รายการตรวจสอบลำดับการเล่นหลัก
 
 ทำครบทั้ง 4 ชุด: **Single-player บน PC**, **Single-player บน browser**, **Duo co-op บน PC + PC**,
 **Duo co-op แบบผสม PC + browser** (ให้ทั้งฝั่ง PC และ browser ได้เป็น Host อย่างน้อยครั้งละหนึ่งรอบ)

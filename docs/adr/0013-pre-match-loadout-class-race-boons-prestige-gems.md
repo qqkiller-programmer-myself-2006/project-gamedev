@@ -2,7 +2,7 @@
 status: accepted
 ---
 
-# เลือก Class, Race และ Boons ก่อนเริ่ม Match แบบ AAC พร้อม Skill tree/Prestige และ Gems ที่เก็บบน server (แทน Classless start)
+# เลือก Class, Race และ Boons ก่อนเริ่ม Match ตาม AAC พร้อม Skill tree/Prestige และ Gems ที่เก็บบน server (แทนการเริ่มแบบ Classless)
 
 เจ้าของงานตัดสิน (2026-09-29) ให้หน้าก่อนเริ่ม Match เหมือนภาพ `docs/references/aac_rogue/01–03`: เลือก Class ก่อนเริ่มแบบ AAC, Enervation เป็น Boon ตามภาพ, เผ่า "Robloxian" เปลี่ยนชื่อเป็น **Human** และ Gems เก็บข้ามเกมบน server (Cloudflare D1)
 
@@ -59,12 +59,12 @@ status: accepted
 - **ProfileStore** เป็น seam ที่ MatchServer รับจากภายนอก (เหมือน clock/rng): `MemoryProfileStore` สำหรับ test, `FileProfileStore` (ค่าเริ่มต้นของ server ในเครื่อง) และ `D1ProfileStore` เรียก Cloudflare Worker (`deploy/profile-worker/`) ที่ผูก D1 ผ่าน HTTPS พร้อม secret ของ server
 - การบันทึกเป็นแบบ async: Match ไม่รอ network; ถ้าบันทึกไม่สำเร็จ server log และลองใหม่
 
-## Considered Options
+## ตัวเลือกที่พิจารณา
 
 - **เก็บ Gems ในไฟล์ของ client**: ง่ายที่สุด แต่โกงได้และไม่ตามข้ามเครื่อง — เจ้าของงานมี Cloudflare D1/R2 free tier จึงเลือก server
 - **คง Classless start**: รักษาเรื่องราวเดิม แต่ไม่ตรงภาพที่เจ้าของงานต้องการ
 
-## Consequences
+## ผลที่ตามมา
 
 - `CONTEXT.md` ต้องแก้: Classless (กรณีไม่มี loadout เท่านั้น), Class Encounter (ได้ reward แทน Class), Race, Boon, Gems, Prestige, Skill tree (meta), Enervation (Boon)
 - ADR-0010 ส่วน "Enervation เป็น passive ของ Rogue" ถูกแทน

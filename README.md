@@ -1,7 +1,7 @@
-# BEYOND THE WORLD'S END — Forest vertical slice
+# BEYOND THE WORLD'S END — vertical slice ของ Forest
 
-Online co-op fantasy turn-based RPG built with **Godot 4.7** and **GDScript**.
-The current goal is the Forest vertical slice described in
+เกม RPG แฟนตาซีผลัดกันเล่นแบบ co-op ออนไลน์ สร้างด้วย **Godot 4.7** และ **GDScript**
+เป้าหมายปัจจุบันคือ vertical slice ของ Forest ตามที่ระบุใน
 [issue #2](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/2).
 
 - Domain glossary: [`CONTEXT.md`](CONTEXT.md)
@@ -14,19 +14,18 @@ The current goal is the Forest vertical slice described in
 - Accessibility checklist: [`docs/design/accessibility.md`](docs/design/accessibility.md)
 - Staging and QA checklist: [`docs/guides/staging.md`](docs/guides/staging.md)
 
-## Latest verification — 2026-10-01
+## ผลตรวจสอบล่าสุด — 2026-10-01
 
-Checked `origin/main` at `9ac20c4` with Godot 4.7.2. The headless suite reported
-**409 passed, 1 failed**; the remaining failure is
+ตรวจ `origin/main` ที่ `9ac20c4` ด้วย Godot 4.7.2 ชุดทดสอบแบบ headless รายงานว่า
+**ผ่าน 409 ข้อ และไม่ผ่าน 1 ข้อ**; ข้อที่ยังไม่ผ่านคือ
 `test_story_path_choice_hides_vote_status_and_multiplayer_keeps_it`
 (`Multiplayer keeps vote status: expected true`). See [QA tracking issue #91](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/91).
 
-The scripted Duo UI preview completed at `--speed=24`, captured the title,
-Path Voting, Combat, Merchant, Guardian Boss, and Summary screens, and reached
-Defeat after 16:12 of simulated play. This is an automated preview, not a
-human multiplayer or platform-certification playtest.
+ตัวอย่าง UI แบบ Duo ที่ทำงานตามสคริปต์เสร็จที่ `--speed=24` บันทึกภาพหน้า title,
+Path Voting, Combat, Merchant, Guardian Boss และ Summary แล้วไปถึง Defeat หลังจำลองการเล่น 16:12 นาที
+นี่เป็นการแสดงตัวอย่างอัตโนมัติ ไม่ใช่การทดสอบ multiplayer โดยผู้เล่นจริงหรือการรับรองแพลตฟอร์ม
 
-## Where things live
+## ตำแหน่งไฟล์และโฟลเดอร์
 
 ```text
 assets/                  Imported runtime art: fonts, heroes, enemies, backgrounds, icons
@@ -64,7 +63,7 @@ docs/screenshots/        Current game screenshots
 .claude/agents/          Agent definitions
 ```
 
-## Quick start
+## เริ่มต้นใช้งานอย่างรวดเร็ว
 
 ```bash
 # Godot 4.7.2 must be on PATH as `godot` (or set GODOT=/path/to/godot)
@@ -74,41 +73,41 @@ godot --path . -- --url=ws://127.0.0.1:8910          # PC client (open two for c
 godot --path . -- --dev --playtest --jump=boss --class=mage --seed=7   # dev: jump straight to a scene
 ```
 
-## Final build (2026-10-02): what is in the game
+## บิลด์สุดท้าย (2026-10-02): เนื้อหาภายในเกม
 
-Goal: every screen and rule matches the AAC reference images ([#47](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/47)).
+เป้าหมาย: ทุกหน้าจอและกติกาตรงกับภาพอ้างอิง AAC ([#47](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/47))
 
-- **Modes:** online co-op Multiplayer (room code, 1–5 players, AI fills empty slots) and offline **Story mode**
-  (one player controls all five, story scenes, chapter cards, Save/Continue; no timers) — ADR-0014.
-- **Before the match:** pick Class, Race and Boons (ADR-0013); Skill tree, Prestige and Gems kept per player on the server
-  (Cloudflare Worker + D1, `deploy/profile-worker`; the owner deploys it — see its README).
-- **Classes:** Swordsman, Archer, Mage, Guardian, Assassin (renamed from Rogue on 2026-09-30; old profiles migrate),
-  plus Classless. Hero art from the owner's sprite sheets (`art_source/heroes/`), cut by `tools/art/slice_character_sheet.py`.
-- **Rules (ADR-0012):** 7 attributes (STR/DEX/CON/INT/FTH/CHA/LCK), Fight / Items / Focus with Strike and Guard,
-  Energy for party and enemies, personal Gold with Transfer, Consumable slot.
-- **Journey:** 5 Layers — Layers 1–4 in the forest (Wolf, Thief, Golem, Slime, Goblin), Layer 5 and the boss in a cave
-  (Kobold, Skeleton, Giant Spider, Minotaur), painted forest/cave backdrops. Boss and Thornback Boar art pending (#75).
-- **UI:** one Navy + Gold theme ([docs/design/ui-style.md](docs/design/ui-style.md)), 55 code-drawn pixel icons beside labels
-  ([docs/design/icons.md](docs/design/icons.md)), text scale up to Extra-large.
-- **Balance** (100 seeds, [docs/design/balance.md](docs/design/balance.md)): every mode wins 74–93% with bots.
-- **Quality:** 362 headless tests; reviews in [docs/review/](docs/review/).
+- **โหมด:** Multiplayer แบบ co-op ออนไลน์ (room code, ผู้เล่น 1–5 คน, AI ควบคุม slot ว่าง) และ **Story mode** แบบออฟไลน์
+  (ผู้เล่นหนึ่งคนควบคุมทั้งห้าตัว มีฉากเนื้อเรื่อง การ์ดบท และ Save/Continue; ไม่มี timer) — ADR-0014
+- **ก่อนเริ่มแมตช์:** เลือก Class, Race และ Boons (ADR-0013); Skill tree, Prestige และ Gems จัดเก็บแยกตามผู้เล่นบน server
+  (Cloudflare Worker + D1, `deploy/profile-worker`; เจ้าของโปรเจกต์เป็นผู้ deploy ดู README ในโฟลเดอร์นั้น)
+- **อาชีพ:** Swordsman, Archer, Mage, Guardian, Assassin (เปลี่ยนชื่อจาก Rogue เมื่อ 2026-09-30; ย้ายข้อมูลโปรไฟล์เดิมให้แล้ว)
+  และ Classless ภาพฮีโร่มาจาก sprite sheet ของเจ้าของโปรเจกต์ (`art_source/heroes/`) และตัดด้วย `tools/art/slice_character_sheet.py`
+- **กติกา (ADR-0012):** มี 7 คุณลักษณะ (STR/DEX/CON/INT/FTH/CHA/LCK), คำสั่ง Fight / Items / Focus พร้อม Strike และ Guard,
+  Energy สำหรับกลุ่มและศัตรู, Gold ส่วนตัวที่โอนได้ และช่อง Consumable
+- **การเดินทาง:** มี 5 ชั้น — ชั้น 1–4 อยู่ในป่า (Wolf, Thief, Golem, Slime, Goblin), ชั้น 5 และบอสอยู่ในถ้ำ
+  (Kobold, Skeleton, Giant Spider, Minotaur) พร้อมฉากหลังป่า/ถ้ำที่วาดไว้ ภาพบอสและ Thornback Boar ยังรออยู่ (#75)
+- **UI:** ใช้ธีม Navy + Gold แบบเดียว ([docs/design/ui-style.md](docs/design/ui-style.md)), ไอคอนพิกเซลวาดด้วยโค้ด 55 ชิ้นวางข้างป้าย
+  ([docs/design/icons.md](docs/design/icons.md)) และขยายข้อความได้ถึง Extra-large
+- **สมดุลเกม** (100 seed, [docs/design/balance.md](docs/design/balance.md)): ทุกโหมดมีอัตราชนะเมื่อใช้ bot 74–93%
+- **คุณภาพ:** มี test แบบ headless 362 ข้อ; รายงานรีวิวอยู่ใน [docs/review/](docs/review/)
 
-Older sections below describe earlier milestones; where they say *Rogue*, the class is now *Assassin*.
+หัวข้อด้านล่างบันทึกงานระยะก่อนหน้า; จุดที่กล่าวถึง *Rogue* หมายถึงอาชีพ *Assassin* ในปัจจุบัน
 
-## The Match interface
+## Match interface
 
 `MatchServer` (`src/match/match_server.gd`) is the only seam game logic is
 tested through. It receives three dependencies from outside — a `GameRng`
 seed, a clock and `ForestContent` — and exposes:
 
-| Call | Purpose |
+| คำเรียก | จุดประสงค์ |
 | --- | --- |
-| `open_session()` | Anonymous session for a new connection |
-| `command(session, cmd)` | Apply a command; returns `{"ok": true, ...}` or `{"ok": false, "error": code}` |
-| `update()` | Process timers due at `clock.now()` |
-| `take_events(session)` | Events this session should see |
-| `snapshot(session)` | State this session should see |
-| `close_session(session)` | Connection dropped |
+| `open_session()` | สร้าง session นิรนามสำหรับการเชื่อมต่อใหม่ |
+| `command(session, cmd)` | ประมวลผลคำสั่ง; คืน `{"ok": true, ...}` หรือ `{"ok": false, "error": code}` |
+| `update()` | ประมวลผล timer ที่ถึงกำหนด ณ `clock.now()` |
+| `take_events(session)` | รับ event ที่ session นี้ควรเห็น |
+| `snapshot(session)` | รับสถานะที่ session นี้ควรเห็น |
+| `close_session(session)` | ปิดการเชื่อมต่อ |
 
 ## งานล่าสุด: Rest camp, Ready check และ HUD ตาม issue #31–#37
 

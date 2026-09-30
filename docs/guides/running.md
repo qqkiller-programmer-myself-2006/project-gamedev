@@ -1,9 +1,9 @@
-# Running the game
+# วิธีเปิดเกม
 
 ทุกอย่าง (server, PC client, browser client) มาจาก project เดียว: main scene
 (`src/app/main.tscn`) เปิด server เมื่อมี `--server` หรือรันแบบ headless, นอกนั้นเปิด client
 
-## Server (headless, authoritative)
+## Server (headless, ผู้ตัดสินผล)
 
 ```bash
 godot --headless --path . -- --server --port=8910
@@ -21,13 +21,13 @@ godot --path . -- --url=ws://127.0.0.1:8910 --name=Ann  # กรอกค่า�
 ```
 
 ทดสอบ co-op บนเครื่องเดียว: เปิด server หนึ่งตัว แล้วเปิด client สองหน้าต่าง
-คนหนึ่งกด **Create a room** อีกคนใส่ Room code แล้วกด **Join room**
+คนหนึ่งกด `Create a room` อีกคนใส่ Room code แล้วกด `Join room`
 
 ### Dev Playtest (กระโดดไปฉากที่ต้องการ)
 
-เฉพาะ debug build หรือ `--dev` (ไม่มีใน release export): ปุ่ม **[DEV] Playtest** บนหน้าแรกเปิด panel ให้เลือก
-**Start at** (Journey start, Combat, Merchant, Rest camp, Class Encounter, Story event, Cave = Layer 5 combat, Boss),
-**Class** ของผู้เล่น (Classless/Swordsman/Archer/Mage/Guardian/Assassin) และ **Seed** แล้วเริ่ม match คนเดียวบน server ในตัวเกม
+เฉพาะ debug build หรือ `--dev` (ไม่มีใน release export): ปุ่ม `[DEV] Playtest` บนหน้าแรกเปิด panel ให้เลือก
+`Start at` (Journey start, Combat, Merchant, Rest camp, Class Encounter, Story event, Cave = Layer 5 combat, Boss),
+`Class` ของผู้เล่น (Classless/Swordsman/Archer/Mage/Guardian/Assassin) และ `Seed` แล้วเริ่ม match คนเดียวบน server ในตัวเกม
 แล้วข้ามไปฉากนั้นทันที (ตั้ง Layer และเลเวล/EXP ให้เหมาะกับ Layer นั้น, ใช้ seed เดิม = ฉากเดิม)
 
 ```bash
@@ -64,9 +64,9 @@ xvfb-run -a godot --path . --rendering-driver opengl3 -s tools/dev/ui_preview.gd
 
 ตัวเลือก: `--scale=1.45` (ขนาดตัวหนังสือ), `--reduced-motion`
 
-## Profile storage
+## การจัดเก็บโปรไฟล์
 
-Run these commands once from `deploy/profile-worker/`, after replacing the placeholder `database_id` in `wrangler.toml` with the ID returned by the D1 create command:
+เรียกคำสั่งต่อไปนี้หนึ่งครั้งจาก `deploy/profile-worker/` หลังแทนค่า `database_id` ตัวอย่างใน `wrangler.toml` ด้วย ID ที่ได้จากคำสั่งสร้าง D1:
 
 ```bash
 npx wrangler login
@@ -76,7 +76,7 @@ npx wrangler secret put SERVER_SECRET
 npx wrangler deploy
 ```
 
-Then start the game server with the deployed Worker URL and the same secret:
+จากนั้นเปิด game server ด้วย URL ของ Worker ที่ deploy แล้วและ secret เดียวกัน:
 
 ```bash
 godot --headless --path . -- --server --profile-url=https://... --profile-secret=...
