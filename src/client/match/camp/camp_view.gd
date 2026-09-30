@@ -13,6 +13,7 @@ var _ready := false
 var _deadline: Variant = null
 var _countdown: Label
 var _region: Label
+var _backdrop: BattleBackdrop
 var _encounter_label: Label
 var _encounter_icon: TextureRect
 var _columns: HBoxContainer
@@ -48,9 +49,9 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 		if parsed is Dictionary:
 			_content = parsed
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var backdrop := BattleBackdrop.new()
-	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(backdrop)
+	_backdrop = BattleBackdrop.new()
+	_backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(_backdrop)
 	var shade := ColorRect.new()
 	shade.color = Color(UiKit.BG, 0.6)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -118,6 +119,7 @@ func build(view: Dictionary, encounter: Dictionary) -> void:
 	# T34: build() tears down _columns/_bottom, so remember scroll positions
 	# and the focused control first and restore them after the rebuild.
 	var camp_state := _snapshot_camp_state()
+	_backdrop.set_backdrop(str(_content.get("journey", {}).get("backdrops", {}).get(str(view.get("layer", 1)), "")))
 	_region.text = "%s (%d/%d)" % [UiText.region_of(view), int(view.get("layer", 0)), int(view.get("layers_total", 5))]
 	var merchant := str(encounter.get("kind", "")) == "merchant"
 	_encounter_icon.texture = Icons.texture("merchant") if merchant else Icons.texture("rest")
