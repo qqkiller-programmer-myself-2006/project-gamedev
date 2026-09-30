@@ -1,4 +1,4 @@
-# Godot 4
+# Godot 4 import metadata is generated; never commit it, including for docs screenshots.
 .godot/
 /android/
 *.import
