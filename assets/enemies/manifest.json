@@ -1,4 +1,53 @@
 {
+  "elder_thornwarden": {
+    "animations": {
+      "idle": {
+        "right": [
+          "idle_00.png",
+          "idle_01.png",
+          "idle_02.png",
+          "idle_03.png",
+          "idle_04.png",
+          "idle_05.png"
+        ]
+      },
+      "attack": 6,
+      "hurt": [
+        "idle_03.png",
+        "idle_04.png"
+      ],
+      "die": [
+        "idle_05.png"
+      ]
+    },
+    "canvas": {
+      "idle": [
+        365,
+        461
+      ],
+      "attack": [
+        625,
+        364
+      ],
+      "hurt": [
+        365,
+        461
+      ],
+      "die": [
+        365,
+        461
+      ]
+    },
+    "baseline": {
+      "idle": 455,
+      "attack": 358,
+      "hurt": 455,
+      "die": 455
+    },
+    "size_px": 96,
+    "faces": "right",
+    "variants": []
+  },
   "giant_spider": {
     "animations": {
       "idle": 5,
