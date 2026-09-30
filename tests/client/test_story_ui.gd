@@ -3,6 +3,13 @@ extends "res://tests/test_case.gd"
 const VotePanel = preload("res://src/client/match/vote_panel.gd")
 const ClassPanel = preload("res://src/client/match/class_panel.gd")
 
+class ToastProbeApp extends ClientApp:
+	var last_toast := ""
+	var last_toast_seconds := 0.0
+	func toast(message: String, seconds: float = 4.0) -> void:
+		last_toast = message
+		last_toast_seconds = seconds
+
 func _has_text(node: Node, wanted: String) -> bool:
 	if node is Label and str(node.text).contains(wanted):
 		return true
@@ -192,4 +199,25 @@ func test_story_log_hides_join_and_host_lines() -> void:
 	assert_eq(screen.describe({"type": "player_joined", "name": "Traveller", "slot": 0}), "Traveller joined (slot 1).")
 	assert_eq(screen.describe({"type": "host_changed", "name": "Traveller"}), "Traveller is now the Host.")
 	screen.free()
+	app.free()
+
+
+func test_story_title_explains_isolated_profile_policy() -> void:
+	var app := _ui_app()
+	var title := TitleScreen.new()
+	app.add_child(title)
+	title._app = app
+	title._show_play()
+	assert_true(_has_text(title, "Human only"))
+	assert_true(_has_text(title, "no online Races, Boons, or class-tree bonuses"))
+	app.free()
+
+
+func test_lobby_shows_profile_unavailable_notice() -> void:
+	var app := ToastProbeApp.new()
+	var lobby := LobbyScreen.new()
+	lobby.show_events(app, [{"type": "profile_unavailable"}])
+	assert_eq(app.last_toast, UiText.error("profile_unavailable"))
+	assert_eq(app.last_toast_seconds, 6.0)
+	lobby.free()
 	app.free()

@@ -44,8 +44,16 @@
       "hurt": 455,
       "die": 455
     },
-    "size_px": 96,
+    "size_px": 128,
     "faces": "right",
+    "body_height": {
+      "attack": 362
+    },
+    "fps": {
+      "idle": 6,
+      "attack": 10
+    },
+    "hurt_shake": true,
     "variants": []
   },
   "giant_spider": {
@@ -510,6 +518,208 @@
       "die": 108
     },
     "size_px": 48,
+    "faces": "right",
+    "variants": []
+  },
+  "old_swordsman": {
+    "animations": {
+      "idle": [
+        "idle_00.png",
+        "idle_01.png",
+        "idle_02.png"
+      ],
+      "attack": [
+        "attack_00.png",
+        "attack_01.png",
+        "attack_02.png"
+      ],
+      "hurt": [
+        "idle_00.png",
+        "idle_01.png",
+        "idle_02.png"
+      ],
+      "die": [
+        "idle_00.png",
+        "idle_01.png",
+        "idle_02.png"
+      ]
+    },
+    "canvas": {
+      "idle": [
+        542,
+        448
+      ],
+      "attack": [
+        593,
+        447
+      ],
+      "hurt": [
+        542,
+        448
+      ],
+      "die": [
+        542,
+        448
+      ]
+    },
+    "baseline": {
+      "idle": 442,
+      "attack": 441,
+      "hurt": 442,
+      "die": 442
+    },
+    "size_px": 64,
+    "faces": "right",
+    "variants": []
+  },
+  "shrine_spirit": {
+    "animations": {
+      "idle": [
+        "idle_00.png",
+        "idle_01.png",
+        "idle_02.png"
+      ],
+      "attack": [
+        "attack_00.png",
+        "attack_01.png",
+        "attack_02.png"
+      ],
+      "hurt": [
+        "idle_00.png",
+        "idle_01.png",
+        "idle_02.png"
+      ],
+      "die": [
+        "idle_00.png",
+        "idle_01.png",
+        "idle_02.png"
+      ]
+    },
+    "canvas": {
+      "idle": [
+        334,
+        328
+      ],
+      "attack": [
+        410,
+        320
+      ],
+      "hurt": [
+        334,
+        328
+      ],
+      "die": [
+        334,
+        328
+      ]
+    },
+    "baseline": {
+      "idle": 322,
+      "attack": 314,
+      "hurt": 322,
+      "die": 322
+    },
+    "size_px": 64,
+    "faces": "right",
+    "variants": []
+  },
+  "thornback_boar": {
+    "animations": {
+      "idle": [
+        "idle_00.png",
+        "idle_01.png",
+        "idle_02.png"
+      ],
+      "attack": [
+        "attack_00.png",
+        "attack_01.png",
+        "attack_02.png"
+      ],
+      "hurt": [
+        "idle_00.png",
+        "idle_01.png",
+        "idle_02.png"
+      ],
+      "die": [
+        "idle_00.png",
+        "idle_01.png",
+        "idle_02.png"
+      ]
+    },
+    "canvas": {
+      "idle": [
+        505,
+        375
+      ],
+      "attack": [
+        547,
+        352
+      ],
+      "hurt": [
+        505,
+        375
+      ],
+      "die": [
+        505,
+        375
+      ]
+    },
+    "baseline": {
+      "idle": 369,
+      "attack": 346,
+      "hurt": 369,
+      "die": 369
+    },
+    "size_px": 64,
+    "faces": "right",
+    "variants": []
+  },
+  "veteran_hunter": {
+    "animations": {
+      "idle": [
+        "idle_00.png",
+        "idle_01.png"
+      ],
+      "attack": [
+        "attack_00.png",
+        "attack_01.png",
+        "attack_02.png",
+        "attack_03.png"
+      ],
+      "hurt": [
+        "idle_00.png",
+        "idle_01.png"
+      ],
+      "die": [
+        "idle_00.png",
+        "idle_01.png"
+      ]
+    },
+    "canvas": {
+      "idle": [
+        485,
+        444
+      ],
+      "attack": [
+        562,
+        473
+      ],
+      "hurt": [
+        485,
+        444
+      ],
+      "die": [
+        485,
+        444
+      ]
+    },
+    "baseline": {
+      "idle": 438,
+      "attack": 467,
+      "hurt": 438,
+      "die": 438
+    },
+    "size_px": 64,
     "faces": "right",
     "variants": []
   }

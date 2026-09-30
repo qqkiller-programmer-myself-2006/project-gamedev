@@ -57,9 +57,9 @@
       {"speaker":"arin","text":"We will find him. The road beyond the Forest is open.","mood":"determined"}
     ],
     "party_defeated": [
-      {"speaker":"narrator","text":"The cave beneath the Forest closes around the fallen Party.","mood":"somber"},
-      {"speaker":"wren","text":"Father waited three winters. We can gather our strength and try again.","mood":"hopeful"},
-      {"speaker":"arin","text":"Next time, we reach the Guardian in the cave together.","mood":"determined"}
+      {"speaker":"narrator","text":"The Party falls, their journey through the Forest unfinished.","mood":"somber"},
+      {"speaker":"wren","text":"We can gather our strength and try again.","mood":"hopeful"},
+      {"speaker":"arin","text":"Next time, we will be ready.","mood":"determined"}
     ]
   }
 }

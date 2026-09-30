@@ -18,6 +18,7 @@ var tips: VBoxContainer
 var _screen: MatchScreen
 var _app: ClientApp
 var _combat: Dictionary = {}
+var _content: Dictionary = {}
 var _me := ""
 var _deadline: Variant = null
 var _countdown: Label
@@ -54,6 +55,11 @@ var _combat_grid: Control
 func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_screen = screen
 	_app = app
+	var content_file := FileAccess.open("res://content/forest.json", FileAccess.READ)
+	if content_file != null:
+		var parsed = JSON.parse_string(content_file.get_as_text())
+		if parsed is Dictionary:
+			_content = parsed
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	_backdrop = BattleBackdrop.new()
@@ -189,14 +195,16 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 
 
 ## Rebuilds everything that depends on the snapshot.
+func _backdrop_name(view: Dictionary, encounter: Dictionary) -> String:
+	if str(encounter.get("kind", "")) == "boss":
+		return str(encounter.get("backdrop", _content.get("boss", {}).get("backdrop", "")))
+	return str(_content.get("journey", {}).get("backdrops", {}).get(str(view.get("layer", 1)), ""))
+
+
 func build(view: Dictionary, combat: Dictionary) -> void:
 	_combat = combat
 	var encounter: Dictionary = view.get("encounter", {}) if view.get("encounter") is Dictionary else {}
-	var content_file := FileAccess.open("res://content/forest.json", FileAccess.READ)
-	var content: Dictionary = JSON.parse_string(content_file.get_as_text()) if content_file != null else {}
-	var boss := str(encounter.get("kind", "")) == "boss"
-	var backdrop_name := str(encounter.get("backdrop", content.get("boss", {}).get("backdrop", ""))) if boss else str(content.get("journey", {}).get("backdrops", {}).get(str(view.get("layer", 1)), ""))
-	_backdrop.set_backdrop(backdrop_name)
+	_backdrop.set_backdrop(_backdrop_name(view, encounter))
 	_me = str(combat.get("actor", "")) if _screen.room_view().get("story", false) and str(combat.get("actor", "")).begins_with("p") else "p%d" % _screen.your_slot()
 	var mode_key := "%d-%s-%s-%d" % [int(view.get("layer", 0)), str(view.get("phase")), combat.get("actor", ""),
 			int(combat.get("round", 0))]
