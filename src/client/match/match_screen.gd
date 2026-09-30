@@ -33,6 +33,8 @@ var _battle_mode := false
 var _camp: CampView
 ## Card id -> times (ms) of recent floating numbers, to stack them.
 var _float_stack: Dictionary = {}
+var _floating_numbers: Array[Label] = []
+var _combat_finished := false
 var _camp_mode := false
 var _scroll_to_top := false
 var _story_director: StoryDirector = null
@@ -63,6 +65,7 @@ func setup(client: ClientApp) -> void:
 	var center_scroll := ScrollContainer.new()
 	_center_scroll = center_scroll
 	center_scroll.follow_focus = true
+	center_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	center_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	center_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_center = MarginContainer.new()
@@ -156,6 +159,7 @@ func refresh(client: ClientApp, force: bool = false) -> void:
 	var focus_id := _focused_id()
 	anchors.clear()
 	var combat := _active_combat(view)
+	_combat_finished = not combat.is_empty() and not str(combat.get("result", "")).is_empty()
 	var camp := _active_camp(view)
 	_set_fullscreen("battle" if not combat.is_empty() else ("camp" if not camp.is_empty() else ""))
 	if _battle_mode:
@@ -372,6 +376,8 @@ func build_corner_menu(host: Control) -> PanelContainer:
 func float_text(id: String, text: String, color: Color) -> void:
 	# Cards may have just been rebuilt: wait for layout before measuring.
 	await get_tree().process_frame
+	if _combat_finished:
+		return
 	var anchor: Control = anchors.get(id)
 	if anchor == null or not is_instance_valid(anchor) or not anchor.is_inside_tree():
 		return
@@ -381,6 +387,7 @@ func float_text(id: String, text: String, color: Color) -> void:
 	label.add_theme_constant_override("outline_size", 6)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(label)
+	_floating_numbers.append(label)
 	# Numbers that land on the same card together (several DoTs ticking)
 	# stack upwards instead of drawing over each other.
 	var now := Time.get_ticks_msec()
@@ -390,7 +397,7 @@ func float_text(id: String, text: String, color: Color) -> void:
 	recent.append(now)
 	_float_stack[id] = recent
 	var rect := anchor.get_global_rect()
-	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -26.0 * lane)
+	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -42.0 * lane)
 	var tween := create_tween()
 	if app.settings.reduced_motion:
 		tween.tween_interval(1.2)
@@ -398,6 +405,13 @@ func float_text(id: String, text: String, color: Color) -> void:
 		tween.tween_property(label, "global_position:y", label.global_position.y - 40, 1.1)
 		tween.parallel().tween_property(label, "modulate:a", 0.0, 1.1).set_delay(0.4)
 	tween.tween_callback(label.queue_free)
+
+
+func _clear_floating_numbers() -> void:
+	for label in _floating_numbers:
+		if is_instance_valid(label):
+			label.queue_free()
+	_floating_numbers.clear()
 
 
 func describe(event: Dictionary) -> String:
@@ -451,7 +465,7 @@ func describe(event: Dictionary) -> String:
 			return "%s %s the %s Class." % [name_of("p%d" % int(event["slot"])),
 					"takes" if event["accepted"] else "declines", str(event["class"]).capitalize()]
 		"purchase":
-			return "%s bought %s for %d Gold." % [name_of("p%d" % int(event["slot"])), str(event["item"]).capitalize(), int(event["price"])]
+			return "%s bought %s for %d Gold." % [name_of("p%d" % int(event["slot"])), UiText.item_name(str(event["item"])), int(event["price"])]
 		"rested":
 			return "The Party rests and recovers."
 		"treasure_found":
@@ -459,13 +473,14 @@ func describe(event: Dictionary) -> String:
 		"clue_found":
 			return "Story Clue found: %s." % event["clue"]["title"]
 		"boss_started":
-			return "%s, %s, blocks the way!" % [event["name"], event["title"]]
+			return "%s, %s, blocks the way!" % [UiText.region_text(str(event["name"]), match_view()), event["title"]]
 		"boss_telegraph":
 			return "WARNING: %s" % event["text"]
 		"boss_phase":
-			return "Phase %d - %s: %s" % [int(event["phase"]), event["name"], event["text"]]
+			return "Phase %d - %s: %s" % [int(event["phase"]), UiText.region_text(str(event["name"]), match_view()), UiText.region_text(str(event["text"]), match_view())]
 		"match_ended":
-			return "Victory! The Forest is behind you." if event["result"] == "victory" else "Defeat. The Forest wins this time."
+			var region := UiText.region_of(match_view())
+			return "Victory! The %s is behind you." % region if event["result"] == "victory" else "Defeat. The %s wins this time." % region
 		"status_applied":
 			if str(event.get("kind", "")) == "dot":
 				return "%s suffers %s (x%d, %d turns)." % [name_of(str(event["target"])), event["name"],
@@ -490,7 +505,7 @@ func _describe_action(event: Dictionary) -> String:
 	if event.has("move_name"):
 		what = "uses %s" % event["move_name"]
 	if event.has("item"):
-		what = "uses %s" % str(event["item"]).replace("_", " ").capitalize()
+		what = "uses %s" % UiText.item_name(str(event["item"]))
 	var parts: Array[String] = []
 	for result in event.get("results", []):
 		var target := name_of(str(result["target"]))
@@ -551,7 +566,7 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				elif event.has("skill"):
 					named = str(event["skill"]).replace("_", " ").capitalize()
 				elif event.has("item"):
-					named = str(event["item"]).replace("_", " ").capitalize()
+					named = UiText.item_name(str(event["item"]))
 				if not named.is_empty():
 					_battle.announce(named)
 			var hurt := false
@@ -572,6 +587,8 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 		"vote_resolved":
 			client.banner("Next: %s" % event["name"], 2.2, "vote")
 		"combat_ended":
+			_combat_finished = true
+			_clear_floating_numbers()
 			var rewards: Dictionary = event.get("rewards", {})
 			if event["result"] == "victory" and int(rewards.get("exp", 0)) > 0:
 				_announce(client, "Victory! +%d EXP, +%d Gold" % [int(rewards["exp"]), int(rewards.get("gold", 0))], 2.5, "good")
@@ -597,6 +614,7 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 		"slot_ai_takeover":
 			client.toast("%s is now controlled by AI." % event["character"])
 		"match_ended":
+			_clear_floating_numbers()
 			client.banner("Victory!" if event["result"] == "victory" else "Defeat", 3.0,
 					"good" if event["result"] == "victory" else "bad")
 

@@ -530,9 +530,8 @@ static func hp_bar(hp: int, max_hp: int, width: float = 0.0) -> ProgressBar:
 	bar.max_value = maxi(1, max_hp)
 	bar.value = hp
 	bar.show_percentage = false
-	bar.custom_minimum_size = Vector2(width, 20)
-	var ratio := float(hp) / float(maxi(1, max_hp))
-	bar.add_theme_stylebox_override("fill", box(HP_LOW if ratio < 0.35 else HP_FILL, Color(0, 0, 0, 0), 0, 0))
+	bar.custom_minimum_size = Vector2(width, 30)
+	bar.add_theme_stylebox_override("fill", box(BAR_HP, Color(0, 0, 0, 0), 0, 0))
 	var text := label("HP %d / %d" % [hp, max_hp], "small")
 	text.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

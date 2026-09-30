@@ -60,6 +60,29 @@ func test_story_path_choice_hides_vote_status_and_multiplayer_keeps_it() -> void
 	app.free()
 
 
+func test_large_text_path_vote_keeps_status_and_timer_outside_scroll_area() -> void:
+	var app := _ui_app()
+	app.settings.text_scale = 1.4
+	app.snapshot = {"room": {"your_slot": 0, "slots": [{"owner_name": "Ann"}]},
+		"match": {"layer": 1, "story": false}}
+	var screen := MatchScreen.new()
+	screen.app = app
+	var view := _vote_view(false)
+	view["party"] = [{"slot": 0, "name": "Ann", "controller": "human"}]
+	view["vote"]["deadline"] = ClientApp._local_now() + 60.0
+	view["vote"]["seconds"] = 60.0
+	view["vote"]["options"].append({"index": 1, "type": "rest", "name": "Quiet Glade", "hint": "A place to recover.", "voters": []})
+	var panel := VotePanel.new()
+	panel.build(screen, app, view)
+	assert_true(_has_text(panel, "Alternatives"), "route choices can scroll independently")
+	assert_true(_has_text(panel, "Ready 0 of 1"), "vote status stays in the footer")
+	assert_true(_has_text(panel, "Vote closes in"), "the vote timer stays in the footer")
+	assert_true(panel.get_child(2) is ScrollContainer, "only the route choices scroll")
+	panel.free()
+	screen.free()
+	app.free()
+
+
 func _class_view(deadline: float) -> Dictionary:
 	return {
 		"encounter": {

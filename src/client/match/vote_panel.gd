@@ -16,7 +16,8 @@ const TYPE_ICONS := {
 
 
 func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
-	add_theme_constant_override("separation", 12)
+	add_theme_constant_override("separation", 8)
+	size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var vote: Dictionary = view["vote"]
 	_options = vote["options"]
 	_deadline = vote["deadline"]
@@ -25,19 +26,27 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	var solo := ClientApp.is_story_view(view)
 	add_child(UiKit.para("Choose your path" if solo else "Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])], "title"))
 	add_child(UiKit.para("Choose one path." if solo else "Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random.", "dim"))
+	var option_scroll := ScrollContainer.new()
+	option_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	option_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	option_scroll.custom_minimum_size = Vector2(0, 150)
+	var option_stack := UiKit.vbox(8)
+	option_stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	option_scroll.add_child(option_stack)
+	add_child(option_scroll)
 	if _options.is_empty():
-		add_child(UiKit.para("No routes available.", "dim"))
+		option_stack.add_child(UiKit.para("No routes available.", "dim"))
 	else:
 		# First server-ordered route is featured with full detail; the rest
 		# stay in server order as compact alternatives. Keys 1-3 still follow
 		# that same server order so the featured card is always [1].
-		add_child(_featured_card(screen, app, _options[0]))
+		option_stack.add_child(_featured_card(screen, app, _options[0]))
 		if _options.size() > 1:
-			add_child(UiKit.label("Alternatives", "dim"))
+			option_stack.add_child(UiKit.label("Alternatives", "dim"))
 			var alt_row := UiKit.flow(12)
 			for i in range(1, _options.size()):
 				alt_row.add_child(_compact_card(screen, app, _options[i]))
-			add_child(alt_row)
+			option_stack.add_child(alt_row)
 	if not solo:
 		add_child(UiKit.para(_voter_status(screen, view, vote)))
 	var timer_row := UiKit.hbox(10)
@@ -82,7 +91,7 @@ func _featured_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> 
 	box.add_child(_vote_button(screen, app, option, mine, solo, "primary"))
 	var card := UiKit.panel(box, "HighlightPanel" if mine else "CardPanel")
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(250, 230)
+	card.custom_minimum_size = Vector2(250, 190)
 	return card
 
 

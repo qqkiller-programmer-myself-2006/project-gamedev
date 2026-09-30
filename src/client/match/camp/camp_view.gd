@@ -29,6 +29,7 @@ var _left_mode := "craft"
 var _inventory_mode := "inventory"
 var _invest_panel: PanelContainer
 var _content: Dictionary = {}
+var _backdrop: BattleBackdrop
 const SLOTS := ["helmet", "chest", "legs", "boots", "weapon", "charm1", "charm2", "charm3"]
 const ATTRIBUTES := ["str", "dex", "con", "int", "fth", "cha", "lck"]
 const PERCENT_STATS := ["crit", "crit_damage", "block", "block_reduction", "dodge", "aggro", "lifesteal", "status_resist"]
@@ -39,6 +40,10 @@ const TAB_ICONS := {"Stash": "items", "Shop": "merchant", "Craft": "rest", "Inve
 static func tab_width_for_scale(text_scale: float) -> float:
 	return 116.0 * maxf(1.0, text_scale)
 
+
+static func backdrop_for_layer(content: Dictionary, layer: int) -> String:
+	return str(content.get("journey", {}).get("backdrops", {}).get(str(layer), ""))
+
 func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_screen = screen
 	_app = app
@@ -48,9 +53,9 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 		if parsed is Dictionary:
 			_content = parsed
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var backdrop := BattleBackdrop.new()
-	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(backdrop)
+	_backdrop = BattleBackdrop.new()
+	_backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(_backdrop)
 	var shade := ColorRect.new()
 	shade.color = Color(UiKit.BG, 0.6)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -119,6 +124,8 @@ func build(view: Dictionary, encounter: Dictionary) -> void:
 	# and the focused control first and restore them after the rebuild.
 	var camp_state := _snapshot_camp_state()
 	_region.text = "%s (%d/%d)" % [UiText.region_of(view), int(view.get("layer", 0)), int(view.get("layers_total", 5))]
+	var backdrop_name := backdrop_for_layer(_content, int(view.get("layer", 1)))
+	_backdrop.set_backdrop(backdrop_name)
 	var merchant := str(encounter.get("kind", "")) == "merchant"
 	_encounter_icon.texture = Icons.texture("merchant") if merchant else Icons.texture("rest")
 	_encounter_label.text = "\"%s\"" % str(encounter.get("name", "Merchant" if merchant else "Rest")).replace("\"", "")

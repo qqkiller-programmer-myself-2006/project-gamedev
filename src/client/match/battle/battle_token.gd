@@ -153,18 +153,22 @@ func setup(data: Dictionary) -> void:
 	tooltip_text = str(data.get("tooltip", ""))
 	modulate = Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
 	_set_animation("dead" if down else "idle")
+	mouse_entered.connect(queue_redraw)
+	mouse_exited.connect(queue_redraw)
 	set_process(sprite_set != null)
 
 func play_animation(kind: String) -> void:
-	if sprite_set == null:
-		return
 	if kind == "revive":
 		down = false
 		modulate = Color.WHITE
-		_set_animation("idle")
+		if sprite_set != null:
+			_set_animation("idle")
 		return
 	if kind == "dead":
 		down = true
+		modulate = Color(0.55, 0.55, 0.55, 0.85)
+	if sprite_set == null:
+		return
 	_set_animation(kind)
 
 ## A fresh token is built for each snapshot. Carry a one-shot animation over
@@ -240,6 +244,8 @@ func _draw() -> void:
 		ring_color = Color("#fff3b0")
 	if has_focus():
 		ring_color = UiKit.ACCENT
+	elif is_hovered() and target_number > 0:
+		ring_color = UiKit.GOOD
 	var ground_color := Color(0, 0, 0, 0.45)
 	if side == "party":
 		ground_color = tint.darkened(0.25)
@@ -378,8 +384,8 @@ func _draw_enemy(feet: Vector2, body: Color, dark: Color) -> void:
 			draw_circle(Vector2(feet.x, feet.y - 43), radius, Color(0.30, 0.90, 0.94, 0.06))
 		draw_circle(Vector2(feet.x, feet.y - 43), 18.0, Color("#8fe8f0"))
 		draw_circle(Vector2(feet.x - 6, feet.y - 49), 5.0, Color("#eaffff"))
-	elif kind.contains("outlaw") or kind.contains("bandit") or kind.contains("swordsman") or kind.contains("hunter") or kind.contains("sentinel"):
-		_draw_humanoid(feet, Color("#45494f"), Color("#20242b"), 1.0)
+	elif kind.contains("outlaw") or kind.contains("bandit") or kind.contains("thief") or kind.contains("swordsman") or kind.contains("hunter") or kind.contains("sentinel"):
+		_draw_humanoid(feet, Color("#45494f"), Color("#20242b"), 1.35)
 		draw_rect(Rect2(feet.x - 17, feet.y - 53, 34, 9), Color("#181b22"))
 	elif kind.contains("archer"):
 		_draw_humanoid(feet, body, dark, 0.9)

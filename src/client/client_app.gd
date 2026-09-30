@@ -399,6 +399,10 @@ func _show_screen(screen: String) -> void:
 # --- Feedback -----------------------------------------------------------------
 
 func toast(message: String, seconds: float = 4.0) -> void:
+	if _current is LobbyScreen:
+		_toast.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, 12)
+	else:
+		_toast.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 16)
 	_toast_label.text = message
 	_toast_until = _local_now() + seconds
 	_toast.visible = true
@@ -444,7 +448,8 @@ func flash(node: CanvasItem, color: Color) -> void:
 		return
 	var tween := create_tween()
 	tween.tween_property(node, "modulate", color, 0.08)
-	tween.tween_property(node, "modulate", Color.WHITE, 0.25)
+	var resting := Color(0.55, 0.55, 0.55, 0.85) if node is BattleToken and (node as BattleToken).down else Color.WHITE
+	tween.tween_property(node, "modulate", resting, 0.25)
 
 
 ## Shows a one-time tutorial hint unless the player has seen it already.
@@ -549,7 +554,16 @@ func confirm(key: String, on_confirm: Callable, args: Array = []) -> void:
 	var texts: Array = UiText.CONFIRM[key]
 	var dialog := ConfirmDialog.new()
 	_overlay_holder.add_child(dialog)
-	dialog.setup(str(texts[0]), str(texts[1]) % args if not args.is_empty() else str(texts[1]), str(texts[2]), on_confirm)
+	var title := str(texts[0])
+	var body := str(texts[1])
+	if key == "buy_item" and args.size() >= 2:
+		title = title % str(args[0])
+		body = body % int(args[1])
+	elif not args.is_empty():
+		if title.contains("%"):
+			title = title % args[0]
+		body = body % args
+	dialog.setup(title, body, str(texts[2]), on_confirm)
 
 
 ## Leaves the room or Match after asking.
@@ -631,14 +645,11 @@ func _exit_tree() -> void:
 
 
 func _build_toast() -> void:
-	# Toasts always appear at the top centre, on every screen.
+	# Keep lobby notices in the unused top-right corner, away from the room-code
+	# row and action buttons. Other screens use the bottom-right safe area.
 	_toast_label = UiKit.label("")
 	_toast = UiKit.panel(_toast_label, "ToastPanel")
-	_toast.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	_toast.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_toast.grow_vertical = Control.GROW_DIRECTION_END
-	_toast.offset_top = 12
-	_toast.offset_bottom = 12
+	_toast.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 16)
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_toast.visible = false
 	add_child(_toast)
