@@ -12,8 +12,8 @@ Races, Boons, per-Class skill trees, Prestige, and Gems are authoritative
 server-side metadata in `content/forest.json`. Gems are earned per passed
 Layer, Guardian victory, Story Clue, and eligible Class Encounter, then saved
 through the injected `ProfileStore` for token-bearing sessions. Missing tokens
-use a session-only profile. Enervation is a Boon, not a Assassin passive; status
-resistance is a derived stat.
+use a session-only profile. Enervation is a Boon, not an Assassin class passive;
+status resistance is a derived stat.
 
 คำศัพท์และขอบเขตที่ใช้ร่วมกันสำหรับ vertical slice ของเกม BEYOND THE WORLD'S END ซึ่งเป็น online fantasy turn-based RPG แบบ co-op
 
@@ -72,7 +72,7 @@ _Avoid_: game API, backend
 _Avoid_: fifth sibling, mercenary
 
 **Classless**:
-สถานะเริ่มต้นของตัวละครที่ยังไม่มีความสามารถเฉพาะ Class
+สถานะของตัวละครที่ยังไม่มีความสามารถเฉพาะ Class; เป็นทางเริ่มแบบ legacy เมื่อไม่มีการส่ง loadout และตัวละครนี้ยังรับ Class ได้จาก Class Encounter
 _Avoid_: default class, novice class
 
 **Class Encounter**:
@@ -96,7 +96,7 @@ Class ระดับแรกของ Forest vertical slice ได้แก่
 _Avoid_: starter class (เพราะผู้เล่นไม่ได้เริ่มเกมด้วย Class)
 
 **Assassin**:
-Tier 1 Class สาย Melee DoT ที่ใช้มีดและยาพิษติด DoT หลายชนิดบนเป้าเดียว แล้วปิดด้วย Skill ที่แรงขึ้นตามจำนวนชนิด DoT บนเป้า; มี passive Enervation (ADR-0010)
+Tier 1 Class สาย Melee DoT ที่ใช้มีดและยาพิษติด DoT หลายชนิดบนเป้าเดียว แล้วปิดด้วย Skill ที่แรงขึ้นตามจำนวนชนิด DoT บนเป้า; Enervation เป็น Boon ที่เลือกก่อนเริ่ม Match (ADR-0013; renamed from Rogue in #74)
 _Avoid_: assassin, thief
 
 **AI replacement**:
@@ -118,8 +118,8 @@ Status effect ที่ทำ damage ตอนเริ่ม turn ของต�
 _Avoid_: poison (เมื่อหมายถึง DoT ทุกชนิด), tick effect
 
 **Enervation**:
-passive ของ Assassin: damage ตรงแรงขึ้น 5% ต่อชนิด DoT บนเป้า (ไม่เกิน ×1.4), DoT ที่ Assassin ติดแรงขึ้น 15% และ Assassin รับ damage จาก DoT มากขึ้น ×1.15
-_Avoid_: boon, perk (slice นี้ไม่มีระบบ Boon)
+Boon ที่เพิ่ม damage ตรง 5% ต่อชนิด DoT บนเป้า (ไม่เกิน ×1.4), เพิ่ม damage ของ DoT ที่ผู้สวมใส่ทำ 15% และทำให้ผู้สวมใส่รับ damage จาก DoT มากขึ้น ×1.15 (ADR-0013)
+_Avoid_: Assassin passive, perk
 
 **Path Voting**:
 การที่ผู้เล่นจริงโหวตเลือกเส้นทางถัดไปหลัง Encounter; AI ไม่มีสิทธิ์โหวต และกรณีเสมอให้สุ่มจากตัวเลือกที่คะแนนเท่ากัน
