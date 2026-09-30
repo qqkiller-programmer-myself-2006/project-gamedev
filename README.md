@@ -14,6 +14,18 @@ The current goal is the Forest vertical slice described in
 - Accessibility checklist: [`docs/design/accessibility.md`](docs/design/accessibility.md)
 - Staging and QA checklist: [`docs/guides/staging.md`](docs/guides/staging.md)
 
+## Latest verification — 2026-10-01
+
+Checked `origin/main` at `9ac20c4` with Godot 4.7.2. The headless suite reported
+**409 passed, 1 failed**; the remaining failure is
+`test_story_path_choice_hides_vote_status_and_multiplayer_keeps_it`
+(`Multiplayer keeps vote status: expected true`). See [QA tracking issue #91](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/91).
+
+The scripted Duo UI preview completed at `--speed=24`, captured the title,
+Path Voting, Combat, Merchant, Guardian Boss, and Summary screens, and reached
+Defeat after 16:12 of simulated play. This is an automated preview, not a
+human multiplayer or platform-certification playtest.
+
 ## Where things live
 
 ```text
