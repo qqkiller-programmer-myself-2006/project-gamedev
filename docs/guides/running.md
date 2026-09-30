@@ -52,6 +52,7 @@ server ออนไลน์ตอบ `dev_offline_only`.
 | Combat | A Attack, S Skill, D Defend, I Item, 1–9 เลือกเป้า/Skill/Item, Esc ย้อนกลับ |
 | Class Encounter | Y รับ Class, N ปฏิเสธ |
 | Merchant | 1–4 ซื้อ, R ซื้อเสร็จแล้ว |
+| Rest camp | 1–9 คราฟต์, R เสร็จแล้ว, Esc เมนู |
 | Story Event | 1–2 โหวตตัวเลือก, Enter ไปต่อ |
 
 ## ดู UI โดยไม่ต้องต่อ server จริง

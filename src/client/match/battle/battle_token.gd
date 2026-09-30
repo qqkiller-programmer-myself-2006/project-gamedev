@@ -395,9 +395,16 @@ func _status_badge(entry: Dictionary, compact: bool) -> PanelContainer:
 	var line := UiKit.hbox(2)
 	var icon_name := str(STATUS_ICONS.get(status, "info"))
 	line.add_child(Icons.rect(icon_name, Icons.size_for_scale(text_scale)))
+	# Turns left are visible text when there is room (compact badges keep the
+	# tooltip fallback so four badges still fit above a token).
+	var count := "%d" % int(entry.get("stacks", 1))
+	if str(entry.get("kind", "dot")) != "dot":
+		count = "%d" % int(entry.get("charges", 0))
+	elif not compact:
+		count = "x%d %dt" % [int(entry.get("stacks", 1)), int(entry.get("turns", 0))]
 	if not compact:
 		line.add_child(UiKit.pixel_label(UiKit.status_tag(status), "small", color))
-	line.add_child(UiKit.pixel_label("%d" % int(entry.get("stacks", 1)), "small"))
+	line.add_child(UiKit.pixel_label(count, "small"))
 	var result := UiKit.panel(line)
 	result.add_theme_stylebox_override("panel", UiKit.flat_box(UiKit.STATUS_BG, color, 1, 3))
 	result.tooltip_text = "%s: %s stack(s), %s turn(s) left" % [entry.get("name", status), entry.get("stacks", 1), entry.get("turns", 0)]

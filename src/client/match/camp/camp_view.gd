@@ -350,8 +350,15 @@ func _build_shop(view: Dictionary, body: VBoxContainer) -> void:
 		text.add_child(Icons.with_text("gold", "%d Gold   (%d left)" % [int(entry.get("price", 0)), int(entry.get("remaining", 0))], "small", _app.settings.text_scale, UiKit.ACCENT))
 		card.get_child(0).add_child(text)
 		var actions := UiKit.vbox(2)
-		var buy := _button("Buy", func() -> void: _app.send({"type": "buy", "slot": _acting_slot(), "item": entry.get("item", "")}))
 		var affordable := int(_character(view, _acting_slot()).get("gold", 0)) >= int(entry.get("price", 0)) if _screen.room_view().get("story", false) else bool(entry.get("affordable", int(view.get("gold", 0)) >= int(entry.get("price", 0))))
+		# The state is in the button text itself (not only the tooltip), so it
+		# is readable with keyboard focus and without hovering.
+		var buy_label := "Buy"
+		if int(entry.get("remaining", 0)) <= 0:
+			buy_label = "Sold out"
+		elif not affordable:
+			buy_label = "Need %d Gold" % int(entry.get("price", 0))
+		var buy := _button(buy_label, func() -> void: _app.send({"type": "buy", "slot": _acting_slot(), "item": entry.get("item", "")}))
 		if int(entry.get("remaining", 0)) <= 0:
 			UiKit.disable(buy, true, UiText.WHY["sold_out"])
 		else:
@@ -395,6 +402,11 @@ func _recipe_row(recipe: Dictionary, index: int) -> Control:
 	var recipe_name := UiKit.pixel_label("%s%s" % ["[%d] " % (index + 1) if index < 9 else "", str(recipe.get("name", recipe.get("recipe", "")))], "small")
 	recipe_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	name.add_child(recipe_name)
+	# Materials are visible text (have/need with OK/NEED words), not only the
+	# Craft button's hover tooltip, so keyboard users can tell what is missing.
+	var mats := UiKit.pixel_label(_materials_text(recipe), "tiny", UiKit.TEXT_DIM)
+	mats.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	name.add_child(mats)
 	var tips_text := ""
 	for material in recipe.get("materials", []):
 		tips_text += "%d %s (%d)\n" % [int(material.get("need", 0)), str(material.get("name", material.get("item", ""))), int(material.get("have", 0))]
@@ -411,6 +423,21 @@ func _recipe_row(recipe: Dictionary, index: int) -> Control:
 	card.get_child(0).add_child(name)
 	card.get_child(0).add_child(actions)
 	return card
+
+
+## Visible materials summary for a recipe row: "have/need name [OK|NEED]".
+## Words carry the state so colour is never the only cue.
+func _materials_text(recipe: Dictionary) -> String:
+	var materials: Array = recipe.get("materials", [])
+	if materials.is_empty():
+		return "No materials needed"
+	var parts: Array[String] = []
+	for material in materials:
+		var need := int(material.get("need", 0))
+		var have := int(material.get("have", 0))
+		parts.append("%d/%d %s %s" % [have, need, str(material.get("name", material.get("item", ""))),
+				"OK" if have >= need else "NEED"])
+	return "Mats: " + ", ".join(parts)
 
 func _build_stash(view: Dictionary, body: VBoxContainer) -> void:
 	for entry in view.get("inventory", []):

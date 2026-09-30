@@ -22,7 +22,7 @@ func _initialize() -> void:
 func _run() -> void:
 	var failed := false
 	for resolution in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
-		for scale in [1.0, 1.2, 1.4]:
+		for scale in [1.0, 1.2, 1.45]:
 			root.size = resolution
 			var app := ClientApp.new()
 			app.settings = ClientSettings.new()

@@ -144,6 +144,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 
 	var bottom_left := UiKit.vbox(2)
 	bottom_left.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	bottom_left.grow_horizontal = Control.GROW_DIRECTION_END
 	bottom_left.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	bottom_left.offset_left = 14
 	bottom_left.offset_bottom = -10
@@ -429,6 +430,14 @@ func _build_timeline(view: Dictionary) -> void:
 			var energy_bar := UiKit.stat_bar(int(unit["energy"]), int(unit.get("energy_max", 6)), UiKit.BAR_ENERGY,
 					"%d/%d" % [int(unit["energy"]), int(unit.get("energy_max", 6))], 12, "tiny")
 			entry.add_child(energy_bar)
+		# Weakness is visible text on the timeline, not only the stage token's
+		# hover tooltip, so keyboard target choice can use it.
+		if not str(id).begins_with("p"):
+			var weakness: Array = unit.get("weakness", [])
+			if not weakness.is_empty():
+				var weak_label := UiKit.pixel_label("Weak: " + ", ".join(weakness), "tiny", UiKit.WARN)
+				weak_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				entry.add_child(weak_label)
 		var card := UiKit.panel(entry, "HudHighlightPanel" if is_actor else "HudPanel")
 		card.set_meta("actor_id", str(id))
 		card.modulate = Color(1, 1, 1, 0.6) if hp <= 0 or acted else Color.WHITE
