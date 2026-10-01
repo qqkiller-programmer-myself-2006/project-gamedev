@@ -95,6 +95,14 @@ func test_search_boxes_have_distinct_focus_ids() -> void:
 	assert_true(left != inv, "the two search boxes are distinct controls")
 
 
+func test_camp_backdrop_tracks_the_current_layer() -> void:
+	_make_camp()
+	var view := _view()
+	view["layer"] = 5
+	_camp.build(view, _merchant())
+	assert_eq(_camp._backdrop.backdrop_name, "cave")
+
+
 func test_update_keeps_search_text() -> void:
 	_make_camp()
 	var view := _view()

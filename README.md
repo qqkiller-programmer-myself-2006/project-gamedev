@@ -16,14 +16,20 @@
 
 ## ผลตรวจสอบล่าสุด — 2026-10-01
 
-ตรวจ `origin/main` ที่ `9ac20c4` ด้วย Godot 4.7.2 ชุดทดสอบแบบ headless รายงานว่า
-**ผ่าน 409 ข้อ และไม่ผ่าน 1 ข้อ**; ข้อที่ยังไม่ผ่านคือ
-`test_story_path_choice_hides_vote_status_and_multiplayer_keeps_it`
-(`Multiplayer keeps vote status: expected true`). See [QA tracking issue #91](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/91).
+ตรวจ `origin/main` ที่ `d21aff0` ด้วย Godot 4.7.2 บน Windows (2026-10-01):
 
-ตัวอย่าง UI แบบ Duo ที่ทำงานตามสคริปต์เสร็จที่ `--speed=24` บันทึกภาพหน้า title,
-Path Voting, Combat, Merchant, Guardian Boss และ Summary แล้วไปถึง Defeat หลังจำลองการเล่น 16:12 นาที
-นี่เป็นการแสดงตัวอย่างอัตโนมัติ ไม่ใช่การทดสอบ multiplayer โดยผู้เล่นจริงหรือการรับรองแพลตฟอร์ม
+- **ชุดทดสอบ headless: ผ่าน 430 ข้อ ไม่ผ่าน 0 ข้อ** (167 วินาที)
+- **จำลองด้วยบอท** (`tools/dev/simulate.gd --seeds=40 --pace`): 1 ผู้เล่นชนะ 29/40 (73%),
+  2 ผู้เล่นชนะ 27/40 (68%), คำสั่งถูกปฏิเสธ 0 ครั้ง ทุกความพ่ายแพ้เกิดที่ Guardian Boss
+  โหมด 2 ผู้เล่นต่ำกว่าเป้า 70–97% เล็กน้อย
+- **UI preview แบบสคริปต์** (`tools/dev/ui_preview.gd --seed=21 --speed=24`): จับภาพ 22 หน้าจอ
+  ตั้งแต่ title ถึง Victory ไม่มี error ใน log ปัญหา UI ที่ยังเห็นในภาพ (ติดตามใน
+  [#87](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/87)):
+  ข้อความ placeholder ("All", "P OK", "S E2", "..."), ตัวเลขดาเมจซ้อนกัน,
+  ตัวเลขดาเมจค้างใน Summary และตัวเลือกใน Path Voting ตกใต้ขอบจอ
+
+นี่เป็นการตรวจอัตโนมัติ ไม่ใช่การทดสอบ multiplayer โดยผู้เล่นจริงหรือการรับรองแพลตฟอร์ม
+ดู [QA tracking issue #91](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/91)
 
 ## ตำแหน่งไฟล์และโฟลเดอร์
 
