@@ -333,7 +333,7 @@ func handle_key(key: int) -> bool:
 			if not choices.get("skills", {}).is_empty():
 				_set_mode("skills")
 			else:
-				_app.toast(UiText.error("skill_unavailable"))
+				_app.toast_error(UiText.error("skill_unavailable"))
 			return true
 		KEY_D:
 			_send({"action": "defend"})

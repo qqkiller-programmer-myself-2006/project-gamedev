@@ -59,6 +59,21 @@ const NO_LIGATURES := {"liga": 0, "clig": 0, "dlig": 0}
 
 static var _pixel_font: Font = null
 static var _number_font: Font = null
+static var _sound_bank: SoundBank = null
+
+
+static func set_sound_bank(sound_bank: SoundBank) -> void:
+	_sound_bank = sound_bank
+
+
+static func play_sound(cue: String) -> void:
+	if _sound_bank != null and is_instance_valid(_sound_bank):
+		_sound_bank.play(cue)
+
+
+static func _on_button_mouse_entered(button: Button) -> void:
+	if not button.disabled:
+		play_sound("hover")
 
 
 static func pixel_font() -> Font:
@@ -459,13 +474,16 @@ static func para(text: String, style: String = "body", color: Color = Color(0, 0
 
 ## `kind`: "secondary" (default), "primary" (the one gold action of a panel),
 ## "danger" (destructive, ask first) or "small" (dense rows).
-static func button(text: String, callback: Callable, big: bool = false, kind: String = "secondary") -> Button:
+static func button(text: String, callback: Callable, big: bool = false, kind: String = "secondary", sound_cue: String = "") -> Button:
 	var node := Button.new()
 	node.text = text
 	node.focus_mode = Control.FOCUS_ALL
 	node.theme_type_variation = button_variation(kind, big)
 	if _has_digit(text):
 		node.add_theme_font_override("font", number_font())
+	node.mouse_entered.connect(_on_button_mouse_entered.bind(node))
+	if not sound_cue.is_empty():
+		node.pressed.connect(play_sound.bind(sound_cue))
 	node.pressed.connect(callback)
 	return node
 
@@ -483,8 +501,8 @@ static func button_variation(kind: String, big: bool = false) -> String:
 	return "BigButton" if big else ""
 
 
-static func primary(text: String, callback: Callable, big: bool = true) -> Button:
-	return button(text, callback, big, "primary")
+static func primary(text: String, callback: Callable, big: bool = true, sound_cue: String = "") -> Button:
+	return button(text, callback, big, "primary", sound_cue)
 
 
 ## Disables `control` (when `off`) and says why in its tooltip.

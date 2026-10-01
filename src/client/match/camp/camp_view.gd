@@ -730,9 +730,12 @@ func handle_key(key: int) -> bool:
 	if key == KEY_ESCAPE:
 		if is_instance_valid(_invest_panel):
 			_close_invest_panel()
+			_app.sounds.play("cancel")
 		elif _hidden:
 			_toggle_hidden()
 		else:
+			if _menu_panel.visible:
+				_app.sounds.play("cancel")
 			_menu_panel.visible = not _menu_panel.visible
 			if _menu_panel.visible:
 				UiKit.focus_first(_menu_panel)
@@ -844,7 +847,7 @@ func _show_info(data: Dictionary) -> void:
 			for key in bonus_keys:
 				body.add_child(UiKit.pixel_label("%s %s" % [_bonus_text(str(key), bonuses[key]), str(key).to_upper()], "small"))
 	_add_use_stats(body, item.get("use", {}))
-	body.add_child(UiKit.button("Close [Esc]", _close_invest_panel, false, "primary"))
+	body.add_child(UiKit.button("Close [Esc]", _close_invest_panel, false, "primary", "cancel"))
 	_open_popup(body, 440)
 	_invest_panel.name = "ItemInfoPanel"
 
@@ -894,7 +897,7 @@ func _show_abilities(view: Dictionary) -> void:
 	var scroll := _scroll_body(list)
 	scroll.custom_minimum_size = Vector2(0, 360)
 	body.add_child(scroll)
-	body.add_child(UiKit.button("Close [Esc]", _close_invest_panel, false, "primary"))
+	body.add_child(UiKit.button("Close [Esc]", _close_invest_panel, false, "primary", "cancel"))
 	_open_popup(body, 470)
 	_invest_panel.name = "AbilitiesPanel"
 
@@ -926,7 +929,7 @@ func _open_transfer_picker(kind: String, item: String = "") -> void:
 				command["item"] = item
 			_app.send(command)
 			_close_invest_panel()))
-	body.add_child(UiKit.button("Cancel [Esc]", _close_invest_panel))
+	body.add_child(UiKit.button("Cancel [Esc]", _close_invest_panel, false, "secondary", "cancel"))
 	_open_popup(body, 280)
 
 func _open_invest(character: Dictionary) -> void:
@@ -939,7 +942,7 @@ func _open_invest(character: Dictionary) -> void:
 			_app.send({"type": "invest", "slot": _acting_slot(), "stat": stat})
 			_close_invest_panel())
 		body.add_child(plus)
-	body.add_child(UiKit.button("Cancel [Esc]", _close_invest_panel))
+	body.add_child(UiKit.button("Cancel [Esc]", _close_invest_panel, false, "secondary", "cancel"))
 	_open_popup(body, 220)
 	_invest_panel.name = "InvestPanel"
 

@@ -34,3 +34,11 @@ func test_finished_defeat_is_not_replayed_but_other_music_can_switch() -> void:
 	sound_bank._music_track = "battle"
 	assert_false(sound_bank._should_skip_music("defeat"), "defeat can play again after switching away")
 	sound_bank.free()
+
+
+func test_hover_is_limited_to_one_cue_per_cooldown() -> void:
+	var sound_bank := SoundBank.new()
+	assert_false(sound_bank._hover_is_rate_limited(1000), "first hover plays")
+	assert_true(sound_bank._hover_is_rate_limited(1069), "hover inside cooldown is suppressed")
+	assert_false(sound_bank._hover_is_rate_limited(1070), "hover at cooldown boundary plays")
+	sound_bank.free()

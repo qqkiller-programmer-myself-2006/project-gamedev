@@ -24,9 +24,9 @@ func setup(title: String, text: String, confirm_label: String, on_confirm: Calla
 	body.add_child(UiKit.para(text))
 	var row := UiKit.hbox(10)
 	row.alignment = BoxContainer.ALIGNMENT_END
-	var cancel := UiKit.button("Cancel [Esc]", close)
+	var cancel := UiKit.button("Cancel [Esc]", close, false, "secondary", "cancel")
 	cancel.set_meta("focus_id", "confirm_cancel")
-	var ok := UiKit.button(confirm_label, _confirm, false, "danger")
+	var ok := UiKit.button(confirm_label, _confirm, false, "danger", "cancel" if confirm_label.to_lower().begins_with("leave") else "")
 	ok.set_meta("focus_id", "confirm_ok")
 	row.add_child(cancel)
 	row.add_child(ok)
