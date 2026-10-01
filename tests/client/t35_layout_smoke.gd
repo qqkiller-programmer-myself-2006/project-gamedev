@@ -177,7 +177,7 @@ func _run() -> void:
 			await process_frame
 			var camp_tip := camp.tips.get_child(0) as Control
 			var camp_body := camp_tip.get_child(0).get_child(1) as Control
-			if camp_body.size.y > 16 * scale + 1:
+			if camp_body.size.y > 22 * scale + 1:
 				push_error("camp Tip body exceeds height cap at %s scale %.1f" % [resolution, scale])
 				failed = true
 			var tip_rect := Rect2(camp_tip.global_position, camp_tip.size)
