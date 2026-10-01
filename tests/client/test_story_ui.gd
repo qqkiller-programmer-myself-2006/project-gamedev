@@ -58,7 +58,7 @@ func test_story_path_choice_hides_vote_status_and_multiplayer_keeps_it() -> void
 	app.snapshot["match"]["story"] = false
 	var multi := VotePanel.new()
 	multi.build(screen, app, _vote_view(false))
-	assert_true(_has_text(multi, "Ready "), "Multiplayer keeps vote status")
+	assert_true(_has_text(multi, "0 of 0 ready"), "Multiplayer keeps vote status")
 	assert_true(_has_text(multi, "Votes:"), "Multiplayer keeps vote tallies")
 	assert_true(_has_text(multi, "Vote for this path"), "Multiplayer keeps vote labels")
 	story.free()
@@ -81,11 +81,30 @@ func test_large_text_path_vote_keeps_status_and_timer_outside_scroll_area() -> v
 	view["vote"]["options"].append({"index": 1, "type": "rest", "name": "Quiet Glade", "hint": "A place to recover.", "voters": []})
 	var panel := VotePanel.new()
 	panel.build(screen, app, view)
-	assert_true(_has_text(panel, "Alternatives"), "route choices can scroll independently")
-	assert_true(_has_text(panel, "Ready 0 of 1"), "vote status stays in the footer")
+	assert_true(_has_text(panel, "Other path:"), "compact alternatives are labelled as other paths")
+	assert_true(_has_text(panel, "0 of 1 ready"), "vote status stays in the footer")
 	assert_true(_has_text(panel, "Vote closes in"), "the vote timer stays in the footer")
 	assert_true(panel.get_child(2) is ScrollContainer, "only the route choices scroll")
+	assert_true(_has_text(panel, "Recommended"), "first server-ordered route is recommended")
 	panel.free()
+	screen.free()
+	app.free()
+
+
+func test_party_portrait_and_hp_numbers_are_separate_from_the_bar() -> void:
+	var app := _ui_app()
+	app.snapshot = {"room": {"your_slot": 0, "slots": []}}
+	var screen := MatchScreen.new()
+	screen.app = app
+	screen._party = UiKit.vbox(6)
+	screen.add_child(screen._party)
+	screen._build_party(_party_view(true))
+	var card: Control = screen._party.get_child(0).get_child(0)
+	assert_true(card.get_child(0) is TextureRect, "party card starts with a portrait")
+	var details: Control = card.get_child(1)
+	var hp_row: Control = details.get_child(1)
+	assert_true(hp_row is HBoxContainer, "HP text sits beside its bar")
+	assert_eq(hp_row.get_child_count(), 2)
 	screen.free()
 	app.free()
 
@@ -154,8 +173,11 @@ func test_story_party_cards_hide_player_badge_and_owner() -> void:
 	multi_screen.app = app
 	multi_screen._party = UiKit.vbox(6)
 	multi_screen.add_child(multi_screen._party)
-	multi_screen._build_party(_party_view(false))
-	assert_true(_has_text(multi_screen._party, "PLAYER"), "Multiplayer keeps controller badge")
+	var multiplayer_view := _party_view(false)
+	multiplayer_view["phase"] = "voting"
+	multiplayer_view["vote"] = {"voted_slots": []}
+	multi_screen._build_party(multiplayer_view)
+	assert_true(_has_text(multi_screen._party, "WAITING"), "Multiplayer shows the ready state")
 	assert_true(_has_text(multi_screen._party, "Owner Name"), "Multiplayer keeps owner name")
 	multi_screen.free()
 	app.free()

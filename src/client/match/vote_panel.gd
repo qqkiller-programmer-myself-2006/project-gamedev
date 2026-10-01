@@ -30,7 +30,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	option_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	option_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	option_scroll.custom_minimum_size = Vector2(0, 150)
-	var option_stack := UiKit.vbox(8)
+	var option_stack := UiKit.vbox(3)
 	option_stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	option_scroll.add_child(option_stack)
 	add_child(option_scroll)
@@ -42,14 +42,11 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 		# that same server order so the featured card is always [1].
 		option_stack.add_child(_featured_card(screen, app, _options[0]))
 		if _options.size() > 1:
-			option_stack.add_child(UiKit.label("Alternatives", "dim"))
-			var alt_row := UiKit.flow(12)
 			for i in range(1, _options.size()):
-				alt_row.add_child(_compact_card(screen, app, _options[i]))
-			option_stack.add_child(alt_row)
-	if not solo:
-		add_child(UiKit.para(_voter_status(screen, view, vote)))
+				option_stack.add_child(_compact_card(screen, app, _options[i]))
 	var timer_row := UiKit.hbox(10)
+	if not solo:
+		timer_row.add_child(_ready_status(screen, view, vote))
 	_countdown = UiKit.label("", "heading")
 	timer_row.add_child(_countdown)
 	_bar = ProgressBar.new()
@@ -91,39 +88,57 @@ func _featured_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> 
 	box.add_child(_vote_button(screen, app, option, mine, solo, "primary"))
 	var card := UiKit.panel(box, "HighlightPanel" if mine else "CardPanel")
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(250, 190)
+	card.custom_minimum_size = Vector2(250, 0)
 	return card
 
 
 func _compact_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> Control:
-	var box := _option_body(screen, app, option, false)
+	var box := UiKit.hbox(8)
+	box.add_child(Icons.rect(str(TYPE_ICONS.get(str(option["type"]), "info")), Icons.size_for_scale(app.settings.text_scale)))
+	box.add_child(UiKit.badge(UiText.type_tag(option["type"]), UiKit.ACCENT))
+	var detail := "Other path: %s" % str(option["name"])
+	if not ClientApp.is_story_view(screen.match_view()):
+		var voters: Array = option.get("voters", [])
+		var voter_names: Array[String] = []
+		for slot in voters: voter_names.append(_voter_name(screen, int(slot)))
+		detail += "  Votes: %d%s" % [voters.size(), " (%s)" % ", ".join(voter_names) if not voter_names.is_empty() else ""]
+	var title := UiKit.label(detail, "body")
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.tooltip_text = str(option.get("hint", ""))
+	box.add_child(title)
 	var index := int(option["index"])
 	var solo := ClientApp.is_story_view(screen.match_view())
 	var mine: bool = screen.get_meta("my_vote_%d" % int(screen.match_view()["layer"]), -1) == index
 	box.add_child(_vote_button(screen, app, option, mine, solo, "secondary"))
 	var card := UiKit.panel(box, "CompactHighlightPanel" if mine else "CompactPanel")
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(220, 0)
+	card.custom_minimum_size = Vector2(0, 44)
 	return card
 
 
 func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full: bool) -> VBoxContainer:
-	var box := UiKit.vbox(6)
+	var box := UiKit.vbox(2)
 	var head := UiKit.hbox(6)
 	head.add_child(Icons.rect(str(TYPE_ICONS.get(str(option["type"]), "info")), Icons.size_for_scale(app.settings.text_scale)))
 	head.add_child(UiKit.badge(UiText.type_tag(option["type"]), UiKit.ACCENT))
 	head.add_child(UiKit.label(UiText.type_label(option["type"]), "dim"))
 	if full:
-		head.add_child(UiKit.badge("Featured", UiKit.ACCENT))
+		head.add_child(UiKit.badge("Recommended", UiKit.ACCENT))
 	box.add_child(head)
-	box.add_child(UiKit.para(str(option["name"]), "heading"))
+	var name := UiKit.pixel_label(str(option["name"]), "heading")
+	box.add_child(name)
+	if full:
+		box.add_child(_art_strip(screen, app))
 	var hint_text := str(option.get("hint", ""))
 	if full:
 		box.add_child(UiKit.para(hint_text))
-		box.add_child(UiKit.para(str(UiText.TYPE_HELP.get(option["type"], "")), "dim"))
-	elif not hint_text.is_empty():
-		box.add_child(UiKit.para(hint_text, "dim"))
-	box.add_child(UiKit.spacer())
+		var rewards := UiKit.flow(5)
+		for reward in [["exp", "EXP"], ["gold", "Gold"], ["items", "Items"]]:
+			var chip := UiKit.hbox(3)
+			chip.add_child(Icons.rect(str(reward[0]), Icons.size_for_scale(app.settings.text_scale)))
+			chip.add_child(UiKit.label(str(reward[1]), "small"))
+			rewards.add_child(UiKit.panel(chip, "CompactPanel"))
+		box.add_child(rewards)
 	var solo := ClientApp.is_story_view(screen.match_view())
 	if not solo:
 		var voters: Array = option.get("voters", [])
@@ -137,12 +152,46 @@ func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full:
 
 func _vote_button(screen: MatchScreen, app: ClientApp, option: Dictionary, mine: bool, solo: bool, kind: String) -> Button:
 	var index := int(option["index"])
-	var text := ("Chosen" if mine else "[%d] Choose this path" % (index + 1)) if solo \
-		else ("Your vote" if mine else "[%d] Vote for this path" % (index + 1))
+	var text := ("Chosen" if mine else "Choose this path: %s [%d]" % [str(option["name"]), index + 1]) if solo \
+		else ("Your vote" if mine else "Vote for this path: %s [%d]" % [str(option["name"]), index + 1])
 	var button := UiKit.button(text, func() -> void: _vote(screen, app, index), false, "selected" if mine else kind)
 	UiKit.disable(button, _voted, UiText.WHY["voted"])
 	button.set_meta("focus_id", "vote_%d" % index)
 	return button
+
+
+func _art_strip(screen: MatchScreen, app: ClientApp) -> Control:
+	var layer := int(screen.match_view().get("layer", 1))
+	var path := "res://assets/backgrounds/%s.png" % ("cave" if layer >= 4 else "forest")
+	var art := TextureRect.new()
+	art.texture = load(path)
+	art.custom_minimum_size = Vector2(0, 18)
+	art.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	art.tooltip_text = "Recommended route"
+	return art
+
+
+func _ready_status(screen: MatchScreen, view: Dictionary, vote: Dictionary) -> Control:
+	var human_count := 0
+	for character in view.get("party", []):
+		if character.get("controller") == "human" and (not view.get("story", false) or int(character["slot"]) == 0):
+			human_count += 1
+	var ready: int = vote.get("voted_slots", []).size()
+	var row := UiKit.hbox(8)
+	row.custom_minimum_size = Vector2(150, 0)
+	row.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	row.add_child(UiKit.label("%d of %d ready" % [mini(ready, human_count), human_count], "heading"))
+	var segments := UiKit.hbox(3)
+	for i in range(human_count):
+		var segment := ColorRect.new()
+		segment.color = UiKit.GOOD if i < ready else UiKit.SLATE
+		segment.custom_minimum_size = Vector2(20, 10)
+		segments.add_child(segment)
+	row.add_child(segments)
+	return row
 
 
 func _vote(screen: MatchScreen, app: ClientApp, index: int) -> void:

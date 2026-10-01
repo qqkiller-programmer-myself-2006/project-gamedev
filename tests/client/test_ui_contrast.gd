@@ -57,9 +57,8 @@ func test_theme_has_the_navy_and_gold_variations() -> void:
 
 func test_hp_bar_text_is_outlined_on_both_fills() -> void:
 	var bar := UiKit.hp_bar(10, 40)
-	var label: Label = bar.get_child(0)
-	assert_true(label.get_theme_constant("outline_size") >= 3, "outline keeps numbers readable on any fill")
-	assert_eq(label.text, "HP 10 / 40", "numbers, not just a coloured bar")
+	assert_eq(bar.get_child_count(), 0, "HP text is outside the colored bar")
+	assert_false(bar.show_percentage, "the bar does not add an overlapping percentage")
 	bar.free()
 
 

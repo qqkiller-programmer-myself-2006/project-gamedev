@@ -642,7 +642,10 @@ func _collect_names(view: Dictionary) -> void:
 
 func _build_top(view: Dictionary) -> void:
 	UiKit.clear(_top)
-	_top.add_child(UiKit.label(UiText.region_of(view), "heading", UiKit.ACCENT))
+	var region := UiKit.hbox(4)
+	region.add_child(Icons.rect("info", Icons.size_for_scale(app.settings.text_scale)))
+	region.add_child(UiKit.label(UiText.region_of(view), "heading", UiKit.ACCENT))
+	_top.add_child(region)
 	var total := int(view.get("layers_total", 5))
 	var layer := int(view.get("layer", 0))
 	var phase := str(view.get("phase", ""))
@@ -658,12 +661,12 @@ func _build_top(view: Dictionary) -> void:
 	_top.add_child(steps)
 	var where := "Guardian Boss" if phase == "boss" else "Layer %d of %d" % [layer, total]
 	_top.add_child(UiKit.label(where))
-	_top.add_child(UiKit.label("Gold: %d" % int(view.get("gold", 0)), "heading", UiKit.ACCENT))
-	var clues := UiKit.button("Clues: %d [C]" % view.get("clues", []).size(), toggle_clues)
+	_top.add_child(Icons.with_text("gold", "Gold: %d" % int(view.get("gold", 0)), "heading", app.settings.text_scale, UiKit.ACCENT))
+	var clues := Icons.apply_to_button(UiKit.button("Clues: %d [C]" % view.get("clues", []).size(), toggle_clues), "info", app.settings.text_scale)
 	clues.set_meta("focus_id", "clues")
 	_top.add_child(clues)
-	_top.add_child(UiKit.button("Settings [F2]", app.open_settings))
-	var leave := UiKit.button("Leave [Esc]", app.confirm_leave, false, "danger")
+	_top.add_child(Icons.apply_to_button(UiKit.button("Settings [F2]", app.open_settings), "settings", app.settings.text_scale))
+	var leave := Icons.apply_to_button(UiKit.button("Leave [Esc]", app.confirm_leave, false, "danger"), "quit", app.settings.text_scale)
 	leave.set_meta("focus_id", "leave")
 	_top.add_child(leave)
 
@@ -675,10 +678,24 @@ func _build_party(view: Dictionary) -> void:
 	if encounter != null:
 		combat = MatchScreen.combat_of(encounter)
 	var slots: Array = room_view().get("slots", [])
+	var vote_state = view.get("vote", {})
+	var voted_slots: Array = vote_state.get("voted_slots", []) if vote_state is Dictionary else []
 	for character in view.get("party", []):
 		var slot := int(character["slot"])
 		var id := "p%d" % slot
-		var card := UiKit.vbox(2)
+		var card := UiKit.hbox(8)
+		var portrait := TextureRect.new()
+		var class_key := str(character.get("class_name", "bram")).to_lower().replace(" ", "_")
+		if class_key == "classless": class_key = "bram"
+		var portrait_path := "res://assets/heroes/%s/portrait.png" % class_key
+		if ResourceLoader.exists(portrait_path): portrait.texture = load(portrait_path)
+		portrait.custom_minimum_size = Vector2(52, 52)
+		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		card.add_child(portrait)
+		var details := UiKit.vbox(2)
+		details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var head := UiKit.hbox(6)
 		head.add_child(UiKit.label(str(character["name"]), "body", UiKit.ACCENT if slot == your_slot() else UiKit.TEXT))
 		head.add_child(UiKit.label("Lv %d %s" % [int(character["level"]), character["class_name"]], "dim"))
@@ -686,10 +703,16 @@ func _build_party(view: Dictionary) -> void:
 		if slot == your_slot():
 			head.add_child(UiKit.badge("YOU", UiKit.GOOD))
 		if not ClientApp.is_story_view(view):
-			head.add_child(UiKit.badge("PLAYER" if character["controller"] == "human" else "AI",
-					UiKit.ALLY if character["controller"] == "human" else UiKit.TEXT_DIM))
-		card.add_child(head)
-		card.add_child(UiKit.hp_bar(int(character["hp"]), int(character["max_hp"])))
+			var human: bool = str(character["controller"]) == "human"
+			var status := "AI" if not human else ("READY" if voted_slots.has(slot) else "WAITING")
+			if str(view.get("phase", "")) != "voting" and human: status = "PLAYER"
+			head.add_child(UiKit.badge(status,
+				UiKit.ALLY if human else UiKit.TEXT_DIM))
+		details.add_child(head)
+		var hp_row := UiKit.hbox(8)
+		hp_row.add_child(UiKit.hp_bar(int(character["hp"]), int(character["max_hp"])))
+		hp_row.add_child(UiKit.number_label("HP %d / %d" % [int(character["hp"]), int(character["max_hp"])], "small"))
+		details.add_child(hp_row)
 		var info := UiKit.hbox(4)
 		if not ClientApp.is_story_view(view):
 			var owner := "AI controlled"
@@ -707,7 +730,8 @@ func _build_party(view: Dictionary) -> void:
 			info.add_child(UiKit.badge("GUARDED", UiKit.ALLY))
 		if combat.get("shielded", false) and int(character["hp"]) > 0:
 			info.add_child(UiKit.badge("WALL", UiKit.ALLY))
-		card.add_child(info)
+		details.add_child(info)
+		card.add_child(details)
 		var panel := UiKit.panel(card, "CompactHighlightPanel" if combat.get("actor", "") == id else "CompactPanel")
 		var tip := "ATK %d  DEF %d  MAG %d  RES %d  SPD %d  EXP %d" % [int(character["atk"]), int(character["def"]),
 				int(character["mag"]), int(character["res"]), int(character["spd"]), int(character["exp"])]
