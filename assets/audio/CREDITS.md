@@ -32,10 +32,6 @@
 - `music/music_forest.ogg`, `music/music_battle.ogg`, `music/music_victory.ogg`: Glizzy Elf Forest RPG Music Pack, https://opengameart.org/content/glizzy-elf-forest-rpg-music-pack
   Attribution is not required; included for provenance.
 
-## MintoDog — CC0
-- `music/music_guardian.ogg`: Hope (Orchestral battle music), https://opengameart.org/content/hopeorchestral-battle-music
-  Attribution is not required; included for provenance.
-
 ## Emma_MA — CC0 1.0
 - `music/music_boss_dark.ogg`: Determined Pursuit (epic orchestra loop), https://opengameart.org/content/determined-pursuit-epic-orchestra-loop
   The source is explicitly loopable. Converted from WAV to OGG Vorbis and loudness-normalized for the game.

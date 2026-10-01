@@ -13,7 +13,6 @@ The three Kenney packs form a practical, consistently stylized SFX base. The mus
 | [85 Short music jingles](https://opengameart.org/content/85-short-music-jingles) (original [Kenney page](https://kenney.nl/assets/music-jingles)) | Kenney | CC0. Attribution is optional; suggested credit: `Kenney.nl` or `www.kenney.nl`. | 85 OGG files (17 jingles × 5 instruments); ZIP 1.1 MB. | Victory/good, defeat/bad, level-up/EXP and short loot/gem reward stingers. Choose and audition individual variants; source tags include win/lose. |
 | [Glizzy Elf Forest RPG Music Pack](https://opengameart.org/content/glizzy-elf-forest-rpg-music-pack) | Zane Little Music | CC0. No attribution required. Optional credit: `Music by Zane Little Music (CC0), “Glizzy Elf Forest” — https://opengameart.org/content/glizzy-elf-forest-rpg-music-pack`. | ZIP 44.4 MB; 5 listed pieces: Forest Loop, Battle Intro, Battle Loop, Victory Intro, Victory Loop. Internal audio codec/container is **unverified** on the listing. | Forest exploration, regular battle, battle transition and victory. Not listed as a boss or title/lobby theme. |
 | [FREE Contemplative Fantasy Music Pack](https://opengameart.org/content/free-contemplative-fantasy-music-pack) | YannZ | CC-BY 4.0. Required credit text from the source: `Music by YannZ https://yannz41.itch.io Spotify: https://open.spotify.com/intl-it/artist/76CUcHd0t0XViSm9YBbHBw Contact: yziango@gmail.com`. | 15 listed OGG variants/tracks (menu, pause, one-shot, credits, 10 modular loops, in-game loop); OGG files range approximately 3.2–11.1 MB in the listing. MP3 equivalents are also listed. | Main-menu/title and lobby music; calm exploration/transition loops. The composer describes introspective, ambient fantasy music. It is a calmer style than the action music above. |
-| [Hope (Orchestral battle music)](https://opengameart.org/content/hopeorchestral-battle-music) | MintoDog | CC0. No attribution required. | OGG 2.2 MB; FLAC 7.6 MB; one explicitly loopable track. | Optional Guardian boss battle alternative, subject to audition: it is bright orchestral battle music, rather than explicitly dark/boss music. |
 | [Determined Pursuit (epic orchestra loop)](https://opengameart.org/content/determined-pursuit-epic-orchestra-loop) | Emma_MA | CC0. The source says it entered the public domain in January 2017; no attribution is required. | Stereo WAV, 108 seconds, 19.1 MB; explicitly loopable. Converted to OGG Vorbis quality 4 at 2.1 MB. | Guardian boss loop: frantic strings, determined horns, busy drums; normalized to -13.3 LUFS, within 0.5 LU of the regular battle track. |
 | [FREE Contemplative Fantasy Music Pack](https://opengameart.org/content/free-contemplative-fantasy-music-pack) — Pause Menu OST, "On a tous besoin de temps" | YannZ | CC-BY 4.0. Required credit text: `Music by YannZ https://yannz41.itch.io Spotify: https://open.spotify.com/intl-it/artist/76CUcHd0t0XViSm9YBbHBw Contact: yziango@gmail.com`. | OGG, 16 seconds, 3.2 MB source; converted to OGG Vorbis quality 4 at 307 KB. The source is loopable. | Somber defeat music, configured to play once; normalized to -24.3 LUFS, within 1.7 LU of the existing victory music. |
 
@@ -21,7 +20,7 @@ The three Kenney packs form a practical, consistently stylized SFX base. The mus
 
 The enemy-death sourcing gap is resolved with `Monster SFX.wav` by marcelofg55 (CC0) from [Monster SFX](https://opengameart.org/content/monster-sfx); the in-game cue uses a trimmed version. `player_down` continues to use the existing Kenney sample.
 
-The Kenney SFX pages do not claim dedicated fantasy spell, heal, buff/debuff, critical, miss or countdown sounds. The `magic_cast`, `heal`, `buff`, `debuff`, `miss`, and `critical` cues now use separately sourced short samples (see `assets/audio/CREDITS.md`); `critical` uses `bing1.wav` from BMacZero's CC0 Metal Impact Sounds pack. The dedicated boss and defeat music gap is resolved: `Determined Pursuit` by Emma_MA supplies the explicitly loopable orchestral boss cue, and YannZ's melancholic pause-menu piece supplies one-shot defeat music. `music_guardian.ogg` (Hope) remains in the repository and credits as a fallback asset; the Guardian cue points to the heavier boss track. The `defeat_sting` SFX remains unchanged.
+The Kenney SFX pages do not claim dedicated fantasy spell, heal, buff/debuff, critical, miss or countdown sounds. The `magic_cast`, `heal`, `buff`, `debuff`, `miss`, and `critical` cues now use separately sourced short samples (see `assets/audio/CREDITS.md`); `critical` uses `bing1.wav` from BMacZero's CC0 Metal Impact Sounds pack. The dedicated boss and defeat music gap is resolved: `Determined Pursuit` by Emma_MA supplies the explicitly loopable orchestral boss cue, and YannZ's melancholic pause-menu piece supplies one-shot defeat music. The earlier provisional Guardian track (MintoDog's Hope) was removed from the repository. The `defeat_sting` SFX remains unchanged.
 
 ## Cue mapping
 
@@ -64,7 +63,6 @@ The Kenney SFX pages do not claim dedicated fantasy spell, heal, buff/debuff, cr
 - The three Kenney items are listed as CC0 on both the publisher's asset pages and the linked OpenGameArt listings. OGA gives exact formats, sizes and optional attribution text for each. CC0 allows commercial use without asking permission; credit is still useful for provenance. [CC0 1.0 deed](https://creativecommons.org/publicdomain/zero/1.0/).
 - The Zane Little Music pack page explicitly labels it CC0 and lists its pieces and ZIP size. It does not specify contained codecs; that field remains unverified until the archive can be inspected.
 - YannZ's listing explicitly says CC-BY 4.0, specifies loopable menu and in-game tracks, provides OGG/MP3 listings and the requested credit. The page includes a comment thread describing correction/removal of additional restrictions so the page is now CC-BY only; use the published CC-BY attribution and retain the source/license record.
-- MintoDog's page explicitly says CC0, loopable, and lists OGG/FLAC file sizes.
 - Links above were opened and checked on 2026-10-01. No download links to archives were fetched. The Kenney publisher pages confirm the publisher license/count; OpenGameArt pages provide the detailed file metadata.
 - Pixabay/Freesound/itch.io results are omitted from the shortlist: these candidates were not needed after finding suitable direct CC0/CC-BY source pages. Do not infer a blanket site license for user-uploaded assets; verify each item page individually.
 
@@ -87,10 +85,6 @@ Sources: [Godot audio import formats](https://docs.godotengine.org/en/stable/tut
 
 ## Zane Little Music — CC0
 - Glizzy Elf Forest RPG Music Pack: https://opengameart.org/content/glizzy-elf-forest-rpg-music-pack
-  Attribution is not required; included for provenance.
-
-## MintoDog — CC0
-- Hope (Orchestral battle music): https://opengameart.org/content/hopeorchestral-battle-music
   Attribution is not required; included for provenance.
 
 ## YannZ — CC-BY 4.0
