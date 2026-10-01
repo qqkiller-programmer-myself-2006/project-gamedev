@@ -15,7 +15,11 @@ var anchors: Dictionary = {}
 var combat_mode := ""
 var combat_mode_key := ""
 
-var _top: HFlowContainer
+var _top: HBoxContainer
+var _header_left: Control
+var _header_status: Control
+var _header_actions: Control
+var _header_clues: Button
 var _party: VBoxContainer
 var _center: MarginContainer
 var _center_scroll: ScrollContainer
@@ -49,7 +53,9 @@ func setup(client: ClientApp) -> void:
 	add_child(margin)
 	var column := UiKit.vbox(10)
 	margin.add_child(column)
-	_top = UiKit.flow(12)
+	_top = UiKit.hbox(8)
+	_top.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_top.resized.connect(_fit_header)
 	column.add_child(UiKit.panel(_top))
 	var middle := UiKit.hbox(12)
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -81,6 +87,7 @@ func setup(client: ClientApp) -> void:
 	_log.custom_minimum_size = Vector2(0, 90)
 	_log.focus_mode = Control.FOCUS_NONE
 	_log.add_theme_color_override("default_color", UiKit.TEXT_DIM)
+	_log.text = "Waiting for match events..."
 	var bottom := UiKit.hbox(10)
 	var log_panel := UiKit.panel(_log)
 	log_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -654,33 +661,66 @@ func _collect_names(view: Dictionary) -> void:
 
 func _build_top(view: Dictionary) -> void:
 	UiKit.clear(_top)
-	var region := UiKit.hbox(4)
-	region.add_child(Icons.rect("info", Icons.size_for_scale(app.settings.text_scale)))
-	region.add_child(UiKit.label(UiText.region_of(view), "heading", UiKit.ACCENT))
-	_top.add_child(region)
+	var left := UiKit.hbox(6)
+	left.add_child(Icons.rect("info", Icons.size_for_scale(app.settings.text_scale)))
+	left.add_child(UiKit.label(UiText.region_of(view), "heading", UiKit.ACCENT))
 	var total := int(view.get("layers_total", 5))
 	var layer := int(view.get("layer", 0))
 	var phase := str(view.get("phase", ""))
-	var steps := UiKit.hbox(4)
+	var steps := UiKit.hbox(3)
 	for i in range(1, total + 1):
 		var done := i < layer or (i == layer and phase in ["boss", "victory", "defeat"])
-		var text := "%d" % i
-		if i == layer and not done:
-			text = "> %d <" % i
-		steps.add_child(UiKit.badge(text, UiKit.ACCENT if i == layer else (UiKit.GOOD if done else UiKit.TEXT_DIM)))
+		var chip := UiKit.badge("%d" % i, UiKit.ACCENT if i == layer else (UiKit.GOOD if done else UiKit.TEXT_DIM))
+		chip.custom_minimum_size = Vector2(32, 32)
+		chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		chip.get_child(0).custom_minimum_size = Vector2(28, 28)
+		(chip.get_child(0) as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		chip.tooltip_text = "Layer %d%s" % [i, " (current)" if i == layer else (" (complete)" if done else "")]
+		steps.add_child(chip)
 	var boss_now := phase == "boss" or (phase in ["victory", "defeat"] and layer >= total)
-	steps.add_child(UiKit.badge("> BOSS <" if phase == "boss" else "BOSS", UiKit.ENEMY if boss_now else UiKit.TEXT_DIM))
-	_top.add_child(steps)
+	var boss_chip := UiKit.badge("B", UiKit.ENEMY if boss_now else UiKit.TEXT_DIM)
+	boss_chip.custom_minimum_size = Vector2(32, 32)
+	boss_chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	boss_chip.get_child(0).custom_minimum_size = Vector2(28, 28)
+	(boss_chip.get_child(0) as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_chip.tooltip_text = "Boss" if boss_now else "Guardian Boss"
+	steps.add_child(boss_chip)
+	left.add_child(steps)
+	_header_left = left
+	_top.add_child(left)
 	var where := "Guardian Boss" if phase == "boss" else "Layer %d of %d" % [layer, total]
-	_top.add_child(UiKit.label(where))
-	_top.add_child(Icons.with_text("gold", "Gold: %d" % int(view.get("gold", 0)), "heading", app.settings.text_scale, UiKit.ACCENT))
+	var status := UiKit.label(where, "body", UiKit.TEXT)
+	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_header_status = status
+	_top.add_child(status)
+	var actions := UiKit.hbox(5)
+	actions.size_flags_horizontal = Control.SIZE_SHRINK_END
+	actions.add_child(Icons.with_text("gold", "Gold: %d" % int(view.get("gold", 0)), "body", app.settings.text_scale, UiKit.ACCENT))
 	var clues := Icons.apply_to_button(UiKit.button("Clues: %d [C]" % view.get("clues", []).size(), toggle_clues), "info", app.settings.text_scale)
 	clues.set_meta("focus_id", "clues")
-	_top.add_child(clues)
-	_top.add_child(Icons.apply_to_button(UiKit.button("Settings [F2]", app.open_settings), "settings", app.settings.text_scale))
+	clues.set_meta("header_clues", true)
+	clues.tooltip_text = "Clues [C]"
+	_header_clues = clues
+	actions.add_child(clues)
+	actions.add_child(Icons.apply_to_button(UiKit.button("Settings [F2]", app.open_settings), "settings", app.settings.text_scale))
 	var leave := Icons.apply_to_button(UiKit.button("Leave [Esc]", app.confirm_leave, false, "danger"), "quit", app.settings.text_scale)
 	leave.set_meta("focus_id", "leave")
-	_top.add_child(leave)
+	actions.add_child(leave)
+	_header_actions = actions
+	_top.add_child(actions)
+	_fit_header()
+
+
+func _fit_header() -> void:
+	if not is_instance_valid(_header_left) or not is_instance_valid(_header_status) or not is_instance_valid(_header_actions) or not is_instance_valid(_header_clues):
+		return
+	var width := _top.size.x
+	var required := _header_left.get_combined_minimum_size().x + _header_actions.get_combined_minimum_size().x + 100.0 + 24.0
+	var compact := required > width
+	_header_clues.text = "" if compact else "Clues: %d [C]" % match_view().get("clues", []).size()
+	_header_clues.custom_minimum_size.x = 40.0 if compact else 0.0
+	_header_status.custom_minimum_size.x = 84.0
 
 
 func _build_party(view: Dictionary) -> void:

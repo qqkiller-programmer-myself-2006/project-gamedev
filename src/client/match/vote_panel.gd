@@ -24,7 +24,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	var me := screen.your_slot()
 	_voted = vote["voted_slots"].has(me)
 	var solo := ClientApp.is_story_view(view)
-	add_child(UiKit.para("Choose your path" if solo else "Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])], "title"))
+	add_child(UiKit.para("Choose your path" if solo else "Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])], "heading"))
 	add_child(UiKit.para("Choose one path." if solo else "Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random.", "dim"))
 	var option_scroll := ScrollContainer.new()
 	option_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -86,9 +86,8 @@ func _featured_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> 
 	var solo := ClientApp.is_story_view(screen.match_view())
 	var mine: bool = screen.get_meta("my_vote_%d" % int(screen.match_view()["layer"]), -1) == index
 	box.add_child(_vote_button(screen, app, option, mine, solo, "primary"))
-	var card := UiKit.panel(box, "HighlightPanel" if mine else "CardPanel")
+	var card := UiKit.panel(box, "HighlightPanel")
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(250, 0)
 	return card
 
 
@@ -152,8 +151,8 @@ func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full:
 
 func _vote_button(screen: MatchScreen, app: ClientApp, option: Dictionary, mine: bool, solo: bool, kind: String) -> Button:
 	var index := int(option["index"])
-	var text := ("Chosen" if mine else "Choose this path: %s [%d]" % [str(option["name"]), index + 1]) if solo \
-		else ("Your vote" if mine else "Vote for this path: %s [%d]" % [str(option["name"]), index + 1])
+	var text := ("Chosen" if mine else "Choose path [%d]" % (index + 1)) if solo \
+		else ("Your vote" if mine else "Vote for this path [%d]" % (index + 1))
 	var button := UiKit.button(text, func() -> void: _vote(screen, app, index), false, "selected" if mine else kind)
 	UiKit.disable(button, _voted, UiText.WHY["voted"])
 	button.set_meta("focus_id", "vote_%d" % index)

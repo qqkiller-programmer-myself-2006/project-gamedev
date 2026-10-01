@@ -63,8 +63,8 @@ before destructive actions.
 ## Spacing and typography
 
 - Screen edge gutter 12–40 px; panel content margin 14; rows inside a panel 6–10 apart; button rows 8–12 apart.
-- Sizes only from `UiKit.SIZES` × the text-size setting: tiny 11, small 15, body 18, heading 23, title 34, huge 52.
-- Pixelify Sans (`PixelXxxLabel`, headings, buttons, names, numbers); the default font for long, wrapping text.
+- Sizes only from `UiKit.SIZES` × the text-size setting: tiny 11, small 14, body 17, heading 21, title 29, huge 38.
+- Use the readable UI font for body copy, digits, headings, buttons and long text. Pixelify Sans is only for short decorative titles or marks; never use it for paragraphs or long button labels.
 - Headings may be `GOLD`; body text is `TEXT`; hints and secondary lines are `TEXT_DIM` (`"dim"` style).
 
 ## UX rules
@@ -84,6 +84,8 @@ before destructive actions.
 8. **Toasts at top centre** on every screen; banners just below the top bar, never over buttons for long.
 9. Nothing overlaps at 1280×720, 1920×1080 and text size 1.4; long lists scroll; rows wrap.
 10. Reduced motion turns off fades, slides and floating motion.
+11. Match headers group region/layer on the left, current status in the centre, and currency/Clues/menu actions on the right. Header groups wrap as the viewport narrows; secondary labels may wrap before controls are clipped.
+12. Battle uses a compact scrollable turn list, a scrollable multi-line log above the footer, and a bottom action band that stays inside the viewport. Keep Party tokens on the left and enemies on the right; mark the active actor and valid targets with a gold border plus text.
 
 ## Icons
 

@@ -214,13 +214,16 @@ func test_timeline_shows_weakness_as_text() -> void:
 	app.free()
 
 
-func test_combat_log_dock_grows_right_at_large_scale() -> void:
+func test_combat_log_and_footer_use_viewport_anchors_at_large_scale() -> void:
 	var battle := _battle(1.45)
 	battle.add_log("Bram attacks Wolf A takes 14.")
 	var dock := battle._log.get_parent() as Control
-	assert_eq(dock.grow_horizontal, Control.GROW_DIRECTION_END,
-			"combat log dock must grow right so large text cannot slide off the left edge")
-	assert_true(dock.offset_left >= 0.0, "combat log dock stays inside the left edge")
+	var log_dock := dock.get_parent() as Control
+	assert_eq(log_dock.anchor_left, 0.01, "combat log uses a small viewport inset")
+	assert_eq(log_dock.anchor_right, 0.17, "combat log stays inside the turn-list sidebar")
+	assert_true(battle._log.scroll_active, "combat log remains scrollable")
+	assert_eq(battle._bottom.anchor_left, 0.14, "action footer has a proportional left inset")
+	assert_eq(battle._bottom.anchor_right, 0.86, "action footer has a proportional right inset")
 	var screen: MatchScreen = battle._screen
 	var app: ClientApp = battle._app
 	battle.free()
@@ -253,7 +256,10 @@ func test_primary_battle_actions_are_keyboard_focusable() -> void:
 	for button in _buttons(battle):
 		found[str(button.get_meta("focus_id", ""))] = button.focus_mode
 	assert_eq(found.get("action_fight", Control.FOCUS_NONE), Control.FOCUS_ALL, "Fight is keyboard focusable")
+	assert_eq(found.get("action_skills", Control.FOCUS_NONE), Control.FOCUS_ALL, "Skills is keyboard focusable")
 	assert_eq(found.get("action_items", Control.FOCUS_NONE), Control.FOCUS_ALL, "Items is keyboard focusable")
+	assert_eq(found.get("action_defend", Control.FOCUS_NONE), Control.FOCUS_ALL, "Defend is keyboard focusable")
+	assert_eq(found.get("action_flee", Control.FOCUS_NONE), Control.FOCUS_ALL, "Flee menu is keyboard focusable")
 	assert_eq(found.get("action_focus", Control.FOCUS_NONE), Control.FOCUS_ALL, "Focus is keyboard focusable")
 	var screen: MatchScreen = battle._screen
 	var app: ClientApp = battle._app
