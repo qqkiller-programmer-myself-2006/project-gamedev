@@ -98,7 +98,7 @@ const TYPE_HELP := {
 }
 
 const HINTS := {
-	"vote": "Path Voting: every player has one vote and AI never votes. The most votes wins; ties are broken at random. Press 1-3 to vote.",
+	"vote": "Use keys 1-3.",
 	"combat": "Your turn! Fight [F] opens your attacks, Items [I] uses your personal Gold and consumable slot, and Focus [O] restores Energy when available. In timed Combats you have 15 seconds; if time runs out you Defend.",
 	"combat_story": "Your turn! Fight [F] opens your attacks, Items [I] uses your personal Gold and consumable slot, and Focus [O] restores Energy when available. Story turns have no countdown.",
 	"skill": "You have a Class now. Fight [F] opens your Skills; each Skill costs Energy and has a cooldown counted in your own turns.",

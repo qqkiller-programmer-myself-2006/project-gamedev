@@ -75,14 +75,16 @@ func test_large_text_path_vote_keeps_status_and_timer_outside_scroll_area() -> v
 	var screen := MatchScreen.new()
 	screen.app = app
 	var view := _vote_view(false)
-	view["party"] = [{"slot": 0, "name": "Ann", "controller": "human"}]
+	view["party"] = []
+	for slot in 5:
+		view["party"].append({"slot": slot, "name": "Player %d" % slot, "controller": "human"})
 	view["vote"]["deadline"] = ClientApp._local_now() + 60.0
 	view["vote"]["seconds"] = 60.0
 	view["vote"]["options"].append({"index": 1, "type": "rest", "name": "Quiet Glade", "hint": "A place to recover.", "voters": []})
 	var panel := VotePanel.new()
 	panel.build(screen, app, view)
 	assert_true(_has_text(panel, "Quiet Glade"), "every route gets its own card")
-	assert_true(_has_text(panel, "0 of 1 ready"), "vote status stays in the footer")
+	assert_true(_has_text(panel, "0 of 5 ready"), "all five human votes fit in the fixed footer")
 	assert_true(_has_text(panel, "Vote closes in"), "the vote timer stays in the footer")
 	assert_true(panel.get_child(2) is ScrollContainer, "only the route choices scroll")
 	assert_true(_has_text(panel, "Recommended"), "first server-ordered route is recommended")
@@ -90,6 +92,22 @@ func test_large_text_path_vote_keeps_status_and_timer_outside_scroll_area() -> v
 	assert_eq(featured.theme_type_variation, "HighlightPanel", "recommended card is highlighted before voting")
 	assert_true(_has_text(featured, "Vote for this path [1]"), "featured action stays short enough to fit at large text scale")
 	panel.free()
+	screen.free()
+	app.free()
+
+
+func test_match_end_clears_the_banner_for_the_summary_title() -> void:
+	var app := _ui_app()
+	app._banner = PanelContainer.new()
+	app._banner.visible = true
+	app._banner_label = Label.new()
+	app._banner.add_child(app._banner_label)
+	app._banner_until = ClientApp._local_now() + 3.0
+	var screen := MatchScreen.new()
+	screen.app = app
+	screen._feedback(app, {"type": "match_ended", "result": "victory"})
+	assert_false(app._banner.visible, "SummaryPanel title replaces the match-end banner")
+	assert_eq(app._banner_until, 0.0, "the hidden banner cannot remain active over Summary")
 	screen.free()
 	app.free()
 
