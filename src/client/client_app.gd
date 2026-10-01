@@ -314,11 +314,14 @@ func _on_update(events: Array, snap: Dictionary) -> void:
 				story_save.clear()
 	_publish_for_web(snap)
 	var wanted := _screen_for(snap)
+	var events_before_refresh := wanted == _current_name and _current != null and _current.has_method("show_events")
+	if events_before_refresh and not events.is_empty():
+		_current.show_events(self, events)
 	if wanted != _current_name:
 		_show_screen(wanted)
 	if _current != null and _current.has_method("refresh"):
 		_current.refresh(self)
-	if _current != null and _current.has_method("show_events") and not events.is_empty():
+	if not events_before_refresh and _current != null and _current.has_method("show_events") and not events.is_empty():
 		_current.show_events(self, events)
 	for event in events:
 		if str(event.get("type", "")) == "profile_save_failed":
