@@ -29,7 +29,7 @@ const CUE_ASSETS := {
 	"heal": "res://assets/audio/sfx/heal.ogg",
 	"buff": "res://assets/audio/sfx/buff.ogg",
 	"debuff": "res://assets/audio/sfx/debuff.ogg",
-	"critical": "",
+	"critical": "res://assets/audio/sfx/critical.ogg",
 	"miss": "res://assets/audio/sfx/miss.ogg",
 }
 
