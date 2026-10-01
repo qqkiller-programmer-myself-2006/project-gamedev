@@ -84,8 +84,8 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_workspace.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_workspace.offset_left = 24
 	_workspace.offset_right = -24
-	_workspace.offset_top = 64
-	_workspace.offset_bottom = -66
+	_workspace.offset_top = 126
+	_workspace.offset_bottom = -(66.0 + 90.0 * _app.settings.text_scale)
 	add_child(_workspace)
 	_columns = UiKit.hbox(10)
 	_columns.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -106,14 +106,12 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_hide_button.offset_bottom = -12
 	_hide_button.custom_minimum_size = Vector2(110, 40)
 	add_child(_hide_button)
-	# Dock the compact, scrollable Tip in the footer beside Ready.
+	# Reserve a slim top rail for tips so the shop column keeps its full height.
 	tips = UiKit.vbox(6)
-	tips.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	tips.grow_horizontal = Control.GROW_DIRECTION_END
-	tips.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	tips.offset_left = 24
-	tips.offset_right = 24
-	tips.offset_bottom = -6
+	tips.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	tips.offset_left = 152
+	tips.offset_top = 48
+	tips.custom_minimum_size = Vector2(360, 0)
 	add_child(tips)
 	_menu_panel = screen.build_corner_menu(self)
 
@@ -230,24 +228,25 @@ func _find_by_focus_id(node: Node, focus_id: String) -> Node:
 
 func _build_columns(view: Dictionary, merchant: bool) -> void:
 	UiKit.clear(_columns)
-	_columns.add_child(_column("Shop" if merchant else "Crafting", _left_panel(view, merchant), 0.28))
+	_columns.add_child(_column("Shop" if merchant else "Crafting", _left_panel(view, merchant), 1.0))
 	_columns.add_child(_vertical_tabs(["Stash", "Shop" if merchant else "Craft"], true))
-	_columns.add_child(_column("Inventory", _inventory_panel(view), 0.30))
+	_columns.add_child(_column("Inventory", _inventory_panel(view), 1.0))
 	_columns.add_child(_vertical_tabs(["Inventory", "Abilities"], false, view))
-	_columns.add_child(_column("Equipment", _equipment_panel(view, merchant), 0.36))
+	_columns.add_child(_column("Equipment", _equipment_panel(view, merchant), 1.0))
 
 func _column(title: String, content: Control, ratio: float) -> Control:
 	var column := UiKit.vbox(6)
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.size_flags_stretch_ratio = ratio
 	var heading := UiKit.hbox(6)
+	heading.alignment = BoxContainer.ALIGNMENT_CENTER
 	heading.add_child(Icons.rect(str(COLUMN_ICONS.get(title, "items")), Icons.size_for_scale(_app.settings.text_scale)))
 	var heading_label := UiKit.pixel_label(title, "heading")
 	heading_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	heading.add_child(heading_label)
 	var tag := UiKit.panel(heading, "TitleTag")
-	tag.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	tag.custom_minimum_size = Vector2(150, 0)
+	tag.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tag.custom_minimum_size = Vector2(0, 48)
 	column.add_child(tag)
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -529,7 +528,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	var gear: Dictionary = character.get("gear", {})
 	for slot in SLOTS:
 		var cell := UiKit.vbox(1)
-		cell.custom_minimum_size = Vector2(0, 82 if _app.settings.text_scale >= 1.4 else 70)
+		cell.custom_minimum_size = Vector2(0, 54 if _app.settings.text_scale >= 1.4 else 70)
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var worn: Dictionary = gear.get(slot, {})
 		var slot_row := UiKit.hbox(2)
@@ -629,6 +628,8 @@ func _build_bottom() -> void:
 	_countdown.add_theme_color_override("font_outline_color", UiKit.BG)
 	_countdown.add_theme_constant_override("outline_size", 5)
 	_bottom.add_child(_countdown)
+	_bottom.custom_minimum_size = Vector2(320, 52)
+	_bottom.offset_bottom = -10
 
 func tick() -> void:
 	if _countdown == null or not ClientApp.has_timer(_deadline):

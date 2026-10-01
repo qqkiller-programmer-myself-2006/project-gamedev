@@ -39,6 +39,7 @@ var _stage: Control
 var _backdrop: BattleBackdrop
 var _timeline: VBoxContainer
 var _timeline_scroll: ScrollContainer
+var _timeline_header: Label
 var _region: Label
 var _region_sub: Label
 var _header: VBoxContainer
@@ -51,6 +52,7 @@ var _turn_notice: Label
 var _banner: PanelContainer
 var _banner_label: Label
 var _banner_tween: Tween = null
+var _was_your_turn := false
 var _menu_panel: PanelContainer
 var _combat_grid: Control
 
@@ -71,19 +73,37 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	add_child(_stage)
 
 	var left := MarginContainer.new()
-	left.set_anchors_preset(Control.PRESET_LEFT_WIDE)
+	left.anchor_left = 0.0
+	left.anchor_top = 0.0
+	left.anchor_right = 0.0
+	left.anchor_bottom = 1.0
+	left.offset_left = 8
+	left.offset_right = 190
 	left.offset_top = 70
-	left.offset_bottom = -160
-	left.custom_minimum_size = Vector2(150, 0)
+	left.offset_bottom = -170
 	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var timeline_stack := UiKit.vbox(4)
+	timeline_stack.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_timeline_header = UiKit.pixel_label("", "heading", UiKit.ACCENT)
+	_timeline_header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var round_badge := UiKit.panel(_timeline_header, "TitleTag")
+	round_badge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	timeline_stack.add_child(round_badge)
 	var scroll := ScrollContainer.new()
 	_timeline_scroll = scroll
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.follow_focus = true
 	_timeline = UiKit.vbox(4)
 	_timeline.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_timeline.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	scroll.add_child(_timeline)
-	left.add_child(scroll)
+	timeline_stack.add_child(scroll)
+	var timeline_panel := UiKit.panel(timeline_stack, "HudPanel")
+	timeline_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	timeline_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	left.add_child(timeline_panel)
 	add_child(left)
 
 	_menu_panel = screen.build_corner_menu(self)
@@ -94,10 +114,8 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	region_box.offset_right = -14
 	region_box.offset_top = 6
 	region_box.alignment = BoxContainer.ALIGNMENT_END
-	_region = UiKit.number_label("", "title")
+	_region = UiKit.pixel_label("", "heading", UiKit.TEXT)
 	_region.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_region.add_theme_color_override("font_outline_color", UiKit.BG)
-	_region.add_theme_constant_override("outline_size", 6)
 	region_box.add_child(_region)
 	_region_sub = UiKit.pixel_label("", "small")
 	var sub_panel := UiKit.panel(_region_sub, "HudPanel")
@@ -135,12 +153,12 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_center_text.add_theme_constant_override("outline_size", 10)
 	add_child(_center_text)
 	_turn_notice = UiKit.number_label("", "body", UiKit.ACCENT)
-	_turn_notice.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_turn_notice.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_turn_notice.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_turn_notice.offset_top = -174 * _app.settings.text_scale
-	_turn_notice.offset_bottom = -144 * _app.settings.text_scale
-	_turn_notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_turn_notice.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_turn_notice.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_turn_notice.offset_right = -14
+	_turn_notice.offset_top = 90 * _app.settings.text_scale
+	_turn_notice.offset_bottom = 130 * _app.settings.text_scale
+	_turn_notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_turn_notice.add_theme_color_override("font_outline_color", Color.BLACK)
 	_turn_notice.add_theme_constant_override("outline_size", 4)
 	_turn_notice.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -158,16 +176,21 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_log = RichTextLabel.new()
 	_log.bbcode_enabled = false
 	_log.scroll_following = true
-	var log_width := maxf(110.0, 245.0 - 300.0 * (_app.settings.text_scale - 1.0))
-	_log.custom_minimum_size = Vector2(log_width, 102)
+	var log_width := 238.0
+	var viewport_height := 1080.0
+	if is_inside_tree():
+		viewport_height = get_viewport_rect().size.y
+	_log.custom_minimum_size = Vector2(log_width - 20.0, viewport_height * 0.18)
 	_log.scroll_active = false
 	_log.fit_content = false
 	_log.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_log.add_theme_font_size_override("normal_font_size", int(UiKit.SIZES["small"] * _app.settings.text_scale))
+	_log.add_theme_font_size_override("font_size", int(UiKit.SIZES["small"] * _app.settings.text_scale))
 	_log.focus_mode = Control.FOCUS_NONE
 	_log.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_log.add_theme_color_override("default_color", UiKit.TEXT_DIM)
 	var log_panel := UiKit.panel(_log, "HudPanel")
-	log_panel.custom_minimum_size = Vector2(log_width, 110)
+	log_panel.custom_minimum_size = Vector2(log_width, viewport_height * 0.18)
 	_rewards = UiKit.vbox(0)
 	bottom_left.add_child(_rewards)
 	bottom_left.add_child(log_panel)
@@ -329,9 +352,10 @@ func announce(text: String) -> void:
 	if text == "Your turn!":
 		_turn_notice.text = text
 		_turn_notice.visible = true
-		var notice_tween := create_tween()
-		notice_tween.tween_interval(1.5 if _app.settings.reduced_motion else 1.2)
-		notice_tween.tween_callback(func() -> void: _turn_notice.visible = false)
+		if not _app.settings.reduced_motion:
+			var notice_tween := create_tween()
+			notice_tween.tween_interval(1.2)
+			notice_tween.tween_callback(func() -> void: _turn_notice.visible = false)
 		return
 	_banner_label.text = text
 	_banner.visible = true
@@ -449,10 +473,7 @@ func _build_header(view: Dictionary) -> void:
 ## Energy) from the latest server snapshot.
 func _build_timeline(view: Dictionary) -> void:
 	UiKit.clear(_timeline)
-	var title := UiKit.pixel_label("Turn %d" % int(_combat.get("round", 1)), "title")
-	title.add_theme_color_override("font_outline_color", Color.BLACK)
-	title.add_theme_constant_override("outline_size", 6)
-	_timeline.add_child(title)
+	_timeline_header.text = "TURN  %d" % int(_combat.get("round", 1))
 	var remaining: Array = _combat.get("turn_order", [])
 	var order: Array = _combat.get("round_order", remaining)
 	var actor := str(_combat.get("actor", ""))
@@ -460,42 +481,53 @@ func _build_timeline(view: Dictionary) -> void:
 		var unit := _unit(view, str(id))
 		if unit.is_empty():
 			continue
-		var entry := UiKit.vbox(2)
-		entry.custom_minimum_size = Vector2(150, 46)
+		var entry := UiKit.hbox(6)
+		entry.custom_minimum_size = Vector2(0, 36)
 		var acted := not remaining.has(id)
 		var is_actor: bool = id == actor
-		var head := UiKit.vbox(0)
+		var head := UiKit.vbox(3)
 		var tag := _controller_tag(str(id), unit)
 		var color := UiKit.ACCENT if is_actor else (UiKit.TEXT_DIM if acted else UiKit.TEXT)
-		var name_label := UiKit.pixel_label(("> " if is_actor else "") + _screen.name_of(str(id)) + " (%d)" % int(unit.get("level", 1)), "tiny", color)
-		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var chip := UiKit.pixel_label(tag[0], "tiny", tag[1])
+		chip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		chip.custom_minimum_size = Vector2(30, 28)
+		head.add_child(UiKit.panel(chip, "BadgePanel"))
+		var details := UiKit.vbox(1)
+		details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var name_line := UiKit.hbox(3)
+		name_line.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var weakness: Array = unit.get("weakness", [])
+		var unit_name := _screen.name_of(str(id))
+		if not weakness.is_empty():
+			unit_name += "  Weak: " + ", ".join(weakness)
+		var name_label := UiKit.pixel_label(("> " if is_actor else "") + unit_name,
+				"tiny" if not weakness.is_empty() else "small", color)
 		name_label.clip_text = true
-		head.add_child(name_label)
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_line.add_child(name_label)
+		if unit.has("energy"):
+			var pip := UiKit.pixel_label("E%d" % int(unit["energy"]), "tiny", UiKit.BAR_ENERGY)
+			pip.tooltip_text = "Energy %d/%d" % [int(unit["energy"]), int(unit.get("energy_max", 6))]
+			name_line.add_child(pip)
+		details.add_child(name_line)
 		var hp := int(unit.get("hp", 0))
-		entry.add_child(head)
 		var hp_bar := UiKit.stat_bar(hp, int(unit.get("max_hp", 1)), UiKit.BAR_HP,
 				"DOWN" if hp <= 0 else "%d/%d" % [hp, int(unit.get("max_hp", 1))], 12, "tiny")
-		entry.add_child(hp_bar)
-		if unit.has("energy"):
-			var energy_bar := UiKit.stat_bar(int(unit["energy"]), int(unit.get("energy_max", 6)), UiKit.BAR_ENERGY,
-					"%d/%d" % [int(unit["energy"]), int(unit.get("energy_max", 6))], 12, "tiny")
-			entry.add_child(energy_bar)
-		# Weakness is visible text on the timeline, not only the stage token's
-		# hover tooltip, so keyboard target choice can use it.
-		if not str(id).begins_with("p"):
-			var weakness: Array = unit.get("weakness", [])
-			if not weakness.is_empty():
-				var weak_label := UiKit.pixel_label("Weak: " + ", ".join(weakness), "tiny", UiKit.WARN)
-				weak_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				weak_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-				entry.add_child(weak_label)
+		details.add_child(hp_bar)
+		entry.add_child(head)
+		entry.add_child(details)
+		var weakness_hint := " - Weak: " + ", ".join(weakness) if not weakness.is_empty() else ""
 		var card := UiKit.panel(entry, "HudHighlightPanel" if is_actor else "HudPanel")
 		card.set_meta("actor_id", str(id))
-		card.modulate = Color(1, 1, 1, 0.6) if hp <= 0 or acted else Color.WHITE
-		card.tooltip_text = "%s (%s) - %s - Speed %d - HP %d/%d%s%s" % [tag[0], _screen.name_of(str(id)), tag[2],
+		card.modulate = Color.WHITE
+		if hp <= 0 or acted:
+			name_label.add_theme_color_override("font_color", UiKit.TEXT_DIM)
+		card.tooltip_text = "%s (%s) - %s - Speed %d - HP %d/%d%s%s%s" % [tag[0], _screen.name_of(str(id)), tag[2],
 				int(unit.get("spd", 0)), hp, int(unit.get("max_hp", 1)),
 				(", Energy %d/%d" % [int(unit["energy"]), int(unit.get("energy_max", 6))]) if unit.has("energy") else "",
-				" (already acted this round)" if acted else (" - acting now" if is_actor else "")]
+				" (already acted this round)" if acted else (" - acting now" if is_actor else ""), weakness_hint]
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		card.custom_minimum_size = Vector2(0, 42)
 		_timeline.add_child(card)
 		if is_actor and actor != _last_actor:
 			_app.fade_in(card, 0.3)
@@ -552,7 +584,7 @@ func _build_stage(view: Dictionary) -> void:
 						int(character["mag"]), int(character["res"]), int(character["spd"])],
 			}
 			var px: float = [300.0, 460.0, 620.0][slot] if slot < 3 else [380.0, 540.0][slot - 3]
-			var py: float = (205.0 if slot < 3 else 265.0) if _screen.combat_mode in ["skills", "items"] else (300.0 if slot < 3 else 480.0)
+			var py: float = (205.0 if slot < 3 else 265.0) if _screen.combat_mode in ["skills", "items"] else (300.0 if slot < 3 else 460.0)
 			_spots[id] = [px / 1280.0, py / 720.0]
 			_add_token(data)
 	var enemies: Array = _combat.get("enemies", [])
@@ -579,7 +611,8 @@ func _build_stage(view: Dictionary) -> void:
 			if not enemy.has("energy"):
 				data.erase("energy")
 			var ex := 960.0 if boss else float(group[1][i])
-			var ey := (255.0 if _screen.combat_mode in ["skills", "items"] else 440.0) if boss else (265.0 if _screen.combat_mode in ["skills", "items"] and float(group[2]) > 400.0 else (205.0 if _screen.combat_mode in ["skills", "items"] else float(group[2])))
+			var normal_row_y: float = 460.0 if float(group[2]) > 400.0 else float(group[2])
+			var ey := (255.0 if _screen.combat_mode in ["skills", "items"] else 440.0) if boss else (265.0 if _screen.combat_mode in ["skills", "items"] and float(group[2]) > 400.0 else (205.0 if _screen.combat_mode in ["skills", "items"] else normal_row_y))
 			_spots[id] = [ex / 1280.0, ey / 720.0]
 			_add_token(data)
 	var targets := _current_targets()
@@ -608,11 +641,25 @@ func _add_token(data: Dictionary) -> void:
 		token = BattleToken.new()
 		token.text_scale = _app.settings.text_scale
 		token.setup(data)
+		_style_nameplate(token, data)
 		_stage.add_child(token)
 		_tokens[id] = token
 	else:
 		token.update_data(data)
+		_style_nameplate(token, data)
 	_screen.anchors[data["id"]] = token
+
+
+func _style_nameplate(token: BattleToken, data: Dictionary) -> void:
+	var displayed_name := str(data.get("name", data.get("id", "")))
+	if bool(data.get("you", false)):
+		displayed_name += " (you)"
+	elif str(data.get("controller", "")) == "ai":
+		displayed_name += " (AI)"
+	for label in token.find_children("*", "Label", true, false):
+		if label is Label and (label as Label).text == displayed_name:
+			(label as Label).add_theme_font_size_override("font_size",
+				int(UiKit.SIZES["small"] * _app.settings.text_scale))
 
 
 func _place_tokens() -> void:
@@ -666,16 +713,22 @@ func _build_bottom(view: Dictionary) -> void:
 	hud.add_child(info)
 	if not me.is_empty():
 		var bars := UiKit.hbox(10)
-		bars.add_child(Icons.rect("hp", Icons.size_for_scale(_app.settings.text_scale)))
+		var hp_group := UiKit.vbox(1)
+		hp_group.add_child(UiKit.pixel_label("HP", "tiny", UiKit.TEXT_DIM))
 		var hp := UiKit.stat_bar(int(me["hp"]), int(me["max_hp"]), UiKit.BAR_HP, "%d/%d" % [int(me["hp"]), int(me["max_hp"])], 24, "body")
 		hp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		bars.add_child(hp)
-		bars.add_child(Icons.rect("energy", Icons.size_for_scale(_app.settings.text_scale)))
+		hp_group.add_child(hp)
+		hp_group.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bars.add_child(hp_group)
+		var energy_group := UiKit.vbox(1)
+		energy_group.add_child(UiKit.pixel_label("ENERGY", "tiny", UiKit.TEXT_DIM))
 		var energy := UiKit.stat_bar(int(me.get("energy", 0)), int(me.get("energy_max", 6)), UiKit.BAR_ENERGY,
 				" %d/%d" % [int(me.get("energy", 0)), int(me.get("energy_max", 6))], 24, "body")
 		energy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		energy.tooltip_text = "Energy pays for Skills. You start each Combat with 1 and regain 1 every later turn (max 6)."
-		bars.add_child(energy)
+		energy_group.add_child(energy)
+		energy_group.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		bars.add_child(energy_group)
 		hud.add_child(bars)
 	if your_turn:
 		var actions := UiKit.hbox(8)
@@ -693,6 +746,8 @@ func _build_bottom(view: Dictionary) -> void:
 		focus.disabled = not choices.get("focus", false)
 		focus.tooltip_text = UiText.WHY["focus_unavailable"] if focus.disabled else UiText.WHY["focus_ready"]
 		actions.add_child(focus)
+		for action_button in [fight, item, focus]:
+			action_button.custom_minimum_size.y = 58
 		hud.add_child(actions)
 		_app.hint("combat_story" if _deadline == null or float(_deadline) < 0.0 else "combat")
 		if has_skills:
@@ -705,12 +760,18 @@ func _build_bottom(view: Dictionary) -> void:
 		_app.hint("dot")
 	var row := UiKit.hbox(8)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	if your_turn and not choices.get("skills", {}).is_empty():
+		var skill_slots: int = (choices["skills"] as Dictionary).size()
+		var balance := Control.new()
+		# Counterbalance the skill strip so the three main actions stay centred.
+		balance.custom_minimum_size.x = 130.0 + maxi(0, skill_slots - 1) * 52.0
+		row.add_child(balance)
 	row.add_child(UiKit.panel(hud, "HudPanel"))
 	if your_turn and not choices.get("skills", {}).is_empty():
 		var squares := UiKit.hbox(4)
 		squares.size_flags_vertical = Control.SIZE_SHRINK_END
 		var hourglass := UiKit.panel(UiKit.pixel_label("Turn", "small", UiKit.TEXT_DIM), "HudPanel")
-		hourglass.custom_minimum_size = Vector2(56, 42)
+		hourglass.custom_minimum_size = Vector2(56, 58)
 		hourglass.tooltip_text = UiText.LABELS["action_window"]
 		squares.add_child(hourglass)
 		for skill_id in choices["skills"]:
@@ -733,7 +794,7 @@ func _build_bottom(view: Dictionary) -> void:
 			count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			mark.add_child(count)
 			var square := UiKit.panel(mark, "HudPanel")
-			square.custom_minimum_size = Vector2(38, 42)
+			square.custom_minimum_size = Vector2(48, 58)
 			var why := "Ready to use"
 			if left > 0:
 				why = "%d turn(s) of cooldown left" % left
@@ -743,6 +804,15 @@ func _build_bottom(view: Dictionary) -> void:
 			squares.add_child(square)
 		row.add_child(squares)
 	_bottom.add_child(row)
+	if your_turn and not _was_your_turn and not _app.settings.reduced_motion:
+		var resting_bottom_offset := -8.0
+		_bottom.modulate.a = 0.65
+		_bottom.offset_bottom = resting_bottom_offset - 16.0
+		var enter := create_tween()
+		enter.set_parallel(true)
+		enter.tween_property(_bottom, "modulate:a", 1.0, 0.18)
+		enter.tween_property(_bottom, "offset_bottom", resting_bottom_offset, 0.18).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_was_your_turn = your_turn
 
 
 ## Grid of cards for Skills (with Attack and Defend first, like the
@@ -965,9 +1035,22 @@ func _action_button(text: String, id: String, callback: Callable, active: bool) 
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.set_meta("focus_id", "action_" + id)
 	button.pressed.connect(callback)
+	button.pivot_offset = Vector2(80, 28)
+	if not _app.settings.reduced_motion:
+		button.mouse_entered.connect(func() -> void: _tween_button(button, Vector2(1.035, 1.035), 0.09))
+		button.mouse_exited.connect(func() -> void: _tween_button(button, Vector2.ONE, 0.12))
+		button.button_down.connect(func() -> void: _tween_button(button, Vector2(0.97, 0.97), 0.05))
+		button.button_up.connect(func() -> void: _tween_button(button, Vector2(1.035, 1.035), 0.07))
 	if active:
 		button.add_theme_color_override("font_color", UiKit.ACCENT)
 	return button
+
+
+func _tween_button(button: Control, target: Vector2, duration: float) -> void:
+	if not is_instance_valid(button):
+		return
+	var tween := create_tween()
+	tween.tween_property(button, "scale", target, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 
 static func _centered(node: Control) -> Control:
