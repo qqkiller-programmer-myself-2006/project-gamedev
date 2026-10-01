@@ -31,9 +31,10 @@ var _list_root: Control
 var _battle: BattleView
 var _battle_mode := false
 var _camp: CampView
-## Card id -> times (ms) of recent floating numbers, to stack them.
-var _float_stack: Dictionary = {}
+## Card id -> time when its current floating number finishes.
+var _float_busy_until: Dictionary = {}
 var _float_generation := 0
+var _action_feedback_generation := 0
 var _camp_mode := false
 var _scroll_to_top := false
 var _story_director: StoryDirector = null
@@ -226,7 +227,7 @@ func show_events(client: ClientApp, events: Array) -> void:
 		if not line.is_empty():
 			_add_log(line)
 		_feedback(client, event)
-		if _battle_mode and str(event.get("type", "")) != "action_resolved":
+		if _battle_mode and str(event.get("type", "")) not in ["action_resolved", "combat_ended"]:
 			_battle.animate_bars()
 
 func _on_story_presentation_finished(_item: Dictionary) -> void:
@@ -379,8 +380,17 @@ func build_corner_menu(host: Control) -> PanelContainer:
 
 ## A number or word that rises from a character or enemy card.
 func float_text(id: String, text: String, color: Color) -> void:
-	# Cards may have just been rebuilt: wait for layout before measuring.
+	# Queue hits on the same target so simultaneous results never overlap.
 	var generation := _float_generation
+	var now := Time.get_ticks_msec()
+	var busy_until := int(_float_busy_until.get(id, now))
+	var starts_at := maxi(now, busy_until)
+	_float_busy_until[id] = starts_at + 720
+	if starts_at > now:
+		await get_tree().create_timer(float(starts_at - now) / 1000.0).timeout
+	if generation != _float_generation or not is_inside_tree():
+		return
+	# Cards may have just been rebuilt: wait for layout before measuring.
 	await get_tree().process_frame
 	if generation != _float_generation:
 		return
@@ -394,22 +404,14 @@ func float_text(id: String, text: String, color: Color) -> void:
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.add_to_group("combat_floating_text")
 	add_child(label)
-	# Numbers that land on the same card together (several DoTs ticking)
-	# stack upwards instead of drawing over each other.
-	var now := Time.get_ticks_msec()
-	var recent: Array = _float_stack.get(id, [])
-	recent = recent.filter(func(t: int) -> bool: return now - t < 700)
-	var lane := recent.size()
-	recent.append(now)
-	_float_stack[id] = recent
 	var rect := anchor.get_global_rect()
-	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -38.0 * lane)
+	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -38)
 	var tween := create_tween()
 	if app.settings.reduced_motion:
-		tween.tween_interval(1.2)
+		tween.tween_interval(0.72)
 	else:
-		tween.tween_property(label, "global_position:y", label.global_position.y - 40, 1.1)
-		tween.parallel().tween_property(label, "modulate:a", 0.0, 1.1).set_delay(0.4)
+		tween.tween_property(label, "global_position:y", label.global_position.y - 32, 0.72)
+		tween.parallel().tween_property(label, "modulate:a", 0.0, 0.72).set_delay(0.25)
 	tween.tween_callback(label.queue_free)
 
 
@@ -558,45 +560,15 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				float_text(str(event["target"]), "+%s" % UiKit.status_tag(applied),
 						UiKit.status_color(str(event.get("color", ""))))
 		"action_resolved":
-			if _battle_mode:
-				_battle.handle_event(event)
-				var named := ""
-				if event.has("move_name"):
-					named = str(event["move_name"])
-				elif event.has("skill"):
-					named = str(event["skill"]).replace("_", " ").capitalize()
-				elif event.has("item"):
-					named = BattleView.item_display_name(str(event["item"]))
-				if not named.is_empty():
-					_battle.announce(named)
-			var hurt := false
-			for result in event.get("results", []):
-				var target := str(result["target"])
-				if result.has("damage"):
-					hurt = true
-					client.flash(anchors.get(target), Color(1.6, 0.7, 0.7))
-					var text := "-%d" % int(result["damage"])
-					if result.get("crit", false):
-						text += " CRIT"
-					float_text(target, text, UiKit.ENEMY if target.begins_with("p") else UiKit.ACCENT)
-				elif result.has("heal"):
-					client.flash(anchors.get(target), Color(0.8, 1.5, 0.8))
-					float_text(target, "+%d" % int(result["heal"]), UiKit.GOOD)
-			if hurt:
-				client.sounds.play("hit")
+			call_deferred("_resolve_action_feedback", client, event.duplicate(true), _action_feedback_generation)
 		"vote_resolved":
 			client.banner("Next: %s" % event["name"], 2.2, "vote")
 		"combat_ended":
-			_float_generation += 1
-			_float_stack.clear()
-			for label in get_tree().get_nodes_in_group("combat_floating_text"):
-				if is_instance_valid(label):
-					label.queue_free()
 			if is_instance_valid(_battle):
 				_battle.clear_turn_notice()
-			var rewards: Dictionary = event.get("rewards", {})
-			if event["result"] == "victory" and int(rewards.get("exp", 0)) > 0:
-				_announce(client, "Victory! +%d EXP, +%d Gold" % [int(rewards["exp"]), int(rewards.get("gold", 0))], 2.5, "good")
+			# Let the final hit and its HP tween finish; the encounter's result
+			# screen arrives after its end delay, so clear the numbers beforehand.
+			call_deferred("_clear_combat_feedback_after", 2.6)
 		"player_joined":
 			if not ClientApp.is_story_view(room_view()):
 				client.toast("%s joined." % event["name"])
@@ -619,8 +591,61 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 		"slot_ai_takeover":
 			client.toast("%s is now controlled by AI." % event["character"])
 		"match_ended":
-			client.banner("Victory!" if event["result"] == "victory" else "Defeat", 3.0,
-					"good" if event["result"] == "victory" else "bad")
+			# The Summary owns its outcome heading; clear banners and combat
+			# feedback before showing it instead of covering it with a toast.
+			client.clear_banner()
+			_clear_combat_feedback()
+
+
+func _resolve_action_feedback(client: ClientApp, event: Dictionary, generation: int) -> void:
+	if _battle_mode:
+		_battle.handle_event(event)
+		var named := ""
+		if event.has("move_name"):
+			named = str(event["move_name"])
+		elif event.has("skill"):
+			named = str(event["skill"]).replace("_", " ").capitalize()
+		elif event.has("item"):
+			named = BattleView.item_display_name(str(event["item"]))
+		if not named.is_empty():
+			_battle.announce(named)
+	if not client.settings.reduced_motion:
+		await get_tree().create_timer(0.3).timeout
+	if generation != _action_feedback_generation or not is_inside_tree():
+		return
+	var hurt := false
+	for result in event.get("results", []):
+		var target := str(result["target"])
+		if result.has("damage"):
+			hurt = true
+			client.flash(anchors.get(target), Color(1.6, 0.7, 0.7))
+			var text := "-%d" % int(result["damage"])
+			if result.get("crit", false):
+				text += " CRIT"
+			float_text(target, text, UiKit.ENEMY if target.begins_with("p") else UiKit.ACCENT)
+		elif result.has("heal"):
+			client.flash(anchors.get(target), Color(0.8, 1.5, 0.8))
+			float_text(target, "+%d" % int(result["heal"]), UiKit.GOOD)
+	if hurt:
+		client.sounds.play("hit")
+
+
+func _clear_combat_feedback_after(seconds: float) -> void:
+	if not is_inside_tree():
+		return
+	await get_tree().create_timer(seconds).timeout
+	_clear_combat_feedback()
+
+
+func _clear_combat_feedback() -> void:
+	_float_generation += 1
+	_float_busy_until.clear()
+	_action_feedback_generation += 1
+	var floating: Array = get_tree().get_nodes_in_group("combat_floating_text") if is_inside_tree() \
+			else find_children("*", "Label", true, false)
+	for label in floating:
+		if is_instance_valid(label) and label.is_in_group("combat_floating_text"):
+			label.queue_free()
 
 
 func _collect_names(view: Dictionary) -> void:

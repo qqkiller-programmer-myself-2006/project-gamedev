@@ -92,7 +92,7 @@ func _process(delta: float) -> bool:
 		friend = harness.server.open_session()
 		harness.server.command(friend, {"type": "join_room", "code": _code(), "name": "Bob"})
 		friend_bot = MatchBot.new(harness, [friend])
-		friend_bot.choose_route = MatchBot.sensible_route
+		friend_bot.choose_route = _preview_route
 		return false
 	if frame == 40:
 		app._toast_until = 0.0
@@ -182,7 +182,9 @@ func _drive() -> void:
 		return
 	if key != _last_key:
 		_last_key = key
-		_think_until = Time.get_ticks_msec() / 1000.0 + 0.6
+		# The preview clock advances at --speed, so the usual reaction pause can
+		# consume the entire vote timer at high speed and miss keyboard input.
+		_think_until = Time.get_ticks_msec() / 1000.0 + (0.1 if key == "03_vote" else 0.6)
 		return
 	if Time.get_ticks_msec() / 1000.0 < _think_until:
 		return
@@ -263,11 +265,12 @@ func _act(key: String, view: Dictionary) -> void:
 	elif key == "03_vote":
 		var options: Array = view["vote"]["options"]
 		var pick := MatchBot.sensible_route(options, 0, view)
-		# Visit one Rest camp after the first fight so it gets a screenshot.
-		if not shots.has("10_rest") and shots.has("04_combat_turn"):
+		# Visit a Rest camp once so accessibility evidence always includes it.
+		if not shots.has("10_rest"):
 			for option in options:
 				if option["type"] == "rest":
 					pick = option["index"]
+		print("ui_preview: vote options=", options, " selected=", pick)
 		_press(KEY_1 + pick)
 	elif key.ends_with("_turn"):
 		var encounter: Dictionary = view["encounter"]
@@ -315,6 +318,16 @@ func _act(key: String, view: Dictionary) -> void:
 		_press(KEY_ENTER)
 	if app.connection != null:
 		app.connection.poll()
+
+
+func _preview_route(options: Array, slot: int, view: Dictionary) -> int:
+	# Align the preview bot with the local player until Rest evidence is captured,
+	# so a tie cannot randomly send the run down another route.
+	if not shots.has("10_rest"):
+		for option in options:
+			if str(option.get("type", "")) == "rest":
+				return int(option["index"])
+	return MatchBot.sensible_route(options, slot, view)
 
 
 func _press(keycode: int) -> void:

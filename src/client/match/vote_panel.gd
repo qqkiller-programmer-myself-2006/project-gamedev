@@ -16,28 +16,31 @@ const TYPE_ICONS := {
 
 
 func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
-	add_theme_constant_override("separation", 12)
+	add_theme_constant_override("separation", 5)
 	var vote: Dictionary = view["vote"]
 	_options = vote["options"]
 	_deadline = vote["deadline"]
 	var me := screen.your_slot()
 	_voted = vote["voted_slots"].has(me)
 	var solo := ClientApp.is_story_view(view)
-	add_child(UiKit.para("Choose your path" if solo else "Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])], "title"))
-	add_child(UiKit.para("Choose one path." if solo else "Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random.", "dim"))
-	var timer_row := UiKit.hbox(10)
-	_countdown = UiKit.label("", "heading")
+	add_child(UiKit.para("Choose your path" if solo else "Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])], "heading"))
+	var description := UiKit.para("Choose one path." if solo else "Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random.", "tiny")
+	description.max_lines_visible = 2
+	description.clip_text = true
+	add_child(description)
+	var timer_row := UiKit.hbox(6)
+	_countdown = UiKit.label("", "small")
 	timer_row.add_child(_countdown)
 	_bar = ProgressBar.new()
 	_bar.show_percentage = false
 	_bar.max_value = maxf(1.0, float(vote.get("seconds", 20.0)))
 	_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_bar.custom_minimum_size = Vector2(0, 14)
+	_bar.custom_minimum_size = Vector2(0, 10)
 	timer_row.add_child(_bar)
 	if not view.get("story", false):
 		add_child(timer_row)
 	if not solo:
-		add_child(UiKit.para(_voter_status(screen, view, vote)))
+		add_child(UiKit.para(_voter_status(screen, view, vote), "tiny"))
 	if _options.is_empty():
 		add_child(UiKit.para("No routes available.", "dim"))
 	else:
@@ -46,8 +49,8 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 		# that same server order so the featured card is always [1].
 		add_child(_featured_card(screen, app, _options[0]))
 		if _options.size() > 1:
-			add_child(UiKit.label("Alternatives", "dim"))
-			var alt_row := UiKit.flow(12)
+			add_child(UiKit.label("Alternatives", "small"))
+			var alt_row := UiKit.flow(6)
 			for i in range(1, _options.size()):
 				alt_row.add_child(_compact_card(screen, app, _options[i]))
 			add_child(alt_row)
@@ -82,7 +85,7 @@ func _featured_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> 
 	box.add_child(_vote_button(screen, app, option, mine, solo, "primary"))
 	var card := UiKit.panel(box, "HighlightPanel" if mine else "CardPanel")
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(250, 230)
+	card.custom_minimum_size = Vector2(250, 156)
 	return card
 
 
@@ -107,13 +110,25 @@ func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full:
 	if full:
 		head.add_child(UiKit.badge("Featured", UiKit.ACCENT))
 	box.add_child(head)
-	box.add_child(UiKit.para(str(option["name"]), "heading"))
+	var option_name := UiKit.para(str(option["name"]), "heading")
+	option_name.max_lines_visible = 2
+	option_name.clip_text = true
+	box.add_child(option_name)
 	var hint_text := str(option.get("hint", ""))
 	if full:
-		box.add_child(UiKit.para(hint_text))
-		box.add_child(UiKit.para(str(UiText.TYPE_HELP.get(option["type"], "")), "dim"))
+		var hint := UiKit.para(hint_text, "small")
+		hint.max_lines_visible = 2
+		hint.clip_text = true
+		box.add_child(hint)
+		var type_help := UiKit.para(str(UiText.TYPE_HELP.get(option["type"], "")), "tiny")
+		type_help.max_lines_visible = 1
+		type_help.clip_text = true
+		box.add_child(type_help)
 	elif not hint_text.is_empty():
-		box.add_child(UiKit.para(hint_text, "dim"))
+		var alternative_hint := UiKit.para(hint_text, "dim")
+		alternative_hint.max_lines_visible = 1
+		alternative_hint.clip_text = true
+		box.add_child(alternative_hint)
 	box.add_child(UiKit.spacer())
 	var solo := ClientApp.is_story_view(screen.match_view())
 	if not solo:

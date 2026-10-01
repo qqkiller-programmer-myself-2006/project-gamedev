@@ -191,7 +191,7 @@ func setup(data: Dictionary) -> void:
 			animation_elapsed = old_elapsed
 			_bob_time = old_bob
 	_pending_bar_targets.clear()
-	if updating and not reduced_motion and not down:
+	if updating and not down:
 		var updated_bars := find_children("*", "ProgressBar", true, false)
 		for i in mini(previous_bar_values.size(), updated_bars.size()):
 			var bar := updated_bars[i] as ProgressBar
@@ -204,7 +204,10 @@ func setup(data: Dictionary) -> void:
 func animate_bars() -> void:
 	var bars := find_children("*", "ProgressBar", true, false)
 	for i in mini(_pending_bar_targets.size(), bars.size()):
-		create_tween().tween_property(bars[i], "value", _pending_bar_targets[i], 0.25)
+		if reduced_motion:
+			bars[i].value = _pending_bar_targets[i]
+		else:
+			create_tween().tween_property(bars[i], "value", _pending_bar_targets[i], 0.25)
 	_pending_bar_targets.clear()
 
 func play_animation(kind: String) -> void:

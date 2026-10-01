@@ -226,3 +226,88 @@ func test_combat_log_dock_grows_right_at_large_scale() -> void:
 	battle.free()
 	screen.free()
 	app.free()
+
+
+func test_battle_timeline_starts_clear_of_corner_controls() -> void:
+	var battle := _battle()
+	assert_true(battle._timeline_scroll.get_parent().offset_left >= 104.0,
+			"initiative title starts to the right of the = and ? corner controls")
+	battle._combat = {"round": 2, "round_order": [], "turn_order": []}
+	battle._build_timeline({})
+	assert_eq(battle._timeline_title.text, "Turn 2", "the timeline title stays outside the scrolling cards")
+	var screen: MatchScreen = battle._screen
+	var app: ClientApp = battle._app
+	battle.free()
+	screen.free()
+	app.free()
+
+
+func test_summary_keeps_one_outcome_heading_and_hides_timeline() -> void:
+	var battle := _battle()
+	battle._combat = {"result": "victory", "trial": false, "rewards": {}}
+	battle._build_result()
+	assert_eq(battle._center_text.text, "Victory!", "summary has one victory heading")
+	assert_false(battle._timeline.visible, "turn order is hidden in summary")
+	var screen: MatchScreen = battle._screen
+	var app: ClientApp = battle._app
+	battle.free()
+	screen.free()
+	app.free()
+
+
+func test_reduced_motion_applies_hp_change_without_a_tween() -> void:
+	var token := BattleToken.new()
+	var data := {"id": "p0", "side": "party", "name": "Alice", "kind": "classless",
+		"hp": 20, "max_hp": 30, "energy": 3, "energy_max": 6, "statuses": [], "reduced_motion": true}
+	token.setup(data)
+	data["hp"] = 10
+	token.setup(data)
+	var bars := token.find_children("*", "ProgressBar", true, false)
+	assert_eq((bars[0] as ProgressBar).value, 20.0, "reduced motion keeps the old bar until hit feedback completes")
+	token.animate_bars()
+	assert_eq((bars[0] as ProgressBar).value, 10.0, "reduced motion applies the hit without a tween")
+	token.free()
+
+
+func test_combat_ended_does_not_skip_the_final_hit_bar_sequence() -> void:
+	var battle := _battle()
+	var screen: MatchScreen = battle._screen
+	var app: ClientApp = battle._app
+	screen._battle = battle
+	screen._battle_mode = true
+	screen._log = RichTextLabel.new()
+	screen.add_child(screen._log)
+	var token := BattleToken.new()
+	var data := {"id": "p0", "side": "party", "name": "Alice", "kind": "classless",
+		"hp": 20, "max_hp": 30, "energy": 3, "energy_max": 6, "statuses": []}
+	token.setup(data)
+	data["hp"] = 10
+	data["energy"] = 2
+	token.setup(data)
+	battle._tokens["p0"] = token
+	screen.show_events(app, [{"type": "combat_ended", "result": "victory", "rewards": {}}])
+	assert_eq(token._pending_bar_targets, [10.0, 2.0],
+			"combat_ended leaves the final HP/Energy update pending for hit feedback")
+	token.free()
+	battle.free()
+	screen.free()
+	app.free()
+
+
+func test_summary_clears_floating_combat_feedback() -> void:
+	var battle := _battle()
+	var screen: MatchScreen = battle._screen
+	var app: ClientApp = battle._app
+	var number := Label.new()
+	screen.add_child(number)
+	number.add_to_group("combat_floating_text")
+	screen._float_generation = 2
+	screen._action_feedback_generation = 4
+	screen._float_busy_until["e0"] = Time.get_ticks_msec() + 1000
+	screen._clear_combat_feedback()
+	assert_true(number.is_queued_for_deletion(), "summary removes any number still over the party panel")
+	assert_eq([screen._float_generation, screen._action_feedback_generation, screen._float_busy_until], [3, 5, {}],
+			"summary invalidates pending numbers and stops their queue")
+	battle.free()
+	screen.free()
+	app.free()

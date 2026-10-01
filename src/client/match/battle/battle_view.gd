@@ -40,6 +40,7 @@ var _stage: Control
 var _backdrop: BattleBackdrop
 var _timeline: VBoxContainer
 var _timeline_scroll: ScrollContainer
+var _timeline_title: Label
 var _region: Label
 var _region_sub: Label
 var _header: VBoxContainer
@@ -71,16 +72,23 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_stage.resized.connect(_place_tokens)
 	add_child(_stage)
 
-	var left := MarginContainer.new()
+	var left := UiKit.vbox(4)
 	left.set_anchors_preset(Control.PRESET_LEFT_WIDE)
 	left.offset_top = 52
 	left.offset_bottom = -170
+	# Keep the timeline title and first row clear of the two top-left controls.
+	left.offset_left = 104
 	left.custom_minimum_size = Vector2(150, 0)
 	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_timeline_title = UiKit.pixel_label("", "title")
+	_timeline_title.add_theme_color_override("font_outline_color", Color.BLACK)
+	_timeline_title.add_theme_constant_override("outline_size", 6)
+	left.add_child(_timeline_title)
 	var scroll := ScrollContainer.new()
 	_timeline_scroll = scroll
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.follow_focus = true
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_timeline = UiKit.vbox(4)
 	_timeline.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(_timeline)
@@ -352,7 +360,15 @@ func handle_event(event: Dictionary) -> void:
 	var actor_token: BattleToken = _tokens.get(actor)
 	if actor_token != null:
 		actor_token.play_animation("attack")
-	for result in event.get("results", []):
+	call_deferred("_play_event_hits", event.get("results", []).duplicate(true))
+
+
+func _play_event_hits(results: Array) -> void:
+	if not _app.settings.reduced_motion:
+		await get_tree().create_timer(0.3).timeout
+	if not is_inside_tree():
+		return
+	for result in results:
 		var target := str(result.get("target", ""))
 		var token: BattleToken = _tokens.get(target)
 		if token == null:
@@ -364,10 +380,10 @@ func handle_event(event: Dictionary) -> void:
 				token.play_animation("hurt")
 		elif bool(result.get("revived", false)):
 			token.play_animation("revive")
+	if not _app.settings.reduced_motion:
+		await get_tree().create_timer(0.12).timeout
 	if is_inside_tree():
-		var tween := create_tween()
-		tween.tween_interval(0.3 if not _app.settings.reduced_motion else 0.0)
-		tween.tween_callback(animate_bars)
+		animate_bars()
 
 
 func animate_bars() -> void:
@@ -435,10 +451,7 @@ func _build_header(view: Dictionary) -> void:
 ## Energy) from the latest server snapshot.
 func _build_timeline(view: Dictionary) -> void:
 	UiKit.clear(_timeline)
-	var title := UiKit.pixel_label("Turn %d" % int(_combat.get("round", 1)), "title")
-	title.add_theme_color_override("font_outline_color", Color.BLACK)
-	title.add_theme_constant_override("outline_size", 6)
-	_timeline.add_child(title)
+	_timeline_title.text = "Turn %d" % int(_combat.get("round", 1))
 	var remaining: Array = _combat.get("turn_order", [])
 	var order: Array = _combat.get("round_order", remaining)
 	var actor := str(_combat.get("actor", ""))
