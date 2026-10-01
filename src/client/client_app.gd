@@ -385,8 +385,10 @@ func _show_screen(screen: String) -> void:
 	match screen:
 		"title":
 			_current = TitleScreen.new()
+			sounds.play_music("title")
 		"lobby":
 			_current = LobbyScreen.new()
+			sounds.play_music("lobby")
 		_:
 			_current = MatchScreen.new()
 	_current_name = screen
@@ -580,6 +582,7 @@ func confirm_leave() -> void:
 func apply_settings() -> void:
 	theme = UiKit.make_theme(settings.text_scale)
 	SoundBank.set_volume(settings.volume)
+	SoundBank.set_music_volume(settings.music_volume)
 	if _current != null and _current.has_method("refresh") and not snapshot.is_empty():
 		_current.refresh(self, true)
 

@@ -149,6 +149,19 @@ func is_host() -> bool:
 func refresh(client: ClientApp, force: bool = false) -> void:
 	app = client
 	var view := match_view()
+	var phase := str(view.get("phase", ""))
+	var encounter: Variant = view.get("encounter")
+	var music_track := "forest"
+	if phase == "victory":
+		music_track = "victory"
+	elif phase == "defeat":
+		music_track = "defeat"
+	elif phase == "boss" or (encounter != null and str(encounter.get("kind", "")) == "boss"):
+		music_track = "guardian"
+	elif not _active_combat(view).is_empty():
+		music_track = "battle"
+	if app.sounds != null:
+		app.sounds.play_music(music_track)
 	var stable := view.duplicate()
 	stable.erase("elapsed")
 	var digest := JSON.stringify([stable, room_view()])
@@ -599,12 +612,12 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 		"profile_unavailable":
 			client.toast(UiText.error("profile_unavailable"), 6.0)
 		"treasure_found":
-			client.banner("Treasure! +%d Gold" % int(event["gold"]), 2.0, "good")
+			client.banner("Treasure! +%d Gold" % int(event["gold"]), 2.0, "loot_pickup")
 		"clue_found":
 			client.banner("Story Clue: %s" % event["clue"]["title"], 2.5, "good")
 		"level_up":
 			float_text("p%d" % int(event["slot"]), "LEVEL UP", UiKit.GOOD)
-			client.sounds.play("good")
+			client.sounds.play("level_up")
 		"class_changed":
 			client.sounds.play("good")
 		"boss_telegraph":
