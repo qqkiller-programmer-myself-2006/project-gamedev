@@ -73,8 +73,8 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 
 	var left := MarginContainer.new()
 	left.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	left.offset_top = 52
-	left.offset_bottom = -280
+	left.offset_top = 70
+	left.offset_bottom = -160
 	left.custom_minimum_size = Vector2(150, 0)
 	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var scroll := ScrollContainer.new()
@@ -148,23 +148,27 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_turn_notice.visible = false
 	add_child(_turn_notice)
 
+	# Keep the log below the hero lane and clear of the centered action HUD.
 	var bottom_left := UiKit.vbox(2)
 	bottom_left.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	bottom_left.grow_horizontal = Control.GROW_DIRECTION_END
 	bottom_left.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	bottom_left.offset_left = 14
-	bottom_left.offset_bottom = -180
+	bottom_left.offset_bottom = -8
 	bottom_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_log = RichTextLabel.new()
 	_log.bbcode_enabled = false
 	_log.scroll_following = true
-	_log.custom_minimum_size = Vector2(300, 82)
+	var log_width := maxf(110.0, 245.0 - 300.0 * (_app.settings.text_scale - 1.0))
+	_log.custom_minimum_size = Vector2(log_width, 102)
+	_log.scroll_active = false
+	_log.fit_content = false
 	_log.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_log.focus_mode = Control.FOCUS_NONE
 	_log.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_log.add_theme_color_override("default_color", UiKit.TEXT_DIM)
 	var log_panel := UiKit.panel(_log, "HudPanel")
-	log_panel.custom_minimum_size = Vector2(300, 90)
+	log_panel.custom_minimum_size = Vector2(log_width, 110)
 	_rewards = UiKit.vbox(0)
 	bottom_left.add_child(_rewards)
 	bottom_left.add_child(log_panel)
@@ -452,6 +456,7 @@ func _build_timeline(view: Dictionary) -> void:
 			if not weakness.is_empty():
 				var weak_label := UiKit.pixel_label("Weak: " + ", ".join(weakness), "tiny", UiKit.WARN)
 				weak_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				weak_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				entry.add_child(weak_label)
 		var card := UiKit.panel(entry, "HudHighlightPanel" if is_actor else "HudPanel")
 		card.set_meta("actor_id", str(id))
