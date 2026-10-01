@@ -5,7 +5,7 @@
       192,
       192
     ],
-    "fps": 14,
+    "fps": 16,
     "anchor": "target",
     "tier": "ultimate"
   },
@@ -15,7 +15,7 @@
       128,
       128
     ],
-    "fps": 14,
+    "fps": 16,
     "anchor": "target",
     "tier": "normal"
   },
@@ -25,7 +25,7 @@
       192,
       192
     ],
-    "fps": 14,
+    "fps": 16,
     "anchor": "target",
     "tier": "ultimate"
   },
@@ -35,7 +35,7 @@
       192,
       192
     ],
-    "fps": 14,
+    "fps": 16,
     "anchor": "target",
     "tier": "ultimate"
   },
@@ -45,7 +45,7 @@
       128,
       128
     ],
-    "fps": 14,
+    "fps": 16,
     "anchor": "target",
     "tier": "normal"
   },
@@ -55,7 +55,7 @@
       192,
       192
     ],
-    "fps": 14,
+    "fps": 16,
     "anchor": "party",
     "tier": "ultimate"
   },
@@ -65,7 +65,7 @@
       128,
       128
     ],
-    "fps": 14,
+    "fps": 16,
     "anchor": "target",
     "tier": "normal"
   },
@@ -75,7 +75,7 @@
       128,
       128
     ],
-    "fps": 14,
+    "fps": 16,
     "anchor": "actor",
     "tier": "normal"
   },
@@ -85,7 +85,7 @@
       128,
       128
     ],
-    "fps": 14,
+    "fps": 16,
     "anchor": "target",
     "tier": "normal"
   },
@@ -95,7 +95,7 @@
       192,
       192
     ],
-    "fps": 14,
+    "fps": 16,
     "anchor": "target",
     "tier": "ultimate"
   }

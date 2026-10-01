@@ -103,29 +103,43 @@ func _process(delta: float) -> bool:
 		_shot("02_lobby")
 		(app._current as LobbyScreen)._open_setup()
 		return false
-	if frame == 45:
+	if frame >= 45 and not shots.has("02a_setup_class"):
+		var lobby := app._current as LobbyScreen
+		if lobby == null or not is_instance_valid(lobby._setup):
+			if lobby != null:
+				lobby._open_setup()
+			return false
 		_shot("02a_setup_class")
-		(app._current as LobbyScreen)._setup._cycle_class(-1)
-		(app._current as LobbyScreen)._setup._switch_tab("Races")
-		(app._current as LobbyScreen)._setup._race = "Dwarf"
-		(app._current as LobbyScreen)._setup._render()
+		lobby._setup._cycle_class(-1)
+		lobby._setup._switch_tab("Races")
+		lobby._setup._race = "Dwarf"
+		lobby._setup._render()
 		return false
-	if frame == 50:
+	if frame >= 50 and not shots.has("02b_setup_races"):
+		var lobby := app._current as LobbyScreen
+		if lobby == null or not is_instance_valid(lobby._setup):
+			return false
 		_shot("02b_setup_races")
-		(app._current as LobbyScreen)._setup._switch_tab("Boons")
+		lobby._setup._switch_tab("Boons")
 		return false
-	if frame == 55:
+	if frame >= 55 and not shots.has("02c_setup_boons"):
+		var lobby := app._current as LobbyScreen
+		if lobby == null or not is_instance_valid(lobby._setup):
+			return false
 		_shot("02c_setup_boons")
-		(app._current as LobbyScreen)._setup._select_boon("Alert")
+		lobby._setup._select_boon("Alert")
 		return false
-	if frame == 60:
+	if frame >= 60 and not shots.has("02d_setup_boons_equipped"):
+		var lobby := app._current as LobbyScreen
+		if lobby == null or not is_instance_valid(lobby._setup):
+			return false
 		_shot("02d_setup_boons_equipped")
-		var chosen: Dictionary = (app._current as LobbyScreen)._setup._own_loadout()
+		var chosen: Dictionary = lobby._setup._own_loadout()
 		if chosen.get("class", "") != "guardian" or not chosen.get("boons", []).has("Alert"):
 			printerr("ui_preview: Character setup did not reach the room snapshot")
 			quit(1)
 			return true
-		(app._current as LobbyScreen)._setup._finish.call()
+		lobby._setup._finish.call()
 		return false
 	if frame == 65:
 		_shot("02e_lobby_loadout")

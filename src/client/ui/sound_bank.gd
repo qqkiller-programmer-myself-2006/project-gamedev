@@ -19,7 +19,7 @@ const CUE_ASSETS := {
 	"cancel": "res://assets/audio/sfx/ui_cancel.ogg",
 	"error": "res://assets/audio/sfx/ui_error.ogg",
 	"sword_hit": "res://assets/audio/sfx/sword_hit.ogg",
-	"enemy_death": "res://assets/audio/sfx/hit.ogg",
+	"enemy_death": "res://assets/audio/sfx/enemy_death.ogg",
 	"player_down": "res://assets/audio/sfx/player_down.ogg",
 	"level_up": "res://assets/audio/sfx/level_up.ogg",
 	"loot_pickup": "res://assets/audio/sfx/loot_pickup.ogg",
@@ -29,7 +29,7 @@ const CUE_ASSETS := {
 	"heal": "res://assets/audio/sfx/heal.ogg",
 	"buff": "res://assets/audio/sfx/buff.ogg",
 	"debuff": "res://assets/audio/sfx/debuff.ogg",
-	"critical": "",
+	"critical": "res://assets/audio/sfx/critical.ogg",
 	"miss": "res://assets/audio/sfx/miss.ogg",
 }
 

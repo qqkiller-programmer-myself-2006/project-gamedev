@@ -31,12 +31,12 @@ Issues และ specs ของรีโปนี้อยู่ใน GitHub I
 ## ตำแหน่งไฟล์และโฟลเดอร์
 
 - `assets/`: ภาพที่นำเข้าเพื่อใช้ขณะรันเกม; `art_source/`: ชีตภาพต้นฉบับที่ไม่รวมในการนำเข้าหรือส่งออก
-- `content/`: ข้อมูลป่าและเนื้อเรื่อง
-- `src/app/`: ฉากเริ่มต้น; `src/shared/`: ตัวสร้างเลขสุ่ม นาฬิกา และตัวโหลด content กลาง; `src/profile/`: ที่เก็บโปรไฟล์และตัวส่งข้อมูล
-- `src/match/`: เซิร์ฟเวอร์แมตช์, AI, เหตุการณ์ และกติกาที่เซิร์ฟเวอร์ตัดสิน; `src/match/rules/`: ตัวช่วยกติกา
-- `src/net/`: โปรโตคอลและการรับส่งข้อมูล; `src/server/`: โหนดเซิร์ฟเวอร์แบบ headless
-- `src/client/ui/`: ส่วน UI ที่ใช้ร่วมกัน; `title/`, `lobby/`, `match/`, `story/`: หน้าจอผู้เล่น; `match/battle/` และ `match/camp/`: มุมมองแต่ละช่วง
+- `content/`: ข้อมูล Forest และเนื้อเรื่อง
+- `src/app/`: ฉากเริ่มต้น; `src/shared/`: RNG, นาฬิกา และ content ที่ใช้ร่วมกัน; `src/profile/`: ที่เก็บ profile และตัวส่งข้อมูล
+- `src/match/`: Match ที่เซิร์ฟเวอร์ตัดสิน, AI, encounter และกติกา; `src/match/rules/`: ตัวช่วยกติกา
+- `src/net/`: โปรโตคอลและการรับส่งข้อมูล; `src/server/`: เซิร์ฟเวอร์แบบ headless
+- `src/client/ui/`: UI ที่ใช้ร่วมกัน; `title/`, `lobby/`, `match/`, `story/`: หน้าจอผู้เล่น; `match/battle/` และ `match/camp/`: มุมมองตามช่วงของเกม
 - `tests/`: โครงสร้างสอดคล้องกับ `src/` พร้อม runner และโค้ดสนับสนุนที่ root/โฟลเดอร์ support
-- `tools/dev/`, `tools/art/`, `tools/ci/`: เครื่องมือพัฒนา งานภาพ และ CI; `tools/run_tests.sh`: ตัวรัน test
-- `deploy/`: staging; `docs/design/`, `docs/guides/`, `docs/adr/`, `docs/agents/`, `docs/plans/`, `docs/review/`, `docs/references/`, `docs/screenshots/`: เอกสารแยกตามประเภท
-- `.ai/`: ข้อกำหนดงาน ตัวรัน agent และ checkpoint; `.claude/agents/`: คำจำกัดความ agent
+- `tools/dev/`, `tools/art/`, `tools/ci/`: เครื่องมือพัฒนา งานภาพ และ CI; `tools/run_tests.sh`: ตัวรันเทสต์
+- `deploy/`: staging; `docs/design/`, `docs/guides/`, `docs/adr/`, `docs/agents/`, `docs/plans/`, `docs/review/`, `docs/history/`, `docs/references/`, `docs/screenshots/`: เอกสารแยกตามประเภท
+- `.ai/`: ข้อกำหนดงาน (สารบัญที่ `.ai/tasks/README.md`), runner และ checkpoint; `.claude/agents/`: คำจำกัดความ agent

@@ -32,21 +32,21 @@ func setup(app: ClientApp) -> void:
 func _build_chrome() -> void:
 	var logo := UiKit.vbox(0)
 	logo.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	logo.position = Vector2(0, 16)
-	logo.offset_bottom = 106
-	var title := UiKit.pixel_label(Tr.t("BEYOND THE WORLD'S END"), "huge", UiKit.ACCENT)
+	logo.position = Vector2(0, 28)
+	logo.offset_bottom = 118
+	var title := UiKit.pixel_label("BEYOND THE WORLD'S END", "huge", UiKit.ACCENT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	title.add_theme_color_override("font_outline_color", UiKit.BG)
 	title.add_theme_constant_override("outline_size", 10)
 	logo.add_child(title)
-	var subtitle := UiKit.label(Tr.t("Beyond the World's End - a co-op journey"), "heading")
+	var subtitle := UiKit.label("Forest to Cave - a co-op journey", "heading")
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	subtitle.position.y = 62
+	subtitle.position.y = 70
 	logo.add_child(subtitle)
 	add_child(logo)
-	var build := UiKit.label(Tr.t("BUILD 0.10  |  CO-OP JOURNEY"), "small", UiKit.TEXT_DIM)
+	var build := UiKit.label("BUILD 0.10  |  FOREST TO CAVE", "small", UiKit.TEXT_DIM)
 	build.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	build.autowrap_mode = TextServer.AUTOWRAP_OFF
 	build.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -61,26 +61,25 @@ func _show_menu() -> void:
 	_clear_content()
 	var body := UiKit.vbox(10)
 	body.custom_minimum_size = Vector2(340, 0)
-	var panel := _attach_narrow_panel(body, 390, 176.0)
-	_content = panel
-	body.add_child(UiKit.label(Tr.t("WELCOME, TRAVELLER"), "heading", UiKit.ACCENT))
-	body.add_child(UiKit.para(Tr.t("Choose your path into the forest."), "dim"))
-	var play := UiKit.primary(Tr.t("Play"), _show_play)
+	body.add_child(UiKit.label("WELCOME, TRAVELLER", "heading", UiKit.ACCENT))
+	body.add_child(UiKit.para("Choose your path into the forest.", "dim"))
+	var play := UiKit.primary("Play", _show_play, true)
 	Icons.apply_to_button(play, "play", _app.settings.text_scale)
 	play.set_meta("focus_id", "play")
 	body.add_child(play)
-	var settings := UiKit.button(Tr.t("Settings [F2]"), _app.open_settings)
+	var settings := UiKit.button("Settings [F2]", _app.open_settings, true)
 	Icons.apply_to_button(settings, "settings", _app.settings.text_scale)
 	settings.set_meta("focus_id", "settings")
 	body.add_child(settings)
-	var credits := UiKit.button(Tr.t("Credits"), _show_credits)
+	var credits := UiKit.button("Credits", _show_credits, true)
 	Icons.apply_to_button(credits, "credits", _app.settings.text_scale)
 	credits.set_meta("focus_id", "credits")
 	body.add_child(credits)
 	if not OS.has_feature("web"):
-		var quit := UiKit.button(Tr.t("Quit"), func() -> void: _app.stop_dev_playtest(); get_tree().quit())
+		var quit := UiKit.button("Quit", func() -> void: _app.stop_dev_playtest(); get_tree().quit(), true)
 		Icons.apply_to_button(quit, "quit", _app.settings.text_scale)
 		body.add_child(quit)
+	_content = _attach_narrow_panel(body, 390, 150.0)
 	UiKit.focus_first(body)
 
 func _show_play() -> void:
@@ -165,7 +164,7 @@ func _show_story_setup() -> void:
 		var pick := OptionButton.new()
 		pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		for class_id in STORY_CLASSES:
-			pick.add_item(class_id.capitalize())
+			pick.add_item(Tr.t(class_id.capitalize()))
 		pick.select(i)
 		pick.set_meta("story_index", i)
 		_story_picks.append(pick)
@@ -229,7 +228,7 @@ func _update_story_preview(row: int) -> void:
 	if is_instance_valid(_story_preview_name):
 		_story_preview_name.text = STORY_NAMES[index]
 	if is_instance_valid(_story_preview_class):
-		_story_preview_class.text = class_id.capitalize()
+		_story_preview_class.text = Tr.t(class_id.capitalize())
 	if is_instance_valid(_story_preview_portrait):
 		var path := _story_portrait_path(class_id)
 		if ResourceLoader.exists(path):
@@ -250,7 +249,7 @@ func _show_multiplayer() -> void:
 	body.custom_minimum_size = Vector2(520, 0)
 	body.add_child(UiKit.label("ENTER THE FOREST", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.label("Your name (shown to other players)", "dim"))
-	_name = _line_edit(_app.settings.player_name, "e.g. Arin", 16)
+	_name = _line_edit(_app.settings.player_name, Tr.t("e.g. Arin"), 16)
 	body.add_child(_name)
 	var create := UiKit.primary("Create a room", _create)
 	Icons.apply_to_button(create, "multiplayer", _app.settings.text_scale)
@@ -259,7 +258,7 @@ func _show_multiplayer() -> void:
 	body.add_child(HSeparator.new())
 	body.add_child(UiKit.label("Have a Room code? Letters and numbers, case does not matter.", "dim"))
 	var row := UiKit.hbox(8)
-	_code = _line_edit(str(_app.options.get("join", "")), "Room code", 12)
+	_code = _line_edit(str(_app.options.get("join", "")), Tr.t("Room code"), 12)
 	_code.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_code.text_submitted.connect(func(_t: String) -> void: _join())
 	row.add_child(_code)
@@ -297,7 +296,7 @@ func _show_credits() -> void:
 	body.add_child(UiKit.label("BEYOND THE WORLD'S END", "title", UiKit.ACCENT))
 	body.add_child(UiKit.label("Made with Godot 4.7", "heading"))
 	body.add_child(UiKit.para("Font: Pixelify Sans, OFL\nCharacter art by the project owner.", "body"))
-	body.add_child(UiKit.para("Audio: Kenney, Zane Little Music, MintoDog, JaggedStone and artisticdude (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md", "dim"))
+	body.add_child(UiKit.para("Audio: Kenney, Zane Little Music, MintoDog, marcelofg55, JaggedStone, artisticdude and Brian MacIntosh (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md", "dim"))
 	var back := UiKit.primary("Back [Esc]", _show_menu, false)
 	Icons.apply_to_button(back, "back", _app.settings.text_scale)
 	body.add_child(back)
@@ -329,10 +328,14 @@ func _attach_narrow_panel(body: Control, width: float, base_y: float) -> PanelCo
 	panel.set_meta("narrow_title_panel", true)
 	add_child(panel)
 	_layout_narrow_panel(panel)
+	# Fonts and icons settle after the first frame; measure again so the panel hugs its buttons.
+	_layout_narrow_panel.call_deferred(panel)
 	return panel
 
 
 func _layout_narrow_panel(panel: PanelContainer) -> void:
+	if not is_instance_valid(panel) or panel.get_child_count() == 0:
+		return
 	var scroll := panel.get_child(0) as ScrollContainer
 	var body := scroll.get_child(0) as Control
 	var top := _top(float(panel.get_meta("base_y", 150.0)))
@@ -340,7 +343,7 @@ func _layout_narrow_panel(panel: PanelContainer) -> void:
 	# The menu needs room for all four actions at large text sizes. It can cover
 	# the campfire scene, but must stay below the title and subtitle.
 	var max_panel_height := viewport_height - top - 24.0 if _view == "menu" else maxf(180.0, viewport_height * 0.64 - top)
-	var scroll_height := max_panel_height - 32.0 if _view == "menu" else minf(body.get_combined_minimum_size().y, max_panel_height - 32.0)
+	var scroll_height := minf(body.get_combined_minimum_size().y, max_panel_height - 32.0)
 	scroll.custom_minimum_size = Vector2(float(panel.get_meta("panel_width", 0.0)), scroll_height)
 	panel.offset_top = top
 	panel.offset_bottom = top + scroll_height + 32.0

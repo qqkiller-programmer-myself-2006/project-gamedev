@@ -36,6 +36,7 @@ var _battle: BattleView
 var _battle_mode := false
 var _camp: CampView
 ## Card id -> times (ms) of recent floating numbers, to stack them.
+var _float_stack: Dictionary = {}
 var _float_busy_until: Dictionary = {}
 var _floating_numbers: Array[Label] = []
 var _float_generation := 0
@@ -62,7 +63,7 @@ func setup(client: ClientApp) -> void:
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(middle)
 	var party_scroll := ScrollContainer.new()
-	party_scroll.custom_minimum_size = Vector2(clampf(300.0 * client.settings.text_scale, 300.0, 440.0), 0)
+	party_scroll.custom_minimum_size = Vector2(clampf(280.0 * client.settings.text_scale, 280.0, 360.0), 0)
 	party_scroll.follow_focus = true
 	party_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_party = UiKit.vbox(6)
@@ -84,18 +85,21 @@ func setup(client: ClientApp) -> void:
 	middle.add_child(center_panel)
 	_log = RichTextLabel.new()
 	_log.bbcode_enabled = false
+	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_log.scroll_following = true
 	_log.custom_minimum_size = Vector2(0, 90)
 	_log.focus_mode = Control.FOCUS_NONE
 	_log.add_theme_color_override("default_color", UiKit.TEXT_DIM)
 	_log.text = "Waiting for match events..."
-	var bottom := UiKit.hbox(10)
+	# Stack the history and its Tip so the lower-right panel never forces the
+	# entire screen wider than a narrow viewport at large text sizes.
+	var bottom := UiKit.vbox(6)
 	var log_panel := UiKit.panel(_log)
 	log_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bottom.add_child(log_panel)
-	# Tips sit next to the log (never over controls); they are short so the
-	# phase panel keeps its height.
+	# Tips stay below the log in a separate row, away from phase controls.
 	_tips = UiKit.vbox(0)
+	_tips.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bottom.add_child(_tips)
 	column.add_child(bottom)
 	_list_root = margin
@@ -128,12 +132,18 @@ func tip_slot() -> Container:
 func tip_width() -> float:
 	if _battle_mode:
 		return 210.0
+	if str(match_view().get("phase", "")) == "voting":
+		var viewport_width := get_viewport_rect().size.x
+		var width_ratio := 0.14 if viewport_width <= 1400.0 else 0.20
+		return minf(520.0, minf(viewport_width * width_ratio, 90.0))
 	return 390.0 if _camp_mode else 520.0
 
 
 ## The camp footer has space for one scrollable line beside Ready.
 func tip_body_height() -> float:
-	return 22.0 if _camp_mode else 92.0
+	if _camp_mode:
+		return 22.0
+	return 60.0 if str(match_view().get("phase", "")) == "voting" else 92.0
 
 
 func match_view() -> Dictionary:
@@ -423,8 +433,16 @@ func float_text(id: String, text: String, color: Color) -> void:
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(label)
 	_floating_numbers.append(label)
+	# Numbers that land on the same card together (several DoTs ticking)
+	# stack upwards instead of drawing over each other.
+	var now := Time.get_ticks_msec()
+	var recent: Array = _float_stack.get(id, [])
+	recent = recent.filter(func(t: int) -> bool: return now - t < 1200)
+	var lane := recent.size()
+	recent.append(now)
+	_float_stack[id] = recent
 	var rect := anchor.get_global_rect()
-	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, 0)
+	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -56.0 * lane)
 	var tween := create_tween()
 	if app.settings.reduced_motion:
 		tween.tween_interval(1.2)
@@ -614,8 +632,15 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 			var healed := false
 			var buffed := false
 			var debuffed := false
+			var enemy_down := false
+			var player_down := false
 			for result in event.get("results", []):
 				var target := str(result["target"])
+				if bool(result.get("down", false)):
+					if target.begins_with("p"):
+						player_down = true
+					else:
+						enemy_down = true
 				if result.has("damage"):
 					hurt = hurt or int(result.get("damage", 0)) > 0
 					missed = missed or bool(result.get("dodged", false))
@@ -645,9 +670,13 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				client.sounds.play("buff")
 			if debuffed:
 				client.sounds.play("debuff")
+			if enemy_down:
+				client.sounds.play("enemy_death")
+			if player_down:
+				client.sounds.play("player_down")
 			if critical:
 				client.sounds.play("critical")
-			elif hurt and not spell_skill and not has_status_sound:
+			elif hurt and not spell_skill and not has_status_sound and not enemy_down and not player_down:
 				client.sounds.play("hit")
 			elif missed and not hurt and not has_status_sound:
 				client.sounds.play("miss")
@@ -683,6 +712,8 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 		"match_ended":
 			_combat_finished = true
 			_clear_floating_numbers()
+			# SummaryPanel displays the result itself, so no floating banner.
+			client.clear_banner()
 
 
 func _show_action_hit(client: ClientApp, target: String, text: String, color: Color) -> void:
@@ -755,7 +786,7 @@ func _build_top(view: Dictionary) -> void:
 	_top.add_child(status)
 	var actions := UiKit.hbox(5)
 	actions.size_flags_horizontal = Control.SIZE_SHRINK_END
-	actions.add_child(Icons.with_text("gold", "Gold: %d" % int(view.get("gold", 0)), "body", app.settings.text_scale, UiKit.ACCENT))
+	actions.add_child(Icons.with_text("gold", Tr.t("Gold: %d" % int(view.get("gold", 0))), "body", app.settings.text_scale, UiKit.ACCENT))
 	var clues := Icons.apply_to_button(UiKit.button(Tr.t("Clues: %d [C]" % view.get("clues", []).size()), toggle_clues), "info", app.settings.text_scale)
 	clues.set_meta("focus_id", "clues")
 	clues.set_meta("header_clues", true)
@@ -800,7 +831,7 @@ func _build_party(view: Dictionary) -> void:
 		if class_key == "classless": class_key = "bram"
 		var portrait_path := "res://assets/heroes/%s/portrait.png" % class_key
 		if ResourceLoader.exists(portrait_path): portrait.texture = load(portrait_path)
-		portrait.custom_minimum_size = Vector2(52, 52)
+		portrait.custom_minimum_size = Vector2(64, 64)
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -821,7 +852,10 @@ func _build_party(view: Dictionary) -> void:
 				UiKit.ALLY if human else UiKit.TEXT_DIM))
 		details.add_child(head)
 		var hp_row := UiKit.hbox(8)
-		hp_row.add_child(UiKit.hp_bar(int(character["hp"]), int(character["max_hp"])))
+		var party_bar := UiKit.hp_bar(int(character["hp"]), int(character["max_hp"]))
+		party_bar.custom_minimum_size.y = 18
+		party_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		hp_row.add_child(party_bar)
 		hp_row.add_child(UiKit.number_label("HP %d / %d" % [int(character["hp"]), int(character["max_hp"])], "small"))
 		details.add_child(hp_row)
 		var info := UiKit.hbox(4)
@@ -854,6 +888,10 @@ func _build_party(view: Dictionary) -> void:
 
 
 func _build_panel(view: Dictionary) -> void:
+	# SummaryPanel displays the result itself; discard any banner raised by the
+	# match-ended event before the panel enters the viewport.
+	if str(view.get("phase", "")) in ["victory", "defeat"]:
+		app.clear_banner()
 	if _panel != null:
 		_center.remove_child(_panel)
 		_panel.queue_free()
@@ -879,6 +917,12 @@ func _build_panel(view: Dictionary) -> void:
 				_:
 					_panel = InfoPanel.new()
 	_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Voting owns its own route-list scroll area. Keep the panel itself pinned
+	# to the viewport so the ready/timer row cannot be scrolled away with it.
+	if phase == "voting":
+		_center_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	else:
+		_center_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	_center.add_child(_panel)
 	_panel.build(self, app, view)
 	var key := "%s-%d-%s" % [phase, int(view.get("layer", 0)), str(encounter.get("kind", "")) if encounter != null else ""]
@@ -914,7 +958,17 @@ func _add_log(line: String) -> void:
 	_log_lines.append(Tr.t(line))
 	if _log_lines.size() > 60:
 		_log_lines.pop_front()
-	_log.text = "\n".join(_log_lines)
+	var display_lines: Array[String] = []
+	for entry in _log_lines:
+		var remaining := entry
+		while remaining.length() > 64:
+			var split_at := remaining.rfind(" ", 64)
+			if split_at <= 0:
+				split_at = 64
+			display_lines.append(remaining.substr(0, split_at))
+			remaining = remaining.substr(split_at).strip_edges()
+		display_lines.append(remaining)
+	_log.text = "\n".join(display_lines)
 
 
 func _focused_id() -> String:

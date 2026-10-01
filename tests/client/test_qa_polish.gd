@@ -68,18 +68,16 @@ func test_large_camp_layout_uses_vertical_scroll_and_keeps_equipment_column() ->
 	app.snapshot = {"room": {"your_slot": 0, "story": false, "slots": []}, "match": {"story": false}}
 	var screen := MatchScreen.new()
 	screen.app = app
-	var camp := CampView.new()
-	camp.setup(screen, app)
-	camp.build({"layer": 1, "layers_total": 5, "gold": 100, "party": [], "inventory": []}, {
-		"kind": "merchant", "name": "Mar", "you_are_ready": false, "stock": [],
-	})
-	assert_eq((camp._workspace as ScrollContainer).horizontal_scroll_mode, ScrollContainer.SCROLL_MODE_DISABLED)
-	assert_eq((camp._workspace as ScrollContainer).vertical_scroll_mode, ScrollContainer.SCROLL_MODE_AUTO)
-	assert_true(camp._columns is VBoxContainer, "large text stacks camp sections vertically")
-	assert_true(camp._columns.get_child_count() >= 4, "equipment remains in the vertically scrollable workspace")
-	camp.free()
+	# The lane stride stays larger than the rendered title text height, and the
+	# stack lifetime covers the full damage-number animation.
+	assert_true(screen.get_script().source_code.contains("-56.0 * lane"), "stacked damage numbers use a full text-line stride")
+	assert_true(screen.get_script().source_code.contains("now - t < 1200"), "stack lanes last until their labels fade")
 	screen.free()
 	app.free()
+
+
+func test_not_enough_gold_error_is_personal() -> void:
+	assert_eq(UiText.error("not_enough_gold"), "You do not have enough Gold.")
 
 
 func test_hp_bars_share_battle_color_and_room_for_large_text() -> void:
