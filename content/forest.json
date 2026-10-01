@@ -1288,7 +1288,7 @@
       "description": "The Guardian of the Forest: ancient bark and thorn. Watch for its warnings; its heaviest blows come one turn later.",
       "stats": {
         "max_hp": 1350,
-        "atk": 20,
+        "atk": 18,
         "def": 6,
         "mag": 16,
         "res": 5,

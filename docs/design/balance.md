@@ -30,7 +30,7 @@ godot --headless --path . -s tools/dev/simulate.gd -- --seeds=100 --humans=1,2 -
 | Thornback Boar | HP 120, ATK 13, DEF 5, SPD 7 — 20 EXP, 10 Gold |
 | Bramble Archer | HP 52, ATK 11, SPD 11 (แถวหลัง) — 16 EXP, 12 Gold |
 | Forest Wisp | HP 46, MAG 10, RES 6 (แถวหลัง, heal 18) — 18 EXP, 9 Gold |
-| Guardian Boss | HP 900, ATK 17, MAG 14; 3 phase ที่ 100% / 66% / 33% (+2 ATK/MAG ต่อ phase, +3 SPD ใน phase 2); Crushing Root ×2.3 ATK, Thorn Storm ×1.15 MAG ทั้ง Party |
+| Guardian Boss | HP 1350, ATK 18, MAG 16 (ATK ลดจาก 20 เมื่อ 2026-10-01 เพื่อให้ Duo ชนะ ≥70%); 3 phase ที่ 100% / 66% / 33% (+2 ATK/MAG ต่อ phase, +3 SPD ใน phase 2); Crushing Root ×2.3 ATK, Thorn Storm ×1.15 MAG ทั้ง Party |
 | Class Encounter | Challenge 3 round, ผ่านได้ 12 EXP ทุกคน; AI รับ Class เดียวกันได้ไม่เกิน 2 ตัว |
 | Rest camp (ADR-0011) | material ดรอป 50% ต่อศัตรู 1 ตัว; gear +1–2 stat (Charm/Quiver/Boots/Robe); 1 stat point ต่อ level (+5 Max HP หรือ +1 stat อื่น); แคมป์เปิดสูงสุด 60 วินาที |
 | Rest / ร้านค้า | Rest ฟื้น 70% ของ max HP; Herb 12, Tonic 28, Spirit Bloom 40, Firebomb 24 Gold |
@@ -172,3 +172,14 @@ Final 100-seed runs from seed 1000:
 | Story (`--story`) | 76% | — |
 
 All five measured modes are inside the target. Rejected commands were 0 in every run.
+
+
+## วัดซ้ำ 2026-10-01 (40 seed, `--pace`, หลังลด Boss ATK 20 → 18)
+
+| | Single-player | Duo co-op |
+| --- | --- | --- |
+| Win rate (ก่อน → หลัง) | 73% → 83% | 68% → 73% |
+| แพ้ที่ Boss | 11 → 7 | 13 → 11 |
+| เวลาจำลองเฉลี่ย | 9.3 นาที | 12.5 นาที |
+
+HP บอส (1350) ไม่เปลี่ยน เพื่อรักษาความยาวของบอสตาม #89
