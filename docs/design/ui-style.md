@@ -35,6 +35,8 @@ danger button or `ENEMY`.
 | `CardPanel` / `CompactPanel` | PanelContainer | `NAVY_RAISED`, 1 px dim border | rows and cards inside a panel |
 | `HighlightPanel` / `CompactHighlightPanel` | PanelContainer | `NAVY_FOCUS`, 2 px `GOLD` | the selected / acting / "you" card, tips |
 | `TitleTag` | PanelContainer | `NAVY_RAISED`, 2 px `BORDER` | small floating title box above a column ("Class", "Races") |
+| `OrnamentPanel` | PanelContainer | translucent navy, 2–3 px `GOLD` edge, square corners, margin 12 | featured combat and camp frame |
+| `OrnamentHighlightPanel` | PanelContainer | focused navy, 3 px `GOLD` edge, square corners, margin 12 | current actor or selected featured card |
 | `HudPanel` | PanelContainer | `HUD_BG` (88 %), 2 px `BORDER` | combat HUD, nameplates, timeline, camp columns |
 | `HudHighlightPanel` / `HudWarnPanel` | PanelContainer | `HUD_BG`, 2 px `GOLD` / `WARN` | acting unit, Boss warning |
 | `HudCard` | PanelContainer | `NAVY_RAISED` 92 %, no border | rows inside HUD panels |

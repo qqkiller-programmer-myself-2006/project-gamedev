@@ -349,7 +349,14 @@ func build_corner_menu(host: Control) -> PanelContainer:
 		item.set_meta("focus_id", "menu_" + str(entry[0]))
 		items.add_child(item)
 	var corner := UiKit.hbox(6)
-	corner.position = Vector2(10, 10)
+	if host is BattleView:
+		corner.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		corner.offset_left = -96
+		corner.offset_right = -10
+		corner.offset_top = 82
+		corner.offset_bottom = 122
+	else:
+		corner.position = Vector2(10, 10)
 	var toggle_menu := func() -> void:
 		menu.visible = not menu.visible
 		if menu.visible:

@@ -64,6 +64,7 @@ var badge_height := BADGE_HEIGHT
 var _bob_time := 0.0
 ## 1-based key shown while this token is a valid target, else 0.
 var target_number := 0
+var show_plate := true
 
 var _badges: HBoxContainer
 var _plate: PanelContainer
@@ -83,6 +84,7 @@ func setup(data: Dictionary) -> void:
 	enemy_kind = kind
 	down = int(data.get("hp", 0)) <= 0
 	acting = bool(data.get("acting", false))
+	show_plate = bool(data.get("show_plate", true))
 	flat = true
 	text = ""
 	focus_mode = Control.FOCUS_NONE
@@ -96,7 +98,7 @@ func setup(data: Dictionary) -> void:
 	figure_height = 150.0 if side == "boss" else 110.0
 	if sprite_set != null and sprite_set.is_enemy:
 		figure_height = sprite_set.size_px() * 1.65
-	custom_minimum_size = Vector2(width, badge_height + figure_height + plate_height)
+	custom_minimum_size = Vector2(width, badge_height + figure_height + (plate_height if show_plate else 0.0))
 	size = custom_minimum_size
 	if side == "party":
 		outfit = PARTY_OUTFITS.get(str(data.get("name", "")), PARTY_OUTFITS["Wren"])
@@ -151,7 +153,9 @@ func setup(data: Dictionary) -> void:
 	_plate.position = Vector2(0, badge_height + figure_height + 2)
 	_plate.custom_minimum_size = Vector2(width, 0)
 	_plate.size = Vector2(width, plate_height)
-	add_child(_plate)
+	_plate.visible = show_plate
+	if show_plate:
+		add_child(_plate)
 	tooltip_text = str(data.get("tooltip", ""))
 	modulate = Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
 	_set_animation("dead" if down else "idle")

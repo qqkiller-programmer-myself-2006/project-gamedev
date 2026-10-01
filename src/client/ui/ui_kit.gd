@@ -124,6 +124,17 @@ static func _panels(theme: Theme) -> void:
 	theme.set_stylebox("panel", "CompactHighlightPanel", flat_box(NAVY_FOCUS, GOLD, 2, 5))
 	theme.set_type_variation("TitleTag", "PanelContainer")
 	theme.set_stylebox("panel", "TitleTag", flat_box(NAVY_RAISED, BORDER, 2, 10))
+	# Ornamental gold frames for the redesigned battle and camp focus panels.
+	theme.set_type_variation("OrnamentPanel", "PanelContainer")
+	var ornament := flat_box(HUD_BG, GOLD, 2, 12)
+	ornament.set_corner_radius_all(3)
+	ornament.border_width_left = 3
+	ornament.border_width_right = 3
+	theme.set_stylebox("panel", "OrnamentPanel", ornament)
+	theme.set_type_variation("OrnamentHighlightPanel", "PanelContainer")
+	var ornament_highlight := flat_box(Color(NAVY_FOCUS, 0.96), GOLD, 3, 12)
+	ornament_highlight.set_corner_radius_all(3)
+	theme.set_stylebox("panel", "OrnamentHighlightPanel", ornament_highlight)
 	theme.set_type_variation("ToastPanel", "PanelContainer")
 	theme.set_stylebox("panel", "ToastPanel", flat_box(NAVY, GOLD, 2, 10))
 	theme.set_type_variation("IconPanel", "PanelContainer")

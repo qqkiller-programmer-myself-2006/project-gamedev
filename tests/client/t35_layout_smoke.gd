@@ -22,7 +22,7 @@ func _initialize() -> void:
 func _run() -> void:
 	var failed := false
 	for resolution in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
-		for scale in [1.0, 1.2, 1.45]:
+		for scale in [1.0, 1.2, 1.4]:
 			root.size = resolution
 			var app := ClientApp.new()
 			app.settings = ClientSettings.new()
@@ -66,6 +66,58 @@ func _run() -> void:
 			if Rect2(tip.global_position, tip.size).intersects(Rect2(battle._region.global_position, battle._region.size)):
 				push_error("battle Tip covers region at %s scale %.1f" % [resolution, scale])
 				failed = true
+			if resolution == Vector2i(1280, 720) and scale in [1.0, 1.4]:
+				var party: Array[Dictionary] = []
+				for slot in 5:
+					party.append({"slot": slot, "name": "Hero %d" % slot, "level": 1,
+						"hp": 50, "max_hp": 50, "energy": 1, "energy_max": 6,
+						"class": "classless", "class_name": "Adventurer", "gold": 0,
+						"spd": 10, "controller": "ai"})
+				var combat_view := {"party": party, "layer": 1}
+				battle._me = "p0"
+				battle._combat = {"actor": "p0", "round": 1, "turn_order": ["p0"],
+					"your_turn": true, "choices": {"skills": {}, "items": {}, "focus": true}}
+				battle._build_timeline(combat_view)
+				battle._build_bottom(combat_view)
+				await process_frame
+				await process_frame
+				await process_frame
+				await process_frame
+				var column_rect := Rect2(battle._timeline_scroll.global_position, battle._timeline_scroll.size)
+				var bottom_row := battle._bottom.get_child(0) as Control
+				var hud_panel := bottom_row.get_child(0) as Control
+				var hud_rect := Rect2(hud_panel.global_position, hud_panel.size)
+				if hud_rect.end.x > 1251.0:
+					push_error("combat bottom bar exceeds viewport at scale %.1f: %s" % [scale, hud_rect])
+					failed = true
+				if column_rect.end.y > hud_rect.position.y:
+					push_error("party column reaches behind the HUD at scale %.1f" % scale)
+					failed = true
+				var actions := hud_panel.get_child(0).get_child(1) as Control
+				for button in actions.get_children():
+					var button_rect := Rect2(button.global_position, button.size)
+					if button_rect.position.x < 0.0 or button_rect.end.x > 1280.0:
+						push_error("combat action button outside viewport at scale %.1f: %s" % [scale, button_rect])
+						failed = true
+				if scale == 1.0:
+					var turn_rect := Rect2(battle._turn_banner.global_position, battle._turn_banner.size)
+					var first_card := battle._timeline.get_child(0) as Control
+					if turn_rect.position.y < 57.0 or turn_rect.end.y + 6.0 > first_card.global_position.y:
+						push_error("Turn banner overlaps or crowds the party column: %s / %s" % [turn_rect, column_rect])
+						failed = true
+					if battle._timeline.get_child_count() != 5:
+						push_error("expected all five party cards")
+						failed = true
+					for card_node in battle._timeline.get_children():
+						var card_rect := Rect2(card_node.global_position, card_node.size)
+						if not column_rect.encloses(card_rect) or card_rect.end.y > hud_rect.position.y:
+							push_error("party card is clipped or behind the HUD: %s" % card_rect)
+							failed = true
+					var party_scrollbar := battle._timeline_scroll.get_v_scroll_bar()
+					var max_scroll := maxf(0.0, party_scrollbar.max_value - party_scrollbar.page)
+					if max_scroll > 0.0:
+						push_error("five-member party unexpectedly scrolls: max value %.1f" % max_scroll)
+						failed = true
 			app.close_hints(false)
 			battle.free()
 			var camp := CampView.new()

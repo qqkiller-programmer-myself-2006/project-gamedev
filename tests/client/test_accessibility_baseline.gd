@@ -184,7 +184,7 @@ func _battle(scale := 1.0) -> BattleView:
 	return battle
 
 
-func test_timeline_shows_weakness_as_text() -> void:
+func test_enemy_weakness_stays_available_in_token_tooltip() -> void:
 	var battle := _battle()
 	var view := {
 		"layer": 1, "layers_total": 5, "gold": 0, "story": false,
@@ -206,7 +206,8 @@ func test_timeline_shows_weakness_as_text() -> void:
 		}],
 	}
 	battle.build(view, combat)
-	assert_true(_has_text(battle._timeline, "Weak: fire"), "timeline shows enemy weakness as text")
+	assert_false(_has_text(battle._timeline, "Weak: fire"), "party column contains only party members")
+	assert_true(battle._tokens["e0"].tooltip_text.contains("Weak to: fire"), "enemy weakness remains in tooltip")
 	var screen: MatchScreen = battle._screen
 	var app: ClientApp = battle._app
 	battle.free()

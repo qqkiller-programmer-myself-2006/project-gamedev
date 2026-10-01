@@ -71,7 +71,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_encounter_icon = Icons.rect("merchant", Icons.size_for_scale(_app.settings.text_scale))
 	encounter_row.add_child(_encounter_icon)
 	encounter_row.add_child(_encounter_label)
-	var encounter_box := UiKit.panel(encounter_row, "HudPanel")
+	var encounter_box := UiKit.panel(encounter_row, "OrnamentPanel")
 	encounter_box.name = "EncounterBox"
 	encounter_box.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	encounter_box.position = Vector2(112, 12)
@@ -505,6 +505,24 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	previous.custom_minimum_size = Vector2(36, 36)
 	previous.tooltip_text = "Previous character"
 	switcher.add_child(previous)
+	for member in party:
+		var member_slot := int(member.get("slot", 0))
+		var member_button := Button.new()
+		member_button.flat = true
+		member_button.custom_minimum_size = Vector2(52, 56)
+		member_button.tooltip_text = str(member.get("name", "Character"))
+		member_button.focus_mode = Control.FOCUS_ALL
+		member_button.pressed.connect(func() -> void: _inspect = member_slot; _screen.refresh(_app, true))
+		var portrait := TextureRect.new()
+		portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		portrait.texture = SpriteSet.portrait(str(member.get("class", "classless")))
+		member_button.add_child(portrait)
+		if member_slot == _inspect:
+			member_button.theme_type_variation = "SelectedButton"
+		switcher.add_child(member_button)
 	var who := UiKit.pixel_label(str(character.get("name", "Character")), "heading", UiKit.ACCENT)
 	who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	who.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -514,6 +532,26 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	next.tooltip_text = "Next character"
 	switcher.add_child(next)
 	root.add_child(switcher)
+	var profile := UiKit.hbox(8)
+	var idle_set := SpriteSet.for_class(str(character.get("class", "classless")))
+	if idle_set != null:
+		var frames := idle_set.frames("idle")
+		if not frames.is_empty():
+			var figure := TextureRect.new()
+			figure.custom_minimum_size = Vector2(104, 124)
+			figure.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			figure.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			figure.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			figure.texture = frames[0]
+			profile.add_child(figure)
+	var identity := UiKit.vbox(2)
+	identity.add_child(UiKit.pixel_label("%s · Lv %d" % [str(character.get("class_name", "Adventurer")), int(character.get("level", 1))], "small", UiKit.TEXT_DIM))
+	identity.add_child(_stat("HP", "%d/%d" % [int(character.get("hp", 0)), int(character.get("max_hp", 0))], "hp"))
+	identity.add_child(_stat("ATK", str(int(character.get("atk", 0))), "weapon"))
+	identity.add_child(_stat("DEF", str(int(character.get("def", 0))), "armor"))
+	identity.add_child(_stat("SPD", str(int(character.get("spd", 0))), "dodge"))
+	profile.add_child(identity)
+	root.add_child(UiKit.panel(profile, "OrnamentPanel"))
 	var grid := GridContainer.new()
 	# At Extra-large text the 32 px icons and slot names need two wider cells
 	# per row; the stat sheet below already scrolls, so the extra rows are safe.
