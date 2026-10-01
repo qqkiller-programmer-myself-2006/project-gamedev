@@ -35,6 +35,8 @@ danger button or `ENEMY`.
 | `CardPanel` / `CompactPanel` | PanelContainer | `NAVY_RAISED`, 1 px dim border | rows and cards inside a panel |
 | `HighlightPanel` / `CompactHighlightPanel` | PanelContainer | `NAVY_FOCUS`, 2 px `GOLD` | the selected / acting / "you" card, tips |
 | `TitleTag` | PanelContainer | `NAVY_RAISED`, 2 px `BORDER` | small floating title box above a column ("Class", "Races") |
+| `OrnamentPanel` | PanelContainer | translucent navy, 2–3 px `GOLD` edge, square corners, margin 12 | featured combat and camp frame |
+| `OrnamentHighlightPanel` | PanelContainer | focused navy, 3 px `GOLD` edge, square corners, margin 12 | current actor or selected featured card |
 | `HudPanel` | PanelContainer | `HUD_BG` (88 %), 2 px `BORDER` | combat HUD, nameplates, timeline, camp columns |
 | `HudHighlightPanel` / `HudWarnPanel` | PanelContainer | `HUD_BG`, 2 px `GOLD` / `WARN` | acting unit, Boss warning |
 | `HudCard` | PanelContainer | `NAVY_RAISED` 92 %, no border | rows inside HUD panels |
@@ -63,8 +65,8 @@ before destructive actions.
 ## Spacing and typography
 
 - Screen edge gutter 12–40 px; panel content margin 14; rows inside a panel 6–10 apart; button rows 8–12 apart.
-- Sizes only from `UiKit.SIZES` × the text-size setting: tiny 11, small 15, body 18, heading 23, title 34, huge 52.
-- Pixelify Sans (`PixelXxxLabel`, headings, buttons, names, numbers); the default font for long, wrapping text.
+- Sizes only from `UiKit.SIZES` × the text-size setting: tiny 11, small 14, body 17, heading 21, title 29, huge 38.
+- Use the readable UI font for body copy, digits, headings, buttons and long text. Pixelify Sans is only for short decorative titles or marks; never use it for paragraphs or long button labels.
 - Headings may be `GOLD`; body text is `TEXT`; hints and secondary lines are `TEXT_DIM` (`"dim"` style).
 
 ## UX rules
@@ -84,10 +86,19 @@ before destructive actions.
 8. **Toasts at top centre** on every screen; banners just below the top bar, never over buttons for long.
 9. Nothing overlaps at 1280×720, 1920×1080 and text size 1.4; long lists scroll; rows wrap.
 10. Reduced motion turns off fades, slides and floating motion.
+11. Match headers group region/layer on the left, current status in the centre, and currency/Clues/menu actions on the right. Header groups wrap as the viewport narrows; secondary labels may wrap before controls are clipped.
+12. Battle uses a compact scrollable turn list, a scrollable multi-line log above the footer, and a bottom action band that stays inside the viewport. Keep Party tokens on the left and enemies on the right; mark the active actor and valid targets with a gold border plus text.
 
 ## Icons
 
 The authored 16×16 pixel icons in `assets/icons/` use the Navy + Gold tokens and bar colours, with a dark outline and top-left light. Render them with nearest-neighbour filtering through `Icons.rect()` or pair them with text using `Icons.with_text()`; keep their meaning available in text or a tooltip. See [`icons.md`](icons.md) for the set and regeneration command.
+
+## Skill FX
+
+Battle skill effects are transparent, limited-palette pixel art with dark outlines and nearest-neighbour sampling. Their
+frame counts, canvas sizes, anchors and tiers are defined in `assets/fx/manifest.json`; ultimate-tier skills use a brief
+screen-flash accent. Reduced motion skips skill effects entirely. Regenerate strips with `python tools/art/make_skill_fx.py`,
+then validate/re-slice them with `python tools/art/slice_skill_fx.py`; review `assets/fx/_contact.png` against the navy field.
 
 ## Checking a UI change
 

@@ -1,30 +1,23 @@
-# Final build checklist (#54) — 2026-10-01
+# Final build checklist (#54, due 2026-10-02)
 
-Base: `main` c0bf6ee. Supported browser: Chromium only (owner decision, #45).
+Legend: [C] Claude can run / verify, [H] needs the owner.
 
-## Verified by Claude (evidence in repo/CI)
-- [x] Headless suite 447 passed, 0 failed (run locally on `main`; CI "Headless GDScript tests" green on PR #114).
-- [x] CI "Export PC, browser and server builds + cross-platform smoke test" green (Chromium 1280x720, PC <-> browser, both host directions).
-- [x] Layout at 1280x720, text 1.0 / 1.4, and 1920x1080 for Battle, Merchant, Rest (#45); Camp Tip clip fixed in PR #114.
-- [x] Keyboard focus + reduced motion covered by `tests/client/test_accessibility_baseline.gd` and `test_battle_smoothness.gd` (#44).
-- [x] Art: Elder Thornwarden, Thornback Boar, Old Swordsman, Veteran Hunter, Shrine Spirit, Bram (Classless) in game (#75, #85).
-- [x] Boss fight shown in a real preview (Cave backdrop, Elder Thornwarden, phase banner) — `ui_preview` 06_boss_turn / 07_boss_warning.
+## Before building
+- [C] `git status` clean, main CI green, `bash tools/run_tests.sh` all pass (447 at 2026-10-01).
+- [C] `simulate.gd --seeds=40 --humans=1,2 --pace` win rate 70–92%, no softlock.
+- [C] UI screenshots at 1280×720 and 1920×1080, ×1.0 and ×1.4 (`tools/dev/ui_preview.gd`); see `2026-10-01-responsive-verification.md`.
+- [H] #39 sign-off on motion level and 1.4× stat-sheet scrolling.
+- [H] #55 Worker + D1 deployed (`wrangler login`, see `docs/guides/running.md`); the client's profile URL points at it.
+- [H] Decision on #85 (Classless / boss art) — currently placeholder blocks.
 
-## Open visual issues seen at 1920x1080 + text 1.4 (not fixed; decide before final build)
-1. Path Vote (`03_vote`): right column text and the vote/ready rows run off the bottom edge, Tip text cut mid-sentence.
-2. Summary (`90_summary_defeat`): the "Defeat" banner still overlaps the "DEFEAT" title (QA item U26).
-3. Camp Equipment panel at 1.4: last line (HP / Invest Points) cut off.
-4. Combat at 1.4: turn list is small and its text is hard to read; target caption sits on the back row.
-Repro: `"$GODOT" --path . -s tools/dev/ui_preview.gd -- --out=build/q --seed=11 --scale=1.4 --resolution=1920x1080 --class=rogue`
+## Build
+- [C] Run the `builds` workflow; download `web-build`, `windows-build`, `linux-server`.
+- [C] `tools/ci/web_smoke.mjs` green on the artifacts.
 
-## Needs the owner (an AI cannot do these)
-- [ ] #55 / #19 deploy Cloudflare Worker + D1 and staging (credentials) — follow `docs/running.md`.
-- [ ] #39 team sign-off on motion level and 1.45x text scrolling.
-- [ ] Play one full Story run and one Multiplayer run by hand (animation feel after #88 cannot be judged from still images).
-- [ ] Decide on open visual issues 1-4 above (fix now or ship).
-- [ ] Final sign-off on #54, then close #47, #40, #2.
+## Smoke on the real build
+- [H] PC `.exe`: Single-player Story and a Duo room through to Guardian Boss.
+- [H] Browser: same, plus a mixed PC + browser room (checklist in `docs/guides/staging.md`).
+- [H] Stopwatch one full Match (target 20–30 min) and note it in #19.
 
-## Build / release steps
-- [ ] `bash tools/run_tests.sh` with no other Godot running -> 0 failed.
-- [ ] Export Web + Windows, confirm both `manifest.json` files ship and `deploy/` does not.
-- [ ] Merge to `main`, confirm CI green, tag the build.
+## Release
+- [H] Staging deployment (#19), then tag and publish.

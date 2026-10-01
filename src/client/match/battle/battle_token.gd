@@ -64,6 +64,7 @@ var badge_height := BADGE_HEIGHT
 var _bob_time := 0.0
 ## 1-based key shown while this token is a valid target, else 0.
 var target_number := 0
+var show_plate := true
 var _target_callback := Callable()
 
 var _badges: HBoxContainer
@@ -88,6 +89,7 @@ func setup(data: Dictionary) -> void:
 	enemy_kind = kind
 	down = int(data.get("hp", 0)) <= 0
 	acting = bool(data.get("acting", false))
+	show_plate = bool(data.get("show_plate", true))
 	flat = true
 	text = ""
 	focus_mode = Control.FOCUS_NONE
@@ -101,7 +103,7 @@ func setup(data: Dictionary) -> void:
 	figure_height = 150.0 if side == "boss" else 110.0
 	if sprite_set != null and sprite_set.is_enemy:
 		figure_height = sprite_set.size_px() * 1.65
-	custom_minimum_size = Vector2(width, badge_height + figure_height + plate_height)
+	custom_minimum_size = Vector2(width, badge_height + figure_height + (plate_height if show_plate else 0.0))
 	size = custom_minimum_size
 	if side == "party":
 		outfit = PARTY_OUTFITS.get(str(data.get("name", "")), PARTY_OUTFITS["Wren"])
@@ -132,7 +134,7 @@ func setup(data: Dictionary) -> void:
 		who += " (AI)"
 	var name_color := tint if side == "party" else (UiKit.ACCENT if bool(data.get("you", false)) else UiKit.TEXT)
 	var name_label := UiKit.pixel_label(who, "small", name_color)
-	name_label.add_theme_font_size_override("font_size", int(10 * (0.9 if side == "boss" else 1.0) * text_factor))
+	name_label.add_theme_font_size_override("font_size", int(12 * (0.95 if side == "boss" else 1.0) * text_factor))
 	name_label.clip_text = false
 	plate_box.add_child(name_label)
 	var bars := UiKit.hbox(0)
@@ -169,7 +171,9 @@ func setup(data: Dictionary) -> void:
 	_plate.position = Vector2(0, badge_height + figure_height + 2)
 	_plate.custom_minimum_size = Vector2(width, 0)
 	_plate.size = Vector2(width, plate_height)
-	add_child(_plate)
+	_plate.visible = show_plate
+	if show_plate:
+		add_child(_plate)
 	tooltip_text = str(data.get("tooltip", ""))
 	modulate = Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
 	_set_animation("dead" if down else "idle")

@@ -54,7 +54,7 @@ func test_story_path_choice_hides_vote_status_and_multiplayer_keeps_it() -> void
 	assert_false(_has_text(story, "Ready "), "Story hides multiplayer vote status")
 	assert_false(_has_text(story, "Votes:"), "Story hides vote tallies")
 	assert_false(_has_text(story, "Vote for this path"), "Story uses choice labels")
-	assert_true(_has_text(story, "Choose this path"), "Story uses choice labels")
+	assert_true(_has_text(story, "Choose path"), "Story uses choice labels")
 	app.snapshot["match"]["story"] = false
 	var multi := VotePanel.new()
 	multi.build(screen, app, _vote_view(false))
@@ -88,6 +88,9 @@ func test_large_text_path_vote_keeps_status_and_timer_outside_scroll_area() -> v
 	assert_true(_has_text(panel, "Vote closes in"), "the vote timer stays in the footer")
 	assert_true(panel.get_child(2) is ScrollContainer, "only the route choices scroll")
 	assert_true(_has_text(panel, "Recommended"), "first server-ordered route is recommended")
+	var featured: Control = panel.get_child(2).get_child(0).get_child(0)
+	assert_eq(featured.theme_type_variation, "HighlightPanel", "recommended card is highlighted before voting")
+	assert_true(_has_text(featured, "Vote for this path [1]"), "featured action stays short enough to fit at large text scale")
 	panel.free()
 	screen.free()
 	app.free()
@@ -212,7 +215,7 @@ func test_story_panel_stays_hidden_after_forced_refresh() -> void:
 	var screen := MatchScreen.new()
 	app.add_child(screen)
 	screen.app = app
-	screen._top = UiKit.flow(4)
+	screen._top = UiKit.hbox(4)
 	screen._party = UiKit.vbox(4)
 	screen._center_scroll = ScrollContainer.new()
 	screen._center = MarginContainer.new()
