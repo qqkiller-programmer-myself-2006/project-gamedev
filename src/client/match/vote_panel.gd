@@ -16,18 +16,16 @@ const TYPE_ICONS := {
 
 
 func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
-	add_theme_constant_override("separation", 5)
+	add_theme_constant_override("separation", 8)
+	size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var vote: Dictionary = view["vote"]
 	_options = vote["options"]
 	_deadline = vote["deadline"]
 	var me := screen.your_slot()
 	_voted = vote["voted_slots"].has(me)
 	var solo := ClientApp.is_story_view(view)
-	add_child(UiKit.para(Tr.t("Choose your path") if solo else Tr.t("Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])]), "heading"))
-	var description := UiKit.para(Tr.t("Choose one path.") if solo else Tr.t("Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random."), "tiny")
-	description.max_lines_visible = 2
-	description.clip_text = true
-	add_child(description)
+	add_child(UiKit.para("Choose your path" if solo else "Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])], "heading"))
+	add_child(UiKit.para("Choose one path." if solo else "Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random.", "dim"))
 	var option_scroll := ScrollContainer.new()
 	option_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	option_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -37,7 +35,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	option_scroll.add_child(option_stack)
 	add_child(option_scroll)
 	if _options.is_empty():
-		option_stack.add_child(UiKit.para(Tr.t("No routes available."), "dim"))
+		option_stack.add_child(UiKit.para("No routes available.", "dim"))
 	else:
 		# First server-ordered route is featured with full detail; the rest
 		# stay in server order as compact alternatives. Keys 1-3 still follow
@@ -59,7 +57,6 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	timer_row.add_child(_bar)
 	if not view.get("story", false):
 		add_child(timer_row)
-		add_child(UiKit.para(_voter_status(screen, view, vote), "tiny"))
 	tick(screen, app)
 	if not solo:
 		app.hint("vote")
@@ -70,7 +67,7 @@ func tick(screen: MatchScreen, app: ClientApp) -> void:
 		return
 	var left := app.seconds_left(_deadline)
 	_bar.value = left
-	_countdown.text = Tr.t("Vote closes in %ds%s" % [ceili(left), "  - hurry!" if left <= 5.0 else ""])
+	_countdown.text = "Vote closes in %ds%s" % [ceili(left), "  - hurry!" if left <= 5.0 else ""]
 	if not _voted:
 		screen.warn_if_short(_deadline, left)
 
@@ -89,9 +86,8 @@ func _featured_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> 
 	var solo := ClientApp.is_story_view(screen.match_view())
 	var mine: bool = screen.get_meta("my_vote_%d" % int(screen.match_view()["layer"]), -1) == index
 	box.add_child(_vote_button(screen, app, option, mine, solo, "primary"))
-	var card := UiKit.panel(box, "HighlightPanel" if mine else "CardPanel")
+	var card := UiKit.panel(box, "HighlightPanel")
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(250, 156)
 	return card
 
 
@@ -99,12 +95,12 @@ func _compact_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> C
 	var box := UiKit.hbox(8)
 	box.add_child(Icons.rect(str(TYPE_ICONS.get(str(option["type"]), "info")), Icons.size_for_scale(app.settings.text_scale)))
 	box.add_child(UiKit.badge(UiText.type_tag(option["type"]), UiKit.ACCENT))
-	var detail := Tr.t("Other path: %s" % Tr.t(str(option["name"])))
+	var detail := "Other path: %s" % str(option["name"])
 	if not ClientApp.is_story_view(screen.match_view()):
 		var voters: Array = option.get("voters", [])
 		var voter_names: Array[String] = []
 		for slot in voters: voter_names.append(_voter_name(screen, int(slot)))
-		detail += Tr.t("  Votes: %d%s" % [voters.size(), " (%s)" % ", ".join(voter_names) if not voter_names.is_empty() else ""])
+		detail += "  Votes: %d%s" % [voters.size(), " (%s)" % ", ".join(voter_names) if not voter_names.is_empty() else ""]
 	var title := UiKit.label(detail, "body")
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.tooltip_text = str(option.get("hint", ""))
@@ -126,33 +122,27 @@ func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full:
 	head.add_child(UiKit.badge(UiText.type_tag(option["type"]), UiKit.ACCENT))
 	head.add_child(UiKit.label(UiText.type_label(option["type"]), "dim"))
 	if full:
-		head.add_child(UiKit.badge(Tr.t("Recommended"), UiKit.ACCENT))
+		head.add_child(UiKit.badge("Recommended", UiKit.ACCENT))
 	box.add_child(head)
-	var option_name := UiKit.para(Tr.t(str(option["name"])), "heading")
-	option_name.max_lines_visible = 2
-	option_name.clip_text = true
-	box.add_child(option_name)
-	var hint_text := Tr.t(str(option.get("hint", "")))
+	var name := UiKit.pixel_label(str(option["name"]), "heading")
+	box.add_child(name)
 	if full:
-		var hint := UiKit.para(hint_text, "small")
-		hint.max_lines_visible = 2
-		hint.clip_text = true
-		box.add_child(hint)
-		var type_help := UiKit.para(Tr.t(str(UiText.TYPE_HELP.get(option["type"], ""))), "tiny")
-		type_help.max_lines_visible = 1
-		type_help.clip_text = true
-		box.add_child(type_help)
-	elif not hint_text.is_empty():
-		var alternative_hint := UiKit.para(hint_text, "dim")
-		alternative_hint.max_lines_visible = 1
-		alternative_hint.clip_text = true
-		box.add_child(alternative_hint)
-	box.add_child(UiKit.spacer())
+		box.add_child(_art_strip(screen, app))
+	var hint_text := str(option.get("hint", ""))
+	if full:
+		box.add_child(UiKit.para(hint_text))
+		var rewards := UiKit.flow(5)
+		for reward in [["exp", "EXP"], ["gold", "Gold"], ["items", "Items"]]:
+			var chip := UiKit.hbox(3)
+			chip.add_child(Icons.rect(str(reward[0]), Icons.size_for_scale(app.settings.text_scale)))
+			chip.add_child(UiKit.label(str(reward[1]), "small"))
+			rewards.add_child(UiKit.panel(chip, "CompactPanel"))
+		box.add_child(rewards)
 	var solo := ClientApp.is_story_view(screen.match_view())
 	if not solo:
 		var voters: Array = option.get("voters", [])
 		var tally := UiKit.flow(4)
-		tally.add_child(UiKit.label(Tr.t("Votes: %d" % voters.size()), "heading" if not voters.is_empty() else "dim"))
+		tally.add_child(UiKit.label("Votes: %d" % voters.size(), "heading" if not voters.is_empty() else "dim"))
 		for slot in voters:
 			tally.add_child(UiKit.badge(_voter_name(screen, int(slot)), UiKit.ALLY))
 		box.add_child(tally)
@@ -161,8 +151,8 @@ func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full:
 
 func _vote_button(screen: MatchScreen, app: ClientApp, option: Dictionary, mine: bool, solo: bool, kind: String) -> Button:
 	var index := int(option["index"])
-	var text := Tr.t(("Chosen" if mine else "[%d] Choose this path" % (index + 1))) if solo \
-		else Tr.t("Your vote" if mine else "[%d] Vote for this path" % (index + 1))
+	var text := ("Chosen" if mine else "Choose path [%d]" % (index + 1)) if solo \
+		else ("Your vote" if mine else "Vote for this path [%d]" % (index + 1))
 	var button := UiKit.button(text, func() -> void: _vote(screen, app, index), false, "selected" if mine else kind)
 	UiKit.disable(button, _voted, UiText.WHY["voted"])
 	button.set_meta("focus_id", "vote_%d" % index)
@@ -179,7 +169,7 @@ func _art_strip(screen: MatchScreen, app: ClientApp) -> Control:
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	art.tooltip_text = Tr.t("Recommended route")
+	art.tooltip_text = "Recommended route"
 	return art
 
 
@@ -192,7 +182,7 @@ func _ready_status(screen: MatchScreen, view: Dictionary, vote: Dictionary) -> C
 	var row := UiKit.hbox(8)
 	row.custom_minimum_size = Vector2(150, 0)
 	row.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	row.add_child(UiKit.label(Tr.t("%d of %d ready" % [mini(ready, human_count), human_count]), "heading"))
+	row.add_child(UiKit.label("%d of %d ready" % [mini(ready, human_count), human_count], "heading"))
 	var segments := UiKit.hbox(3)
 	for i in range(human_count):
 		var segment := ColorRect.new()
@@ -228,7 +218,7 @@ static func _voter_status(screen: MatchScreen, view: Dictionary, vote: Dictionar
 		var who := str(slots[slot]["owner_name"]) if slot < slots.size() else str(character["name"])
 		(voted if vote["voted_slots"].has(slot) else waiting).append(who)
 	var total := voted.size() + waiting.size()
-	var text := Tr.t("Ready %d of %d." % [voted.size(), total])
+	var text := "Ready %d of %d." % [voted.size(), total]
 	if not waiting.is_empty():
-		text += Tr.t(" Waiting: %s." % ", ".join(waiting))
+		text += " Waiting: %s." % ", ".join(waiting)
 	return text

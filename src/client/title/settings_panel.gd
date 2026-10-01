@@ -5,6 +5,7 @@ extends Control
 
 var _app: ClientApp
 var _volume_label: Label
+var _music_volume_label: Label
 
 
 func setup(app: ClientApp) -> void:
@@ -69,6 +70,23 @@ func setup(app: ClientApp) -> void:
 	volume_row.add_child(slider)
 	volume_row.add_child(_volume_label)
 	box.add_child(volume_row)
+	box.add_child(UiKit.label("Music volume", "heading"))
+	var music_volume_row := UiKit.hbox(10)
+	var music_slider := HSlider.new()
+	music_slider.min_value = 0
+	music_slider.max_value = 100
+	music_slider.step = 5
+	music_slider.value = round(app.settings.music_volume * 100.0)
+	music_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	music_slider.focus_mode = Control.FOCUS_ALL
+	_music_volume_label = UiKit.label("%d%%" % int(music_slider.value))
+	music_slider.value_changed.connect(func(value: float) -> void:
+		app.settings.music_volume = value / 100.0
+		_music_volume_label.text = "%d%%" % int(value)
+		_save_and_apply())
+	music_volume_row.add_child(music_slider)
+	music_volume_row.add_child(_music_volume_label)
+	box.add_child(music_volume_row)
 	box.add_child(UiKit.label("Every sound cue also appears on screen as a banner or log line.", "dim"))
 
 	var close := UiKit.primary("Close [Esc]", queue_free)

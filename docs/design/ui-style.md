@@ -1,79 +1,106 @@
-# คู่มือรูปแบบส่วนติดต่อ: กรมท่า + ทอง (issue #60)
+# UI style guide: Navy + Gold (issue #60)
 
-ทุกหน้าจอใช้ธีมเดียว เจ้าของงานเลือก **กรมท่า + ทอง** (2026-09-29) ธีมกำหนดไว้แห่งเดียวที่ `src/client/ui/ui_kit.gd` (โทเค็น `UiKit` และ `UiKit.make_theme()`) หน้าจอเลือก **type variation** ที่เหมาะสม ไม่สร้าง StyleBox เองหรือเขียนค่าสี hex ภาพตัวละครในฉากต่อสู้ (`battle_token.gd`), `battle_backdrop.gd` และ `home_backdrop.gd` เป็นภาพฉาก ไม่ใช่องค์ประกอบ UI จึงคงสีของภาพไว้
+One theme on every screen. The owner picked **Navy + Gold** (2026-09-29). The theme lives in one place,
+`src/client/ui/ui_kit.gd` (`UiKit` tokens + `UiKit.make_theme()`). Screens pick a **type variation**; they never build
+their own StyleBoxes and never write hex colours. Art inside the battle figures (`battle_token.gd` drawings),
+`battle_backdrop.gd` and `home_backdrop.gd` is scenery, not UI, and keeps its own colours.
 
-## โทเค็น
+## Tokens
 
-| โทเค็น (`UiKit.`) | ค่า | ใช้ |
+| Token (`UiKit.`) | Value | Use |
 | --- | --- | --- |
-| `BG` | `#11162a` | พื้นหลังแอปหลังทุกหน้าจอและการ์ดบท |
-| `NAVY` (`PANEL`) | `#1c2233` | พื้นหลังแผงและการ์ดทุกแห่ง |
-| `NAVY_RAISED` (`PANEL_LIGHT`) | `#2a3147` | แถว ป้ายชื่อ ช่องป้อน และการ์ดภายในแผง |
-| `NAVY_FOCUS` (`PANEL_FOCUS`) | `#333c57` | แผงที่เลือกหรือเน้น พร้อมขอบทอง |
-| `BORDER` | `#b3b4c0` | ขอบแผง 2 px และลายข้าวหลามตัดที่มุม |
-| `SLATE` / `SLATE_HOVER` | `#454b5e` / `#58607a` | ปุ่มรอง |
-| `GOLD` (`ACCENT`) | `#f0c85a` | การกระทำหลัก วงแหวนโฟกัส สีเน้นหัวข้อ และสถานะที่เลือก |
-| `TEXT` / `TEXT_DIM` | `#f2f2f5` / `#a9abb8` | ข้อความหลักและข้อความรอง |
-| `SUCCESS` (`GOOD`) / `WARN` / `DANGER` | `#83df76` / `#f0a040` / `#e05a4f` | สถานะดี คำเตือน (DEV, จ่ายไม่ไหว) และการกระทำที่ต้องระวัง (Leave) |
-| `ALLY` / `ENEMY` | `#8fd0f0` / `#f8aca0` | ชื่อผู้เล่นและศัตรู โดยต้องมีคำหรือป้ายกำกับประกอบเสมอ |
-| `DISABLED_BG` / `DISABLED_TEXT` | `#1f2536` / `#8a8fa3` | ส่วนควบคุมที่ปิดใช้งาน (อัตราส่วนความต่าง ≥ 3:1) |
-| `BAR_HP` / `BAR_ENERGY` / `BAR_BACK` | คงเดิม | แถบพลังชีวิตสีแดงและพลังงานสีน้ำเงิน |
-| `HUD_BG` | `NAVY` ที่ความทึบ 88% | แผงซ้อนในหน้าต่อสู้และค่ายที่อ่านได้บนฉาก |
+| `BG` | `#11162a` | app background behind every screen, chapter card |
+| `NAVY` (`PANEL`) | `#1c2233` | every panel / card background |
+| `NAVY_RAISED` (`PANEL_LIGHT`) | `#2a3147` | rows, title tags, inputs and cards inside panels |
+| `NAVY_FOCUS` (`PANEL_FOCUS`) | `#333c57` | selected / highlighted panel (with a gold border) |
+| `BORDER` | `#b3b4c0` | 2 px panel border and the corner diamonds |
+| `SLATE` / `SLATE_HOVER` | `#454b5e` / `#58607a` | secondary buttons |
+| `GOLD` (`ACCENT`) | `#f0c85a` | primary action, focus ring, heading accent, selected state |
+| `TEXT` / `TEXT_DIM` | `#f2f2f5` / `#a9abb8` | body / secondary text |
+| `SUCCESS` (`GOOD`) / `WARN` / `DANGER` | `#83df76` / `#f0a040` / `#e05a4f` | positive, caution (DEV, unaffordable), destructive (Leave) |
+| `ALLY` / `ENEMY` | `#8fd0f0` / `#f8aca0` | text naming players / enemies (always with a word or tag too) |
+| `DISABLED_BG` / `DISABLED_TEXT` | `#1f2536` / `#8a8fa3` | disabled controls (≥ 3:1) |
+| `BAR_HP` / `BAR_ENERGY` / `BAR_BACK` | unchanged | HP (red) and Energy (blue) bars |
+| `HUD_BG` | `NAVY` at 88 % alpha | combat and camp overlays, readable over the field |
 
-สีข้อความทุกสีมีอัตราส่วนความต่างอย่างน้อย 4.5:1 ตาม WCAG AA บน `BG`, `NAVY`, `NAVY_RAISED` และ `NAVY_FOCUS` (`tests/client/test_ui_contrast.gd`) สี `DANGER` ใช้เป็นพื้นหรือขอบเท่านั้น ข้อความบนปุ่มอันตรายใช้ `TEXT` หรือ `ENEMY`
+Every text colour reaches WCAG AA 4.5:1 on `BG`, `NAVY`, `NAVY_RAISED` and `NAVY_FOCUS`
+(`tests/client/test_ui_contrast.gd`). `DANGER` is a fill/border colour only; destructive *text* uses `TEXT` on the
+danger button or `ENEMY`.
 
-## รูปแบบย่อยของส่วนควบคุม
+## Type variations
 
-| รูปแบบ | ชนิดพื้นฐาน | ลักษณะ | การใช้ |
+| Variation | Base | Look | Use |
 | --- | --- | --- | --- |
-| *(ค่าเริ่มต้น)* / `NavyPanel` | PanelContainer | `NAVY`, ขอบ `BORDER` 2 px, มุมเหลี่ยม, ลายข้าวหลามตัด, ระยะขอบ 14 | แผงทุกหน้าจอ กล่องยืนยัน และกล่องบทสนทนา |
-| `CardPanel` / `CompactPanel` | PanelContainer | `NAVY_RAISED`, ขอบสีหม่น 1 px | แถวและการ์ดในแผง |
-| `HighlightPanel` / `CompactHighlightPanel` | PanelContainer | `NAVY_FOCUS`, ขอบ `GOLD` 2 px | การ์ดที่เลือก ตัวละครที่กำลังเล่น การ์ด “คุณ” และคำแนะนำ |
-| `TitleTag` | PanelContainer | `NAVY_RAISED`, ขอบ `BORDER` 2 px | ป้ายชื่อลอยเหนือคอลัมน์ เช่น "Class", "Races" |
-| `HudPanel` | PanelContainer | `HUD_BG` 88%, ขอบ `BORDER` 2 px | HUD ต่อสู้ ป้ายชื่อ ลำดับเทิร์น และคอลัมน์ค่าย |
-| `HudHighlightPanel` / `HudWarnPanel` | PanelContainer | `HUD_BG`, ขอบ `GOLD` / `WARN` 2 px | หน่วยที่กำลังเล่นและคำเตือนบอส |
-| `HudCard` | PanelContainer | `NAVY_RAISED` 92%, ไม่มีขอบ | แถวภายในแผง HUD |
-| `BannerPanel` | PanelContainer | `NAVY` 94%, เส้นทองด้านบนและล่าง | แถบแจ้งการกระทำในศึก |
-| `ToastPanel` | PanelContainer | `NAVY`, ขอบ `GOLD` 2 px | ข้อความแจ้งเตือนที่กึ่งกลางด้านบนเสมอ |
-| `BadgePanel` | PanelContainer | พื้นเข้ม ขอบสีหม่น 1 px | ป้าย YOU, AI, HOST |
-| *(ค่าเริ่มต้น)* / `SecondaryButton` | Button | `SLATE`, ขอบ `BORDER`, ชี้แล้วใช้ `SLATE_HOVER` | การกระทำทั่วไป |
-| `PrimaryButton` | Button | พื้น `GOLD`, ข้อความ `NAVY` | การกระทำหลักเพียงอย่างเดียวของแผง |
-| `DangerButton` | Button | พื้นแดงเข้ม ขอบ `DANGER` | Leave และ Reset Skills ซึ่งต้องยืนยันเสมอ |
-| `BigButton` / `BigPrimaryButton` / `BigDangerButton` | ข้างต้น | ข้อความขนาดหัวเรื่อง | ปุ่มขนาดเมนู |
-| `SmallButton` | Button | ข้อความเล็ก ระยะขอบในแคบ | แถวหนาแน่น (ค่าย เมนูต่อสู้) |
-| `SelectedButton` | Button | `NAVY_FOCUS`, 2 พิกเซล `GOLD` | ตัวเลือกปัจจุบันในชุด (ขนาดข้อความ แท็บ จุดในผังทักษะ) |
-| `TabButton` / `TabButtonSelected` | Button | เหรียญสีกรมท่าทรงกลม ขอบทองเมื่อเลือก | แท็บการตั้งค่าตัวละคร |
-| `HudButton` | Button | `NAVY_RAISED` 92% ขอบบาง | แถวคำสั่งและการ์ดในศึก |
+| *(default)* / `NavyPanel` | PanelContainer | `NAVY`, 2 px `BORDER`, square corners, corner diamonds, margin 14 | every screen panel, dialogs, the dialogue box |
+| `CardPanel` / `CompactPanel` | PanelContainer | `NAVY_RAISED`, 1 px dim border | rows and cards inside a panel |
+| `HighlightPanel` / `CompactHighlightPanel` | PanelContainer | `NAVY_FOCUS`, 2 px `GOLD` | the selected / acting / "you" card, tips |
+| `TitleTag` | PanelContainer | `NAVY_RAISED`, 2 px `BORDER` | small floating title box above a column ("Class", "Races") |
+| `OrnamentPanel` | PanelContainer | translucent navy, 2–3 px `GOLD` edge, square corners, margin 12 | featured combat and camp frame |
+| `OrnamentHighlightPanel` | PanelContainer | focused navy, 3 px `GOLD` edge, square corners, margin 12 | current actor or selected featured card |
+| `HudPanel` | PanelContainer | `HUD_BG` (88 %), 2 px `BORDER` | combat HUD, nameplates, timeline, camp columns |
+| `HudHighlightPanel` / `HudWarnPanel` | PanelContainer | `HUD_BG`, 2 px `GOLD` / `WARN` | acting unit, Boss warning |
+| `HudCard` | PanelContainer | `NAVY_RAISED` 92 %, no border | rows inside HUD panels |
+| `BannerPanel` | PanelContainer | `NAVY` 94 %, gold top and bottom rule | action band in battle |
+| `ToastPanel` | PanelContainer | `NAVY`, 2 px `GOLD` | toasts (always top centre) |
+| `BadgePanel` | PanelContainer | dark fill, 1 px dim border | tags such as YOU, AI, HOST |
+| *(default)* / `SecondaryButton` | Button | `SLATE`, `BORDER` edge, hover `SLATE_HOVER` | every ordinary action |
+| `PrimaryButton` | Button | `GOLD` fill, `NAVY` text | the one main action of a panel |
+| `DangerButton` | Button | dark red fill, `DANGER` edge | Leave, Reset Skills (always confirmed) |
+| `BigButton` / `BigPrimaryButton` / `BigDangerButton` | the above | heading-size text | menu-sized buttons |
+| `SmallButton` | Button | small text, tight padding | dense rows (camp, battle menu) |
+| `SelectedButton` | Button | `NAVY_FOCUS`, 2 px `GOLD` | the current choice in a set (text size, tab, tree node) |
+| `TabButton` / `TabButtonSelected` | Button | round navy medallion; gold edge when selected | Character setup tabs |
+| `HudButton` | Button | `NAVY_RAISED` 92 %, thin border | battle action row and cards |
 
-ปุ่มทุกปุ่มมีรูปแบบ `focus` เป็น **วงแหวนทองหนา 2 px ที่อยู่นอกขอบปุ่ม 3 px** จึงมองเห็นบนพื้นทอง เทา และกรมท่า `LineEdit`, `OptionButton`, `CheckButton`, `HSlider`, แถบเลื่อน, `HSeparator` และคำแนะนำเมื่อชี้ใช้ธีมเดียวกัน: ช่องป้อน `NAVY_RAISED`, ขอบโฟกัสและเคอร์เซอร์สีทอง, ตัวจับแถบเลื่อนสีเทา และคำแนะนำเมื่อชี้พื้น `NAVY` ขอบทอง
+Every button's `focus` style is a 2 px **gold ring drawn 3 px outside** the button, so it shows on gold, slate and navy
+alike. `LineEdit`, `OptionButton`, `CheckButton`, `HSlider`, scrollbars, `HSeparator` and tooltips are styled in the
+same theme (`NAVY_RAISED` inputs, gold focus edge and caret, slate scrollbar grabbers, `NAVY` tooltip with a gold
+edge).
 
-ตัวช่วย: `UiKit.button(text, callback, big, kind)` รับ `kind` เป็น `"secondary"` (ค่าเริ่มต้น), `"primary"`, `"danger"` หรือ `"small"`; `UiKit.disable(button, reason)` ปิดส่วนควบคุมพร้อมบอกเหตุผลในคำแนะนำเมื่อชี้; `UiKit.navy_box()` ให้ StyleBox สีกรมท่าสำหรับส่วนควบคุมที่วาดเอง เช่น กล่องบทสนทนา; `ConfirmDialog` ขอคำยืนยันก่อนการกระทำที่ย้อนคืนยาก
+Helpers: `UiKit.button(text, callback, big, kind)` with `kind` = `"secondary"` (default), `"primary"`, `"danger"`,
+`"small"`; `UiKit.disable(button, reason)` disables a control and explains why in its tooltip;
+`UiKit.navy_box()` is the navy StyleBox (for custom-drawn controls such as the dialogue box); `ConfirmDialog` asks
+before destructive actions.
 
-## ระยะห่างและตัวอักษร
+## Spacing and typography
 
-- ระยะจากขอบหน้าจอ 12–40 px; ขอบเนื้อหาแผง 14; แถวภายในแผงห่างกัน 6–10; แถวปุ่มห่างกัน 8–12
-- ใช้ขนาดจาก `UiKit.SIZES` คูณการตั้งค่าขนาดข้อความเท่านั้น: จิ๋ว 11, เล็ก 15, เนื้อหา 18, หัวข้อ 23, ชื่อเรื่อง 34, ใหญ่พิเศษ 52
-- Pixelify Sans (`PixelXxxLabel`, ส่วนหัว, ปุ่ม, ชื่อ, ตัวเลข); ใช้แบบอักษรเริ่มต้นกับข้อความยาวที่ต้องตัดบรรทัด
-- ส่วนหัวอาจเป็น `GOLD`; ข้อความเนื้อหาคือ `TEXT`; คำแนะนำและบรรทัดรองคือ `TEXT_DIM` (ลักษณะ `"dim"`)
+- Screen edge gutter 12–40 px; panel content margin 14; rows inside a panel 6–10 apart; button rows 8–12 apart.
+- Sizes only from `UiKit.SIZES` × the text-size setting: tiny 11, small 14, body 17, heading 21, title 29, huge 38.
+- Use the readable UI font for body copy, digits, headings, buttons and long text. Pixelify Sans is only for short decorative titles or marks; never use it for paragraphs or long button labels.
+- Headings may be `GOLD`; body text is `TEXT`; hints and secondary lines are `TEXT_DIM` (`"dim"` style).
 
-## กฎประสบการณ์ผู้ใช้
+## UX rules
 
-1. **แต่ละแผงมีปุ่มหลักสีทองหนึ่งปุ่ม** เช่น Play, Begin Story, Create a room, Start the Match, Finish, Ready, Continue รายการตัวเลือก (เส้นทาง ตัวเลือกเนื้อเรื่อง การ์ดทักษะ) ไม่มีปุ่มหลัก: ทุกตัวเลือกใช้ปุ่มรอง และตัวที่เลือกใช้ `HighlightPanel` / `SelectedButton`
-2. **คำใบ้ปุ่มลัด** เขียน `[Key]` ต่อท้ายชื่อเฉพาะปุ่มที่ใช้ได้จริง: `Settings [F2]`, `Back [Esc]`, `Ready [R]`, `Clues [C]`, `Fight [F]`, `Got it [H]`
-3. **โฟกัสมองเห็นได้เสมอ**: วงแหวนทอง; ทุกหน้าจอโฟกัสส่วนควบคุมหลัก (หรือแรก) เมื่อเปิดขึ้นมา
-4. **Esc ใช้ย้อนกลับทุกที่**: เมนูย่อยหน้าแรกถอยหนึ่งขั้น, หน้าจัดตัวละครเสร็จสิ้น, หน้าซ้อน (Settings, Clues, กล่องโต้ตอบ, การเลือกเป้าหมาย) ปิด, หน้าต่อสู้และค่ายสลับเมนู; ในรายชื่อแมตช์หรือล็อบบี้ให้ถามก่อนออก
-5. **สถานะว่างบอกขั้นตอนถัดไป** โดยใช้ข้อความใน `UiText.EMPTY`
-6. **ส่วนควบคุมที่ปิดใช้งานบอกเหตุผล** ผ่านคำแนะนำเมื่อชี้ (`UiKit.disable`)
-7. **การกระทำที่ย้อนคืนยากต้องยืนยัน**: Leave room, Leave match, Reset Skills (`ConfirmDialog` โฟกัส Cancel)
-8. **ข้อความแจ้งเตือนอยู่กึ่งกลางด้านบน** ของทุกหน้าจอ; แถบแจ้งเตือนอยู่ใต้แถบบนและไม่บังปุ่มนาน
-9. ที่ 1280×720, 1920×1080 และขนาดข้อความ 1.4 ต้องไม่มีสิ่งทับกัน; รายการยาวเลื่อนได้และแถวตัดบรรทัดได้
-10. ตัวเลือกลดการเคลื่อนไหวปิดการจาง การเลื่อน และการลอย
+1. **One gold primary action per panel** (Play, Begin Story, Create a room, Start the Match, Finish, Ready, Continue).
+   Choice lists (paths, Story options, Skill cards) have no primary: every option is secondary and the chosen one gets
+   `HighlightPanel` / `SelectedButton`.
+2. **Key hints** are written `[Key]` after the label, only for keys that really work: `Settings [F2]`, `Back [Esc]`,
+   `Ready [R]`, `Clues [C]`, `Fight [F]`, `Got it [H]`.
+3. **Focus is always visible**: gold ring; every screen focuses its primary (or first) control when it opens.
+4. **Esc = back** everywhere: title sub-menus go back one step, Character setup finishes, overlays (Settings, Clues,
+   dialogs, battle target picking) close, battle and camp toggle their menu, and on the Match list or the lobby Esc asks
+   to leave.
+5. **Empty states say what to do next** (texts in `UiText.EMPTY`).
+6. **Disabled controls explain why** in a tooltip (`UiKit.disable`).
+7. **Destructive actions ask first**: Leave room, Leave match, Reset Skills (`ConfirmDialog`, Cancel is focused).
+8. **Toasts at top centre** on every screen; banners just below the top bar, never over buttons for long.
+9. Nothing overlaps at 1280×720, 1920×1080 and text size 1.4; long lists scroll; rows wrap.
+10. Reduced motion turns off fades, slides and floating motion.
+11. Match headers group region/layer on the left, current status in the centre, and currency/Clues/menu actions on the right. Header groups wrap as the viewport narrows; secondary labels may wrap before controls are clipped.
+12. Battle uses a compact scrollable turn list, a scrollable multi-line log above the footer, and a bottom action band that stays inside the viewport. Keep Party tokens on the left and enemies on the right; mark the active actor and valid targets with a gold border plus text.
 
-## ไอคอน
+## Icons
 
-ไอคอน 16×16 พิกเซลที่เขียนใน `assets/icons/` ใช้โทเค็นสีกรมท่า + ทอง และแถบสี โดยมีโครงร่างสีเข้มและแสงด้านซ้ายบน แสดงผลด้วยการกรองเพื่อนบ้านที่ใกล้ที่สุดผ่าน `Icons.rect()` หรือจับคู่กับข้อความโดยใช้ `Icons.with_text()` เก็บความหมายไว้ในข้อความหรือคำแนะนำเมื่อชี้ ดู [`icons.md`](icons.md) สำหรับคำสั่งการตั้งค่าและการสร้างใหม่
+The authored 16×16 pixel icons in `assets/icons/` use the Navy + Gold tokens and bar colours, with a dark outline and top-left light. Render them with nearest-neighbour filtering through `Icons.rect()` or pair them with text using `Icons.with_text()`; keep their meaning available in text or a tooltip. See [`icons.md`](icons.md) for the set and regeneration command.
 
-## ตรวจการเปลี่ยนแปลง UI
+## Skill FX
+
+Battle skill effects are transparent, limited-palette pixel art with dark outlines and nearest-neighbour sampling. Their
+frame counts, canvas sizes, anchors and tiers are defined in `assets/fx/manifest.json`; ultimate-tier skills use a brief
+screen-flash accent. Reduced motion skips skill effects entirely. Regenerate strips with `python tools/art/make_skill_fx.py`,
+then validate/re-slice them with `python tools/art/slice_skill_fx.py`; review `assets/fx/_contact.png` against the navy field.
+
+## Checking a UI change
 
 ```bash
 # Set GODOT to a local Godot 4.7 console binary, or leave it as `godot` on PATH.
@@ -83,18 +110,19 @@ GODOT="${GODOT:-godot}"
 "$GODOT" --path . -s tools/dev/story_preview.gd -- --out=build/ux_story --full
 ```
 
-`ui_preview` จับภาพกล่องยืนยัน Leave (`02f`) และ Settings (`02g`) ด้วย เปิด PNG เพื่อตรวจข้อความล้น สิ่งทับกัน และแผงที่มีปุ่มทองเกินหนึ่งปุ่ม รัน Godot ทีละโปรเซส
+`ui_preview` also captures the Leave confirmation (`02f`) and Settings (`02g`). Open the PNGs and look for clipped text,
+overlaps and more than one gold button per panel. Run one Godot process at a time.
 
-## การตรวจสอบ: ก่อน → หลัง (2026-09-29, `tools/dev/ui_preview.gd` seed 3 และ 11, `tools/dev/story_preview.gd --full`)
+## Audit: before → after (2026-09-29, `tools/dev/ui_preview.gd` seeds 3 and 11, `tools/dev/story_preview.gd --full`)
 
-| หน้าจอ | ก่อน | หลังจาก |
+| Screen | Before | After |
 | --- | --- | --- |
-| ธีมหลัก (ล็อบบี้ การลงคะแนน บันทึกเบาะแส การตั้งค่า สรุป แผงอาชีพ/เนื้อเรื่อง) | สีเขียว: `BG #141d18`, `PANEL #1f2c25`, `BORDER #5f8065`, มุมโค้งมน | โทเค็นสีกรมท่า + ทอง แผงสีกรมท่าสี่เหลี่ยมประดับเพชร |
-| หน้าแรก | สีกรมท่าจาก `_navy()` ในหน้าเอง ร่วมกับ `CornerDiamonds` และการแต่งปุ่มทีละปุ่ม; OptionButton ยังเขียว; ปุ่มใหญ่หลายปุ่มมีน้ำหนักเท่ากัน; Esc กลับเมนูหลักทันทีเสมอ | ใช้ธีมกลาง; แผงละปุ่มหลักหนึ่งปุ่ม; Esc ถอยหนึ่งขั้น |
-| ล็อบบี้ | สีเขียว; Start และ Character Setup ต่างเป็นปุ่มใหญ่; Leave ไม่ขอยืนยัน; ข้อความแจ้งเตือนอยู่กึ่งกลางด้านล่าง | Start เป็นปุ่มหลัก, Leave เป็นปุ่มอันตรายพร้อมยืนยัน, ข้อความแจ้งเตือนอยู่กึ่งกลางด้านบน |
-| หน้าจัดตัวละคร | มี `flat_box(Color("#…"))` ราว 12 จุด, พื้นลายทางน้ำตาล, ปุ่มปิดใช้งานและปุ่ม Purchase สีเขียว; Reset Skills ไม่ขอยืนยัน; ปุ่มปิดใช้งานไม่บอกเหตุผล | ใช้ `TitleTag`, `TabButton`, `SelectedButton`, `PrimaryButton`; พื้นกรมท่า; บอกเหตุผลที่ปิดใช้งาน; ยืนยัน Reset; ปุ่ม 1–5 สลับแท็บ |
-| ค่าย (Merchant / Rest) | แผงเทา AAC `#5c5c5c` และ `_flat_box` ของตัวเอง; ฟอนต์คงที่ 11–13 px; ข้อความแทน "Jumpscare", "Consumable <null>"; ปุ่ม × เขียน Leave แต่ปิดคำแนะนำ | คอลัมน์ HUD สีกรมท่า (คงผังสามคอลัมน์), ขนาดตัวอักษรตามธีม, ชื่อเหตุการณ์จริง, "Empty", เมนู ≡ ร่วมพร้อมยืนยัน Leave, ข้อความสถานะว่าง |
-| HUD ต่อสู้ | แผงเทาโปร่งแสง; แถบแจ้ง การเตือน และการ์ดตัวที่เล่นสร้างจากค่าสีในหน้า; ย้ายข้อความแจ้งเตือนเองทุกเฟรม | `HudPanel` กรมท่า 88%, `BannerPanel`, `HudWarnPanel`, `HudHighlightPanel`; ปุ่ม Items ที่ปิดใช้งานบอกเหตุผล |
-| หน้าแมตช์ (ลงคะแนน เดินทาง อาชีพ เนื้อเรื่อง สรุป) | สีเขียว; แถบแจ้งของแอปบังแถบบน; Leave ไม่ขอยืนยัน | สีกรมท่า; แถบแจ้งอยู่ใต้แถบบน; Leave ขอยืนยัน; ปุ่มโหวตที่ปิดใช้งานบอกเหตุผล |
-| บทสนทนาเรื่องราว / การ์ดบท | ค่าคงที่สีกรมท่า/ทองของตัวเอง (`1c2233`, `c9ced8`, `e8c56a`, `101624`) และขนาดตัวอักษรคงที่ | โทเค็น UiKit และ `SIZES` |
-| ตั้งค่า | ใช้ข้อความ `"> Normal"` บอกขนาดปัจจุบัน | ใช้ `SelectedButton` บอกขนาดปัจจุบัน และ Close เป็นปุ่มหลัก |
+| Base theme (lobby, voting, clue log, settings, summary, class/story panels) | green: `BG #141d18`, `PANEL #1f2c25`, `BORDER #5f8065`, rounded corners | Navy + Gold tokens, square navy panels with diamonds |
+| Home page | navy via a local `_navy()` + `CornerDiamonds` + per-button restyle; OptionButtons still green; several big equal buttons; Esc always jumped to the main menu | default theme only; one primary per panel; Esc goes back one step |
+| Lobby | green; Start and Character Setup both big; Leave unconfirmed; toast bottom centre | Start = primary, Leave = danger + confirm, toast top centre |
+| Character setup | ~12 `flat_box(Color("#…"))` literals, brown striped background, green disabled buttons, green "Purchase" fill; Reset Skills unconfirmed; disabled buttons silent | variations (`TitleTag`, `TabButton`, `SelectedButton`, `PrimaryButton`), navy background, disabled reasons, Reset confirmed, 1–5 switch tabs |
+| Camp (Merchant / Rest) | AAC grey `#5c5c5c` panels and own `_flat_box`; fixed 11–13 px fonts; "Jumpscare" placeholder; "Consumable <null>"; × button labelled Leave but closed tips | navy HUD columns (3-column layout kept), theme sizes, real Encounter name, "Empty", shared ≡ menu with confirmed Leave, empty states |
+| Battle HUD | grey translucent; banner / warning / acting card built from literals; toast moved by hand each tick | `HudPanel` navy 88 %, `BannerPanel`, `HudWarnPanel`, `HudHighlightPanel`; Items disabled reason |
+| Match list (voting, travel, class, story, summary) | green; app banner covered the top bar; Leave unconfirmed | navy; banner below the top bar; Leave confirmed; disabled vote buttons explain why |
+| Story dialogue / chapter card | own navy/gold constants (`1c2233`, `c9ced8`, `e8c56a`, `101624`) and fixed font sizes | UiKit tokens and `SIZES` |
+| Settings | "> Normal" text marker for the current size | `SelectedButton` for the current size, Close = primary |

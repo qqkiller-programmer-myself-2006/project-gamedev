@@ -127,7 +127,7 @@ func test_telegraph_is_visible_in_the_boss_view_until_it_lands() -> void:
 func test_defending_against_the_telegraphed_blow_halves_it() -> void:
 	var blows := []
 	for defend in [false, true]:
-		_to_boss(1, {"enemies": {"elder_thornwarden": {"stats": {"max_hp": 5000, "spd": 5}}}})
+		_to_boss(1, {"enemies": {"elder_thornwarden": {"stats": {"max_hp": 5000, "atk": 20, "spd": 5}}}})
 		var on_turn := func() -> void:
 			var pending: Dictionary = _boss_view()["boss"]["telegraph"]
 			if defend and not pending.is_empty():

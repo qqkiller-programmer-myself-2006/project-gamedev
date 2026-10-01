@@ -15,7 +15,11 @@ var anchors: Dictionary = {}
 var combat_mode := ""
 var combat_mode_key := ""
 
-var _top: HFlowContainer
+var _top: HBoxContainer
+var _header_left: Control
+var _header_status: Control
+var _header_actions: Control
+var _header_clues: Button
 var _party: VBoxContainer
 var _center: MarginContainer
 var _center_scroll: ScrollContainer
@@ -31,10 +35,10 @@ var _list_root: Control
 var _battle: BattleView
 var _battle_mode := false
 var _camp: CampView
-## Card id -> time when its current floating number finishes.
-var _float_busy_until: Dictionary = {}
-var _float_generation := 0
-var _action_feedback_generation := 0
+## Card id -> times (ms) of recent floating numbers, to stack them.
+var _float_stack: Dictionary = {}
+var _floating_numbers: Array[Label] = []
+var _combat_finished := false
 var _camp_mode := false
 var _scroll_to_top := false
 var _story_director: StoryDirector = null
@@ -49,7 +53,9 @@ func setup(client: ClientApp) -> void:
 	add_child(margin)
 	var column := UiKit.vbox(10)
 	margin.add_child(column)
-	_top = UiKit.flow(12)
+	_top = UiKit.hbox(8)
+	_top.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_top.resized.connect(_fit_header)
 	column.add_child(UiKit.panel(_top))
 	var middle := UiKit.hbox(12)
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -81,6 +87,7 @@ func setup(client: ClientApp) -> void:
 	_log.custom_minimum_size = Vector2(0, 90)
 	_log.focus_mode = Control.FOCUS_NONE
 	_log.add_theme_color_override("default_color", UiKit.TEXT_DIM)
+	_log.text = "Waiting for match events..."
 	var bottom := UiKit.hbox(10)
 	var log_panel := UiKit.panel(_log)
 	log_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -149,6 +156,19 @@ func is_host() -> bool:
 func refresh(client: ClientApp, force: bool = false) -> void:
 	app = client
 	var view := match_view()
+	var phase := str(view.get("phase", ""))
+	var encounter: Variant = view.get("encounter")
+	var music_track := "forest"
+	if phase == "victory":
+		music_track = "victory"
+	elif phase == "defeat":
+		music_track = "defeat"
+	elif phase == "boss" or (encounter != null and str(encounter.get("kind", "")) == "boss"):
+		music_track = "guardian"
+	elif not _active_combat(view).is_empty():
+		music_track = "battle"
+	if app.sounds != null:
+		app.sounds.play_music(music_track)
 	var stable := view.duplicate()
 	stable.erase("elapsed")
 	var digest := JSON.stringify([stable, room_view()])
@@ -159,6 +179,7 @@ func refresh(client: ClientApp, force: bool = false) -> void:
 	var focus_id := _focused_id()
 	anchors.clear()
 	var combat := _active_combat(view)
+	_combat_finished = not combat.is_empty() and not str(combat.get("result", "")).is_empty()
 	var camp := _active_camp(view)
 	_set_fullscreen("battle" if not combat.is_empty() else ("camp" if not camp.is_empty() else ""))
 	if _battle_mode:
@@ -174,12 +195,6 @@ func refresh(client: ClientApp, force: bool = false) -> void:
 	_build_top(view)
 	_build_party(view)
 	_build_panel(view)
-	if _panel is VotePanel:
-		# Keep the route title and timer visible on short, large-text layouts.
-		# Number keys still vote; scrolling remains available for lower routes.
-		_center_scroll.scroll_vertical = 0
-		_scroll_to_top = false
-		return
 	if not _restore_focus(focus_id):
 		UiKit.focus_first(_center)
 	var viewport := get_viewport()
@@ -228,8 +243,6 @@ func show_events(client: ClientApp, events: Array) -> void:
 		if not line.is_empty():
 			_add_log(line)
 		_feedback(client, event)
-		if _battle_mode and str(event.get("type", "")) not in ["action_resolved", "combat_ended"]:
-			_battle.animate_bars()
 
 func _on_story_presentation_finished(_item: Dictionary) -> void:
 	_sync_story_presentation_visibility()
@@ -360,7 +373,14 @@ func build_corner_menu(host: Control) -> PanelContainer:
 		item.set_meta("focus_id", "menu_" + str(entry[0]))
 		items.add_child(item)
 	var corner := UiKit.hbox(6)
-	corner.position = Vector2(10, 10)
+	if host is BattleView:
+		corner.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		corner.offset_left = -96
+		corner.offset_right = -10
+		corner.offset_top = 82
+		corner.offset_bottom = 122
+	else:
+		corner.position = Vector2(10, 10)
 	var toggle_menu := func() -> void:
 		menu.visible = not menu.visible
 		if menu.visible:
@@ -381,17 +401,9 @@ func build_corner_menu(host: Control) -> PanelContainer:
 
 ## A number or word that rises from a character or enemy card.
 func float_text(id: String, text: String, color: Color) -> void:
-	# Queue hits on the same target so simultaneous results never overlap.
-	var generation := _float_generation
-	var now := Time.get_ticks_msec()
-	var starts_at := _queue_float_start(id, now)
-	if starts_at > now:
-		await get_tree().create_timer(float(starts_at - now) / 1000.0).timeout
-	if generation != _float_generation or not is_inside_tree():
-		return
 	# Cards may have just been rebuilt: wait for layout before measuring.
 	await get_tree().process_frame
-	if generation != _float_generation:
+	if _combat_finished:
 		return
 	var anchor: Control = anchors.get(id)
 	if anchor == null or not is_instance_valid(anchor) or not anchor.is_inside_tree():
@@ -401,23 +413,32 @@ func float_text(id: String, text: String, color: Color) -> void:
 	label.add_theme_color_override("font_outline_color", Color.BLACK)
 	label.add_theme_constant_override("outline_size", 6)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.add_to_group("combat_floating_text")
 	add_child(label)
+	_floating_numbers.append(label)
+	# Numbers that land on the same card together (several DoTs ticking)
+	# stack upwards instead of drawing over each other.
+	var now := Time.get_ticks_msec()
+	var recent: Array = _float_stack.get(id, [])
+	recent = recent.filter(func(t: int) -> bool: return now - t < 700)
+	var lane := recent.size()
+	recent.append(now)
+	_float_stack[id] = recent
 	var rect := anchor.get_global_rect()
-	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -38)
+	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -42.0 * lane)
 	var tween := create_tween()
 	if app.settings.reduced_motion:
-		tween.tween_interval(0.72)
+		tween.tween_interval(1.2)
 	else:
-		tween.tween_property(label, "global_position:y", label.global_position.y - 32, 0.72)
-		tween.parallel().tween_property(label, "modulate:a", 0.0, 0.72).set_delay(0.25)
+		tween.tween_property(label, "global_position:y", label.global_position.y - 40, 1.1)
+		tween.parallel().tween_property(label, "modulate:a", 0.0, 1.1).set_delay(0.4)
 	tween.tween_callback(label.queue_free)
 
 
-func _queue_float_start(id: String, now: int) -> int:
-	var starts_at := maxi(now, int(_float_busy_until.get(id, now)))
-	_float_busy_until[id] = starts_at + 720
-	return starts_at
+func _clear_floating_numbers() -> void:
+	for label in _floating_numbers:
+		if is_instance_valid(label):
+			label.queue_free()
+	_floating_numbers.clear()
 
 
 func describe(event: Dictionary) -> String:
@@ -427,75 +448,74 @@ func describe(event: Dictionary) -> String:
 		"player_joined":
 			if ClientApp.is_story_view(room_view()):
 				return ""
-			return Tr.t("%s joined (slot %d)." % [event["name"], int(event["slot"]) + 1])
+			return "%s joined (slot %d)." % [event["name"], int(event["slot"]) + 1]
 		"player_left":
-			var why := Tr.t("lost connection") if event["reason"] == "disconnected" else Tr.t("left")
-			return Tr.t("%s %s. Slot %d is now played by AI." % [event["name"], Tr.t(why), int(event["slot"]) + 1])
+			var why := "lost connection" if event["reason"] == "disconnected" else "left"
+			return "%s %s. Slot %d is now played by AI." % [event["name"], why, int(event["slot"]) + 1]
 		"slot_ai_takeover":
-			return Tr.t("AI takes over %s." % event["character"])
+			return "AI takes over %s." % event["character"]
 		"host_changed":
 			if ClientApp.is_story_view(room_view()):
 				return ""
-			return Tr.t("%s is now the Host." % event["name"])
+			return "%s is now the Host." % event["name"]
 		"match_started":
-			return Tr.t("The journey into the Forest begins.")
+			return "The journey into the Forest begins."
 		"vote_started":
-			return Tr.t("Layer %d: choose the next path." % int(event["layer"]))
+			return "Layer %d: choose the next path." % int(event["layer"])
 		"vote_resolved":
 			var how := ""
 			if event["no_votes"]:
-				how = Tr.t(" Nobody voted, so it was picked at random.")
+				how = " Nobody voted, so it was picked at random."
 			elif event["tie_broken"]:
-				how = Tr.t(" It was a tie, broken at random.")
-			return Tr.t("The Party heads for %s (%s).%s" % [event["name"], UiText.type_label(event["encounter_type"]), Tr.t(how)])
+				how = " It was a tie, broken at random."
+			return "The Party heads for %s (%s).%s" % [event["name"], UiText.type_label(event["encounter_type"]), how]
 		"encounter_started":
-			return Tr.t("Arrived: %s." % event["name"])
+			return "Arrived: %s." % event["name"]
 		"combat_started":
-			return Tr.t("Enemies appear!")
+			return "Enemies appear!"
 		"action_resolved":
 			return _describe_action(event)
 		"combat_ended":
 			if event["result"] == "victory":
 				var rewards: Dictionary = event.get("rewards", {})
 				if rewards.is_empty() or int(rewards.get("exp", 0)) + int(rewards.get("gold", 0)) == 0:
-					return Tr.t("The enemy falls!")
-				return Tr.t("Victory! +%d EXP each, +%d Gold." % [int(rewards.get("exp", 0)), int(rewards.get("gold", 0))])
+					return "The enemy falls!"
+				return "Victory! +%d EXP each, +%d Gold." % [int(rewards.get("exp", 0)), int(rewards.get("gold", 0))]
 			if event["result"] == "timeout":
-				return Tr.t("Time is up for the Challenge.")
-			return Tr.t("The Party has fallen...")
+				return "Time is up for the Challenge."
+			return "The Party has fallen..."
 		"level_up":
-			return Tr.t("%s reached level %d!" % [name_of("p%d" % int(event["slot"])), int(event["level"])])
+			return "%s reached level %d!" % [name_of("p%d" % int(event["slot"])), int(event["level"])]
 		"class_challenge_ended":
-			return Tr.t(str(event["text"]))
+			return str(event["text"])
 		"class_choice":
-			return Tr.t("%s %s the %s Class." % [name_of("p%d" % int(event["slot"])),
-					Tr.t("takes" if event["accepted"] else "declines"), str(event["class"]).capitalize()])
+			return "%s %s the %s Class." % [name_of("p%d" % int(event["slot"])),
+					"takes" if event["accepted"] else "declines", str(event["class"]).capitalize()]
 		"purchase":
-			return Tr.t("%s bought %s for %d Gold." % [name_of("p%d" % int(event["slot"])),
-				BattleView.item_display_name(str(event["item"])), int(event["price"])] )
+			return "%s bought %s for %d Gold." % [name_of("p%d" % int(event["slot"])), UiText.item_name(str(event["item"])), int(event["price"])]
 		"rested":
-			return Tr.t("The Party rests and recovers.")
+			return "The Party rests and recovers."
 		"treasure_found":
-			return Tr.t("Treasure! +%d Gold." % int(event["gold"]))
+			return "Treasure! +%d Gold." % int(event["gold"])
 		"clue_found":
-			return Tr.t("Story Clue found: %s." % event["clue"]["title"])
+			return "Story Clue found: %s." % event["clue"]["title"]
 		"boss_started":
-			return Tr.t("%s, %s, blocks the way!" % [event["name"], event["title"]])
+			return "%s, %s, blocks the way!" % [UiText.region_text(str(event["name"]), match_view()), event["title"]]
 		"boss_telegraph":
-			return Tr.t("WARNING: %s" % event["text"])
+			return "WARNING: %s" % event["text"]
 		"boss_phase":
-			return Tr.t("Phase %d - %s: %s" % [int(event["phase"]), event["name"], event["text"]])
+			return "Phase %d - %s: %s" % [int(event["phase"]), UiText.region_text(str(event["name"]), match_view()), UiText.region_text(str(event["text"]), match_view())]
 		"match_ended":
-			var region := Tr.t(UiText.region_of(match_view()))
-			return Tr.t("Victory! The %s is behind you." % region) if event["result"] == "victory" else Tr.t("Defeat. The %s wins this time." % region)
+			var region := UiText.region_of(match_view())
+			return "Victory! The %s is behind you." % region if event["result"] == "victory" else "Defeat. The %s wins this time." % region
 		"status_applied":
 			if str(event.get("kind", "")) == "dot":
 				return "%s suffers %s (x%d, %d turns)." % [name_of(str(event["target"])), event["name"],
 						int(event["stacks"]), int(event["turns"])]
-			return Tr.t("%s gains %s." % [name_of(str(event["target"])), event["name"]])
+			return "%s gains %s." % [name_of(str(event["target"])), event["name"]]
 		"status_tick":
-			return Tr.t("%s takes %d from %s%s." % [name_of(str(event["target"])), int(event["damage"]), event["name"],
-					Tr.t(" and falls") if event.get("down", false) else ""])
+			return "%s takes %d from %s%s." % [name_of(str(event["target"])), int(event["damage"]), event["name"],
+					" and falls" if event.get("down", false) else ""]
 	return ""
 
 
@@ -503,39 +523,39 @@ func _describe_action(event: Dictionary) -> String:
 	var actor := name_of(str(event["actor"]))
 	match str(event["action"]):
 		"defend":
-			return Tr.t("%s ran out of time and defends." % actor) if event["automatic"] else Tr.t("%s defends." % actor)
+			return "%s %s." % [actor, "ran out of time and Defends" if event["automatic"] else "Defends"]
 		"charge":
-			return Tr.t("%s gathers power for %s..." % [actor, event.get("move_name", "something big")])
-	var what := Tr.t("attacks")
+			return "%s gathers power for %s..." % [actor, event.get("move_name", "something big")]
+	var what := "attacks"
 	if event.has("skill"):
-		what = Tr.t("uses %s" % str(event.get("skill", "")).replace("_", " ").capitalize())
+		what = "uses %s" % str(event.get("skill", "")).replace("_", " ").capitalize()
 	if event.has("move_name"):
-		what = Tr.t("uses %s" % event["move_name"])
+		what = "uses %s" % event["move_name"]
 	if event.has("item"):
-		what = Tr.t("uses %s" % BattleView.item_display_name(str(event["item"])))
+		what = "uses %s" % UiText.item_name(str(event["item"]))
 	var parts: Array[String] = []
 	for result in event.get("results", []):
 		var target := name_of(str(result["target"]))
 		if result.has("damage"):
 			var note := ""
 			if result.get("crit", false):
-				note += Tr.t(" critical!")
+				note += " critical!"
 			if result.get("weak", false):
-				note += Tr.t(" weak spot!")
+				note += " weak spot!"
 			if result.has("protected"):
-				note += Tr.t(" (shielding %s)" % name_of(str(result["protected"])))
+				note += " (shielding %s)" % name_of(str(result["protected"]))
 			if result.get("down", false):
-				note += Tr.t(" - down")
-			parts.append(Tr.t("%s takes %d%s" % [target, int(result["damage"]), note]))
+				note += " - down"
+			parts.append("%s takes %d%s" % [target, int(result["damage"]), note])
 		elif result.has("heal"):
-			parts.append(Tr.t("%s recovers %d HP" % [target, int(result["heal"])]) )
+			parts.append("%s recovers %d HP" % [target, int(result["heal"])])
 		elif result.get("revived", false):
-			parts.append(Tr.t("%s is back on their feet" % target))
+			parts.append("%s is back on their feet" % target)
 		elif result.get("status", "") == "protected":
-			parts.append(Tr.t("%s is protected" % target))
+			parts.append("%s is protected" % target)
 		elif result.get("status", "") == "shielded":
-			parts.append(Tr.t("the Party raises its guard"))
-	return Tr.t("%s %s: %s." % [actor, what, ", ".join(parts)]) if not parts.is_empty() else Tr.t("%s %s." % [actor, what])
+			parts.append("the Party raises its guard")
+	return "%s %s: %s." % [actor, what, ", ".join(parts)] if not parts.is_empty() else "%s %s." % [actor, what]
 
 
 ## A big announcement: the battle band while fighting, else the app banner.
@@ -565,92 +585,108 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				float_text(str(event["target"]), "+%s" % UiKit.status_tag(applied),
 						UiKit.status_color(str(event.get("color", ""))))
 		"action_resolved":
-			call_deferred("_resolve_action_feedback", client, event.duplicate(true), _action_feedback_generation)
+			var spell_skill := str(event.get("skill", "")) in ["fireball", "frost_lance"]
+			if spell_skill:
+				client.sounds.play("magic_cast")
+			if _battle_mode:
+				_battle.handle_event(event)
+				var named := ""
+				if event.has("move_name"):
+					named = str(event["move_name"])
+				elif event.has("skill"):
+					named = str(event["skill"]).replace("_", " ").capitalize()
+				elif event.has("item"):
+					named = UiText.item_name(str(event["item"]))
+				if not named.is_empty():
+					_battle.announce(named)
+			var hurt := false
+			var missed := false
+			var critical := false
+			var healed := false
+			var buffed := false
+			var debuffed := false
+			for result in event.get("results", []):
+				var target := str(result["target"])
+				if result.has("damage"):
+					hurt = hurt or int(result.get("damage", 0)) > 0
+					missed = missed or bool(result.get("dodged", false))
+					critical = critical or bool(result.get("crit", false))
+					var text := "-%d" % int(result["damage"])
+					if result.get("crit", false):
+						text += " CRIT"
+					_show_action_hit.call_deferred(client, target, text,
+							UiKit.ENEMY if target.begins_with("p") else UiKit.ACCENT)
+				elif result.has("heal"):
+					healed = true
+					client.flash(anchors.get(target), Color(0.8, 1.5, 0.8))
+					float_text(target, "+%d" % int(result["heal"]), UiKit.GOOD)
+				var status := str(result.get("status", ""))
+				if status in ["protected", "shielded"]:
+					buffed = true
+				for applied in result.get("applied", []):
+					var applied_status := str(applied.get("status", ""))
+					if applied_status == "venom_coat":
+						buffed = true
+					elif applied_status in ["bleed", "poison", "toxin"]:
+						debuffed = true
+			var has_status_sound := healed or buffed or debuffed
+			if healed:
+				client.sounds.play("heal")
+			if buffed:
+				client.sounds.play("buff")
+			if debuffed:
+				client.sounds.play("debuff")
+			if critical:
+				client.sounds.play("critical")
+			elif hurt and not spell_skill and not has_status_sound:
+				client.sounds.play("hit")
+			elif missed and not hurt and not has_status_sound:
+				client.sounds.play("miss")
 		"vote_resolved":
-			client.banner(Tr.t("Next: %s" % event["name"]), 2.2, "vote")
+			client.banner("Next: %s" % event["name"], 2.2, "vote")
 		"combat_ended":
-			if is_instance_valid(_battle):
-				_battle.clear_turn_notice()
-			# Let the final hit and its HP tween finish; the encounter's result
-			# screen arrives after its end delay, so clear the numbers beforehand.
-			call_deferred("_clear_combat_feedback_after", 2.6)
+			_combat_finished = true
+			_clear_floating_numbers()
+			var rewards: Dictionary = event.get("rewards", {})
+			if event["result"] == "victory" and int(rewards.get("exp", 0)) > 0:
+				_announce(client, "Victory! +%d EXP, +%d Gold" % [int(rewards["exp"]), int(rewards.get("gold", 0))], 2.5, "good")
 		"player_joined":
 			if not ClientApp.is_story_view(room_view()):
-				client.toast(Tr.t("%s joined." % event["name"]))
+				client.toast("%s joined." % event["name"])
 				client.sounds.play("click")
 		"profile_unavailable":
 			client.toast(UiText.error("profile_unavailable"), 6.0)
 		"treasure_found":
-			client.banner(Tr.t("Treasure! +%d Gold" % int(event["gold"])), 2.0, "good")
+			client.banner("Treasure! +%d Gold" % int(event["gold"]), 2.0, "loot_pickup")
 		"clue_found":
-			client.banner(Tr.t("Story Clue: %s" % event["clue"]["title"]), 2.5, "good")
+			client.banner("Story Clue: %s" % event["clue"]["title"], 2.5, "good")
 		"level_up":
 			float_text("p%d" % int(event["slot"]), "LEVEL UP", UiKit.GOOD)
-			client.sounds.play("good")
+			client.sounds.play("level_up")
 		"class_changed":
 			client.sounds.play("good")
 		"boss_telegraph":
-			_announce(client, Tr.t("Warning: %s next turn!" % event["name"]), 2.5, "warn")
+			_announce(client, "Warning: %s next turn!" % event["name"], 2.5, "warn")
 		"boss_phase":
-			_announce(client, Tr.t("Phase %d: %s" % [int(event["phase"]), event["name"]]), 2.5, "warn")
+			_announce(client, "Phase %d: %s" % [int(event["phase"]), event["name"]], 2.5, "warn")
 		"slot_ai_takeover":
-			client.toast(Tr.t("%s is now controlled by AI." % event["character"]))
+			client.toast("%s is now controlled by AI." % event["character"])
 		"match_ended":
-			# The Summary owns its outcome heading; clear banners and combat
-			# feedback before showing it instead of covering it with a toast.
-			client.clear_banner()
-			_clear_combat_feedback()
+			_clear_floating_numbers()
+			client.banner("Victory!" if event["result"] == "victory" else "Defeat", 3.0,
+					"good" if event["result"] == "victory" else "bad")
 
 
-func _resolve_action_feedback(client: ClientApp, event: Dictionary, generation: int) -> void:
-	if _battle_mode:
-		_battle.handle_event(event)
-		var named := ""
-		if event.has("move_name"):
-			named = str(event["move_name"])
-		elif event.has("skill"):
-			named = str(event["skill"]).replace("_", " ").capitalize()
-		elif event.has("item"):
-			named = BattleView.item_display_name(str(event["item"]))
-		if not named.is_empty():
-			_battle.announce(named)
-	if not client.settings.reduced_motion:
-		await get_tree().create_timer(0.3).timeout
-	if generation != _action_feedback_generation or not is_inside_tree():
+func _show_action_hit(client: ClientApp, target: String, text: String, color: Color) -> void:
+	if client.settings.reduced_motion:
+		client.flash(anchors.get(target), color)
+		float_text(target, text, color)
 		return
-	var hurt := false
-	for result in event.get("results", []):
-		var target := str(result["target"])
-		if result.has("damage"):
-			hurt = true
-			client.flash(anchors.get(target), Color(1.6, 0.7, 0.7))
-			var text := "-%d" % int(result["damage"])
-			if result.get("crit", false):
-				text += " CRIT"
-			float_text(target, text, UiKit.ENEMY if target.begins_with("p") else UiKit.ACCENT)
-		elif result.has("heal"):
-			client.flash(anchors.get(target), Color(0.8, 1.5, 0.8))
-			float_text(target, "+%d" % int(result["heal"]), UiKit.GOOD)
-	if hurt:
-		client.sounds.play("hit")
-
-
-func _clear_combat_feedback_after(seconds: float) -> void:
-	if not is_inside_tree():
+	await get_tree().create_timer(0.3).timeout
+	if not is_instance_valid(self):
 		return
-	await get_tree().create_timer(seconds).timeout
-	_clear_combat_feedback()
-
-
-func _clear_combat_feedback() -> void:
-	_float_generation += 1
-	_float_busy_until.clear()
-	_action_feedback_generation += 1
-	var floating: Array = get_tree().get_nodes_in_group("combat_floating_text") if is_inside_tree() \
-			else find_children("*", "Label", true, false)
-	for label in floating:
-		if is_instance_valid(label) and label.is_in_group("combat_floating_text"):
-			label.queue_free()
+	client.flash(anchors.get(target), Color(1.6, 0.7, 0.7))
+	float_text(target, text, color)
 
 
 func _collect_names(view: Dictionary) -> void:
@@ -663,11 +699,10 @@ func _collect_names(view: Dictionary) -> void:
 	var combat: Dictionary = MatchScreen.combat_of(encounter)
 	var counts := {}
 	for enemy in combat.get("enemies", []):
-		var enemy_name := Tr.t(str(enemy["name"]))
-		counts[enemy_name] = int(counts.get(enemy_name, 0)) + 1
+		counts[enemy["name"]] = int(counts.get(enemy["name"], 0)) + 1
 	var seen := {}
 	for enemy in combat.get("enemies", []):
-		var base := Tr.t(str(enemy["name"]))
+		var base := str(enemy["name"])
 		if int(counts[base]) > 1:
 			seen[base] = int(seen.get(base, 0)) + 1
 			names[enemy["id"]] = "%s %s" % [base, "ABCDE"[int(seen[base]) - 1]]
@@ -677,33 +712,66 @@ func _collect_names(view: Dictionary) -> void:
 
 func _build_top(view: Dictionary) -> void:
 	UiKit.clear(_top)
-	var region := UiKit.hbox(4)
-	region.add_child(Icons.rect("info", Icons.size_for_scale(app.settings.text_scale)))
-	region.add_child(UiKit.label(Tr.t(UiText.region_of(view)), "heading", UiKit.ACCENT))
-	_top.add_child(region)
+	var left := UiKit.hbox(6)
+	left.add_child(Icons.rect("info", Icons.size_for_scale(app.settings.text_scale)))
+	left.add_child(UiKit.label(UiText.region_of(view), "heading", UiKit.ACCENT))
 	var total := int(view.get("layers_total", 5))
 	var layer := int(view.get("layer", 0))
 	var phase := str(view.get("phase", ""))
-	var steps := UiKit.hbox(4)
+	var steps := UiKit.hbox(3)
 	for i in range(1, total + 1):
 		var done := i < layer or (i == layer and phase in ["boss", "victory", "defeat"])
-		var text := "%d" % i
-		if i == layer and not done:
-			text = "> %d <" % i
-		steps.add_child(UiKit.badge(text, UiKit.ACCENT if i == layer else (UiKit.GOOD if done else UiKit.TEXT_DIM)))
+		var chip := UiKit.badge("%d" % i, UiKit.ACCENT if i == layer else (UiKit.GOOD if done else UiKit.TEXT_DIM))
+		chip.custom_minimum_size = Vector2(32, 32)
+		chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		chip.get_child(0).custom_minimum_size = Vector2(28, 28)
+		(chip.get_child(0) as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		chip.tooltip_text = "Layer %d%s" % [i, " (current)" if i == layer else (" (complete)" if done else "")]
+		steps.add_child(chip)
 	var boss_now := phase == "boss" or (phase in ["victory", "defeat"] and layer >= total)
-	steps.add_child(UiKit.badge("> BOSS <" if phase == "boss" else "BOSS", UiKit.ENEMY if boss_now else UiKit.TEXT_DIM))
-	_top.add_child(steps)
+	var boss_chip := UiKit.badge("B", UiKit.ENEMY if boss_now else UiKit.TEXT_DIM)
+	boss_chip.custom_minimum_size = Vector2(32, 32)
+	boss_chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	boss_chip.get_child(0).custom_minimum_size = Vector2(28, 28)
+	(boss_chip.get_child(0) as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_chip.tooltip_text = "Boss" if boss_now else "Guardian Boss"
+	steps.add_child(boss_chip)
+	left.add_child(steps)
+	_header_left = left
+	_top.add_child(left)
 	var where := "Guardian Boss" if phase == "boss" else "Layer %d of %d" % [layer, total]
-	_top.add_child(UiKit.label(where))
-	_top.add_child(Icons.with_text("gold", "Gold: %d" % int(view.get("gold", 0)), "heading", app.settings.text_scale, UiKit.ACCENT))
+	var status := UiKit.label(where, "body", UiKit.TEXT)
+	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_header_status = status
+	_top.add_child(status)
+	var actions := UiKit.hbox(5)
+	actions.size_flags_horizontal = Control.SIZE_SHRINK_END
+	actions.add_child(Icons.with_text("gold", "Gold: %d" % int(view.get("gold", 0)), "body", app.settings.text_scale, UiKit.ACCENT))
 	var clues := Icons.apply_to_button(UiKit.button("Clues: %d [C]" % view.get("clues", []).size(), toggle_clues), "info", app.settings.text_scale)
 	clues.set_meta("focus_id", "clues")
-	_top.add_child(clues)
-	_top.add_child(Icons.apply_to_button(UiKit.button("Settings [F2]", app.open_settings), "settings", app.settings.text_scale))
+	clues.set_meta("header_clues", true)
+	clues.tooltip_text = "Clues [C]"
+	_header_clues = clues
+	actions.add_child(clues)
+	actions.add_child(Icons.apply_to_button(UiKit.button("Settings [F2]", app.open_settings), "settings", app.settings.text_scale))
 	var leave := Icons.apply_to_button(UiKit.button("Leave [Esc]", app.confirm_leave, false, "danger"), "quit", app.settings.text_scale)
 	leave.set_meta("focus_id", "leave")
-	_top.add_child(leave)
+	actions.add_child(leave)
+	_header_actions = actions
+	_top.add_child(actions)
+	_fit_header()
+
+
+func _fit_header() -> void:
+	if not is_instance_valid(_header_left) or not is_instance_valid(_header_status) or not is_instance_valid(_header_actions) or not is_instance_valid(_header_clues):
+		return
+	var width := _top.size.x
+	var required := _header_left.get_combined_minimum_size().x + _header_actions.get_combined_minimum_size().x + 100.0 + 24.0
+	var compact := required > width
+	_header_clues.text = "" if compact else "Clues: %d [C]" % match_view().get("clues", []).size()
+	_header_clues.custom_minimum_size.x = 40.0 if compact else 0.0
+	_header_status.custom_minimum_size.x = 84.0
 
 
 func _build_party(view: Dictionary) -> void:
@@ -733,7 +801,7 @@ func _build_party(view: Dictionary) -> void:
 		details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var head := UiKit.hbox(6)
 		head.add_child(UiKit.label(str(character["name"]), "body", UiKit.ACCENT if slot == your_slot() else UiKit.TEXT))
-		head.add_child(UiKit.label("Lv %d %s" % [int(character["level"]), Tr.t(str(character["class_name"]).capitalize())], "dim"))
+		head.add_child(UiKit.label("Lv %d %s" % [int(character["level"]), character["class_name"]], "dim"))
 		head.add_child(UiKit.spacer())
 		if slot == your_slot():
 			head.add_child(UiKit.badge("YOU", UiKit.GOOD))

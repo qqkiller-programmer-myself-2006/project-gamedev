@@ -53,7 +53,6 @@ var acting := false
 var class_id := ""
 var sprite_set: SpriteSet
 var enemy_sprite := false
-var trainer := false
 var animation := "idle"
 var animation_frames: Array[Texture2D] = []
 var animation_frame := 0
@@ -65,57 +64,32 @@ var badge_height := BADGE_HEIGHT
 var _bob_time := 0.0
 ## 1-based key shown while this token is a valid target, else 0.
 var target_number := 0
+var show_plate := true
 var _target_callback := Callable()
 
 var _badges: HBoxContainer
 var _plate: PanelContainer
-var _hovered := false
-var _pending_bar_targets: Array[float] = []
 var _hp_bar: ProgressBar
 var _hp_damage_bar: ProgressBar
 var _energy_bar: ProgressBar
 var _bar_tween: Tween
 
+
 ## `data`: {id, side, name, kind (class or enemy kind), hp, max_hp,
 ## energy, energy_max, statuses, acting, controller, you}
 func setup(data: Dictionary) -> void:
-	var updating := _badges != null
-	var previous_bar_values: Array[float] = []
-	var old_animation := animation
-	var old_frame := animation_frame
-	var old_elapsed := animation_elapsed
-	var old_bob := _bob_time
-	var old_down := down
-	if updating:
-		for bar_node in find_children("*", "ProgressBar", true, false):
-			previous_bar_values.append((bar_node as ProgressBar).value)
-		for connection in pressed.get_connections():
-			pressed.disconnect(connection.callable)
-		for child in get_children():
-			remove_child(child)
-			child.free()
-		_badges = null
-		_plate = null
-		target_number = 0
-	else:
-		mouse_entered.connect(func() -> void:
-			_hovered = true
-			queue_redraw())
-		mouse_exited.connect(func() -> void:
-			_hovered = false
-			queue_redraw())
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	unit_id = str(data["id"])
 	side = str(data.get("side", "party"))
 	var kind := str(data.get("kind", ""))
 	class_id = kind.to_lower()
 	enemy_sprite = side != "party" and not str(data.get("sprite", "")).is_empty()
-	trainer = bool(data.get("trainer", false))
 	sprite_set = SpriteSet.for_class(class_id) if side == "party" else SpriteSet.for_enemy(str(data.get("sprite", "")), str(data.get("sprite_variant", ""))) if enemy_sprite else null
 	reduced_motion = bool(data.get("reduced_motion", false))
 	enemy_kind = kind
 	down = int(data.get("hp", 0)) <= 0
 	acting = bool(data.get("acting", false))
+	show_plate = bool(data.get("show_plate", true))
 	flat = true
 	text = ""
 	focus_mode = Control.FOCUS_NONE
@@ -128,8 +102,8 @@ func setup(data: Dictionary) -> void:
 	var width := 180.0 * text_factor if side == "boss" else minf(140.0 * text_factor, MAX_PLATE_WIDTH)
 	figure_height = 150.0 if side == "boss" else 110.0
 	if sprite_set != null and sprite_set.is_enemy:
-		figure_height = maxf(sprite_set.size_px() * 1.65, 92.0 if trainer else 0.0)
-	custom_minimum_size = Vector2(width, badge_height + figure_height + plate_height)
+		figure_height = sprite_set.size_px() * 1.65
+	custom_minimum_size = Vector2(width, badge_height + figure_height + (plate_height if show_plate else 0.0))
 	size = custom_minimum_size
 	if side == "party":
 		outfit = PARTY_OUTFITS.get(str(data.get("name", "")), PARTY_OUTFITS["Wren"])
@@ -160,7 +134,7 @@ func setup(data: Dictionary) -> void:
 		who += " (AI)"
 	var name_color := tint if side == "party" else (UiKit.ACCENT if bool(data.get("you", false)) else UiKit.TEXT)
 	var name_label := UiKit.pixel_label(who, "small", name_color)
-	name_label.add_theme_font_size_override("font_size", int(10 * (0.9 if side == "boss" else 1.0) * text_factor))
+	name_label.add_theme_font_size_override("font_size", int(12 * (0.95 if side == "boss" else 1.0) * text_factor))
 	name_label.clip_text = false
 	plate_box.add_child(name_label)
 	var bars := UiKit.hbox(0)
@@ -197,8 +171,10 @@ func setup(data: Dictionary) -> void:
 	_plate.position = Vector2(0, badge_height + figure_height + 2)
 	_plate.custom_minimum_size = Vector2(width, 0)
 	_plate.size = Vector2(width, plate_height)
-	add_child(_plate)
-	tooltip_text = Tr.t(str(data.get("tooltip", "")))
+	_plate.visible = show_plate
+	if show_plate:
+		add_child(_plate)
+	tooltip_text = str(data.get("tooltip", ""))
 	modulate = Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
 	_set_animation("dead" if down else "idle")
 	if not mouse_entered.is_connected(queue_redraw):
@@ -247,18 +223,6 @@ func update_data(data: Dictionary) -> void:
 			_bar_tween = create_tween()
 			_bar_tween.tween_interval(0.3)
 		_bar_tween.tween_property(_energy_bar, "value", energy, 0.25)
-
-func animate_bars() -> void:
-	if _pending_bar_targets.is_empty():
-		return
-	var bars := find_children("*", "ProgressBar", true, false)
-	for i in mini(_pending_bar_targets.size(), bars.size()):
-		if reduced_motion:
-			bars[i].value = _pending_bar_targets[i]
-		else:
-			create_tween().tween_property(bars[i], "value", _pending_bar_targets[i], 0.25)
-	_pending_bar_targets.clear()
-
 
 func play_animation(kind: String) -> void:
 	if kind == "revive":
@@ -332,8 +296,8 @@ func _process(delta: float) -> void:
 
 ## Makes the token a clickable target with number `number` (0 = not a target).
 func set_target(number: int, callback: Callable) -> void:
-	for connection in pressed.get_connections():
-		pressed.disconnect(connection.callable)
+	if _target_callback.is_valid() and pressed.is_connected(_target_callback):
+		pressed.disconnect(_target_callback)
 	target_number = number
 	disabled = number <= 0
 	focus_mode = Control.FOCUS_ALL if number > 0 else Control.FOCUS_NONE
@@ -343,10 +307,6 @@ func set_target(number: int, callback: Callable) -> void:
 	else:
 		_target_callback = Callable()
 	queue_redraw()
-
-
-func resting_modulate() -> Color:
-	return Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
 
 
 func _draw() -> void:
@@ -411,7 +371,7 @@ func _draw_figure(feet: Vector2) -> void:
 		var canvas: Vector2 = sprite_set.canvas(animation)
 		var target_height := 110.0
 		if sprite_set.is_enemy:
-			target_height = maxf(sprite_set.size_px() * 1.65, 92.0 if trainer else 0.0)
+			target_height = sprite_set.size_px() * 1.65
 		var scale := target_height / maxf(1.0, _body_height(animation))
 		var bob := 0.0 if reduced_motion or animation != "idle" else sin(_bob_time * TAU) * 2.0
 		var top_left := Vector2(roundf(feet.x - canvas.x * scale * 0.5),
