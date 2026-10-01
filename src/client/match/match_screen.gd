@@ -55,7 +55,7 @@ func setup(client: ClientApp) -> void:
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(middle)
 	var party_scroll := ScrollContainer.new()
-	party_scroll.custom_minimum_size = Vector2(clampf(300.0 * client.settings.text_scale, 300.0, 440.0), 0)
+	party_scroll.custom_minimum_size = Vector2(clampf(280.0 * client.settings.text_scale, 280.0, 360.0), 0)
 	party_scroll.follow_focus = true
 	party_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_party = UiKit.vbox(6)
@@ -77,17 +77,20 @@ func setup(client: ClientApp) -> void:
 	middle.add_child(center_panel)
 	_log = RichTextLabel.new()
 	_log.bbcode_enabled = false
+	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_log.scroll_following = true
 	_log.custom_minimum_size = Vector2(0, 90)
 	_log.focus_mode = Control.FOCUS_NONE
 	_log.add_theme_color_override("default_color", UiKit.TEXT_DIM)
-	var bottom := UiKit.hbox(10)
+	# Stack the history and its Tip so the lower-right panel never forces the
+	# entire screen wider than a narrow viewport at large text sizes.
+	var bottom := UiKit.vbox(6)
 	var log_panel := UiKit.panel(_log)
 	log_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bottom.add_child(log_panel)
-	# Tips sit next to the log (never over controls); they are short so the
-	# phase panel keeps its height.
+	# Tips stay below the log in a separate row, away from phase controls.
 	_tips = UiKit.vbox(0)
+	_tips.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bottom.add_child(_tips)
 	column.add_child(bottom)
 	_list_root = margin
@@ -120,12 +123,18 @@ func tip_slot() -> Container:
 func tip_width() -> float:
 	if _battle_mode:
 		return 210.0
+	if str(match_view().get("phase", "")) == "voting":
+		var viewport_width := get_viewport_rect().size.x
+		var width_ratio := 0.14 if viewport_width <= 1400.0 else 0.20
+		return minf(520.0, minf(viewport_width * width_ratio, 90.0))
 	return 390.0 if _camp_mode else 520.0
 
 
 ## The camp footer has space for one scrollable line beside Ready.
 func tip_body_height() -> float:
-	return 22.0 if _camp_mode else 92.0
+	if _camp_mode:
+		return 22.0
+	return 60.0 if str(match_view().get("phase", "")) == "voting" else 92.0
 
 
 func match_view() -> Dictionary:
@@ -615,8 +624,8 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 			client.toast("%s is now controlled by AI." % event["character"])
 		"match_ended":
 			_clear_floating_numbers()
-			client.banner("Victory!" if event["result"] == "victory" else "Defeat", 3.0,
-					"good" if event["result"] == "victory" else "bad")
+			# SummaryPanel displays the result itself, so no floating banner.
+			client.clear_banner()
 
 
 func _show_action_hit(client: ClientApp, target: String, text: String, color: Color) -> void:
@@ -755,6 +764,10 @@ func _build_party(view: Dictionary) -> void:
 
 
 func _build_panel(view: Dictionary) -> void:
+	# SummaryPanel displays the result itself; discard any banner raised by the
+	# match-ended event before the panel enters the viewport.
+	if str(view.get("phase", "")) in ["victory", "defeat"]:
+		app.clear_banner()
 	if _panel != null:
 		_center.remove_child(_panel)
 		_panel.queue_free()
@@ -780,6 +793,12 @@ func _build_panel(view: Dictionary) -> void:
 				_:
 					_panel = InfoPanel.new()
 	_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Voting owns its own route-list scroll area. Keep the panel itself pinned
+	# to the viewport so the ready/timer row cannot be scrolled away with it.
+	if phase == "voting":
+		_center_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	else:
+		_center_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	_center.add_child(_panel)
 	_panel.build(self, app, view)
 	var key := "%s-%d-%s" % [phase, int(view.get("layer", 0)), str(encounter.get("kind", "")) if encounter != null else ""]
@@ -815,7 +834,17 @@ func _add_log(line: String) -> void:
 	_log_lines.append(line)
 	if _log_lines.size() > 60:
 		_log_lines.pop_front()
-	_log.text = "\n".join(_log_lines)
+	var display_lines: Array[String] = []
+	for entry in _log_lines:
+		var remaining := entry
+		while remaining.length() > 64:
+			var split_at := remaining.rfind(" ", 64)
+			if split_at <= 0:
+				split_at = 64
+			display_lines.append(remaining.substr(0, split_at))
+			remaining = remaining.substr(split_at).strip_edges()
+		display_lines.append(remaining)
+	_log.text = "\n".join(display_lines)
 
 
 func _focused_id() -> String:

@@ -490,7 +490,9 @@ func hint(key: String) -> void:
 	var panel := UiKit.panel(box, "HighlightPanel")
 	panel.set_meta("hint", true)
 	panel.set_meta("hint_key", key)
-	var close := UiKit.button(UiText.LABELS["got_it"], func() -> void: _dismiss_hint(panel), false, "small")
+	var close_text := "OK" if width < 200.0 else UiText.LABELS["got_it"]
+	var close := UiKit.button(close_text, func() -> void: _dismiss_hint(panel), false, "small")
+	close.tooltip_text = UiText.LABELS["got_it"]
 	head.add_child(close)
 	if _current != null and _current.has_method("tip_slot"):
 		_current.tip_slot().add_child(panel)

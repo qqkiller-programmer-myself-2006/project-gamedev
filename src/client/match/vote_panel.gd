@@ -45,6 +45,9 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 			for i in range(1, _options.size()):
 				option_stack.add_child(_compact_card(screen, app, _options[i]))
 	var timer_row := UiKit.hbox(10)
+	# This row stays after the independently scrolling route list. Keep it at
+	# the bottom of the available panel height when the route details overflow.
+	timer_row.size_flags_vertical = Control.SIZE_SHRINK_END
 	if not solo:
 		timer_row.add_child(_ready_status(screen, view, vote))
 	_countdown = UiKit.label("", "heading")
@@ -88,28 +91,29 @@ func _featured_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> 
 	box.add_child(_vote_button(screen, app, option, mine, solo, "primary"))
 	var card := UiKit.panel(box, "HighlightPanel" if mine else "CardPanel")
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(250, 0)
+	card.custom_minimum_size = Vector2(0, 0)
 	return card
 
 
 func _compact_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> Control:
-	var box := UiKit.hbox(8)
-	box.add_child(Icons.rect(str(TYPE_ICONS.get(str(option["type"]), "info")), Icons.size_for_scale(app.settings.text_scale)))
-	box.add_child(UiKit.badge(UiText.type_tag(option["type"]), UiKit.ACCENT))
+	var box := UiKit.vbox(4)
+	var row := UiKit.hbox(8)
+	row.add_child(Icons.rect(str(TYPE_ICONS.get(str(option["type"]), "info")), Icons.size_for_scale(app.settings.text_scale)))
+	row.add_child(UiKit.badge(UiText.type_tag(option["type"]), UiKit.ACCENT))
+	var index := int(option["index"])
+	var solo := ClientApp.is_story_view(screen.match_view())
+	var mine: bool = screen.get_meta("my_vote_%d" % int(screen.match_view()["layer"]), -1) == index
+	row.add_child(_vote_button(screen, app, option, mine, solo, "secondary"))
+	box.add_child(row)
 	var detail := "Other path: %s" % str(option["name"])
-	if not ClientApp.is_story_view(screen.match_view()):
+	if not solo:
 		var voters: Array = option.get("voters", [])
 		var voter_names: Array[String] = []
 		for slot in voters: voter_names.append(_voter_name(screen, int(slot)))
 		detail += "  Votes: %d%s" % [voters.size(), " (%s)" % ", ".join(voter_names) if not voter_names.is_empty() else ""]
-	var title := UiKit.label(detail, "body")
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var title := UiKit.para(detail, "body")
 	title.tooltip_text = str(option.get("hint", ""))
 	box.add_child(title)
-	var index := int(option["index"])
-	var solo := ClientApp.is_story_view(screen.match_view())
-	var mine: bool = screen.get_meta("my_vote_%d" % int(screen.match_view()["layer"]), -1) == index
-	box.add_child(_vote_button(screen, app, option, mine, solo, "secondary"))
 	var card := UiKit.panel(box, "CompactHighlightPanel" if mine else "CompactPanel")
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	card.custom_minimum_size = Vector2(0, 44)
@@ -118,7 +122,7 @@ func _compact_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> C
 
 func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full: bool) -> VBoxContainer:
 	var box := UiKit.vbox(2)
-	var head := UiKit.hbox(6)
+	var head := UiKit.flow(6)
 	head.add_child(Icons.rect(str(TYPE_ICONS.get(str(option["type"]), "info")), Icons.size_for_scale(app.settings.text_scale)))
 	head.add_child(UiKit.badge(UiText.type_tag(option["type"]), UiKit.ACCENT))
 	head.add_child(UiKit.label(UiText.type_label(option["type"]), "dim"))
@@ -152,8 +156,10 @@ func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full:
 
 func _vote_button(screen: MatchScreen, app: ClientApp, option: Dictionary, mine: bool, solo: bool, kind: String) -> Button:
 	var index := int(option["index"])
-	var text := ("Chosen" if mine else "Choose this path: %s [%d]" % [str(option["name"]), index + 1]) if solo \
-		else ("Your vote" if mine else "Vote for this path: %s [%d]" % [str(option["name"]), index + 1])
+	# The route name is already displayed in the card. Keep the action label
+	# compact so large text does not force the card wider than its viewport.
+	var text := ("Chosen" if mine else "Choose this path [%d]" % [index + 1]) if solo \
+		else ("Your vote" if mine else "Vote for this path [%d]" % [index + 1])
 	var button := UiKit.button(text, func() -> void: _vote(screen, app, index), false, "selected" if mine else kind)
 	UiKit.disable(button, _voted, UiText.WHY["voted"])
 	button.set_meta("focus_id", "vote_%d" % index)
