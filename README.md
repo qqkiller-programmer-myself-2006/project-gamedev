@@ -97,3 +97,10 @@ docs/guides/       running, testing, web, staging
 docs/adr/           บันทึกการตัดสินใจสถาปัตยกรรม
 export_presets.cfg  preset Web / Windows / Linux Server
 ```
+
+## ประวัติและสารบัญเพิ่มเติม
+
+- [docs/README.md](docs/README.md) — สารบัญเอกสารทั้งหมด
+- [docs/history/](docs/history/) — log งานเก่า (ย้ายออกจาก README เดิมที่ยาว 451 บรรทัด)
+- [.ai/tasks/README.md](.ai/tasks/README.md) — สารบัญ task spec ของ AI executor
+- [docs/review/README.md](docs/review/README.md) — สารบัญรีวิวและ QA
