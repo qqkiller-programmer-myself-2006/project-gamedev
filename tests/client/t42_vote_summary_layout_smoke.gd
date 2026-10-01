@@ -3,7 +3,7 @@ extends SceneTree
 ## Summary and camp Tip bounds at large text.
 
 class LayoutMatch extends MatchScreen:
-	func build_corner_menu(_host: Control) -> PanelContainer:
+	func build_corner_menu(_host: Control, _with_corner: bool = true) -> PanelContainer:
 		return PanelContainer.new()
 
 

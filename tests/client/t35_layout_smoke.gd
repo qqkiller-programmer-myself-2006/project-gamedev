@@ -5,7 +5,7 @@ class FakeMatch extends MatchScreen:
 	var tip_target: Container
 	var tip_width_value := 210.0
 
-	func build_corner_menu(_host: Control) -> PanelContainer:
+	func build_corner_menu(_host: Control, _with_corner: bool = true) -> PanelContainer:
 		return PanelContainer.new()
 
 	func tip_slot() -> Container:
