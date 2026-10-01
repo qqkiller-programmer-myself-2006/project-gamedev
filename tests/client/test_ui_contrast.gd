@@ -52,7 +52,7 @@ func test_theme_has_the_navy_and_gold_variations() -> void:
 	assert_eq(focus.border_color, UiKit.GOLD, "focus ring is gold")
 	assert_true(focus.expand_margin_left > 0.0, "focus ring sits outside the button")
 	var hud: StyleBoxFlat = theme.get_stylebox("panel", "HudPanel")
-	assert_true(is_equal_approx(hud.bg_color.a, 0.88), "battle HUD is navy at 88%")
+	assert_true(is_equal_approx(hud.bg_color.a, 0.94), "battle HUD is navy at 94%")
 
 
 func test_hp_bar_text_is_outlined_on_both_fills() -> void:

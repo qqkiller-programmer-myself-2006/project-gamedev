@@ -399,11 +399,40 @@ func add_log(line: String) -> void:
 
 ## Apply a server event to the existing token animations. The server event is
 ## the source of truth; this method never infers an action from local input.
+func _play_skill_fx(event: Dictionary, actor_token: BattleToken) -> void:
+	var skill := str(event.get("skill", ""))
+	if skill.is_empty() or _app.settings.reduced_motion:
+		return
+	match SkillFx.anchor(skill):
+		"party":
+			var total := Vector2.ZERO
+			var count := 0
+			for id in _tokens:
+				if str(id).begins_with("p"):
+					total += _token_center(_tokens[id])
+					count += 1
+			if count > 0:
+				SkillFx.play(_stage, skill, total / count)
+		"actor":
+			if actor_token != null:
+				SkillFx.play(_stage, skill, _token_center(actor_token))
+		"target":
+			for result in event.get("results", []):
+				var target_token: BattleToken = _tokens.get(str(result.get("target", "")))
+				if target_token != null:
+					SkillFx.play(_stage, skill, _token_center(target_token))
+
+
+func _token_center(token: BattleToken) -> Vector2:
+	return token.position + token.size * 0.5
+
+
 func handle_event(event: Dictionary) -> void:
 	if str(event.get("type", "")) != "action_resolved":
 		return
 	var actor := str(event.get("actor", ""))
 	var actor_token: BattleToken = _tokens.get(actor)
+	_play_skill_fx(event, actor_token)
 	if actor_token != null:
 		actor_token.play_animation("attack")
 	for result in event.get("results", []):

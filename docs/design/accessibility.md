@@ -13,6 +13,8 @@
 | Reduce motion | ปิด fade/slide ของหน้าจอและ panel, การกะพริบของการ์ดเมื่อโดนตี, ตัวเลข damage ที่ลอยขึ้น (ยังแสดงค้างไว้ 1.2 วินาทีแต่ไม่ขยับ) และ fade ของ banner | ✅ |
 | Volume | 0–100% (0 = mute) | ✅ |
 
+Battle layout keeps the initiative list scrollable and compact, with the active character outlined in gold and named in text. The event log is a separate scrollable multi-line panel above the action bar. The action bar uses labelled controls with keyboard hints, while target highlighting uses both a gold outline and a target number. These layout changes preserve text scale and reduced-motion settings.
+
 ## สัญญาณเสียงและตัวชี้แนะทางภาพที่เทียบเท่า
 
 | เหตุการณ์ | เสียง | ภาพ |

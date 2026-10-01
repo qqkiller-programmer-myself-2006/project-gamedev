@@ -13,6 +13,9 @@ func test_audio_cues_resolve_and_unknown_music_is_ignored() -> void:
 	]
 	for cue in cue_names:
 		assert_true(sound_bank.has_cue(cue), "%s resolves to an asset or fallback player" % cue)
+	for cue in ["magic_cast", "heal", "buff", "debuff", "miss"]:
+		var player: AudioStreamPlayer = sound_bank._players[cue][0]
+		assert_true(player.stream is AudioStreamOggVorbis, "%s loads its sourced OGG asset" % cue)
 	sound_bank.play_music("unknown_track")
 	sound_bank.free()
 

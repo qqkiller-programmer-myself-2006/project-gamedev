@@ -14,30 +14,29 @@ The current goal is the Forest vertical slice described in
 - Accessibility checklist: [`docs/design/accessibility.md`](docs/design/accessibility.md)
 - Staging and QA checklist: [`docs/guides/staging.md`](docs/guides/staging.md)
 
-## Latest verification — 2026-10-01
+## Latest UI preview — 2026-10-01
 
-Checked `origin/main` at `cd3752e` (after PR #101, accessibility baseline) with
-Godot 4.7.2 on Windows:
+Captured `origin/main` at `7310d3e` (PRs #122 and #123) with Godot 4.7.2 on
+Windows. The updated title, lobby, voting, battle, and camp screens use more
+game-like proportions. Combat places initiative cards along the left, enemy
+cards above the battlefield, and Fight / Items / Focus in a large bottom action
+bar. The Merchant screen uses Shop, Inventory, and Equipment columns. PR #123
+adds animated skill-effect sprites.
 
-- **Headless suite: 416 passed, 1 failed** (160 s). The one failure is
-  `test_story_path_choice_hides_vote_status_and_multiplayer_keeps_it`. It is a
-  stale test, not a game bug: since PR #98 the voter status reads
-  "Ready N of M." but the test still looked for "Voted:". Fixed in the same PR as
-  this README update (assertion now checks "Ready"). Tracked in
-  [#91](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/91).
-- **Bot simulation** (`tools/dev/simulate.gd --seeds=20`): 1 human 15/20 (75%),
-  2 humans 13/20 (65%), 0 rejected commands. Every defeat was at the Guardian
-  Boss. Duo is under the 70–97% target, but 20 seeds is a small sample; rerun
-  with more seeds before tuning.
-- **Scripted Duo UI preview** (`tools/dev/ui_preview.gd --seed=11 --speed=24`):
-  22 screens from title to Defeat summary captured. Open UI issues seen in the
-  screenshots: placeholder text in the battle top-right ("All", "P OK", "S OK",
-  "..."), the target caption overlapping back-row heroes, floating damage numbers
-  stacking on the boss, and Path Voting alternatives below the fold. See
-  [#87](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/87).
+Run the scripted Duo preview to capture the current UI:
 
-This is automated checking, not a human multiplayer or platform-certification
-playtest.
+```bash
+godot --path . -s tools/dev/ui_preview.gd -- --out=build/ui --seed=7 --speed=8
+```
+
+This run produced 27 PNGs covering the title, lobby and character setup, settings,
+path voting, combat actions and targets, boss states, Merchant, combat rewards,
+skill-effect poses, and defeat summary. Build output is ignored by Git. The seed
+ended in Defeat and did not visit Rest, Story, or Treasure, so those screens are
+not represented in this capture. No test suite was run for this preview.
+
+Redesign references: [combat target selection](docs/references/redesign/combat_target.png)
+and [Merchant](docs/references/redesign/merchant_target.png).
 
 ## Where things live
 
