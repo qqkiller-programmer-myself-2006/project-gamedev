@@ -115,6 +115,7 @@ const CONFIRM := {
 	"leave_room": ["Leave the room?", "You go back to the title screen. Your slot is played by AI until someone takes it.", "Leave room"],
 	"leave_match": ["Leave the Match?", "You go back to the title screen and your character is played by AI for the rest of this Match.", "Leave Match"],
 	"reset_skills": ["Reset Skills?", "Every Skill Tree level of the %s Class goes back to 0. This costs %d Gems.", "Reset Skills"],
+	"buy_item": ["Buy %s?", "Spend %d Gold on this Item?", "Buy Item"],
 }
 
 ## Small labels and tooltips shared by several screens.
@@ -214,6 +215,26 @@ static func class_display(classes: Dictionary, class_id: String) -> String:
 	var entry = classes.get(class_id, {})
 	var display := str(entry.get("name", "")) if entry is Dictionary else ""
 	return display if not display.is_empty() else class_id.capitalize()
+
+
+## Item ids are stable protocol keys; use the content display name in player UI.
+static func item_display_name(content: Dictionary, item_id: String) -> String:
+	var items = content.get("items", {})
+	var item = items.get(item_id, {}) if items is Dictionary else {}
+	return str(item.get("name", item_id.replace("_", " ").capitalize())) if item is Dictionary else item_id.replace("_", " ").capitalize()
+
+
+static func item_name(item_id: String) -> String:
+	if _content_cache.is_empty():
+		_content_cache = ForestContent.load_default().data
+	return item_display_name(_content_cache, item_id)
+
+
+## The same boss/ending text can appear in the Cave; use the current region.
+static func region_text(text: String, view: Dictionary) -> String:
+	if region_of(view) == "Cave":
+		return text.replace("Forest", "Cave").replace("forest", "cave")
+	return text
 
 
 static func clock(seconds: float) -> String:

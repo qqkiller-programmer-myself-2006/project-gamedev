@@ -6,20 +6,12 @@ var _name: LineEdit
 var _server: LineEdit
 var _code: LineEdit
 var _status: Label
-var _seed: LineEdit
 var _content: Control
 var _view := "menu"
 var _story_picks: Array[OptionButton] = []
 var _story_preview_portrait: TextureRect
 var _story_preview_name: Label
 var _story_preview_class: Label
-## DEV Playtest panel: [DevJump target, label] and the player's Class ("" = keep Classless).
-const PLAYTEST_STARTS := [
-	["journey", "Journey start"], ["combat", "Combat (Layer 1)"], ["merchant", "Merchant"],
-	["rest", "Rest camp"], ["class", "Class Encounter"], ["story", "Story event"],
-	["cave", "Cave (Layer 5 combat)"], ["boss", "Boss"],
-]
-const PLAYTEST_CLASSES := ["classless", "swordsman", "archer", "mage", "guardian", "assassin"]
 const STORY_CLASSES := ["swordsman", "archer", "mage", "guardian", "assassin"]
 const STORY_NAMES := ["Arin", "Bram", "Cora", "Dain", "Wren"]
 
@@ -48,13 +40,13 @@ func _build_chrome() -> void:
 	title.add_theme_color_override("font_outline_color", UiKit.BG)
 	title.add_theme_constant_override("outline_size", 10)
 	logo.add_child(title)
-	var subtitle := UiKit.label("Forest - a co-op journey", "heading")
+	var subtitle := UiKit.label("Forest to Cave - a co-op journey", "heading")
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	subtitle.position.y = 70
 	logo.add_child(subtitle)
 	add_child(logo)
-	var build := UiKit.label("BUILD 0.10  |  FOREST SLICE", "small", UiKit.TEXT_DIM)
+	var build := UiKit.label("BUILD 0.10  |  FOREST TO CAVE", "small", UiKit.TEXT_DIM)
 	build.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	build.autowrap_mode = TextServer.AUTOWRAP_OFF
 	build.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -69,26 +61,12 @@ func _show_menu() -> void:
 	_clear_content()
 	var body := UiKit.vbox(10)
 	body.custom_minimum_size = Vector2(340, 0)
-	var panel := UiKit.panel(body)
-	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	panel.set_meta("base_y", 150.0)
-	panel.position = Vector2(88, _top(150))
-	panel.size = Vector2(390, 0)
-	add_child(panel)
-	_content = panel
 	body.add_child(UiKit.label("WELCOME, TRAVELLER", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.para("Choose your path into the forest.", "dim"))
 	var play := UiKit.primary("Play", _show_play)
 	Icons.apply_to_button(play, "play", _app.settings.text_scale)
 	play.set_meta("focus_id", "play")
 	body.add_child(play)
-	if _app.can_playtest():
-		var dev := UiKit.button("[DEV] Playtest  >", _show_playtest, true)
-		dev.set_meta("focus_id", "playtest")
-		dev.set_meta("dev", true)
-		dev.tooltip_text = "DEV: embedded server, single-player; start at any scene"
-		dev.add_theme_color_override("font_color", UiKit.WARN)
-		body.add_child(dev)
 	var settings := UiKit.button("Settings [F2]", _app.open_settings)
 	Icons.apply_to_button(settings, "settings", _app.settings.text_scale)
 	settings.set_meta("focus_id", "settings")
@@ -101,44 +79,7 @@ func _show_menu() -> void:
 		var quit := UiKit.button("Quit", func() -> void: _app.stop_dev_playtest(); get_tree().quit())
 		Icons.apply_to_button(quit, "quit", _app.settings.text_scale)
 		body.add_child(quit)
-	UiKit.focus_first(body)
-
-## DEV panel: pick the scene to start at, the player's Class and a fixed seed.
-func _show_playtest() -> void:
-	_view = "playtest"
-	_clear_content()
-	var body := UiKit.vbox(8)
-	body.custom_minimum_size = Vector2(420, 0)
-	var panel := UiKit.panel(body)
-	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	panel.set_meta("base_y", 150.0)
-	panel.position = Vector2(88, _top(150))
-	panel.size = Vector2(460, 0)
-	add_child(panel)
-	_content = panel
-	body.add_child(UiKit.label("[DEV] PLAYTEST", "heading", UiKit.WARN))
-	body.add_child(UiKit.para("Single-player match on a local server. Same seed = same route and fights.", "dim"))
-	body.add_child(UiKit.label("Start at", "dim"))
-	var start_at := OptionButton.new()
-	for i in PLAYTEST_STARTS.size():
-		start_at.add_item(PLAYTEST_STARTS[i][1])
-	body.add_child(start_at)
-	body.add_child(UiKit.label("Class", "dim"))
-	var class_pick := OptionButton.new()
-	for entry in PLAYTEST_CLASSES:
-		class_pick.add_item(entry.capitalize())
-	body.add_child(class_pick)
-	body.add_child(UiKit.label("Seed (optional number)", "dim"))
-	_seed = _line_edit("", "e.g. 7", 12)
-	_seed.custom_minimum_size.y = 34
-	body.add_child(_seed)
-	var go := UiKit.primary("Start Playtest", func() -> void:
-		_app.start_dev_playtest(_seed.text, PLAYTEST_STARTS[start_at.selected][0], PLAYTEST_CLASSES[class_pick.selected]))
-	go.set_meta("focus_id", "playtest_start")
-	body.add_child(go)
-	var back := UiKit.button("Back [Esc]", _show_menu)
-	Icons.apply_to_button(back, "back", _app.settings.text_scale)
-	body.add_child(back)
+	_content = _attach_narrow_panel(body, 390, 150.0)
 	UiKit.focus_first(body)
 
 func _show_play() -> void:
@@ -146,13 +87,6 @@ func _show_play() -> void:
 	_clear_content()
 	var body := UiKit.vbox(12)
 	body.custom_minimum_size = Vector2(420, 0)
-	var panel := UiKit.panel(body)
-	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	panel.set_meta("base_y", 175.0)
-	panel.position = Vector2(88, _top(175))
-	panel.size = Vector2(460, 0)
-	add_child(panel)
-	_content = panel
 	body.add_child(UiKit.label("CHOOSE YOUR JOURNEY", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.label("Story · offline, control all five", "body"))
 	body.add_child(UiKit.para("Story uses an isolated profile: Human only, with no online Races, Boons, or class-tree bonuses.", "dim"))
@@ -178,6 +112,7 @@ func _show_play() -> void:
 	var back := UiKit.button("Back [Esc]", _show_menu)
 	Icons.apply_to_button(back, "back", _app.settings.text_scale)
 	body.add_child(back)
+	_content = _attach_narrow_panel(body, 460, 175.0)
 	UiKit.focus_first(body)
 
 func _show_story_setup() -> void:
@@ -312,13 +247,6 @@ func _show_multiplayer() -> void:
 	_clear_content()
 	var body := UiKit.vbox(10)
 	body.custom_minimum_size = Vector2(520, 0)
-	var panel := UiKit.panel(body)
-	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	panel.set_meta("base_y", 150.0)
-	panel.position = Vector2(88, _top(150))
-	panel.size = Vector2(560, 0)
-	add_child(panel)
-	_content = panel
 	body.add_child(UiKit.label("ENTER THE FOREST", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.label("Your name (shown to other players)", "dim"))
 	_name = _line_edit(_app.settings.player_name, "e.g. Arin", 16)
@@ -355,6 +283,7 @@ func _show_multiplayer() -> void:
 	Icons.apply_to_button(back, "back", _app.settings.text_scale)
 	back.set_meta("focus_id", "back")
 	body.add_child(back)
+	_content = _attach_narrow_panel(body, 560, 150.0)
 	create.grab_focus.call_deferred()
 	if _app.options.has("auto") and not _name.text.is_empty():
 		(_join if not _code.text.is_empty() else _create).call_deferred()
@@ -364,36 +293,69 @@ func _show_credits() -> void:
 	_clear_content()
 	var body := UiKit.vbox(14)
 	body.custom_minimum_size = Vector2(420, 0)
-	var panel := UiKit.panel(body)
-	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	panel.set_meta("base_y", 150.0)
-	panel.position = Vector2(88, _top(150))
-	panel.size = Vector2(470, 0)
-	add_child(panel)
-	_content = panel
 	body.add_child(UiKit.label("BEYOND THE WORLD'S END", "title", UiKit.ACCENT))
 	body.add_child(UiKit.label("Made with Godot 4.7", "heading"))
 	body.add_child(UiKit.para("Font: Pixelify Sans, OFL\nCharacter art by the project owner.", "body"))
 	var back := UiKit.primary("Back [Esc]", _show_menu, false)
 	Icons.apply_to_button(back, "back", _app.settings.text_scale)
 	body.add_child(back)
+	_content = _attach_narrow_panel(body, 470, 150.0)
 	UiKit.focus_first(body)
 
 ## Panels start lower with bigger text so they clear the logo's subtitle.
 func _top(y: float) -> float:
 	return y + 50.0 * maxf(0.0, _app.settings.text_scale - 1.0)
 
+
+## Centre narrow title panels while preserving a clear strip for the camp scene.
+## Oversized content scrolls inside its panel, and follow_focus keeps keyboard
+## navigation visible when the text scale is increased.
+func _attach_narrow_panel(body: Control, width: float, base_y: float) -> PanelContainer:
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.follow_focus = true
+	scroll.add_child(body)
+	var panel := UiKit.panel(scroll)
+	panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	panel.anchor_left = 0.5
+	panel.anchor_right = 0.5
+	panel.offset_left = -width * 0.5
+	panel.offset_right = width * 0.5
+	panel.set_meta("base_y", base_y)
+	panel.set_meta("panel_width", width - 32.0)
+	panel.set_meta("narrow_title_panel", true)
+	add_child(panel)
+	_layout_narrow_panel(panel)
+	return panel
+
+
+func _layout_narrow_panel(panel: PanelContainer) -> void:
+	var scroll := panel.get_child(0) as ScrollContainer
+	var body := scroll.get_child(0) as Control
+	var top := _top(float(panel.get_meta("base_y", 150.0)))
+	var viewport_height := get_viewport_rect().size.y if is_inside_tree() else size.y
+	# The menu needs room for all four actions at large text sizes. It can cover
+	# the campfire scene, but must stay below the title and subtitle.
+	var max_panel_height := viewport_height - top - 24.0 if _view == "menu" else maxf(180.0, viewport_height * 0.64 - top)
+	var scroll_height := max_panel_height - 32.0 if _view == "menu" else minf(body.get_combined_minimum_size().y, max_panel_height - 32.0)
+	scroll.custom_minimum_size = Vector2(float(panel.get_meta("panel_width", 0.0)), scroll_height)
+	panel.offset_top = top
+	panel.offset_bottom = top + scroll_height + 32.0
+
 func _notification(what: int) -> void:
 	# The text size can change while the title is open (Settings).
 	if what == NOTIFICATION_THEME_CHANGED and _app != null and is_instance_valid(_content):
-		var top := _top(float(_content.get_meta("base_y", 150.0)))
-		if _view == "story_setup":
+		if _content.has_meta("narrow_title_panel"):
+			_layout_narrow_panel(_content as PanelContainer)
+		elif _view == "story_setup":
+			var top := _top(float(_content.get_meta("base_y", 150.0)))
 			# Story setup panel is anchored TOP_WIDE with a finite height
 			# (offset_bottom stays at -24); only move the top so text-scale
 			# changes keep it anchored without collapsing it.
 			_content.offset_top = top
 		else:
-			_content.position.y = top
+			_content.position.y = _top(float(_content.get_meta("base_y", 150.0)))
 
 func _clear_content() -> void:
 	if is_instance_valid(_content):

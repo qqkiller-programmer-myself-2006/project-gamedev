@@ -20,6 +20,102 @@ func test_region_of_reads_boss_from_the_snapshot() -> void:
 	assert_eq(UiText.region_of({"layer": 5, "phase": "boss"}), "Cave")
 	assert_eq(UiText.region_of({"layer": 2, "phase": "combat"}), "Forest")
 	assert_eq(UiText.region_of({"layer": 5, "phase": "combat"}), "Cave")
+	assert_eq(UiText.region_text("Guardian of the Forest", {"layer": 5, "phase": "boss"}), "Guardian of the Cave")
+	assert_eq(UiText.region_text("The Forest waits", {"layer": 2, "phase": "combat"}), "The Forest waits")
+
+
+func test_item_ids_use_content_names_in_client_text() -> void:
+	assert_eq(UiText.item_name("herb"), "Healing Herb")
+	assert_eq(UiText.item_name("forest_tonic"), "Forest Tonic")
+	assert_eq(UiText.item_name("unknown_item"), "Unknown Item", "unknown ids keep a readable fallback")
+
+
+func test_battle_encounter_caption_has_no_placeholder_target_text() -> void:
+	var battle := BattleView.new()
+	battle._region = Label.new()
+	battle._region_sub = Label.new()
+	battle._combat = {}
+	battle._build_region({"phase": "combat", "layer": 1, "layers_total": 5,
+		"encounter": {"kind": "combat", "name": "Wolf Trail"}})
+	assert_eq(battle._region_sub.text, "\"Wolf Trail\"")
+	assert_false(battle._region_sub.text.contains("All"), "placeholder target text is removed")
+	battle.free()
+
+
+func test_camp_uses_the_content_backdrop_for_each_region() -> void:
+	var content := ForestContent.load_default().data
+	assert_eq(CampView.backdrop_for_layer(content, 1), "forest")
+	assert_eq(CampView.backdrop_for_layer(content, 5), "cave")
+
+
+func test_floating_damage_numbers_stack_with_readable_spacing() -> void:
+	var screen := MatchScreen.new()
+	var anchor := Control.new()
+	anchor.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	screen.anchors["e0"] = anchor
+	screen.add_child(anchor)
+	var app := ClientApp.new()
+	app.settings = ClientSettings.new()
+	screen.app = app
+	# The lane stride stays larger than the rendered title text height.
+	assert_true(screen.get_script().source_code.contains("-42.0 * lane"), "stacked damage numbers use a full text-line stride")
+	screen.free()
+	app.free()
+
+
+func test_hp_bars_share_battle_color_and_room_for_large_text() -> void:
+	var bar := UiKit.hp_bar(10, 20)
+	var fill := bar.get_theme_stylebox("fill") as StyleBoxFlat
+	assert_eq(fill.bg_color, UiKit.BAR_HP, "party and battle HP fills use one color")
+	assert_eq(bar.custom_minimum_size.y, 30.0, "large HP digits fit inside the bar")
+	bar.free()
+
+
+func test_defeated_tokens_keep_their_down_state_after_a_hit() -> void:
+	var token := BattleToken.new()
+	token.setup({"id": "e0", "side": "enemy", "name": "Wolf", "kind": "grey_wolf", "hp": 8, "max_hp": 20})
+	token.play_animation("dead")
+	assert_true(token.down, "death state is applied even when there is no sprite animation")
+	assert_eq(token.modulate, Color(0.55, 0.55, 0.55, 0.85), "the defeated token remains dim")
+	token.free()
+
+
+func test_merchant_buy_confirmation_exists() -> void:
+	assert_true(UiText.CONFIRM.has("buy_item"), "merchant purchases have a confirmation template")
+	assert_true(UiText.CONFIRM["buy_item"][0].contains("%s"))
+	assert_true(UiText.CONFIRM["buy_item"][1].contains("%d"))
+	var app := ClientApp.new()
+	app.settings = ClientSettings.new()
+	app.settings.seen_hints.append("merchant")
+	app._overlay_holder = Control.new()
+	app.add_child(app._overlay_holder)
+	app.snapshot = {"room": {"your_slot": 0, "slots": []}}
+	var screen := MatchScreen.new()
+	screen.app = app
+	var merchant := MerchantPanel.new()
+	merchant.build(screen, app, {"gold": 50, "encounter": {
+		"name": "The Shop", "greeting": "Welcome.", "deadline": -1.0, "you_are_ready": false,
+		"ready": [], "stock": [{"item": "herb", "name": "Healing Herb", "price": 10,
+			"remaining": 2, "affordable": true, "description": "Restores HP."}]}})
+	assert_true(merchant.handle_key(screen, app, KEY_1), "the shortcut is handled")
+	assert_true(app._overlay_holder.get_child(0) is ConfirmDialog, "the shortcut opens a confirmation before buying")
+	var dialog := app._overlay_holder.get_child(0) as ConfirmDialog
+	assert_true(_node_has_text(dialog, "Buy Healing Herb?"), "the dialog names the item")
+	assert_true(_node_has_text(dialog, "Spend 10 Gold"), "the dialog states the price")
+	merchant.free()
+	screen.free()
+	app.free()
+
+
+func _node_has_text(node: Node, wanted: String) -> bool:
+	if node is Label and str(node.text).contains(wanted):
+		return true
+	if node is Button and str(node.text).contains(wanted):
+		return true
+	for child in node.get_children():
+		if _node_has_text(child, wanted):
+			return true
+	return false
 
 
 func test_every_class_has_a_capitalised_display_name() -> void:

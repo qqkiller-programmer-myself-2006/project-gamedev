@@ -77,6 +77,12 @@ Fixes that did not work, or only partly worked, are reported again and marked.
 ### Post-review disposition
 
 - **F4 (Story lead profile): not a defect under the accepted ADR-0014 policy.** ADR-0014 specifies an isolated in-memory Story profile with Human and no Boons or class-tree meta, which the current `StoryLauncher` and `Room` implement. The earlier review text calling for the lead's online Race/Boons conflicts with that decision. Keep the no-meta behavior unless the owner accepts a new ADR; if changed, specify local profile sourcing and save validation first.
+- **F5 (same-token sessions): addressed in the current profile store.** Saves advance each session's loaded version independently; a 409 marks that session stale and stops further writes rather than retrying old data over a newer profile. The player receives the existing save-failure event.
+- **F6 (blocking profile GET): partially addressed.** `HttpProfileSender` caps GET at one second. Loading is still synchronous on the server main loop, so joins may pause for up to that bound; asynchronous admission and per-token caching remain possible follow-ups.
+- **F7 (shutdown save loss): addressed.** `HttpProfileSender.stop()` drains queued/in-flight saves within a two-second total budget before joining its worker.
+- **F8 (unseen save notice): addressed.** `LobbyScreen.show_events()` displays `profile_unavailable` as a toast.
+- **F17 (deployment files in exports): addressed.** All three presets exclude `deploy/*`. `_contact.png` and backdrop compression were not changed in this follow-up.
+- **F19 (manifest shipping): verified with a real Web pack.** Godot 4.7.2 exported `.tmp-t76-web.pck`; byte inspection found both `assets/heroes/manifest.json` and `assets/enemies/manifest.json`, and no `deploy/` path. The temporary pack was removed after inspection.
 
 Notes (not scored):
 - T27 dev jump grants levels and Gold and can jump to the Boss. The embedded Playtest server then saves real Gems to the

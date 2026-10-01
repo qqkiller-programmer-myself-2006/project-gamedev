@@ -12,6 +12,7 @@ static var _manifest: Dictionary = {}
 static var _loaded := false
 static var _enemy_manifest: Dictionary = {}
 static var _enemy_loaded := false
+static var _texture_cache: Dictionary = {}
 var class_id := ""
 var enemy_id := ""
 var variant := ""
@@ -64,7 +65,7 @@ func frames(animation: String) -> Array[Texture2D]:
 			animation = "idle"
 	if is_enemy and not variant.is_empty() and animation == "idle":
 		var variant_path := ENEMY_ROOT + enemy_id + "/variants/" + variant + ".png"
-		var variant_texture := load(variant_path) as Texture2D
+		var variant_texture := _cached_texture(variant_path)
 		if variant_texture != null:
 			return [variant_texture]
 	var listed = data.get("animations", {}).get(animation, [])
@@ -92,7 +93,7 @@ func frames(animation: String) -> Array[Texture2D]:
 	var result: Array[Texture2D] = []
 	for filename in listed:
 		var base := ENEMY_ROOT + enemy_id + "/" if is_enemy else ROOT + class_id + "/"
-		var texture := load(base + str(filename)) as Texture2D
+		var texture := _cached_texture(base + str(filename))
 		if texture != null:
 			result.append(texture)
 	return result
@@ -128,7 +129,7 @@ func baseline(animation: String) -> float:
 func canvas(animation: String) -> Vector2:
 	animation = _key(animation)
 	if is_enemy and not variant.is_empty() and animation == "idle":
-		var texture := load(ENEMY_ROOT + enemy_id + "/variants/" + variant + ".png") as Texture2D
+		var texture := _cached_texture(ENEMY_ROOT + enemy_id + "/variants/" + variant + ".png")
 		if texture != null:
 			return Vector2(texture.get_width(), texture.get_height())
 	var size: Array = data.get("canvas", {}).get(animation, [1, 1])
@@ -142,6 +143,11 @@ func _key(animation: String) -> String:
 
 func size_px() -> float:
 	return float(data.get("size_px", 48))
+
+static func _cached_texture(path: String) -> Texture2D:
+	if not _texture_cache.has(path):
+		_texture_cache[path] = load(path) as Texture2D
+	return _texture_cache[path] as Texture2D
 
 static func _load_enemy_manifest() -> void:
 	if _enemy_loaded:

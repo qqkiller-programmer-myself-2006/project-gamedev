@@ -38,7 +38,27 @@ func _run() -> void:
 			root.add_child(battle)
 			battle.setup(screen, app)
 			battle._region.text = "Forest (1/5)"
+			await process_frame
+			var log_rect := Rect2(battle._log.get_parent().global_position, battle._log.get_parent().size)
+			if log_rect.position.x < 0 or log_rect.position.y < resolution.y - 170 or log_rect.end.y > resolution.y:
+				push_error("battle log leaves its clear lower-left lane at %s scale %.1f: %s" % [resolution, scale, log_rect])
+				failed = true
+			battle.add_log("older combat event")
+			battle.add_log("Newest combat event")
+			if not battle._log.get_parsed_text().contains("Newest combat event"):
+				push_error("battle log does not show the newest line at %s scale %.1f" % [resolution, scale])
+				failed = true
+			battle._combat = {"round": 1, "turn_order": ["e0"], "round_order": ["e0"], "actor": ""}
+			battle._build_timeline({"party": [], "enemies": [{"id": "e0", "hp": 20,
+				"max_hp": 20, "weakness": ["Fire", "Ice", "Lightning", "Poison"]}]})
+			var weak_label := battle._timeline.get_child(1).get_child(0).get_child(2) as Label
+			if weak_label == null or weak_label.autowrap_mode == TextServer.AUTOWRAP_OFF:
+				push_error("boss weakness text does not wrap at %s scale %.1f" % [resolution, scale])
+				failed = true
 			var scroll := battle._timeline_scroll
+			if scroll.global_position.y + scroll.size.y < 530:
+				push_error("battle timeline viewport is too short to keep the full boss entry visible at %s scale %.1f" % [resolution, scale])
+				failed = true
 			for i in 10:
 				var card := PanelContainer.new()
 				card.custom_minimum_size = Vector2(150, 70 * scale)
