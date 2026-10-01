@@ -14,12 +14,14 @@ The three Kenney packs form a practical, consistently stylized SFX base. The mus
 | [Glizzy Elf Forest RPG Music Pack](https://opengameart.org/content/glizzy-elf-forest-rpg-music-pack) | Zane Little Music | CC0. No attribution required. Optional credit: `Music by Zane Little Music (CC0), “Glizzy Elf Forest” — https://opengameart.org/content/glizzy-elf-forest-rpg-music-pack`. | ZIP 44.4 MB; 5 listed pieces: Forest Loop, Battle Intro, Battle Loop, Victory Intro, Victory Loop. Internal audio codec/container is **unverified** on the listing. | Forest exploration, regular battle, battle transition and victory. Not listed as a boss or title/lobby theme. |
 | [FREE Contemplative Fantasy Music Pack](https://opengameart.org/content/free-contemplative-fantasy-music-pack) | YannZ | CC-BY 4.0. Required credit text from the source: `Music by YannZ https://yannz41.itch.io Spotify: https://open.spotify.com/intl-it/artist/76CUcHd0t0XViSm9YBbHBw Contact: yziango@gmail.com`. | 15 listed OGG variants/tracks (menu, pause, one-shot, credits, 10 modular loops, in-game loop); OGG files range approximately 3.2–11.1 MB in the listing. MP3 equivalents are also listed. | Main-menu/title and lobby music; calm exploration/transition loops. The composer describes introspective, ambient fantasy music. It is a calmer style than the action music above. |
 | [Hope (Orchestral battle music)](https://opengameart.org/content/hopeorchestral-battle-music) | MintoDog | CC0. No attribution required. | OGG 2.2 MB; FLAC 7.6 MB; one explicitly loopable track. | Optional Guardian boss battle alternative, subject to audition: it is bright orchestral battle music, rather than explicitly dark/boss music. |
+| [Determined Pursuit (epic orchestra loop)](https://opengameart.org/content/determined-pursuit-epic-orchestra-loop) | Emma_MA | CC0. The source says it entered the public domain in January 2017; no attribution is required. | Stereo WAV, 108 seconds, 19.1 MB; explicitly loopable. Converted to OGG Vorbis quality 4 at 2.1 MB. | Guardian boss loop: frantic strings, determined horns, busy drums; normalized to -13.3 LUFS, within 0.5 LU of the regular battle track. |
+| [FREE Contemplative Fantasy Music Pack](https://opengameart.org/content/free-contemplative-fantasy-music-pack) — Pause Menu OST, "On a tous besoin de temps" | YannZ | CC-BY 4.0. Required credit text: `Music by YannZ https://yannz41.itch.io Spotify: https://open.spotify.com/intl-it/artist/76CUcHd0t0XViSm9YBbHBw Contact: yziango@gmail.com`. | OGG, 16 seconds, 3.2 MB source; converted to OGG Vorbis quality 4 at 307 KB. The source is loopable. | Somber defeat music, configured to play once; normalized to -24.3 LUFS, within 1.7 LU of the existing victory music. |
 
 ### Scope and gaps
 
 The enemy-death sourcing gap is resolved with `Monster SFX.wav` by marcelofg55 (CC0) from [Monster SFX](https://opengameart.org/content/monster-sfx); the in-game cue uses a trimmed version. `player_down` continues to use the existing Kenney sample.
 
-This shortlist is deliberately small and uses six creators/packs plus a single optional boss track. The Kenney SFX pages do not claim dedicated fantasy spell, heal, buff/debuff, critical, miss or countdown sounds. The `magic_cast`, `heal`, `buff`, `debuff`, `miss`, and `critical` cues now use separately sourced short samples (see `assets/audio/CREDITS.md`); `critical` uses `bing1.wav` from BMacZero's CC0 Metal Impact Sounds pack. The music shortlist has no explicit defeat loop or dedicated Guardian boss composition; Kenney loss jingles can serve as defeat stings, and Hope is only a possible boss loop. A dedicated boss/defeat score remains a sourcing gap.
+The Kenney SFX pages do not claim dedicated fantasy spell, heal, buff/debuff, critical, miss or countdown sounds. The `magic_cast`, `heal`, `buff`, `debuff`, `miss`, and `critical` cues now use separately sourced short samples (see `assets/audio/CREDITS.md`); `critical` uses `bing1.wav` from BMacZero's CC0 Metal Impact Sounds pack. The dedicated boss and defeat music gap is resolved: `Determined Pursuit` by Emma_MA supplies the explicitly loopable orchestral boss cue, and YannZ's melancholic pause-menu piece supplies one-shot defeat music. `music_guardian.ogg` (Hope) remains in the repository and credits as a fallback asset; the Guardian cue points to the heavier boss track. The `defeat_sting` SFX remains unchanged.
 
 ## Cue mapping
 
@@ -53,9 +55,9 @@ This shortlist is deliberately small and uses six creators/packs plus a single o
 | `music_title` / `music_lobby` (new) | YannZ main menu loopable track (`Ravi de te revoir`); one selection can cover both title and lobby initially. |
 | `music_forest` (new) | Glizzy Elf Forest Loop. |
 | `music_battle` (new) | Glizzy Battle Loop. |
-| `music_guardian` (new) | Hope orchestral loop as a provisional option; dedicated boss score is still a gap. |
+| `music_guardian` (new) | Emma_MA's `Determined Pursuit (epic orchestra loop)` (CC0): 108-second loopable orchestral boss cue at `assets/audio/music/music_boss_dark.ogg`. |
 | `music_victory` (new) | Glizzy Victory Loop. |
-| `music_defeat` (new) | No dedicated defeat loop verified. Use a short Kenney lose jingle then silence/low ambience until a score is sourced. |
+| `music_defeat` (new) | YannZ's `On a tous besoin de temps` pause-menu piece (CC-BY 4.0): 16 seconds at `assets/audio/music/music_defeat.ogg`, configured to play once; the source is also loopable. |
 
 ## Licence notes and source checks
 

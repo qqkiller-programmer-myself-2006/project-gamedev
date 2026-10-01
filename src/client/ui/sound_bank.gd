@@ -40,9 +40,9 @@ const MUSIC_ASSETS := {
 	"lobby": "res://assets/audio/music/music_title.ogg",
 	"forest": "res://assets/audio/music/music_forest.ogg",
 	"battle": "res://assets/audio/music/music_battle.ogg",
-	"guardian": "res://assets/audio/music/music_guardian.ogg",
+	"guardian": "res://assets/audio/music/music_boss_dark.ogg",
 	"victory": "res://assets/audio/music/music_victory.ogg",
-	"defeat": "res://assets/audio/sfx/defeat_sting.ogg",
+	"defeat": "res://assets/audio/music/music_defeat.ogg",
 }
 
 const FALLBACK_NOTES := {

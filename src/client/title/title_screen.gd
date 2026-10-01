@@ -296,7 +296,7 @@ func _show_credits() -> void:
 	body.add_child(UiKit.label("BEYOND THE WORLD'S END", "title", UiKit.ACCENT))
 	body.add_child(UiKit.label("Made with Godot 4.7", "heading"))
 	body.add_child(UiKit.para("Font: Pixelify Sans, OFL\nCharacter art by the project owner.", "body"))
-	body.add_child(UiKit.para("Audio: Kenney, Zane Little Music, MintoDog, marcelofg55, JaggedStone, artisticdude and Brian MacIntosh (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md", "dim"))
+	body.add_child(UiKit.para("Audio: Kenney, Zane Little Music, MintoDog, Emma_MA, marcelofg55, JaggedStone, artisticdude and Brian MacIntosh (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md", "dim"))
 	var back := UiKit.primary("Back [Esc]", _show_menu, false, "cancel")
 	Icons.apply_to_button(back, "back", _app.settings.text_scale)
 	body.add_child(back)
