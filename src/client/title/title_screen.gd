@@ -63,20 +63,20 @@ func _show_menu() -> void:
 	body.custom_minimum_size = Vector2(340, 0)
 	body.add_child(UiKit.label("WELCOME, TRAVELLER", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.para("Choose your path into the forest.", "dim"))
-	var play := UiKit.primary("Play", _show_play)
+	var play := UiKit.primary("Play", _show_play, true)
 	Icons.apply_to_button(play, "play", _app.settings.text_scale)
 	play.set_meta("focus_id", "play")
 	body.add_child(play)
-	var settings := UiKit.button("Settings [F2]", _app.open_settings)
+	var settings := UiKit.button("Settings [F2]", _app.open_settings, true)
 	Icons.apply_to_button(settings, "settings", _app.settings.text_scale)
 	settings.set_meta("focus_id", "settings")
 	body.add_child(settings)
-	var credits := UiKit.button("Credits", _show_credits)
+	var credits := UiKit.button("Credits", _show_credits, true)
 	Icons.apply_to_button(credits, "credits", _app.settings.text_scale)
 	credits.set_meta("focus_id", "credits")
 	body.add_child(credits)
 	if not OS.has_feature("web"):
-		var quit := UiKit.button("Quit", func() -> void: _app.stop_dev_playtest(); get_tree().quit())
+		var quit := UiKit.button("Quit", func() -> void: _app.stop_dev_playtest(); get_tree().quit(), true)
 		Icons.apply_to_button(quit, "quit", _app.settings.text_scale)
 		body.add_child(quit)
 	_content = _attach_narrow_panel(body, 390, 150.0)
@@ -327,10 +327,14 @@ func _attach_narrow_panel(body: Control, width: float, base_y: float) -> PanelCo
 	panel.set_meta("narrow_title_panel", true)
 	add_child(panel)
 	_layout_narrow_panel(panel)
+	# Fonts and icons settle after the first frame; measure again so the panel hugs its buttons.
+	_layout_narrow_panel.call_deferred(panel)
 	return panel
 
 
 func _layout_narrow_panel(panel: PanelContainer) -> void:
+	if not is_instance_valid(panel) or panel.get_child_count() == 0:
+		return
 	var scroll := panel.get_child(0) as ScrollContainer
 	var body := scroll.get_child(0) as Control
 	var top := _top(float(panel.get_meta("base_y", 150.0)))
@@ -338,7 +342,7 @@ func _layout_narrow_panel(panel: PanelContainer) -> void:
 	# The menu needs room for all four actions at large text sizes. It can cover
 	# the campfire scene, but must stay below the title and subtitle.
 	var max_panel_height := viewport_height - top - 24.0 if _view == "menu" else maxf(180.0, viewport_height * 0.64 - top)
-	var scroll_height := max_panel_height - 32.0 if _view == "menu" else minf(body.get_combined_minimum_size().y, max_panel_height - 32.0)
+	var scroll_height := minf(body.get_combined_minimum_size().y, max_panel_height - 32.0)
 	scroll.custom_minimum_size = Vector2(float(panel.get_meta("panel_width", 0.0)), scroll_height)
 	panel.offset_top = top
 	panel.offset_bottom = top + scroll_height + 32.0

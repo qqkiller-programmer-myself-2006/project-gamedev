@@ -701,7 +701,7 @@ func _build_party(view: Dictionary) -> void:
 		if class_key == "classless": class_key = "bram"
 		var portrait_path := "res://assets/heroes/%s/portrait.png" % class_key
 		if ResourceLoader.exists(portrait_path): portrait.texture = load(portrait_path)
-		portrait.custom_minimum_size = Vector2(52, 52)
+		portrait.custom_minimum_size = Vector2(64, 64)
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -722,7 +722,10 @@ func _build_party(view: Dictionary) -> void:
 				UiKit.ALLY if human else UiKit.TEXT_DIM))
 		details.add_child(head)
 		var hp_row := UiKit.hbox(8)
-		hp_row.add_child(UiKit.hp_bar(int(character["hp"]), int(character["max_hp"])))
+		var party_bar := UiKit.hp_bar(int(character["hp"]), int(character["max_hp"]))
+		party_bar.custom_minimum_size.y = 18
+		party_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		hp_row.add_child(party_bar)
 		hp_row.add_child(UiKit.number_label("HP %d / %d" % [int(character["hp"]), int(character["max_hp"])], "small"))
 		details.add_child(hp_row)
 		var info := UiKit.hbox(4)
