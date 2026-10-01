@@ -17,7 +17,7 @@ The three Kenney packs form a practical, consistently stylized SFX base. The mus
 
 ### Scope and gaps
 
-This shortlist is deliberately small and uses five creators/packs plus a single optional boss track. The Kenney SFX pages do not claim dedicated fantasy spell, heal, buff/debuff, critical, miss or countdown sounds. The `magic_cast`, `heal`, `buff`, `debuff`, and `miss` cues now use separately sourced short samples (see `assets/audio/CREDITS.md`). A dedicated `critical` sample remains a sourcing gap and stays on the synth fallback; no suitable short, clearly licensed sharp impact/ring was confirmed. The music shortlist has no explicit defeat loop or dedicated Guardian boss composition; Kenney loss jingles can serve as defeat stings, and Hope is only a possible boss loop. A dedicated boss/defeat score remains a sourcing gap.
+This shortlist is deliberately small and uses five creators/packs plus a single optional boss track. The Kenney SFX pages do not claim dedicated fantasy spell, heal, buff/debuff, critical, miss or countdown sounds. The `magic_cast`, `heal`, `buff`, `debuff`, `miss`, and `critical` cues now use separately sourced short samples (see `assets/audio/CREDITS.md`); `critical` uses `bing1.wav` from BMacZero's CC0 Metal Impact Sounds pack. The music shortlist has no explicit defeat loop or dedicated Guardian boss composition; Kenney loss jingles can serve as defeat stings, and Hope is only a possible boss loop. A dedicated boss/defeat score remains a sourcing gap.
 
 ## Cue mapping
 
@@ -41,7 +41,7 @@ This shortlist is deliberately small and uses five creators/packs plus a single 
 | `heal` (new) | leohpaz's 8 Heals and Buffs SFX, `02_Heal_02.wav` (CC-BY 4.0). |
 | `buff` (new) | leohpaz's 8 Heals and Buffs SFX, `16_Atk_buff_04.wav` (CC-BY 4.0). |
 | `debuff` (new) | leohpaz's 8 Heals and Buffs SFX, `21_Debuff_01.wav` (CC-BY 4.0). |
-| `critical` (new) | Still on synth fallback; no dedicated short, clearly licensed sharp impact/ring was confirmed. |
+| `critical` (new) | Metal Impact Sounds: `bing1.wav` by BMacZero (CC0); sharp metallic impact/ring. |
 | `miss` (new) | artisticdude's Swishes Sound Pack, `swish-7.wav` (CC0). |
 | `enemy_death` / `player_down` (new) | RPG sound effects: inspect impact/metal/cloth samples; no exact death/down cue is promised by the listing. |
 | `level_up` / `exp_gain` (new) | 85 Short music jingles: ascending/reward candidate. |
