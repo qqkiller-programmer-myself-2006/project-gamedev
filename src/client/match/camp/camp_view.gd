@@ -31,7 +31,6 @@ var _left_mode := "craft"
 var _inventory_mode := "inventory"
 var _invest_panel: PanelContainer
 var _content: Dictionary = {}
-var _backdrop: BattleBackdrop
 const SLOTS := ["helmet", "chest", "legs", "boots", "weapon", "charm1", "charm2", "charm3"]
 const ATTRIBUTES := ["str", "dex", "con", "int", "fth", "cha", "lck"]
 const PERCENT_STATS := ["crit", "crit_damage", "block", "block_reduction", "dodge", "aggro", "lifesteal", "status_resist"]
@@ -127,7 +126,6 @@ func build(view: Dictionary, encounter: Dictionary) -> void:
 	# T34: build() tears down _columns/_bottom, so remember scroll positions
 	# and the focused control first and restore them after the rebuild.
 	var camp_state := _snapshot_camp_state()
-	_backdrop.set_backdrop(str(_content.get("journey", {}).get("backdrops", {}).get(str(view.get("layer", 1)), "")))
 	_region.text = "%s (%d/%d)" % [UiText.region_of(view), int(view.get("layer", 0)), int(view.get("layers_total", 5))]
 	var merchant := str(encounter.get("kind", "")) == "merchant"
 	_encounter_icon.texture = Icons.texture("merchant") if merchant else Icons.texture("rest")
