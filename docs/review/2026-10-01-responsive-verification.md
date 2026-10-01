@@ -5,8 +5,10 @@ Screens: Battle, Merchant, Rest camp. Captured with `tools/dev/ui_preview.gd` (`
 | Screen | 1280×720 ×1.0 | 1280×720 ×1.4 | 1920×1080 ×1.0 | 1920×1080 ×1.4 |
 | --- | --- | --- | --- | --- |
 | Battle | Pass | Pass (after badge fix) | Pass | Pass |
-| Merchant | Pass | Pass | Pass | Pass |
+| Merchant | Pass | Pass† | Pass | Pass |
 | Rest | Pass | Pass* | Pass | Pass* |
+
+† The 1280×720 ×1.4 Merchant capture came out at 1920×1080 size (preview window stretches from the 1280×720 base), so it is judged from the 1080p ×1.4 image; the layout is proportional. Re-shoot at true 1280×720 if the team wants strict evidence.
 
 \* Known, deliberate behavior at 1.4× text: the Equipment grid switches to 2 columns, so the stat sheet (HP, Energy, STR…) shrinks to about one visible row and must be scrolled. Nothing overlaps, but this is the "1.45× text scrolling" decision awaiting team sign-off in #39. The Tip box also covers the last visible row of the left list (it scrolls). No change made.
 
@@ -15,6 +17,8 @@ Screens: Battle, Merchant, Rest camp. Captured with `tools/dev/ui_preview.gd` (`
 - `src/client/match/battle/battle_view.gd`: the Turn and skill cooldown badges now scale their minimum size with `settings.text_scale`; at 1.4× they were compressed beside the action panel.
 
 ## Other checks
+
+- Minor, not fixed: at 1920×1080 ×1.0 the "Turn 1" heading above the turn list sits flush against the left screen edge and its first letter touches the edge.
 
 - No important text, number, badge or control overlaps or clips at 1.0×. Transient floating damage numbers may overlap nameplates mid-animation (by design).
 - Keyboard focus and reduced-motion behavior: covered by `tests/client/test_accessibility_baseline.gd` (merged in #112); this change does not alter them.
