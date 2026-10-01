@@ -57,6 +57,7 @@ var _banner_tween: Tween = null
 var _menu_panel: PanelContainer
 var _combat_grid: Control
 var _skill_marks: Control
+var _target_prompt: Control
 
 
 func setup(screen: MatchScreen, app: ClientApp) -> void:
@@ -626,10 +627,16 @@ func _build_enemy_plates(view: Dictionary) -> void:
 		row.add_child(portrait)
 		var info := UiKit.vbox(2)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var name := UiKit.pixel_label("%s  Lv %d" % [_screen.name_of(str(enemy["id"])), int(enemy.get("level", 1))],
-				"tiny" if _app.settings.text_scale >= 1.4 else "small")
-		name.clip_text = true
-		info.add_child(name)
+		var identity := UiKit.hbox(6)
+		identity.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var name := UiKit.pixel_label(_screen.name_of(str(enemy["id"])), "small")
+		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		identity.add_child(name)
+		var level := UiKit.pixel_label("Lv %d" % int(enemy.get("level", 1)), "small", UiKit.TEXT_DIM)
+		level.size_flags_horizontal = Control.SIZE_SHRINK_END
+		identity.add_child(level)
+		info.add_child(identity)
 		var hp := int(enemy.get("hp", 0))
 		var max_hp := int(enemy.get("max_hp", 1))
 		info.add_child(UiKit.stat_bar(hp, max_hp, UiKit.BAR_HP, "%d/%d" % [hp, max_hp], 18, "tiny"))
@@ -754,6 +761,9 @@ func _place_tokens() -> void:
 
 func _build_bottom(view: Dictionary) -> void:
 	UiKit.clear(_bottom)
+	if _target_prompt != null and is_instance_valid(_target_prompt):
+		_target_prompt.queue_free()
+	_target_prompt = null
 	if _combat_grid != null and is_instance_valid(_combat_grid):
 		_combat_grid.queue_free()
 	_combat_grid = null
@@ -768,12 +778,11 @@ func _build_bottom(view: Dictionary) -> void:
 	_turn_notice.visible = not (your_turn and not mode.is_empty())
 	if your_turn and mode in ["skills", "items"]:
 		_combat_grid = _card_grid(mode, choices)
-		_combat_grid.set_anchors_preset(Control.PRESET_CENTER_TOP)
-		_combat_grid.grow_horizontal = Control.GROW_DIRECTION_BOTH
-		_combat_grid.offset_left = -295
-		_combat_grid.offset_right = 435
-		_combat_grid.offset_top = 410
-		_combat_grid.custom_minimum_size = Vector2(730, 0)
+		_combat_grid.set_anchors_preset(Control.PRESET_TOP_WIDE)
+		_combat_grid.offset_left = 275
+		_combat_grid.offset_right = -275
+		_combat_grid.offset_top = 235
+		_combat_grid.offset_bottom = minf(600.0, size.y - 285.0)
 		_combat_grid.visible = not _banner.visible
 		_combat_grid.z_index = 5
 		add_child(_combat_grid)
@@ -781,7 +790,13 @@ func _build_bottom(view: Dictionary) -> void:
 		var caption := UiKit.pixel_label("Choose a target on the field (1-%d), Esc to go back" % _choices.size(), "small", UiKit.ACCENT)
 		caption.add_theme_color_override("font_outline_color", Color.BLACK)
 		caption.add_theme_constant_override("outline_size", 5)
-		_bottom.add_child(_centered(caption))
+		_target_prompt = _centered(caption)
+		_target_prompt.name = "BattleTargetPrompt"
+		_target_prompt.set_anchors_preset(Control.PRESET_TOP_WIDE)
+		_target_prompt.offset_top = 202
+		_target_prompt.offset_bottom = 232
+		_target_prompt.z_index = 6
+		add_child(_target_prompt)
 
 	var hud := UiKit.hbox(12)
 	hud.custom_minimum_size = Vector2(0, 104)
@@ -971,7 +986,15 @@ func _card_grid(mode: String, choices: Dictionary) -> Control:
 			grid.add_child(_card(pretty, "x%d | %s" % [int(info["count"]), description], "items",
 					-1, usable, description, pick, true))
 	var holder := UiKit.panel(grid, "HudPanel")
-	return _centered(holder)
+	var scroll := ScrollContainer.new()
+	scroll.name = "BattleCardScroll"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.follow_focus = true
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.add_child(holder)
+	return scroll
 
 
 func _card(title: String, sub: String, icon_name: String, energy_cost: int, usable: bool, tip: String, pick: Callable,
@@ -979,7 +1002,8 @@ func _card(title: String, sub: String, icon_name: String, energy_cost: int, usab
 	var number := _choices.size() + 1
 	var button := Button.new()
 	button.theme_type_variation = "HudButton"
-	button.custom_minimum_size = Vector2(232, 96 if wrap_sub else 50)
+	var card_height := (108.0 if wrap_sub else 84.0) * _app.settings.text_scale
+	button.custom_minimum_size = Vector2(232, card_height)
 	button.focus_mode = Control.FOCUS_ALL
 	button.disabled = not usable
 	button.tooltip_text = tip
@@ -1004,8 +1028,10 @@ func _card(title: String, sub: String, icon_name: String, energy_cost: int, usab
 	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var name_label := UiKit.pixel_label("[%d] %s" % [number, title], "small" if wrap_sub else "body",
 			UiKit.TEXT if usable else UiKit.TEXT_DIM)
+	name_label.custom_minimum_size.y = 26.0 * _app.settings.text_scale
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if wrap_sub else TextServer.AUTOWRAP_OFF
 	name_label.clip_text = not wrap_sub
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	text.add_child(name_label)
 	var sub_row := UiKit.hbox(4)
 	sub_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1015,10 +1041,12 @@ func _card(title: String, sub: String, icon_name: String, energy_cost: int, usab
 		sub_row.add_child(Icons.rect("energy", Icons.size_for_scale(_app.settings.text_scale)))
 	var sub_label := UiKit.pixel_label(sub, "tiny", UiKit.TEXT_DIM)
 	sub_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sub_label.custom_minimum_size.y = (54.0 if wrap_sub else 48.0) * _app.settings.text_scale
 	if wrap_sub:
 		sub_label.custom_minimum_size.x = 150
 	sub_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if wrap_sub else TextServer.AUTOWRAP_OFF
 	sub_label.clip_text = not wrap_sub
+	sub_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	sub_row.add_child(sub_label)
 	text.add_child(sub_row)
 	row.add_child(text)
