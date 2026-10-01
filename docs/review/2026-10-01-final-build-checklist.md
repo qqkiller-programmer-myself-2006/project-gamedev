@@ -3,12 +3,14 @@
 Legend: [C] Claude can run / verify, [H] needs the owner.
 
 ## Before building
-- [C] `git status` clean, main CI green, `bash tools/run_tests.sh` all pass (447 at 2026-10-01).
+- [C] `git status` clean, main CI green, `bash tools/run_tests.sh` all pass (452 at 2026-10-01 after PR #125).
 - [C] `simulate.gd --seeds=40 --humans=1,2 --pace` win rate 70–92%, no softlock.
 - [C] UI screenshots at 1280×720 and 1920×1080, ×1.0 and ×1.4 (`tools/dev/ui_preview.gd`); see `2026-10-01-responsive-verification.md`.
+- [x] Path Vote overflow and Summary banner overlap at 1080p x1.4 fixed in PR #125 (previews checked at full resolution).
+- [H] Decide on two known 1.4x issues: Camp Equipment panel cuts its last line; combat turn list is small. Fix now or ship.
 - [H] #39 sign-off on motion level and 1.4× stat-sheet scrolling.
 - [H] #55 Worker + D1 deployed (`wrangler login`, see `docs/guides/running.md`); the client's profile URL points at it.
-- [H] Decision on #85 (Classless / boss art) — currently placeholder blocks.
+- [x] #75 / #85 art (boss, Boar, Old Swordsman, Veteran Hunter, Shrine Spirit, Bram) done and in game.
 
 ## Build
 - [C] Run the `builds` workflow; download `web-build`, `windows-build`, `linux-server`.
