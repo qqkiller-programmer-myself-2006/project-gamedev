@@ -52,7 +52,7 @@ func handle_key(_screen: MatchScreen, app: ClientApp, key: int) -> bool:
 		return true
 	var index := key - KEY_1
 	if index >= 0 and index < _stock.size():
-		app.send({"type": "buy", "item": _stock[index]["item"]})
+		_request_buy(app, _stock[index])
 		return true
 	return false
 
@@ -69,7 +69,7 @@ func _row(app: ClientApp, index: int, entry: Dictionary) -> Control:
 		label = "Sold out"
 	elif not entry["affordable"]:
 		label = "Need %d Gold" % int(entry["price"])
-	var buy := UiKit.button(label, func() -> void: app.send({"type": "buy", "item": entry["item"]}))
+	var buy := UiKit.button(label, func() -> void: _request_buy(app, entry))
 	Icons.apply_to_button(buy, "gold", app.settings.text_scale)
 	if int(entry["remaining"]) <= 0:
 		UiKit.disable(buy, true, UiText.WHY["sold_out"])
@@ -78,3 +78,16 @@ func _row(app: ClientApp, index: int, entry: Dictionary) -> Control:
 	buy.set_meta("focus_id", "buy_" + str(entry["item"]))
 	row.add_child(buy)
 	return UiKit.panel(row, "CardPanel")
+
+
+func _request_buy(app: ClientApp, entry: Dictionary) -> void:
+	if int(entry.get("remaining", 0)) <= 0:
+		app.toast(UiText.WHY["sold_out"])
+		return
+	var price := int(entry.get("price", 0))
+	if not bool(entry.get("affordable", false)):
+		app.toast(UiText.WHY["need_gold"] % price)
+		return
+	var item_id := str(entry.get("item", ""))
+	app.confirm("buy_item", func() -> void: app.send({"type": "buy", "item": item_id}),
+			[str(entry.get("name", UiText.item_name(item_id))), price])
