@@ -335,9 +335,10 @@ func _layout_narrow_panel(panel: PanelContainer) -> void:
 	var body := scroll.get_child(0) as Control
 	var top := _top(float(panel.get_meta("base_y", 150.0)))
 	var viewport_height := get_viewport_rect().size.y if is_inside_tree() else size.y
-	# Keep the panel above the party silhouettes, which start near 65% height.
-	var max_panel_height := maxf(180.0, viewport_height * 0.64 - top)
-	var scroll_height := minf(body.get_combined_minimum_size().y, max_panel_height - 32.0)
+	# The menu needs room for all four actions at large text sizes. It can cover
+	# the campfire scene, but must stay below the title and subtitle.
+	var max_panel_height := viewport_height - top - 24.0 if _view == "menu" else maxf(180.0, viewport_height * 0.64 - top)
+	var scroll_height := max_panel_height - 32.0 if _view == "menu" else minf(body.get_combined_minimum_size().y, max_panel_height - 32.0)
 	scroll.custom_minimum_size = Vector2(float(panel.get_meta("panel_width", 0.0)), scroll_height)
 	panel.offset_top = top
 	panel.offset_bottom = top + scroll_height + 32.0
