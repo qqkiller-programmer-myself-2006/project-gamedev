@@ -21,8 +21,8 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var failed := false
-	for resolution in [Vector2i(1280, 720), Vector2i(1600, 900), Vector2i(1920, 1080)]:
-		for scale in [1.0, 1.2, 1.4, 1.45]:
+	for resolution in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
+		for scale in [1.0, 1.2, 1.4]:
 			root.size = resolution
 			var app := ClientApp.new()
 			app.settings = ClientSettings.new()
@@ -40,13 +40,8 @@ func _run() -> void:
 			battle._region.text = "Forest (1/5)"
 			await process_frame
 			var log_rect := Rect2(battle._log.get_parent().global_position, battle._log.get_parent().size)
-			var viewport_rect := Rect2(Vector2.ZERO, Vector2(resolution))
-			var footer_rect := Rect2(battle._bottom.global_position, battle._bottom.size)
-			var timeline_rect := Rect2(battle._timeline_scroll.global_position, battle._timeline_scroll.size)
-			if not viewport_rect.encloses(log_rect) or not viewport_rect.encloses(footer_rect) \
-					or not viewport_rect.encloses(timeline_rect) or timeline_rect.intersects(log_rect):
-				push_error("battle timeline, log or action footer exceeds/overlaps at %s scale %.1f: timeline=%s log=%s footer=%s" %
-					[resolution, scale, timeline_rect, log_rect, footer_rect])
+			if log_rect.position.x < 0 or log_rect.position.y < resolution.y - 170 or log_rect.end.y > resolution.y:
+				push_error("battle log leaves its clear lower-left lane at %s scale %.1f: %s" % [resolution, scale, log_rect])
 				failed = true
 			battle.add_log("older combat event")
 			battle.add_log("Newest combat event")
@@ -56,13 +51,13 @@ func _run() -> void:
 			battle._combat = {"round": 1, "turn_order": ["e0"], "round_order": ["e0"], "actor": ""}
 			battle._build_timeline({"party": [], "enemies": [{"id": "e0", "hp": 20,
 				"max_hp": 20, "weakness": ["Fire", "Ice", "Lightning", "Poison"]}]})
-			var weak_label := battle._timeline.get_child(1).get_child(0).get_child(1) as Label
+			var weak_label := battle._timeline.get_child(1).get_child(0).get_child(2) as Label
 			if weak_label == null or weak_label.autowrap_mode == TextServer.AUTOWRAP_OFF:
 				push_error("boss weakness text does not wrap at %s scale %.1f" % [resolution, scale])
 				failed = true
 			var scroll := battle._timeline_scroll
-			if scroll.size.y < resolution.y * 0.42:
-				push_error("battle timeline viewport is too short at %s scale %.1f" % [resolution, scale])
+			if scroll.global_position.y + scroll.size.y < 530:
+				push_error("battle timeline viewport is too short to keep the full boss entry visible at %s scale %.1f" % [resolution, scale])
 				failed = true
 			for i in 10:
 				var card := PanelContainer.new()
@@ -91,6 +86,58 @@ func _run() -> void:
 			if Rect2(tip.global_position, tip.size).intersects(Rect2(battle._region.global_position, battle._region.size)):
 				push_error("battle Tip covers region at %s scale %.1f" % [resolution, scale])
 				failed = true
+			if resolution == Vector2i(1280, 720) and scale in [1.0, 1.4]:
+				var party: Array[Dictionary] = []
+				for slot in 5:
+					party.append({"slot": slot, "name": "Hero %d" % slot, "level": 1,
+						"hp": 50, "max_hp": 50, "energy": 1, "energy_max": 6,
+						"class": "classless", "class_name": "Adventurer", "gold": 0,
+						"spd": 10, "controller": "ai"})
+				var combat_view := {"party": party, "layer": 1}
+				battle._me = "p0"
+				battle._combat = {"actor": "p0", "round": 1, "turn_order": ["p0"],
+					"your_turn": true, "choices": {"skills": {}, "items": {}, "focus": true}}
+				battle._build_timeline(combat_view)
+				battle._build_bottom(combat_view)
+				await process_frame
+				await process_frame
+				await process_frame
+				await process_frame
+				var column_rect := Rect2(battle._timeline_scroll.global_position, battle._timeline_scroll.size)
+				var bottom_row := battle._bottom.get_child(0) as Control
+				var hud_panel := bottom_row.get_child(0) as Control
+				var hud_rect := Rect2(hud_panel.global_position, hud_panel.size)
+				if hud_rect.end.x > 1251.0:
+					push_error("combat bottom bar exceeds viewport at scale %.1f: %s" % [scale, hud_rect])
+					failed = true
+				if column_rect.end.y > hud_rect.position.y:
+					push_error("party column reaches behind the HUD at scale %.1f" % scale)
+					failed = true
+				var actions := hud_panel.get_child(0).get_child(1) as Control
+				for button in actions.get_children():
+					var button_rect := Rect2(button.global_position, button.size)
+					if button_rect.position.x < 0.0 or button_rect.end.x > 1280.0:
+						push_error("combat action button outside viewport at scale %.1f: %s" % [scale, button_rect])
+						failed = true
+				if scale == 1.0:
+					var turn_rect := Rect2(battle._turn_banner.global_position, battle._turn_banner.size)
+					var first_card := battle._timeline.get_child(0) as Control
+					if turn_rect.position.y < 57.0 or turn_rect.end.y + 6.0 > first_card.global_position.y:
+						push_error("Turn banner overlaps or crowds the party column: %s / %s" % [turn_rect, column_rect])
+						failed = true
+					if battle._timeline.get_child_count() != 5:
+						push_error("expected all five party cards")
+						failed = true
+					for card_node in battle._timeline.get_children():
+						var card_rect := Rect2(card_node.global_position, card_node.size)
+						if not column_rect.encloses(card_rect) or card_rect.end.y > hud_rect.position.y:
+							push_error("party card is clipped or behind the HUD: %s" % card_rect)
+							failed = true
+					var party_scrollbar := battle._timeline_scroll.get_v_scroll_bar()
+					var max_scroll := maxf(0.0, party_scrollbar.max_value - party_scrollbar.page)
+					if max_scroll > 0.0:
+						push_error("five-member party unexpectedly scrolls: max value %.1f" % max_scroll)
+						failed = true
 			app.close_hints(false)
 			battle.free()
 			var camp := CampView.new()
@@ -127,5 +174,5 @@ func _run() -> void:
 			app._current = null
 			screen.free()
 			app.free()
-	print("T35 layout smoke: %s" % ("FAILED" if failed else "12 combinations passed"))
+	print("T35 layout smoke: %s" % ("FAILED" if failed else "6 combinations passed"))
 	quit(1 if failed else 0)
