@@ -89,6 +89,13 @@ before destructive actions.
 
 The authored 16×16 pixel icons in `assets/icons/` use the Navy + Gold tokens and bar colours, with a dark outline and top-left light. Render them with nearest-neighbour filtering through `Icons.rect()` or pair them with text using `Icons.with_text()`; keep their meaning available in text or a tooltip. See [`icons.md`](icons.md) for the set and regeneration command.
 
+## Skill FX
+
+Battle skill effects are transparent, limited-palette pixel art with dark outlines and nearest-neighbour sampling. Their
+frame counts, canvas sizes, anchors and tiers are defined in `assets/fx/manifest.json`; ultimate-tier skills use a brief
+screen-flash accent. Reduced motion skips skill effects entirely. Regenerate strips with `python tools/art/make_skill_fx.py`,
+then validate/re-slice them with `python tools/art/slice_skill_fx.py`; review `assets/fx/_contact.png` against the navy field.
+
 ## Checking a UI change
 
 ```bash

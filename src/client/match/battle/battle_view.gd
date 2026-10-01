@@ -34,6 +34,7 @@ var _choices: Array[Callable] = []
 var _spots: Dictionary = {}
 var _tokens: Dictionary = {}
 var _previous_tokens: Dictionary = {}
+var _skill_fx_reduced_motion := false
 
 var _stage: Control
 var _backdrop: BattleBackdrop
@@ -58,6 +59,7 @@ var _combat_grid: Control
 func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_screen = screen
 	_app = app
+	_skill_fx_reduced_motion = _app.settings.reduced_motion
 	_content = _load_forest_content()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_PASS
@@ -374,6 +376,28 @@ func handle_event(event: Dictionary) -> void:
 		return
 	var actor := str(event.get("actor", ""))
 	var actor_token: BattleToken = _tokens.get(actor)
+	var skill := str(event.get("skill", ""))
+	if not skill.is_empty() and not _skill_fx_reduced_motion:
+		var anchor := SkillFx.anchor(skill)
+		match anchor:
+			"party":
+				var party_points: Array[Vector2] = []
+				for id in _tokens:
+					if str(id).begins_with("p"):
+						party_points.append(_token_center(_tokens[id]))
+				if not party_points.is_empty():
+					var party_center := Vector2.ZERO
+					for point in party_points:
+						party_center += point
+					SkillFx.play(_stage, skill, party_center / party_points.size())
+			"actor":
+				if actor_token != null:
+					SkillFx.play(_stage, skill, _token_center(actor_token))
+			"target":
+				for result in event.get("results", []):
+					var target_token: BattleToken = _tokens.get(str(result.get("target", "")))
+					if target_token != null:
+						SkillFx.play(_stage, skill, _token_center(target_token))
 	if actor_token != null:
 		actor_token.play_animation("attack")
 	for result in event.get("results", []):
@@ -388,6 +412,10 @@ func handle_event(event: Dictionary) -> void:
 				token.play_animation("hurt")
 		elif bool(result.get("revived", false)):
 			token.play_animation("revive")
+
+
+func _token_center(token: BattleToken) -> Vector2:
+	return token.position + token.size * 0.5
 
 
 # --- Parts --------------------------------------------------------------------
