@@ -13,3 +13,14 @@ export_credentials.cfg
 
 # AI executor logs
 .ai/logs/
+
+# Editor settings and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary and generated files
+*.tmp
+*.translation

@@ -76,27 +76,47 @@ python3 -m http.server -d build/web 8060
 - Staging/QA: [`docs/guides/staging.md`](docs/guides/staging.md)
 - การตัดสินใจสถาปัตยกรรม: [`docs/adr/`](docs/adr/) (Story mode: `0014-offline-story-mode.md`)
 
-## โครงรีโป
+## โครงสร้างโปรเจกต์
 
 ```text
-content/            ข้อมูล Forest (forest.json) และ Story (story_mode.json)
-src/app/            entry scene และ launch options
-src/shared/         RNG, clock, ตัวโหลด content
-src/profile/        profile store และ sender
-src/match/          Match server, room, AI, encounter, กติกา
-src/net/            โปรโตคอลและ WebSocket transport
-src/server/        โหนดเซิร์ฟเวอร์ headless
-src/client/         title, lobby, match (battle/camp), story, ui ร่วม
-tests/              เทสต์แยกตาม src พร้อม runner และ support
-tools/dev/          จำลอง, preview, smoke client
-tools/ci/           smoke test เบราว์เซอร์
-tools/run_tests.sh  รันเทสต์แบบ headless
-deploy/             staging, proxy, compose, profile-worker
-docs/design/        prd, balance, ui-style, accessibility
-docs/guides/       running, testing, web, staging
-docs/adr/           บันทึกการตัดสินใจสถาปัตยกรรม
-export_presets.cfg  preset Web / Windows / Linux Server
+.ai/                         task specs, checkpoint และ agent runner
+.claude/agents/              agent definitions
+.github/                     CI workflows และ PR/issue templates
+art_source/                  raw art sheets ที่ไม่ถูก import โดย Godot
+assets/                      runtime art, fonts และเสียงที่เกมโหลด
+content/                     Forest rules และ Story mode JSON
+deploy/                      staging, proxy, compose และ profile-worker
+docs/adr/                    architecture decision records
+docs/agents/                 issue, triage และ domain rules
+docs/design/                 requirements, balance, UI และ accessibility
+docs/guides/                 วิธีรัน, test, export และ deploy
+docs/history/                milestone และ project records
+docs/plans/                  แผนงานและผล audit โครงสร้าง
+docs/references/             source material และ UI references
+docs/research/               ข้อมูลค้นคว้าจากแหล่งภายนอก
+docs/review/                 QA reports, code reviews และ screenshots
+docs/screenshots/            ภาพจากเกมและ UI preview
+i18n/                        gettext template และคำแปล
+src/app/                     entry scene และ launch options
+src/client/                  title, lobby, match, story และ shared UI
+src/match/                   MatchServer, rules, AI และ encounters
+src/net/                     protocol และ WebSocket transport
+src/profile/                 profile stores และ HTTP sender
+src/server/                  headless game server
+src/shared/                  RNG, clocks และ content loader
+tests/                       tests แบ่งตามระบบ พร้อม runner และ support
+tools/art/                   เครื่องมือเตรียมและ slice art
+tools/dev/                   simulator, previews และ smoke client
+tools/i18n/                  extract และตรวจ translation catalog
+tools/ci/                    browser smoke test
+tools/run_tests.sh           รัน test suite แบบ headless
+project.godot                Godot project และ entry configuration
+export_presets.cfg           preset Web / Windows / Linux Server
 ```
+
+## Contributing
+
+ดู [CONTRIBUTING.md](CONTRIBUTING.md) สำหรับ branch naming, commit style, การรัน tests และ PR checklist. การตั้งค่า GitHub ที่เจ้าของรีโปต้องทำอยู่ใน [docs/guides/github-setup.md](docs/guides/github-setup.md).
 
 ## ประวัติและสารบัญเพิ่มเติม
 
