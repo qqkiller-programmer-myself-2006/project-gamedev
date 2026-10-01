@@ -177,7 +177,7 @@ func test_party_wipe_against_the_boss_is_defeat() -> void:
 	_play(60.0, _defend)
 	var view := _view()
 	assert_eq(view["phase"], "defeat")
-	assert_eq(view["summary"]["title"], "Lost in the Forest")
+	assert_eq(view["summary"]["title"], "Lost in the Dark")
 
 
 func test_host_starts_a_new_match_in_the_same_room_after_it_ends() -> void:

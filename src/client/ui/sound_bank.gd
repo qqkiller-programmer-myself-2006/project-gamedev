@@ -25,12 +25,12 @@ const CUE_ASSETS := {
 	"loot_pickup": "res://assets/audio/sfx/loot_pickup.ogg",
 	"victory_sting": "res://assets/audio/sfx/reward_sting.ogg",
 	"defeat_sting": "res://assets/audio/sfx/defeat_sting.ogg",
-	"magic_cast": "",
-	"heal": "",
-	"buff": "",
-	"debuff": "",
-	"critical": "",
-	"miss": "",
+	"magic_cast": "res://assets/audio/sfx/magic_cast.ogg",
+	"heal": "res://assets/audio/sfx/heal.ogg",
+	"buff": "res://assets/audio/sfx/buff.ogg",
+	"debuff": "res://assets/audio/sfx/debuff.ogg",
+	"critical": "res://assets/audio/sfx/critical.ogg",
+	"miss": "res://assets/audio/sfx/miss.ogg",
 }
 
 const MUSIC_ASSETS := {

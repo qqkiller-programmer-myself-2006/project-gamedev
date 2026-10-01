@@ -30,6 +30,9 @@ func test_plate_text_grows_with_text_scale() -> void:
 		assert_true(large[i] > normal[i], "label %d is larger at 1.45 (%d vs %d)" % [i, large[i], normal[i]])
 
 
-func test_default_scale_keeps_ten_pixel_plate_text() -> void:
-	for size in _plate_font_sizes(1.0):
-		assert_eq(size, 10, "plate text stays 10 px at the default size")
+func test_default_scale_keeps_readable_name_and_compact_stat_text() -> void:
+	var sizes := _plate_font_sizes(1.0)
+	assert_true(sizes.size() >= 3, "name, HP and Energy captions are sized")
+	assert_eq(sizes[0], 12, "nameplate names use the readable 12 px size")
+	for i in range(1, sizes.size()):
+		assert_eq(sizes[i], 10, "compact nameplate stats stay 10 px")

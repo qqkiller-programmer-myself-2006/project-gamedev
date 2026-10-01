@@ -30,7 +30,7 @@ const ERRORS := {
 	"invalid_option": "That choice does not exist.",
 	"already_voted": "You already voted.",
 	"ai_cannot_vote": "AI-controlled characters do not vote.",
-	"not_enough_gold": "The Party does not have enough Gold.",
+	"not_enough_gold": "You do not have enough Gold.",
 	"out_of_stock": "Sold out.",
 	"invalid_item": "The merchant does not sell that.",
 	"already_ready": "You are already marked as ready.",
@@ -98,7 +98,7 @@ const TYPE_HELP := {
 }
 
 const HINTS := {
-	"vote": "Path Voting: every player has one vote and AI never votes. The most votes wins; ties are broken at random. Press 1-3 to vote.",
+	"vote": "Use keys 1-3.",
 	"combat": "Your turn! Fight [F] opens your attacks, Items [I] uses your personal Gold and consumable slot, and Focus [O] restores Energy when available. In timed Combats you have 15 seconds; if time runs out you Defend.",
 	"combat_story": "Your turn! Fight [F] opens your attacks, Items [I] uses your personal Gold and consumable slot, and Focus [O] restores Energy when available. Story turns have no countdown.",
 	"skill": "You have a Class now. Fight [F] opens your Skills; each Skill costs Energy and has a cooldown counted in your own turns.",

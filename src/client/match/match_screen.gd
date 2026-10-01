@@ -15,7 +15,11 @@ var anchors: Dictionary = {}
 var combat_mode := ""
 var combat_mode_key := ""
 
-var _top: HFlowContainer
+var _top: HBoxContainer
+var _header_left: Control
+var _header_status: Control
+var _header_actions: Control
+var _header_clues: Button
 var _party: VBoxContainer
 var _center: MarginContainer
 var _center_scroll: ScrollContainer
@@ -49,13 +53,15 @@ func setup(client: ClientApp) -> void:
 	add_child(margin)
 	var column := UiKit.vbox(10)
 	margin.add_child(column)
-	_top = UiKit.flow(12)
+	_top = UiKit.hbox(8)
+	_top.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_top.resized.connect(_fit_header)
 	column.add_child(UiKit.panel(_top))
 	var middle := UiKit.hbox(12)
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(middle)
 	var party_scroll := ScrollContainer.new()
-	party_scroll.custom_minimum_size = Vector2(clampf(300.0 * client.settings.text_scale, 300.0, 440.0), 0)
+	party_scroll.custom_minimum_size = Vector2(clampf(280.0 * client.settings.text_scale, 280.0, 360.0), 0)
 	party_scroll.follow_focus = true
 	party_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_party = UiKit.vbox(6)
@@ -77,17 +83,21 @@ func setup(client: ClientApp) -> void:
 	middle.add_child(center_panel)
 	_log = RichTextLabel.new()
 	_log.bbcode_enabled = false
+	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_log.scroll_following = true
 	_log.custom_minimum_size = Vector2(0, 90)
 	_log.focus_mode = Control.FOCUS_NONE
 	_log.add_theme_color_override("default_color", UiKit.TEXT_DIM)
-	var bottom := UiKit.hbox(10)
+	_log.text = "Waiting for match events..."
+	# Stack the history and its Tip so the lower-right panel never forces the
+	# entire screen wider than a narrow viewport at large text sizes.
+	var bottom := UiKit.vbox(6)
 	var log_panel := UiKit.panel(_log)
 	log_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bottom.add_child(log_panel)
-	# Tips sit next to the log (never over controls); they are short so the
-	# phase panel keeps its height.
+	# Tips stay below the log in a separate row, away from phase controls.
 	_tips = UiKit.vbox(0)
+	_tips.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bottom.add_child(_tips)
 	column.add_child(bottom)
 	_list_root = margin
@@ -120,12 +130,18 @@ func tip_slot() -> Container:
 func tip_width() -> float:
 	if _battle_mode:
 		return 210.0
+	if str(match_view().get("phase", "")) == "voting":
+		var viewport_width := get_viewport_rect().size.x
+		var width_ratio := 0.14 if viewport_width <= 1400.0 else 0.20
+		return minf(520.0, minf(viewport_width * width_ratio, 90.0))
 	return 390.0 if _camp_mode else 520.0
 
 
 ## The camp footer has space for one scrollable line beside Ready.
 func tip_body_height() -> float:
-	return 22.0 if _camp_mode else 92.0
+	if _camp_mode:
+		return 22.0
+	return 60.0 if str(match_view().get("phase", "")) == "voting" else 92.0
 
 
 func match_view() -> Dictionary:
@@ -412,12 +428,12 @@ func float_text(id: String, text: String, color: Color) -> void:
 	# stack upwards instead of drawing over each other.
 	var now := Time.get_ticks_msec()
 	var recent: Array = _float_stack.get(id, [])
-	recent = recent.filter(func(t: int) -> bool: return now - t < 700)
+	recent = recent.filter(func(t: int) -> bool: return now - t < 1200)
 	var lane := recent.size()
 	recent.append(now)
 	_float_stack[id] = recent
 	var rect := anchor.get_global_rect()
-	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -42.0 * lane)
+	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -56.0 * lane)
 	var tween := create_tween()
 	if app.settings.reduced_motion:
 		tween.tween_interval(1.2)
@@ -578,6 +594,9 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				float_text(str(event["target"]), "+%s" % UiKit.status_tag(applied),
 						UiKit.status_color(str(event.get("color", ""))))
 		"action_resolved":
+			var spell_skill := str(event.get("skill", "")) in ["fireball", "frost_lance"]
+			if spell_skill:
+				client.sounds.play("magic_cast")
 			if _battle_mode:
 				_battle.handle_event(event)
 				var named := ""
@@ -590,20 +609,48 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				if not named.is_empty():
 					_battle.announce(named)
 			var hurt := false
+			var missed := false
+			var critical := false
+			var healed := false
+			var buffed := false
+			var debuffed := false
 			for result in event.get("results", []):
 				var target := str(result["target"])
 				if result.has("damage"):
-					hurt = true
+					hurt = hurt or int(result.get("damage", 0)) > 0
+					missed = missed or bool(result.get("dodged", false))
+					critical = critical or bool(result.get("crit", false))
 					var text := "-%d" % int(result["damage"])
 					if result.get("crit", false):
 						text += " CRIT"
 					_show_action_hit.call_deferred(client, target, text,
 							UiKit.ENEMY if target.begins_with("p") else UiKit.ACCENT)
 				elif result.has("heal"):
+					healed = true
 					client.flash(anchors.get(target), Color(0.8, 1.5, 0.8))
 					float_text(target, "+%d" % int(result["heal"]), UiKit.GOOD)
-			if hurt:
+				var status := str(result.get("status", ""))
+				if status in ["protected", "shielded"]:
+					buffed = true
+				for applied in result.get("applied", []):
+					var applied_status := str(applied.get("status", ""))
+					if applied_status == "venom_coat":
+						buffed = true
+					elif applied_status in ["bleed", "poison", "toxin"]:
+						debuffed = true
+			var has_status_sound := healed or buffed or debuffed
+			if healed:
+				client.sounds.play("heal")
+			if buffed:
+				client.sounds.play("buff")
+			if debuffed:
+				client.sounds.play("debuff")
+			if critical:
+				client.sounds.play("critical")
+			elif hurt and not spell_skill and not has_status_sound:
 				client.sounds.play("hit")
+			elif missed and not hurt and not has_status_sound:
+				client.sounds.play("miss")
 		"vote_resolved":
 			client.banner("Next: %s" % event["name"], 2.2, "vote")
 		"combat_ended":
@@ -635,8 +682,8 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 			client.toast("%s is now controlled by AI." % event["character"])
 		"match_ended":
 			_clear_floating_numbers()
-			client.banner("Victory!" if event["result"] == "victory" else "Defeat", 3.0,
-					"good" if event["result"] == "victory" else "bad")
+			# SummaryPanel displays the result itself, so no floating banner.
+			client.clear_banner()
 
 
 func _show_action_hit(client: ClientApp, target: String, text: String, color: Color) -> void:
@@ -674,33 +721,66 @@ func _collect_names(view: Dictionary) -> void:
 
 func _build_top(view: Dictionary) -> void:
 	UiKit.clear(_top)
-	var region := UiKit.hbox(4)
-	region.add_child(Icons.rect("info", Icons.size_for_scale(app.settings.text_scale)))
-	region.add_child(UiKit.label(UiText.region_of(view), "heading", UiKit.ACCENT))
-	_top.add_child(region)
+	var left := UiKit.hbox(6)
+	left.add_child(Icons.rect("info", Icons.size_for_scale(app.settings.text_scale)))
+	left.add_child(UiKit.label(UiText.region_of(view), "heading", UiKit.ACCENT))
 	var total := int(view.get("layers_total", 5))
 	var layer := int(view.get("layer", 0))
 	var phase := str(view.get("phase", ""))
-	var steps := UiKit.hbox(4)
+	var steps := UiKit.hbox(3)
 	for i in range(1, total + 1):
 		var done := i < layer or (i == layer and phase in ["boss", "victory", "defeat"])
-		var text := "%d" % i
-		if i == layer and not done:
-			text = "> %d <" % i
-		steps.add_child(UiKit.badge(text, UiKit.ACCENT if i == layer else (UiKit.GOOD if done else UiKit.TEXT_DIM)))
+		var chip := UiKit.badge("%d" % i, UiKit.ACCENT if i == layer else (UiKit.GOOD if done else UiKit.TEXT_DIM))
+		chip.custom_minimum_size = Vector2(32, 32)
+		chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		chip.get_child(0).custom_minimum_size = Vector2(28, 28)
+		(chip.get_child(0) as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		chip.tooltip_text = "Layer %d%s" % [i, " (current)" if i == layer else (" (complete)" if done else "")]
+		steps.add_child(chip)
 	var boss_now := phase == "boss" or (phase in ["victory", "defeat"] and layer >= total)
-	steps.add_child(UiKit.badge("> BOSS <" if phase == "boss" else "BOSS", UiKit.ENEMY if boss_now else UiKit.TEXT_DIM))
-	_top.add_child(steps)
+	var boss_chip := UiKit.badge("B", UiKit.ENEMY if boss_now else UiKit.TEXT_DIM)
+	boss_chip.custom_minimum_size = Vector2(32, 32)
+	boss_chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	boss_chip.get_child(0).custom_minimum_size = Vector2(28, 28)
+	(boss_chip.get_child(0) as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	boss_chip.tooltip_text = "Boss" if boss_now else "Guardian Boss"
+	steps.add_child(boss_chip)
+	left.add_child(steps)
+	_header_left = left
+	_top.add_child(left)
 	var where := "Guardian Boss" if phase == "boss" else "Layer %d of %d" % [layer, total]
-	_top.add_child(UiKit.label(where))
-	_top.add_child(Icons.with_text("gold", "Gold: %d" % int(view.get("gold", 0)), "heading", app.settings.text_scale, UiKit.ACCENT))
+	var status := UiKit.label(where, "body", UiKit.TEXT)
+	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_header_status = status
+	_top.add_child(status)
+	var actions := UiKit.hbox(5)
+	actions.size_flags_horizontal = Control.SIZE_SHRINK_END
+	actions.add_child(Icons.with_text("gold", "Gold: %d" % int(view.get("gold", 0)), "body", app.settings.text_scale, UiKit.ACCENT))
 	var clues := Icons.apply_to_button(UiKit.button("Clues: %d [C]" % view.get("clues", []).size(), toggle_clues), "info", app.settings.text_scale)
 	clues.set_meta("focus_id", "clues")
-	_top.add_child(clues)
-	_top.add_child(Icons.apply_to_button(UiKit.button("Settings [F2]", app.open_settings), "settings", app.settings.text_scale))
+	clues.set_meta("header_clues", true)
+	clues.tooltip_text = "Clues [C]"
+	_header_clues = clues
+	actions.add_child(clues)
+	actions.add_child(Icons.apply_to_button(UiKit.button("Settings [F2]", app.open_settings), "settings", app.settings.text_scale))
 	var leave := Icons.apply_to_button(UiKit.button("Leave [Esc]", app.confirm_leave, false, "danger"), "quit", app.settings.text_scale)
 	leave.set_meta("focus_id", "leave")
-	_top.add_child(leave)
+	actions.add_child(leave)
+	_header_actions = actions
+	_top.add_child(actions)
+	_fit_header()
+
+
+func _fit_header() -> void:
+	if not is_instance_valid(_header_left) or not is_instance_valid(_header_status) or not is_instance_valid(_header_actions) or not is_instance_valid(_header_clues):
+		return
+	var width := _top.size.x
+	var required := _header_left.get_combined_minimum_size().x + _header_actions.get_combined_minimum_size().x + 100.0 + 24.0
+	var compact := required > width
+	_header_clues.text = "" if compact else "Clues: %d [C]" % match_view().get("clues", []).size()
+	_header_clues.custom_minimum_size.x = 40.0 if compact else 0.0
+	_header_status.custom_minimum_size.x = 84.0
 
 
 func _build_party(view: Dictionary) -> void:
@@ -721,7 +801,7 @@ func _build_party(view: Dictionary) -> void:
 		if class_key == "classless": class_key = "bram"
 		var portrait_path := "res://assets/heroes/%s/portrait.png" % class_key
 		if ResourceLoader.exists(portrait_path): portrait.texture = load(portrait_path)
-		portrait.custom_minimum_size = Vector2(52, 52)
+		portrait.custom_minimum_size = Vector2(64, 64)
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -742,7 +822,10 @@ func _build_party(view: Dictionary) -> void:
 				UiKit.ALLY if human else UiKit.TEXT_DIM))
 		details.add_child(head)
 		var hp_row := UiKit.hbox(8)
-		hp_row.add_child(UiKit.hp_bar(int(character["hp"]), int(character["max_hp"])))
+		var party_bar := UiKit.hp_bar(int(character["hp"]), int(character["max_hp"]))
+		party_bar.custom_minimum_size.y = 18
+		party_bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		hp_row.add_child(party_bar)
 		hp_row.add_child(UiKit.number_label("HP %d / %d" % [int(character["hp"]), int(character["max_hp"])], "small"))
 		details.add_child(hp_row)
 		var info := UiKit.hbox(4)
@@ -775,6 +858,10 @@ func _build_party(view: Dictionary) -> void:
 
 
 func _build_panel(view: Dictionary) -> void:
+	# SummaryPanel displays the result itself; discard any banner raised by the
+	# match-ended event before the panel enters the viewport.
+	if str(view.get("phase", "")) in ["victory", "defeat"]:
+		app.clear_banner()
 	if _panel != null:
 		_center.remove_child(_panel)
 		_panel.queue_free()
@@ -800,6 +887,12 @@ func _build_panel(view: Dictionary) -> void:
 				_:
 					_panel = InfoPanel.new()
 	_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Voting owns its own route-list scroll area. Keep the panel itself pinned
+	# to the viewport so the ready/timer row cannot be scrolled away with it.
+	if phase == "voting":
+		_center_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	else:
+		_center_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	_center.add_child(_panel)
 	_panel.build(self, app, view)
 	var key := "%s-%d-%s" % [phase, int(view.get("layer", 0)), str(encounter.get("kind", "")) if encounter != null else ""]
@@ -835,7 +928,17 @@ func _add_log(line: String) -> void:
 	_log_lines.append(line)
 	if _log_lines.size() > 60:
 		_log_lines.pop_front()
-	_log.text = "\n".join(_log_lines)
+	var display_lines: Array[String] = []
+	for entry in _log_lines:
+		var remaining := entry
+		while remaining.length() > 64:
+			var split_at := remaining.rfind(" ", 64)
+			if split_at <= 0:
+				split_at = 64
+			display_lines.append(remaining.substr(0, split_at))
+			remaining = remaining.substr(split_at).strip_edges()
+		display_lines.append(remaining)
+	_log.text = "\n".join(display_lines)
 
 
 func _focused_id() -> String:

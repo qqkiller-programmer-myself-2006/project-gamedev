@@ -770,8 +770,8 @@ msgid "Loses 5 HP per stack at the start of each of its turns, ignoring armour. 
 msgstr "เสียพลังชีวิต 5 ต่อชั้นเมื่อเริ่มเทิร์นของตน โดยไม่สนเกราะ นาน 2 เทิร์น; สะสมได้สูงสุด 3 ชั้น"
 
 #: content/forest.json:ending.defeat.title
-msgid "Lost in the Forest"
-msgstr "หลงทางในป่า"
+msgid "Lost in the Dark"
+msgstr "หลงทางในความมืด"
 
 #: content/forest.json:meta.races.Lunaeia
 msgid "Lunaeia"
@@ -1110,8 +1110,8 @@ msgid "The Forest Falls Silent"
 msgstr "ป่ากลับคืนสู่ความเงียบ"
 
 #: content/forest.json:ending.defeat.text
-msgid "The Forest closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
-msgstr "ป่าปิดล้อมกลุ่มไว้ ที่ไกลออกไปแม่ยังคงรออยู่ รวบรวมกำลังแล้วลองใหม่"
+msgid "Darkness closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
+msgstr "ความมืดปิดล้อมกลุ่มไว้ ที่ไกลออกไปแม่ยังคงรออยู่ รวบรวมกำลังแล้วลองใหม่"
 
 #: content/story_mode.json:prologue[0].text
 msgid "The Forest has kept Father's trail for three long winters."
@@ -1424,4 +1424,3 @@ msgstr "จุดไฟขึ้นใหม่และพักในที่
 #: content/forest.json:party.members[3].role
 msgid "Youngest sibling"
 msgstr "ลูกคนสุดท้อง"
-

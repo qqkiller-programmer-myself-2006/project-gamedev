@@ -134,7 +134,7 @@ func setup(data: Dictionary) -> void:
 		who += " (AI)"
 	var name_color := tint if side == "party" else (UiKit.ACCENT if bool(data.get("you", false)) else UiKit.TEXT)
 	var name_label := UiKit.pixel_label(who, "small", name_color)
-	name_label.add_theme_font_size_override("font_size", int(10 * (0.9 if side == "boss" else 1.0) * text_factor))
+	name_label.add_theme_font_size_override("font_size", int(12 * (0.95 if side == "boss" else 1.0) * text_factor))
 	name_label.clip_text = false
 	plate_box.add_child(name_label)
 	var bars := UiKit.hbox(0)

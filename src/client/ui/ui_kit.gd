@@ -35,8 +35,8 @@ const GOOD := SUCCESS
 const HP_FILL := Color("#5fb563")
 const HP_LOW := Color("#d9644f")
 
-## Battle and camp overlays: navy at 88 % so they stay readable over the field.
-const HUD_BG := Color(NAVY, 0.88)
+## Battle and camp overlays: navy at 94 % so they stay readable over the field.
+const HUD_BG := Color(NAVY, 0.94)
 const HUD_BG_LIGHT := Color(NAVY_RAISED, 0.92)
 const HUD_BORDER := Color(BORDER, 0.9)
 const BAR_HP := Color("#5fb563")
@@ -49,8 +49,8 @@ const CLEAR := Color(0, 0, 0, 0)
 const STATUS_TAGS := {"bleed": "BLD", "poison": "PSN", "toxin": "TOX", "venom_coat": "PREP"}
 
 ## Base font sizes per label style; multiplied by the text-size setting.
-const SIZES := {"tiny": 11, "small": 15, "body": 18, "heading": 23, "title": 34, "huge": 52}
-## Pixelify Sans (OFL, assets/fonts/OFL.txt) for headings, buttons and names.
+const SIZES := {"tiny": 11, "small": 14, "body": 17, "heading": 21, "title": 29, "huge": 38}
+## Pixelify Sans (OFL, assets/fonts/OFL.txt) for short decorative titles only.
 ## Numeric labels use the Godot body font: its digits are deliberately easier
 ## to distinguish at a glance than Pixelify's 5/S and 7/1.
 const PIXEL_FONT_PATH := "res://assets/fonts/PixelifySans.ttf"
@@ -92,9 +92,6 @@ static func make_theme(scale: float) -> Theme:
 		theme.set_type_variation(pixel_variation, "Label")
 		theme.set_font_size("font_size", pixel_variation, int(SIZES[style] * scale))
 		theme.set_font("font", pixel_variation, pixel)
-	for heading in ["HeadingLabel", "TitleLabel", "HugeLabel"]:
-		theme.set_font("font", heading, pixel)
-	theme.set_font("font", "Button", pixel)
 	theme.set_color("font_color", "Label", TEXT)
 	theme.set_type_variation("DimLabel", "Label")
 	theme.set_color("font_color", "DimLabel", TEXT_DIM)
@@ -160,8 +157,6 @@ static func _buttons(theme: Theme, scale: float) -> void:
 	theme.set_type_variation("SecondaryButton", "Button")
 	for type in ["Button", "SecondaryButton", "OptionButton"]:
 		_button_look(theme, type, SLATE, Color(BORDER, 0.7), SLATE_HOVER, BORDER, TEXT, GOLD)
-	theme.set_font("font", "Button", pixel_font())
-	theme.set_font("font", "OptionButton", pixel_font())
 	theme.set_type_variation("PrimaryButton", "Button")
 	_button_look(theme, "PrimaryButton", GOLD, GOLD.darkened(0.35), GOLD.lightened(0.18), GOLD.lightened(0.4), NAVY, NAVY)
 	theme.set_type_variation("DangerButton", "Button")
@@ -208,7 +203,6 @@ static func _buttons(theme: Theme, scale: float) -> void:
 	theme.set_stylebox("hover", "PopupMenu", flat_box(SLATE_HOVER, GOLD, 1, 4))
 	theme.set_color("font_color", "PopupMenu", TEXT)
 	theme.set_color("font_hover_color", "PopupMenu", GOLD)
-	theme.set_font("font", "PopupMenu", pixel_font())
 
 
 static func _button_look(theme: Theme, type: String, fill: Color, edge: Color, hover_fill: Color, hover_edge: Color,
