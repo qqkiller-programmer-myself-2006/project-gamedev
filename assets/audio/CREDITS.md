@@ -36,8 +36,13 @@
 - `music/music_guardian.ogg`: Hope (Orchestral battle music), https://opengameart.org/content/hopeorchestral-battle-music
   Attribution is not required; included for provenance.
 
+## Emma_MA — CC0 1.0
+- `music/music_boss_dark.ogg`: Determined Pursuit (epic orchestra loop), https://opengameart.org/content/determined-pursuit-epic-orchestra-loop
+  The source is explicitly loopable. Converted from WAV to OGG Vorbis and loudness-normalized for the game.
+
 ## YannZ — CC-BY 4.0
 - `music/music_title.ogg` (also used for lobby): FREE Contemplative Fantasy Music Pack, https://opengameart.org/content/free-contemplative-fantasy-music-pack
+- `music/music_defeat.ogg`: "On a tous besoin de temps" (Pause Menu OST) from FREE Contemplative Fantasy Music Pack, https://opengameart.org/content/free-contemplative-fantasy-music-pack
 - Required credit: Music by YannZ https://yannz41.itch.io Spotify: https://open.spotify.com/intl-it/artist/76CUcHd0t0XViSm9YBbHBw Contact: yziango@gmail.com
 
 ## Changes made
@@ -46,3 +51,5 @@
 - Converted `magical_3.ogg` to mono 22.05 kHz OGG Vorbis and removed leading/trailing silence; converted the heal, attack buff, and debuff WAVs to mono 22.05 kHz OGG Vorbis, removed silence, and trimmed the source samples to under 3 seconds. Converted `swish-7.wav` to mono 22.05 kHz OGG Vorbis and removed silence. Peak-normalized all five new files to an approximately -1.5 dB true-peak ceiling; each is under 300 KB.
 - Trimmed silence from `bing1.wav`, converted it from mono 44.1 kHz PCM WAV to mono 22.05 kHz OGG Vorbis, and peak-normalized it to approximately -1.5 dBFS; the resulting `critical.ogg` is under 100 KB.
 - Trimmed `Monster SFX.wav` to 1.95 seconds, converted it from stereo 48 kHz PCM WAV to mono 22.05 kHz OGG Vorbis, and peak-normalized the encoded result to approximately -1.5 dBFS; the resulting `enemy_death.ogg` is under 150 KB.
+- Converted Emma_MA's 108-second loopable `Determined Pursuit` WAV to stereo OGG Vorbis at quality 4 and normalized it to -13.3 LUFS / -0.9 dBFS true peak for `music_boss_dark.ogg`; source loop points are retained.
+- Converted YannZ's 16-second `On a tous besoin de temps` OGG to OGG Vorbis at quality 4 and normalized it to -24.3 LUFS / -6.6 dBFS true peak for `music_defeat.ogg`; it is played once in-game (the source itself is loopable).
