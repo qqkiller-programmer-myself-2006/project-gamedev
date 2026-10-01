@@ -770,8 +770,9 @@ func _build_bottom(view: Dictionary) -> void:
 	if your_turn and not choices.get("skills", {}).is_empty():
 		var squares := UiKit.hbox(4)
 		squares.size_flags_vertical = Control.SIZE_SHRINK_END
+		var text_scale: float = _app.settings.text_scale
 		var hourglass := UiKit.panel(UiKit.pixel_label("Turn", "small", UiKit.TEXT_DIM), "HudPanel")
-		hourglass.custom_minimum_size = Vector2(56, 58)
+		hourglass.custom_minimum_size = Vector2(56 * text_scale, 58 * text_scale)
 		hourglass.tooltip_text = UiText.LABELS["action_window"]
 		squares.add_child(hourglass)
 		for skill_id in choices["skills"]:
@@ -794,7 +795,7 @@ func _build_bottom(view: Dictionary) -> void:
 			count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			mark.add_child(count)
 			var square := UiKit.panel(mark, "HudPanel")
-			square.custom_minimum_size = Vector2(48, 58)
+			square.custom_minimum_size = Vector2(48 * text_scale, 58 * text_scale)
 			var why := "Ready to use"
 			if left > 0:
 				why = "%d turn(s) of cooldown left" % left
