@@ -64,9 +64,14 @@ var badge_height := BADGE_HEIGHT
 var _bob_time := 0.0
 ## 1-based key shown while this token is a valid target, else 0.
 var target_number := 0
+var _target_callback := Callable()
 
 var _badges: HBoxContainer
 var _plate: PanelContainer
+var _hp_bar: ProgressBar
+var _hp_damage_bar: ProgressBar
+var _energy_bar: ProgressBar
+var _bar_tween: Tween
 
 
 ## `data`: {id, side, name, kind (class or enemy kind), hp, max_hp,
@@ -132,19 +137,32 @@ func setup(data: Dictionary) -> void:
 	plate_box.add_child(name_label)
 	var bars := UiKit.hbox(0)
 	bars.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var hp_bar := UiKit.stat_bar(int(data.get("hp", 0)), int(data.get("max_hp", 1)), UiKit.BAR_HP,
+	_hp_bar = UiKit.stat_bar(int(data.get("hp", 0)), int(data.get("max_hp", 1)), UiKit.BAR_HP,
 			"%d/%d" % [int(data.get("hp", 0)), int(data.get("max_hp", 1))] if not down else "DOWN", 14 * text_factor, "small")
-	hp_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hp_bar.size_flags_stretch_ratio = 6.0
-	_fit_bar_caption(hp_bar, text_factor)
-	bars.add_child(hp_bar)
+	_hp_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_hp_bar.size_flags_stretch_ratio = 6.0
+	_fit_bar_caption(_hp_bar, text_factor)
+	var hp_track := Control.new()
+	hp_track.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hp_track.size_flags_stretch_ratio = 6.0
+	hp_track.custom_minimum_size.y = _hp_bar.custom_minimum_size.y
+	_hp_damage_bar = UiKit.stat_bar(int(data.get("hp", 0)), int(data.get("max_hp", 1)), Color("#d88955"), "",
+			14 * text_factor, "small")
+	_hp_bar.add_theme_stylebox_override("background", UiKit.flat_box(Color(0, 0, 0, 0), Color(0, 0, 0, 0), 0, 0))
+	for hp_layer in [_hp_damage_bar, _hp_bar]:
+		hp_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		hp_layer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		hp_layer.size_flags_stretch_ratio = 6.0
+	hp_track.add_child(_hp_damage_bar)
+	hp_track.add_child(_hp_bar)
+	bars.add_child(hp_track)
 	if data.has("energy"):
-		var energy := UiKit.stat_bar(int(data["energy"]), int(data.get("energy_max", 6)), UiKit.BAR_ENERGY,
+		_energy_bar = UiKit.stat_bar(int(data["energy"]), int(data.get("energy_max", 6)), UiKit.BAR_ENERGY,
 				"%d/%d" % [int(data["energy"]), int(data.get("energy_max", 6))], 14 * text_factor, "small")
-		energy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		energy.size_flags_stretch_ratio = 4.0
-		_fit_bar_caption(energy, text_factor)
-		bars.add_child(energy)
+		_energy_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_energy_bar.size_flags_stretch_ratio = 4.0
+		_fit_bar_caption(_energy_bar, text_factor)
+		bars.add_child(_energy_bar)
 	plate_box.add_child(bars)
 	_plate = UiKit.panel(plate_box, "HudPanel")
 	_plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -155,9 +173,52 @@ func setup(data: Dictionary) -> void:
 	tooltip_text = str(data.get("tooltip", ""))
 	modulate = Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
 	_set_animation("dead" if down else "idle")
-	mouse_entered.connect(queue_redraw)
-	mouse_exited.connect(queue_redraw)
+	if not mouse_entered.is_connected(queue_redraw):
+		mouse_entered.connect(queue_redraw)
+	if not mouse_exited.is_connected(queue_redraw):
+		mouse_exited.connect(queue_redraw)
 	set_process(sprite_set != null)
+
+
+## Refresh visual data without replacing the stage node, preserving hover/focus identity.
+func update_data(data: Dictionary) -> void:
+	var old_animation := animation
+	var old_frame := animation_frame
+	var old_elapsed := animation_elapsed
+	var old_bob := _bob_time
+	var old_hp := _hp_bar.value if _hp_bar != null else float(data.get("hp", 0))
+	var old_energy := _energy_bar.value if _energy_bar != null else float(data.get("energy", 0))
+	if _bar_tween != null:
+		_bar_tween.kill()
+	for child in get_children():
+		remove_child(child)
+		child.queue_free()
+	setup(data)
+	_bob_time = old_bob
+	if old_animation != "idle" and old_animation != "dead" and not down:
+		_set_animation(old_animation)
+		animation_frame = mini(old_frame, maxi(0, animation_frames.size() - 1))
+		animation_elapsed = old_elapsed
+	var hp := float(data.get("hp", 0))
+	var energy := float(data.get("energy", 0))
+	if reduced_motion:
+		return
+	if _hp_bar != null:
+		_hp_bar.value = old_hp
+		_hp_damage_bar.value = maxf(old_hp, hp) if hp >= old_hp else old_hp
+		var hp_caption := _hp_bar.get_child(0) as Label
+		hp_caption.text = "%d/%d" % [int(hp), int(data.get("max_hp", 1))] if hp > 0 else "DOWN"
+		_bar_tween = create_tween()
+		_bar_tween.tween_interval(0.3)
+		_bar_tween.tween_property(_hp_bar, "value", hp, 0.25)
+		_bar_tween.tween_interval(0.06)
+		_bar_tween.tween_property(_hp_damage_bar, "value", hp, 0.28)
+	if _energy_bar != null:
+		_energy_bar.value = old_energy
+		if _bar_tween == null or not _bar_tween.is_running():
+			_bar_tween = create_tween()
+			_bar_tween.tween_interval(0.3)
+		_bar_tween.tween_property(_energy_bar, "value", energy, 0.25)
 
 func play_animation(kind: String) -> void:
 	if kind == "revive":
@@ -169,7 +230,7 @@ func play_animation(kind: String) -> void:
 	if kind == "dead":
 		down = true
 		modulate = Color(0.55, 0.55, 0.55, 0.85)
-	if sprite_set == null:
+	if reduced_motion or sprite_set == null:
 		return
 	_set_animation(kind)
 
@@ -231,11 +292,16 @@ func _process(delta: float) -> void:
 
 ## Makes the token a clickable target with number `number` (0 = not a target).
 func set_target(number: int, callback: Callable) -> void:
+	if _target_callback.is_valid() and pressed.is_connected(_target_callback):
+		pressed.disconnect(_target_callback)
 	target_number = number
 	disabled = number <= 0
 	focus_mode = Control.FOCUS_ALL if number > 0 else Control.FOCUS_NONE
 	if number > 0:
-		pressed.connect(callback)
+		_target_callback = callback
+		pressed.connect(_target_callback)
+	else:
+		_target_callback = Callable()
 	queue_redraw()
 
 

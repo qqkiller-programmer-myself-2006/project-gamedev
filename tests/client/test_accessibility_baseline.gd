@@ -226,3 +226,72 @@ func test_combat_log_dock_grows_right_at_large_scale() -> void:
 	battle.free()
 	screen.free()
 	app.free()
+
+
+func test_primary_battle_actions_are_keyboard_focusable() -> void:
+	var battle := _battle()
+	var view := {
+		"layer": 1, "layers_total": 5, "gold": 0, "story": false,
+		"phase": "combat",
+		"encounter": {"kind": "combat", "name": "Wolves"},
+		"party": [{
+			"slot": 0, "name": "Alice", "class": "classless", "class_name": "Classless",
+			"level": 1, "hp": 10, "max_hp": 10, "atk": 3, "def": 1, "mag": 1, "res": 1,
+			"spd": 10, "exp": 0, "exp_next": 20, "controller": "human",
+		}],
+	}
+	var combat := {
+		"actor": "p0", "round": 1, "your_turn": true, "deadline": -1,
+		"round_order": ["p0", "e0"], "turn_order": ["p0", "e0"],
+		"choices": {"focus": true, "skills": {"slash": {"name": "Slash", "energy": 1,
+			"cooldown": 0, "affordable": true, "targets": ["e0"]}}, "items": {"potion": {}}},
+		"enemies": [{"id": "e0", "name": "Grey Wolf", "kind": "grey_wolf", "row": "front",
+			"hp": 12, "max_hp": 12, "spd": 13}],
+	}
+	battle.build(view, combat)
+	var found := {}
+	for button in _buttons(battle):
+		found[str(button.get_meta("focus_id", ""))] = button.focus_mode
+	assert_eq(found.get("action_fight", Control.FOCUS_NONE), Control.FOCUS_ALL, "Fight is keyboard focusable")
+	assert_eq(found.get("action_items", Control.FOCUS_NONE), Control.FOCUS_ALL, "Items is keyboard focusable")
+	assert_eq(found.get("action_focus", Control.FOCUS_NONE), Control.FOCUS_ALL, "Focus is keyboard focusable")
+	var screen: MatchScreen = battle._screen
+	var app: ClientApp = battle._app
+	battle.free()
+	screen.free()
+	app.free()
+
+
+func test_merchant_and_rest_primary_actions_are_keyboard_focusable() -> void:
+	_make_camp()
+	_camp.build(_view(), _merchant())
+	var merchant_ids := {}
+	for button in _buttons(_camp):
+		merchant_ids[str(button.get_meta("focus_id", ""))] = button.focus_mode
+	assert_eq(merchant_ids.get("buy_bread", Control.FOCUS_NONE), Control.FOCUS_ALL, "Buy is keyboard focusable")
+	assert_eq(merchant_ids.get("ready", Control.FOCUS_NONE), Control.FOCUS_ALL, "Merchant Ready is keyboard focusable")
+	var rest := {
+		"kind": "rest", "name": "Camp", "you_are_ready": false, "ready": [], "humans": 1,
+		"recipes": [{"recipe": "patch", "name": "Patch Up", "category": "Care", "craftable": true,
+			"materials": []}],
+	}
+	_app.settings.text_scale = 1.4
+	_camp.build(_view(), rest)
+	var rest_ids := {}
+	for button in _buttons(_camp):
+		rest_ids[str(button.get_meta("focus_id", ""))] = button.focus_mode
+	assert_eq(rest_ids.get("craft_patch", Control.FOCUS_NONE), Control.FOCUS_ALL, "Craft is keyboard focusable")
+	assert_eq(rest_ids.get("ready", Control.FOCUS_NONE), Control.FOCUS_ALL, "Rest Ready is keyboard focusable")
+
+
+func test_reduced_motion_keeps_action_announcement_visible() -> void:
+	var battle := _battle()
+	battle._app.settings.reduced_motion = true
+	battle.announce("Alice attacks Grey Wolf")
+	assert_true(battle._banner.visible, "reduced motion leaves the action banner visible")
+	assert_eq(battle._banner_label.text, "Alice attacks Grey Wolf", "the action result stays readable")
+	var screen: MatchScreen = battle._screen
+	var app: ClientApp = battle._app
+	battle.free()
+	screen.free()
+	app.free()

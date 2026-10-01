@@ -18,7 +18,10 @@ var tips: VBoxContainer
 var _screen: MatchScreen
 var _app: ClientApp
 var _combat: Dictionary = {}
+var _view: Dictionary = {}
 var _content: Dictionary = {}
+static var _forest_content: Dictionary = {}
+static var forest_parse_count := 0
 var _me := ""
 var _deadline: Variant = null
 var _countdown: Label
@@ -55,11 +58,7 @@ var _combat_grid: Control
 func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_screen = screen
 	_app = app
-	var content_file := FileAccess.open("res://content/forest.json", FileAccess.READ)
-	if content_file != null:
-		var parsed = JSON.parse_string(content_file.get_as_text())
-		if parsed is Dictionary:
-			_content = parsed
+	_content = _load_forest_content()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	_backdrop = BattleBackdrop.new()
@@ -204,8 +203,19 @@ func _backdrop_name(view: Dictionary, encounter: Dictionary) -> String:
 		return str(encounter.get("backdrop", _content.get("boss", {}).get("backdrop", "")))
 	return str(_content.get("journey", {}).get("backdrops", {}).get(str(view.get("layer", 1)), ""))
 
+static func _load_forest_content() -> Dictionary:
+	if _forest_content.is_empty():
+		var content_file := FileAccess.open("res://content/forest.json", FileAccess.READ)
+		if content_file != null:
+			var parsed = JSON.parse_string(content_file.get_as_text())
+			if parsed is Dictionary:
+				_forest_content = parsed
+				forest_parse_count += 1
+	return _forest_content
+
 
 func build(view: Dictionary, combat: Dictionary) -> void:
+	_view = view
 	_combat = combat
 	var encounter: Dictionary = view.get("encounter", {}) if view.get("encounter") is Dictionary else {}
 	_backdrop.set_backdrop(_backdrop_name(view, encounter))
@@ -227,6 +237,25 @@ func build(view: Dictionary, combat: Dictionary) -> void:
 	tick()
 
 
+func refresh_action_panel() -> void:
+	_choices.clear()
+	for token_value in _tokens.values():
+		var token := token_value as BattleToken
+		token.set_target(0, Callable())
+	var targets := _current_targets()
+	for i in targets.size():
+		var target := str(targets[i])
+		var token := _tokens.get(target) as BattleToken
+		if token == null:
+			continue
+		var command := _target_command(target)
+		var pick := func() -> void: _send(command)
+		token.set_target(i + 1, pick)
+		_choices.append(pick)
+	_build_bottom(_view)
+	if not targets.is_empty():
+		focus_default()
+
 func tick() -> void:
 	if _countdown == null or not is_instance_valid(_countdown):
 		return
@@ -239,7 +268,9 @@ func tick() -> void:
 		return
 	var left := _app.seconds_left(_deadline)
 	_countdown.text = "%ds" % ceili(left)
-	_countdown.add_theme_color_override("font_color", UiKit.WARN if left <= 5.0 else UiKit.TEXT)
+	var next_color := UiKit.WARN if left <= 5.0 else UiKit.TEXT
+	if _countdown.get_theme_color("font_color") != next_color:
+		_countdown.add_theme_color_override("font_color", next_color)
 	if _combat.get("your_turn", false):
 		_screen.warn_if_short(_deadline, left)
 
@@ -498,10 +529,6 @@ func _controller_tag(id: String, unit: Dictionary) -> Array:
 
 func _build_stage(view: Dictionary) -> void:
 	_previous_tokens = _tokens.duplicate()
-	for child in _stage.get_children():
-		_stage.remove_child(child)
-		child.queue_free()
-	_tokens.clear()
 	_spots.clear()
 	var statuses: Dictionary = _combat.get("statuses", {})
 	var party: Array = view.get("party", [])
@@ -564,19 +591,27 @@ func _build_stage(view: Dictionary) -> void:
 		var pick := func() -> void: _send(cmd)
 		token.set_target(i + 1, pick)
 		_choices.append(pick)
+	for id in _tokens.keys():
+		if not _spots.has(id):
+			var stale: BattleToken = _tokens[id]
+			_stage.remove_child(stale)
+			stale.queue_free()
+			_tokens.erase(id)
 	_place_tokens()
 	_previous_tokens.clear()
 
 
 func _add_token(data: Dictionary) -> void:
-	var token := BattleToken.new()
-	token.text_scale = _app.settings.text_scale
-	token.setup(data)
-	var previous: BattleToken = _previous_tokens.get(data["id"])
-	if previous != null:
-		token.continue_animation(previous)
-	_stage.add_child(token)
-	_tokens[data["id"]] = token
+	var id := str(data["id"])
+	var token: BattleToken = _tokens.get(id)
+	if token == null or not is_instance_valid(token):
+		token = BattleToken.new()
+		token.text_scale = _app.settings.text_scale
+		token.setup(data)
+		_stage.add_child(token)
+		_tokens[id] = token
+	else:
+		token.update_data(data)
 	_screen.anchors[data["id"]] = token
 
 
@@ -674,8 +709,9 @@ func _build_bottom(view: Dictionary) -> void:
 	if your_turn and not choices.get("skills", {}).is_empty():
 		var squares := UiKit.hbox(4)
 		squares.size_flags_vertical = Control.SIZE_SHRINK_END
+		var text_scale: float = _app.settings.text_scale
 		var hourglass := UiKit.panel(UiKit.pixel_label("Turn", "small", UiKit.TEXT_DIM), "HudPanel")
-		hourglass.custom_minimum_size = Vector2(56, 42)
+		hourglass.custom_minimum_size = Vector2(56 * text_scale, 42 * text_scale)
 		hourglass.tooltip_text = UiText.LABELS["action_window"]
 		squares.add_child(hourglass)
 		for skill_id in choices["skills"]:
@@ -698,7 +734,7 @@ func _build_bottom(view: Dictionary) -> void:
 			count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			mark.add_child(count)
 			var square := UiKit.panel(mark, "HudPanel")
-			square.custom_minimum_size = Vector2(38, 42)
+			square.custom_minimum_size = Vector2(38 * text_scale, 42 * text_scale)
 			var why := "Ready to use"
 			if left > 0:
 				why = "%d turn(s) of cooldown left" % left
@@ -906,7 +942,7 @@ func _set_mode(mode: String) -> void:
 			_banner_tween.kill()
 		_banner.visible = false
 	_screen.combat_mode = mode
-	_screen.refresh(_app, true)
+	refresh_action_panel()
 
 
 func _send(cmd: Dictionary) -> void:

@@ -125,7 +125,7 @@ func tip_width() -> float:
 
 ## The camp footer has space for one scrollable line beside Ready.
 func tip_body_height() -> float:
-	return 16.0 if _camp_mode else 92.0
+	return 22.0 if _camp_mode else 92.0
 
 
 func match_view() -> Dictionary:
@@ -574,11 +574,11 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				var target := str(result["target"])
 				if result.has("damage"):
 					hurt = true
-					client.flash(anchors.get(target), Color(1.6, 0.7, 0.7))
 					var text := "-%d" % int(result["damage"])
 					if result.get("crit", false):
 						text += " CRIT"
-					float_text(target, text, UiKit.ENEMY if target.begins_with("p") else UiKit.ACCENT)
+					_show_action_hit.call_deferred(client, target, text,
+							UiKit.ENEMY if target.begins_with("p") else UiKit.ACCENT)
 				elif result.has("heal"):
 					client.flash(anchors.get(target), Color(0.8, 1.5, 0.8))
 					float_text(target, "+%d" % int(result["heal"]), UiKit.GOOD)
@@ -617,6 +617,18 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 			_clear_floating_numbers()
 			client.banner("Victory!" if event["result"] == "victory" else "Defeat", 3.0,
 					"good" if event["result"] == "victory" else "bad")
+
+
+func _show_action_hit(client: ClientApp, target: String, text: String, color: Color) -> void:
+	if client.settings.reduced_motion:
+		client.flash(anchors.get(target), color)
+		float_text(target, text, color)
+		return
+	await get_tree().create_timer(0.3).timeout
+	if not is_instance_valid(self):
+		return
+	client.flash(anchors.get(target), Color(1.6, 0.7, 0.7))
+	float_text(target, text, color)
 
 
 func _collect_names(view: Dictionary) -> void:
