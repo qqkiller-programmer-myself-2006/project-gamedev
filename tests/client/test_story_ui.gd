@@ -81,7 +81,7 @@ func test_large_text_path_vote_keeps_status_and_timer_outside_scroll_area() -> v
 	view["vote"]["options"].append({"index": 1, "type": "rest", "name": "Quiet Glade", "hint": "A place to recover.", "voters": []})
 	var panel := VotePanel.new()
 	panel.build(screen, app, view)
-	assert_true(_has_text(panel, "Other path:"), "compact alternatives are labelled as other paths")
+	assert_true(_has_text(panel, "Quiet Glade"), "every route gets its own card")
 	assert_true(_has_text(panel, "0 of 1 ready"), "vote status stays in the footer")
 	assert_true(_has_text(panel, "Vote closes in"), "the vote timer stays in the footer")
 	assert_true(panel.get_child(2) is ScrollContainer, "only the route choices scroll")

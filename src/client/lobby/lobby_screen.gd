@@ -19,7 +19,7 @@ func setup(app: ClientApp) -> void:
 	var center := CenterContainer.new()
 	margin.add_child(center)
 	_body = UiKit.vbox(14)
-	_body.custom_minimum_size = Vector2(760, 0)
+	_body.custom_minimum_size = Vector2(880, 0)
 	center.add_child(_body)
 
 
@@ -50,9 +50,12 @@ func refresh(app: ClientApp, force: bool = false) -> void:
 	var you: int = room.get("your_slot", -1)
 	var is_host: bool = you == room.get("host_slot", -2)
 
-	var heading := UiKit.flow(12)
-	heading.add_child(UiKit.label("Room code", "heading"))
-	var code := UiKit.label(str(room.get("code", "")), "huge", UiKit.ACCENT)
+	var heading := UiKit.flow(16)
+	heading.alignment = FlowContainer.ALIGNMENT_CENTER
+	heading.add_child(UiKit.pixel_label("ROOM CODE", "heading", UiKit.TEXT_DIM))
+	var code := UiKit.pixel_label(str(room.get("code", "")), "huge", UiKit.ACCENT)
+	code.add_theme_color_override("font_outline_color", UiKit.BG)
+	code.add_theme_constant_override("outline_size", 8)
 	heading.add_child(code)
 	var copy := UiKit.button("Copy code", func() -> void:
 		DisplayServer.clipboard_set(str(room.get("code", "")))
@@ -60,22 +63,27 @@ func refresh(app: ClientApp, force: bool = false) -> void:
 	copy.set_meta("focus_id", "copy")
 	heading.add_child(copy)
 	_body.add_child(heading)
-	_body.add_child(UiKit.para("Share the code with friends. Anyone on PC or in a browser can join until the Host starts.", "dim"))
+	var hint := UiKit.para("Share the code with friends. Anyone on PC or in a browser can join until the Host starts.", "dim")
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_body.add_child(hint)
 
 	var list := UiKit.vbox(8)
 	_body.add_child(UiKit.panel(list))
-	list.add_child(UiKit.label("Party - always 5 characters. Empty slots are played by AI.", "heading"))
+	list.add_child(UiKit.label("Party - always 5 characters. Empty slots are played by AI.", "heading", UiKit.ACCENT))
 	for slot in room.get("slots", []):
 		list.add_child(_slot_row(slot))
 
-	var actions := UiKit.flow(12)
+	var actions := UiKit.flow(14)
+	actions.alignment = FlowContainer.ALIGNMENT_CENTER
 	var setup_button := UiKit.button("Character Setup", _open_setup, true, "secondary" if is_host else "primary")
 	Icons.apply_to_button(setup_button, "settings", app.settings.text_scale)
+	setup_button.custom_minimum_size.x = 240
 	setup_button.set_meta("focus_id", "setup")
 	actions.add_child(setup_button)
 	if is_host:
 		var start := UiKit.primary("Start the Match", func() -> void: app.send({"type": "start_match"}))
 		Icons.apply_to_button(start, "play", app.settings.text_scale)
+		start.custom_minimum_size.x = 240
 		start.set_meta("focus_id", "start")
 		actions.add_child(start)
 	else:
@@ -86,9 +94,11 @@ func refresh(app: ClientApp, force: bool = false) -> void:
 		actions.add_child(UiKit.label("Waiting for %s (Host) to start the Match..." % host_name, "heading"))
 	var leave := UiKit.button("Leave room [Esc]", app.confirm_leave, true, "danger")
 	Icons.apply_to_button(leave, "back", app.settings.text_scale)
+	leave.custom_minimum_size.x = 200
 	leave.set_meta("focus_id", "leave")
 	actions.add_child(leave)
 	var settings := UiKit.button("Settings [F2]", app.open_settings, true)
+	settings.custom_minimum_size.x = 200
 	Icons.apply_to_button(settings, "settings", app.settings.text_scale)
 	actions.add_child(settings)
 	_body.add_child(actions)
@@ -98,18 +108,23 @@ func refresh(app: ClientApp, force: bool = false) -> void:
 
 func _slot_row(slot: Dictionary) -> Control:
 	var row := UiKit.hbox(10)
-	row.add_child(UiKit.label("Slot %d" % (int(slot["index"]) + 1), "dim"))
-	var character := UiKit.label(str(slot["character_name"]), "heading")
-	character.custom_minimum_size = Vector2(110, 0)
+	var number := UiKit.label("%d" % (int(slot["index"]) + 1), "heading", UiKit.TEXT_DIM)
+	number.custom_minimum_size = Vector2(28, 0)
+	row.add_child(number)
+	var character := UiKit.pixel_label(str(slot["character_name"]), "heading")
+	character.custom_minimum_size = Vector2(130, 0)
 	row.add_child(character)
+	var tag_slot := Control.new()
+	tag_slot.custom_minimum_size = Vector2(96, 0)
+	row.add_child(tag_slot)
 	if slot["controller"] == "human":
-		row.add_child(UiKit.badge("PLAYER", UiKit.ALLY))
+		tag_slot.add_child(UiKit.badge("PLAYER", UiKit.ALLY))
 		row.add_child(UiKit.label(str(slot["owner_name"])))
 		var loadout: Dictionary = slot.get("loadout", {})
 		if not loadout.is_empty():
 			row.add_child(UiKit.label("%s / %s" % [str(loadout.get("class", "")).capitalize(), str(loadout.get("race", ""))], "small", UiKit.ACCENT))
 	else:
-		row.add_child(UiKit.badge("AI", UiKit.TEXT_DIM))
+		tag_slot.add_child(UiKit.badge("AI", UiKit.TEXT_DIM))
 		row.add_child(UiKit.label("AI controlled", "dim"))
 	row.add_child(UiKit.spacer())
 	if slot["is_host"]:
