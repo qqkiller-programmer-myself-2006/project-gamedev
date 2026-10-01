@@ -28,6 +28,8 @@ const CLASS_GLYPHS := {
 const ENEMY_TINTS := {
 	"grey_wolf": Color("#9aa3ad"), "thornback_boar": Color("#a5714f"), "bramble_archer": Color("#79a150"),
 	"forest_wisp": Color("#a6e6ee"), "elder_thornwarden": Color("#5f8f43"),
+	"old_swordsman": Color("#67835a"), "veteran_hunter": Color("#78904c"),
+	"shrine_spirit": Color("#6ebbb0"),
 }
 const STATUS_ICONS := {
 	"bleed": "bleed", "poison": "poison", "toxin": "poison", "venom_coat": "poison",
@@ -153,18 +155,22 @@ func setup(data: Dictionary) -> void:
 	tooltip_text = str(data.get("tooltip", ""))
 	modulate = Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
 	_set_animation("dead" if down else "idle")
+	mouse_entered.connect(queue_redraw)
+	mouse_exited.connect(queue_redraw)
 	set_process(sprite_set != null)
 
 func play_animation(kind: String) -> void:
-	if sprite_set == null:
-		return
 	if kind == "revive":
 		down = false
 		modulate = Color.WHITE
-		_set_animation("idle")
+		if sprite_set != null:
+			_set_animation("idle")
 		return
 	if kind == "dead":
 		down = true
+		modulate = Color(0.55, 0.55, 0.55, 0.85)
+	if sprite_set == null:
+		return
 	_set_animation(kind)
 
 ## A fresh token is built for each snapshot. Carry a one-shot animation over
@@ -206,6 +212,8 @@ func _process(delta: float) -> void:
 		_set_animation("idle")
 		return
 	animation_elapsed += delta
+	if animation == "hurt":
+		queue_redraw()
 	var frame_time := 1.0 / maxf(1.0, sprite_set.fps(animation))
 	while animation_elapsed >= frame_time:
 		animation_elapsed -= frame_time
@@ -240,6 +248,8 @@ func _draw() -> void:
 		ring_color = Color("#fff3b0")
 	if has_focus():
 		ring_color = UiKit.ACCENT
+	elif is_hovered() and target_number > 0:
+		ring_color = UiKit.GOOD
 	var ground_color := Color(0, 0, 0, 0.45)
 	if side == "party":
 		ground_color = tint.darkened(0.25)
@@ -268,6 +278,9 @@ func _fit_bar_caption(bar: Control, factor: float) -> void:
 ## arrows/slashes/orbs, so attack borrows the run row and dead the hurt row; the
 ## character then keeps one size while effects reach past it.
 func _body_height(anim: String) -> float:
+	var override: Dictionary = sprite_set.data.get("body_height", {})
+	if override.has(anim):
+		return float(override[anim])
 	match anim:
 		"attack":
 			for reference in ["run", "walk", "idle"]:
@@ -294,12 +307,18 @@ func _draw_figure(feet: Vector2) -> void:
 		var top_left := Vector2(roundf(feet.x - canvas.x * scale * 0.5),
 				roundf(feet.y - sprite_set.baseline(animation) * scale + bob))
 		var rect := Rect2(top_left, canvas * scale)
+		var frame_tint := Color.WHITE
+		if animation == "hurt" and bool(sprite_set.data.get("hurt_shake", false)):
+			# No dedicated hurt frames: flash red and shake instead of freezing.
+			var decay := 1.0 - float(animation_frame) / maxf(1.0, animation_frames.size())
+			rect.position.x += sin(animation_elapsed * 70.0 + animation_frame * 2.0) * 5.0 * decay
+			frame_tint = Color(1.0, 0.55, 0.55)
 		if sprite_set.mirrored(animation):
 			draw_set_transform(top_left + Vector2(rect.size.x, 0), 0.0, Vector2(-1, 1))
-			draw_texture_rect(animation_frames[animation_frame], Rect2(Vector2.ZERO, rect.size), false)
+			draw_texture_rect(animation_frames[animation_frame], Rect2(Vector2.ZERO, rect.size), false, frame_tint)
 			draw_set_transform(Vector2.ZERO)
 		else:
-			draw_texture_rect(animation_frames[animation_frame], rect, false)
+			draw_texture_rect(animation_frames[animation_frame], rect, false, frame_tint)
 		return
 	var body := tint
 	var dark := tint.darkened(0.45)
@@ -378,8 +397,8 @@ func _draw_enemy(feet: Vector2, body: Color, dark: Color) -> void:
 			draw_circle(Vector2(feet.x, feet.y - 43), radius, Color(0.30, 0.90, 0.94, 0.06))
 		draw_circle(Vector2(feet.x, feet.y - 43), 18.0, Color("#8fe8f0"))
 		draw_circle(Vector2(feet.x - 6, feet.y - 49), 5.0, Color("#eaffff"))
-	elif kind.contains("outlaw") or kind.contains("bandit") or kind.contains("swordsman") or kind.contains("hunter") or kind.contains("sentinel"):
-		_draw_humanoid(feet, Color("#45494f"), Color("#20242b"), 1.0)
+	elif kind.contains("outlaw") or kind.contains("bandit") or kind.contains("thief") or kind.contains("swordsman") or kind.contains("hunter") or kind.contains("sentinel"):
+		_draw_humanoid(feet, Color("#45494f"), Color("#20242b"), 1.35)
 		draw_rect(Rect2(feet.x - 17, feet.y - 53, 34, 9), Color("#181b22"))
 	elif kind.contains("archer"):
 		_draw_humanoid(feet, body, dark, 0.9)

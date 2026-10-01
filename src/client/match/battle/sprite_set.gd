@@ -4,7 +4,7 @@ extends RefCounted
 
 const ROOT := "res://assets/heroes/"
 const MANIFEST := "res://assets/heroes/manifest.json"
-const ART_CLASSES := {"archer": true, "mage": true, "swordsman": true, "guardian": true, "assassin": true}
+const ART_CLASSES := {"archer": true, "mage": true, "swordsman": true, "guardian": true, "assassin": true, "bram": true}
 const ENEMY_ROOT := "res://assets/enemies/"
 const ENEMY_MANIFEST := "res://assets/enemies/manifest.json"
 
@@ -38,13 +38,16 @@ static func enemy_manifest() -> Dictionary:
 	return _enemy_manifest.duplicate(true)
 
 static func for_class(class_id_value: String) -> SpriteSet:
-	if not ART_CLASSES.has(class_id_value.to_lower()):
+	var key := class_id_value.to_lower()
+	if key == "classless":
+		key = "bram"
+	if not ART_CLASSES.has(key):
 		return null
 	_load_manifest()
-	if not _manifest.has(class_id_value.to_lower()):
+	if not _manifest.has(key):
 		return null
 	var result := SpriteSet.new()
-	result.class_id = class_id_value.to_lower()
+	result.class_id = key
 	result.data = _manifest[result.class_id]
 	return result
 
@@ -56,6 +59,9 @@ static func portrait(class_id_value: String) -> Texture2D:
 
 func frames(animation: String) -> Array[Texture2D]:
 	animation = _key(animation)
+	if not is_enemy and class_id == "bram" and (animation == "hurt" or animation == "dead" or animation == "die"):
+		if not data.get("animations", {}).has(animation):
+			animation = "idle"
 	if is_enemy and not variant.is_empty() and animation == "idle":
 		var variant_path := ENEMY_ROOT + enemy_id + "/variants/" + variant + ".png"
 		var variant_texture := load(variant_path) as Texture2D
@@ -69,7 +75,7 @@ func frames(animation: String) -> Array[Texture2D]:
 		listed = generated
 	if listed is Dictionary:
 		listed = listed.get("right", listed.get("left", []))
-	elif animation == "idle" and listed is Array:
+	elif animation == "idle" and listed is Array and not is_enemy:
 		var facing := ""
 		for filename in listed:
 			if str(filename).contains("_right"):
@@ -94,6 +100,9 @@ func frames(animation: String) -> Array[Texture2D]:
 func mirrored(animation: String) -> bool:
 	if is_enemy:
 		return str(data.get("faces", "right")) == "right"
+	if class_id == "bram" and (animation == "hurt" or animation == "dead" or animation == "die"):
+		if not data.get("animations", {}).has(animation):
+			animation = "idle"
 	var listed = data.get("animations", {}).get(animation, [])
 	if listed is Dictionary:
 		return not listed.has("right") and listed.has("left")

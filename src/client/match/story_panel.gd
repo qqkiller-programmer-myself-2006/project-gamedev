@@ -50,7 +50,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 		if int(outcome.get("gold", 0)) > 0:
 			extras.append("+%d Gold" % int(outcome["gold"]))
 		for item in outcome.get("items", {}):
-			extras.append("+%d %s" % [int(outcome["items"][item]), str(item).replace("_", " ").capitalize()])
+			extras.append("+%d %s" % [int(outcome["items"][item]), UiText.item_name(str(item))])
 		if int(outcome.get("exp", 0)) > 0:
 			extras.append("+%d EXP each" % int(outcome["exp"]))
 		if outcome.get("healed", false):

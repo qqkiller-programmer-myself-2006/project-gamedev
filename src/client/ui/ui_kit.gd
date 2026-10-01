@@ -39,7 +39,7 @@ const HP_LOW := Color("#d9644f")
 const HUD_BG := Color(NAVY, 0.88)
 const HUD_BG_LIGHT := Color(NAVY_RAISED, 0.92)
 const HUD_BORDER := Color(BORDER, 0.9)
-const BAR_HP := Color("#d8453c")
+const BAR_HP := Color("#5fb563")
 const BAR_ENERGY := Color("#3b9ae1")
 const BAR_BACK := Color(0.06, 0.06, 0.07, 0.9)
 const CLEAR := Color(0, 0, 0, 0)
@@ -530,16 +530,9 @@ static func hp_bar(hp: int, max_hp: int, width: float = 0.0) -> ProgressBar:
 	bar.max_value = maxi(1, max_hp)
 	bar.value = hp
 	bar.show_percentage = false
-	bar.custom_minimum_size = Vector2(width, 20)
-	var ratio := float(hp) / float(maxi(1, max_hp))
-	bar.add_theme_stylebox_override("fill", box(HP_LOW if ratio < 0.35 else HP_FILL, Color(0, 0, 0, 0), 0, 0))
-	var text := label("HP %d / %d" % [hp, max_hp], "small")
-	text.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	text.add_theme_color_override("font_outline_color", Color.BLACK)
-	text.add_theme_constant_override("outline_size", 4)
-	bar.add_child(text)
+	bar.custom_minimum_size = Vector2(width, 30)
+	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar.add_theme_stylebox_override("fill", box(BAR_HP, Color(0, 0, 0, 0), 0, 0))
 	return bar
 
 

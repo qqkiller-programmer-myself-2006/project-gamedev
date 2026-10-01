@@ -46,6 +46,7 @@
 | T8 Cloudflare Worker + D1 เก็บ profile/Gems | Codex | merged 0ffd1b1 | #55 | ✅ โค้ดเสร็จ 5/5 test; รอเจ้าของงาน deploy ตาม docs/running.md |
 
 | T9 ใช้ sprite ของเจ้าของงาน (Archer/Mage/Swordsman) | Codex | `ai/t9-sprites` / `../ai-t9` | #56 | T9a ✅ merged; T9b (`ai/t9b-sprites-battle` / `../ai-t9b`) กำลังทำ + เศษงาน #48 |
+| DA1 Design alignment audit/plan | Codex | `codex/design-alignment` on `main` `e6b888d` | — | ✅ docs pushed to main; Project #8 items #46/#82/#84/#86 ยังรอ sync |
 
 การตัดสินใจรอบ 3 (2026-09-29 12:10): ใช้ Claude Code + agy + Codex เท่านั้น ไม่ใช้ opencode (เขียนใน AGENTS.md แล้ว); มี subagent `codex-executor` / `agy-executor` ใน `.claude/agents/` (ใช้ได้ใน session ใหม่)
 โควตา: agy Gemini หมด (รีเซ็ต ~14:25), agy Claude หมด (รีเซ็ต ~17:30) — ระหว่างนี้งานทั้งหมดไป Codex; T4-r2 และ T9a-r2 ย้ายมา Codex แล้ว
@@ -132,4 +133,7 @@ Parent issue #47, milestone "Final build — AAC parity" (#4, due 2026-10-02), P
 - 2026-09-30 14:28: merged T43 #46 docs cleanup (canonical AAC reference in docs/README.md, 8 docs/screenshots/*.png.import untracked, stale Godot path out of ui-style.md, 75 links resolve; 14d85d4) as 208d22a on `claude/remote-control-dc3630` -> **391/391**; PR #93 ticked + Closes #46, #46 commented, stays In Progress until PR #93 merges.
 
 - 2026-09-30 (Codex worktree 0cc1): synced to `main` 91d94df. Prepared fixes for #83 (turn list / Tip layout), #90 (UI and Story previews), and #76 (D1 per-session saves, save-failure notice, sender drain, export filters, Story no-meta decision). Final full suite **404/404**; T35 layout smoke 6 viewport/scale combinations and inspected 1.4/1080 previews; #90 previews reached real Story battle and boss Summary (seed 7 defeat, seed 11 victory). Web export pack contains both hero/enemy manifests and no `deploy/`. #76 still has synchronous 1s GET, 409 report/block without merge, and other broad P2 review findings. #90 class-challenge route was reviewed statically but not exercised in preview.
+- 2026-09-30 (Codex audit): started detached at `main` HEAD `7dd5d8b` (PR #97 merged; PR #98 was open at audit time). Found PRD/ADR-0013 drift, conflicting Enervation glossary entries, malformed ADR-0010 supersession note, Story profile policy conflict between ADR-0014 and review follow-up #76, and Project #8 items #46/#82/#84/#86 left In Progress despite closed issues. Plan: `docs/plans/2026-09-30-design-alignment.md`; aligned PRD, glossary, ADR-0010/0013 and reclassified review F4 against ADR-0014. Full suite not run because Godot Editor was open in another checkout; checkpoint warns against concurrent Godot runs.
+- 2026-09-30: synced design-alignment changes onto `origin/main` `0779ef1` after PR #98 merged; DA1 is ready to commit/push. Project #8 status cleanup remains pending.
+- 2026-09-30: pushed design-alignment commit `e6b888d` directly to GitHub `main`; verified `origin/main` points to that commit. Project #8 status cleanup remains pending.
 - Published as `f4d01fe` directly to `main`; closed #83 and #90 after push. #76 remains open for asynchronous profile loading and the remaining P2 scope.

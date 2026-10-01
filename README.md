@@ -14,6 +14,31 @@ The current goal is the Forest vertical slice described in
 - Accessibility checklist: [`docs/design/accessibility.md`](docs/design/accessibility.md)
 - Staging and QA checklist: [`docs/guides/staging.md`](docs/guides/staging.md)
 
+## Latest verification — 2026-10-01
+
+Checked `origin/main` at `cd3752e` (after PR #101, accessibility baseline) with
+Godot 4.7.2 on Windows:
+
+- **Headless suite: 416 passed, 1 failed** (160 s). The one failure is
+  `test_story_path_choice_hides_vote_status_and_multiplayer_keeps_it`. It is a
+  stale test, not a game bug: since PR #98 the voter status reads
+  "Ready N of M." but the test still looked for "Voted:". Fixed in the same PR as
+  this README update (assertion now checks "Ready"). Tracked in
+  [#91](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/91).
+- **Bot simulation** (`tools/dev/simulate.gd --seeds=20`): 1 human 15/20 (75%),
+  2 humans 13/20 (65%), 0 rejected commands. Every defeat was at the Guardian
+  Boss. Duo is under the 70–97% target, but 20 seeds is a small sample; rerun
+  with more seeds before tuning.
+- **Scripted Duo UI preview** (`tools/dev/ui_preview.gd --seed=11 --speed=24`):
+  22 screens from title to Defeat summary captured. Open UI issues seen in the
+  screenshots: placeholder text in the battle top-right ("All", "P OK", "S OK",
+  "..."), the target caption overlapping back-row heroes, floating damage numbers
+  stacking on the boss, and Path Voting alternatives below the fold. See
+  [#87](https://github.com/qqkiller-programmer-myself-2006/project-gamedev/issues/87).
+
+This is automated checking, not a human multiplayer or platform-certification
+playtest.
+
 ## Where things live
 
 ```text

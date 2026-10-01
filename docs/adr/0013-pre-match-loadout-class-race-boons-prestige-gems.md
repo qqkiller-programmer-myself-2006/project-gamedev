@@ -14,7 +14,7 @@ status: accepted
 
 ## 2. Class ก่อนเริ่ม (แทน Classless start)
 
-- ผู้เล่นจริงเลือก Tier 1 Class (Swordsman, Archer, Mage, Guardian, Rogue) ในหน้า Class แบบ carousel `< >` พร้อมคำอธิบายและ "Recommended Stats"
+- ผู้เล่นจริงเลือก Tier 1 Class (Swordsman, Archer, Mage, Guardian, Assassin) ในหน้า Class แบบ carousel `< >` พร้อมคำอธิบายและ "Recommended Stats" (เปลี่ยนชื่อจาก Rogue ตาม #74)
 - slot ของ AI ได้ Class ที่ยังไม่มีใน Party ตามลำดับใน `party.ai_class_order` (ถ้าผู้เล่นไม่ได้ส่ง loadout เลย ตัวละครเริ่ม Classless แบบเดิม — ใช้โดย test เดิมและ client เก่า)
 - **Class Encounter** ยังอยู่: ชนะ Challenge ได้ EXP + Gems แทนการรับ Class; ตัวละครที่ยัง Classless (กรณีไม่มี loadout) ยังรับ Class ได้เหมือนเดิม
 - **Skill tree ต่อ Class**: 7 node (ผัง 3–3–1 ตามภาพ) แต่ละ node สูงสุด 5/5, ราคา `10 × level ถัดไป` Gems, ข้อมูลอยู่ใน `meta.class_tree` ของ content
@@ -39,7 +39,7 @@ status: accepted
 ## 4. Boons
 
 - ความจุ 5 ช่อง; รายการแบ่งกลุ่มตามจำนวนช่องที่ใช้ มีช่อง Search; ฝั่งขวาแสดง Boon ที่ใส่และ `Slots: x/5`
-- **Enervation ย้ายจาก passive ของ Rogue มาเป็น Boon** (ผลเหมือน ADR-0010 เดิม) — Rogue ไม่มี passive นี้แล้ว
+- **Enervation ย้ายจาก passive ของ Assassin (เดิม Rogue) มาเป็น Boon** (ผลเหมือน ADR-0010 เดิม) — Assassin ไม่มี passive นี้แล้ว
 
 | Boon | ช่อง | ผล |
 | --- | --- | --- |
