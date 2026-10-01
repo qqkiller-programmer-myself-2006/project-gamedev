@@ -83,16 +83,14 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	add_child(encounter_box)
 	_workspace = ScrollContainer.new()
 	_workspace.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_workspace.offset_left = 24
-	_workspace.offset_right = -24
+	var edge := 10.0 if _app.settings.text_scale >= 1.4 else 24.0
+	_workspace.offset_left = edge
+	_workspace.offset_right = -edge
 	_workspace.offset_top = 126
-	_workspace.offset_bottom = -(66.0 + 90.0 * _app.settings.text_scale)
-	var large_text := _app.settings.text_scale >= 1.4
-	_workspace.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED if large_text else ScrollContainer.SCROLL_MODE_AUTO
-	_workspace.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if large_text else ScrollContainer.SCROLL_MODE_DISABLED
+	_workspace.offset_bottom = -78.0
 	add_child(_workspace)
-	_columns = UiKit.vbox(10) if large_text else UiKit.hbox(10)
-	_columns.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_columns = UiKit.hbox(4 if _app.settings.text_scale >= 1.4 else 10)
+	_columns.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_workspace.add_child(_columns)
 	_bottom = UiKit.hbox(12)
 	_bottom.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
@@ -545,6 +543,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	var character := _character(view, _inspect)
 	var switcher := UiKit.hbox(4)
 	var previous := _button("<", func() -> void: _move_inspect(-1, party))
+	var compact: bool = _app.settings.text_scale >= 1.4
 	previous.custom_minimum_size = Vector2(36, 36)
 	previous.tooltip_text = "Previous character"
 	switcher.add_child(previous)
@@ -552,7 +551,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 		var member_slot := int(member.get("slot", 0))
 		var member_button := Button.new()
 		member_button.flat = true
-		member_button.custom_minimum_size = Vector2(52, 56)
+		member_button.custom_minimum_size = Vector2(40 if compact else 52, 48 if compact else 56)
 		member_button.tooltip_text = str(member.get("name", "Character"))
 		member_button.focus_mode = Control.FOCUS_ALL
 		member_button.pressed.connect(func() -> void: _inspect = member_slot; _screen.refresh(_app, true))
@@ -583,7 +582,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 		var frames := idle_set.frames("idle")
 		if not frames.is_empty():
 			var figure := TextureRect.new()
-			figure.custom_minimum_size = Vector2(104, 124)
+			figure.custom_minimum_size = Vector2(60, 76) if compact else Vector2(104, 124)
 			figure.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			figure.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			figure.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -607,7 +606,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	var gear: Dictionary = character.get("gear", {})
 	for slot in SLOTS:
 		var cell := UiKit.vbox(1)
-		cell.custom_minimum_size = Vector2(0, 54 if _app.settings.text_scale >= 1.4 else 70)
+		cell.custom_minimum_size = Vector2(0, 40 if _app.settings.text_scale >= 1.4 else 70)
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var worn: Dictionary = gear.get(slot, {})
 		var slot_row := UiKit.hbox(2)
@@ -622,7 +621,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 		slot_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		slot_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		slot_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		slot_label.custom_minimum_size = Vector2(0, 44)
+		slot_label.custom_minimum_size = Vector2(0, 36 if large_text else 44)
 		slot_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		slot_row.add_child(slot_label)
 		cell.add_child(slot_row)
@@ -679,6 +678,9 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	else:
 		UiKit.disable(invest, not _screen.room_view().get("story", false) and _inspect != _screen.your_slot(), UiText.WHY["invest_not_yours"])
 	root.add_child(invest)
+	if compact:
+		# Large text: the whole sheet scrolls so it can never push the other columns past the screen.
+		return _scroll_body(root)
 	return root
 
 func _stat(label: String, value: String, icon_name: String = "") -> Control:
@@ -735,9 +737,12 @@ func handle_key(key: int) -> bool:
 	if key == KEY_ESCAPE:
 		if is_instance_valid(_invest_panel):
 			_close_invest_panel()
+			_app.sounds.play("cancel")
 		elif _hidden:
 			_toggle_hidden()
 		else:
+			if _menu_panel.visible:
+				_app.sounds.play("cancel")
 			_menu_panel.visible = not _menu_panel.visible
 			if _menu_panel.visible:
 				UiKit.focus_first(_menu_panel)
@@ -858,7 +863,7 @@ func _show_info(data: Dictionary) -> void:
 			for key in bonus_keys:
 				body.add_child(UiKit.pixel_label("%s %s" % [_bonus_text(str(key), bonuses[key]), str(key).to_upper()], "small"))
 	_add_use_stats(body, item.get("use", {}))
-	body.add_child(UiKit.button("Close [Esc]", _close_invest_panel, false, "primary"))
+	body.add_child(UiKit.button("Close [Esc]", _close_invest_panel, false, "primary", "cancel"))
 	_open_popup(body, 440)
 	_invest_panel.name = "ItemInfoPanel"
 
@@ -908,7 +913,7 @@ func _show_abilities(view: Dictionary) -> void:
 	var scroll := _scroll_body(list)
 	scroll.custom_minimum_size = Vector2(0, 360)
 	body.add_child(scroll)
-	body.add_child(UiKit.button("Close [Esc]", _close_invest_panel, false, "primary"))
+	body.add_child(UiKit.button("Close [Esc]", _close_invest_panel, false, "primary", "cancel"))
 	_open_popup(body, 470)
 	_invest_panel.name = "AbilitiesPanel"
 
@@ -940,7 +945,7 @@ func _open_transfer_picker(kind: String, item: String = "") -> void:
 				command["item"] = item
 			_app.send(command)
 			_close_invest_panel()))
-	body.add_child(UiKit.button("Cancel [Esc]", _close_invest_panel))
+	body.add_child(UiKit.button("Cancel [Esc]", _close_invest_panel, false, "secondary", "cancel"))
 	_open_popup(body, 280)
 
 func _open_invest(character: Dictionary) -> void:
@@ -953,7 +958,7 @@ func _open_invest(character: Dictionary) -> void:
 			_app.send({"type": "invest", "slot": _acting_slot(), "stat": stat})
 			_close_invest_panel())
 		body.add_child(plus)
-	body.add_child(UiKit.button("Cancel [Esc]", _close_invest_panel))
+	body.add_child(UiKit.button("Cancel [Esc]", _close_invest_panel, false, "secondary", "cancel"))
 	_open_popup(body, 220)
 	_invest_panel.name = "InvestPanel"
 

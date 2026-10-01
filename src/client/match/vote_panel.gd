@@ -132,7 +132,8 @@ func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full:
 	var name := UiKit.pixel_label(Tr.t(str(option["name"])), "heading")
 	box.add_child(name)
 	if full:
-		box.add_child(_art_strip(screen, app))
+		if not screen.is_inside_tree() or screen.get_viewport_rect().size.y > 760.0:
+			box.add_child(_art_strip(screen, app))
 	var hint_text := Tr.t(str(option.get("hint", "")))
 	if full:
 		box.add_child(UiKit.para(hint_text))

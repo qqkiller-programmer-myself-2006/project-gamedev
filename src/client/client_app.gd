@@ -73,6 +73,7 @@ func _ready() -> void:
 	_build_dev_tag()
 	sounds = SoundBank.new()
 	add_child(sounds)
+	UiKit.set_sound_bank(sounds)
 	apply_settings()
 	_show_screen("title")
 
@@ -157,14 +158,15 @@ func use_connection(new_connection: ServerConnection) -> void:
 
 func send(cmd: Dictionary) -> void:
 	if connection == null or not connection.is_open():
-		toast(UiText.error("connection_lost"))
+		toast_error(UiText.error("connection_lost"))
 		return
 	var outgoing := cmd
 	if str(cmd.get("type", "")) in ["create_room", "join_room"]:
 		outgoing = cmd.duplicate()
 		outgoing["token"] = player_token
 	connection.send_command(outgoing)
-	sounds.play("click")
+	if str(outgoing.get("type", "")) != "leave_room":
+		sounds.play("click")
 
 
 func _load_player_token() -> String:
@@ -269,7 +271,7 @@ func _use_connection(new_connection: ServerConnection) -> void:
 	connection.closed.connect(_on_closed.bind(connection))
 	connection.update_received.connect(_on_update)
 	connection.result_received.connect(_on_result)
-	connection.server_error.connect(func(code: String) -> void: toast(UiText.error(code)))
+	connection.server_error.connect(func(code: String) -> void: toast_error(UiText.error(code)))
 
 
 func _on_opened(_session: int) -> void:
@@ -297,7 +299,7 @@ func _show_connection_error(reason: String) -> void:
 		_current._show_multiplayer()
 		_current.show_error(UiText.error(reason))
 	else:
-		toast(UiText.error(reason))
+		toast_error(UiText.error(reason))
 
 
 func _on_update(events: Array, snap: Dictionary) -> void:
@@ -326,7 +328,7 @@ func _on_update(events: Array, snap: Dictionary) -> void:
 		_current.show_events(self, events)
 	for event in events:
 		if str(event.get("type", "")) == "profile_save_failed":
-			toast(UiText.error("profile_changed_elsewhere" if int(event.get("status", 0)) == 409 else "profile_save_failed"), 8.0)
+			toast_error(UiText.error("profile_changed_elsewhere" if int(event.get("status", 0)) == 409 else "profile_save_failed"), 8.0)
 	snapshot_changed.emit()
 
 
@@ -343,14 +345,14 @@ func _on_result(_id: int, _cmd: Dictionary, result: Dictionary) -> void:
 					_current._show_play()
 				_current.show_error(msg)
 			else:
-				toast(msg)
+				toast_error(msg)
 			return
 		
 		var message := UiText.error(str(result.get("error", "")))
 		if _current is TitleScreen:
 			_current.show_error(message)
 		else:
-			toast(message)
+			toast_error(message)
 	elif story_launcher != null and str(_cmd.get("type", "")) == "create_room" and _cmd.get("story", false):
 		if not _story_restore.is_empty():
 			send({"type": "restore_story", "save": _story_restore})
@@ -412,6 +414,13 @@ func toast(message: String, seconds: float = 4.0) -> void:
 	_toast_label.text = Tr.t(message)
 	_toast_until = _local_now() + seconds
 	_toast.visible = true
+
+
+## Shows the normal visual toast and plays its matching error cue.
+func toast_error(message: String, seconds: float = 4.0) -> void:
+	toast(message, seconds)
+	if sounds != null:
+		sounds.play("error")
 
 
 ## A big announcement across the screen (the visual twin of sound cues).
@@ -494,7 +503,7 @@ func hint(key: String) -> void:
 	panel.set_meta("hint", true)
 	panel.set_meta("hint_key", key)
 	var close_text := "OK" if width < 200.0 else UiText.LABELS["got_it"]
-	var close := UiKit.button(close_text, func() -> void: _dismiss_hint(panel), false, "small")
+	var close := UiKit.button(close_text, func() -> void: _dismiss_hint(panel), false, "small", "cancel")
 	close.tooltip_text = UiText.LABELS["got_it"]
 	head.add_child(close)
 	if _current != null and _current.has_method("tip_slot"):
@@ -600,6 +609,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if _has_open_hint():
 		if event.keycode == KEY_H or event.keycode == KEY_ESCAPE:
 			close_hints()
+			if event.keycode == KEY_ESCAPE:
+				sounds.play("cancel")
 			if is_inside_tree():
 				get_viewport().set_input_as_handled()
 			return
@@ -609,11 +620,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		if overlay is SettingsPanel:
 			if event.keycode == KEY_ESCAPE:
 				overlay.queue_free()
+				sounds.play("cancel")
 			get_viewport().set_input_as_handled()
 			return
 		if overlay is ConfirmDialog:
 			if event.keycode == KEY_ESCAPE:
 				overlay.close()
+				sounds.play("cancel")
 			get_viewport().set_input_as_handled()
 			return
 	if _banner.visible:
@@ -625,6 +638,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if _current != null and _current.has_method("handle_key") and _current.handle_key(self, event.keycode):
+		if event.keycode == KEY_ESCAPE and _current is TitleScreen:
+			sounds.play("cancel")
 		if is_inside_tree():
 			get_viewport().set_input_as_handled()
 

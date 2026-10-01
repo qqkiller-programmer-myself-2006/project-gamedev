@@ -34,7 +34,7 @@ func show_events(app: ClientApp, events: Array) -> void:
 			"host_changed":
 				app.toast(Tr.t("%s is now the Host." % event["name"]))
 			"profile_unavailable":
-				app.toast(UiText.error("profile_unavailable"), 6.0)
+				app.toast_error(UiText.error("profile_unavailable"), 6.0)
 
 
 func refresh(app: ClientApp, force: bool = false) -> void:

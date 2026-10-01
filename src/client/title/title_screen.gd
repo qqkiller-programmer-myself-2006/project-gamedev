@@ -109,7 +109,7 @@ func _show_play() -> void:
 	Icons.apply_to_button(multiplayer_button, "multiplayer", _app.settings.text_scale)
 	multiplayer_button.set_meta("focus_id", "multiplayer")
 	body.add_child(multiplayer_button)
-	var back := UiKit.button("Back [Esc]", _show_menu)
+	var back := UiKit.button("Back [Esc]", _show_menu, false, "secondary", "cancel")
 	Icons.apply_to_button(back, "back", _app.settings.text_scale)
 	body.add_child(back)
 	_content = _attach_narrow_panel(body, 460, 175.0)
@@ -202,7 +202,7 @@ func _show_story_setup() -> void:
 	var begin := UiKit.primary("Begin Story", _begin_story)
 	Icons.apply_to_button(begin, "story_mode", _app.settings.text_scale)
 	body.add_child(begin)
-	var back := UiKit.button("Back [Esc]", _show_play)
+	var back := UiKit.button("Back [Esc]", _show_play, false, "secondary", "cancel")
 	Icons.apply_to_button(back, "back", _app.settings.text_scale)
 	body.add_child(back)
 	_update_story_preview(0)
@@ -279,7 +279,7 @@ func _show_multiplayer() -> void:
 	_status = UiKit.para("", "body", UiKit.WARN)
 	_status.visible = false
 	body.add_child(_status)
-	var back := UiKit.button("Back [Esc]", _show_play)
+	var back := UiKit.button("Back [Esc]", _show_play, false, "secondary", "cancel")
 	Icons.apply_to_button(back, "back", _app.settings.text_scale)
 	back.set_meta("focus_id", "back")
 	body.add_child(back)
@@ -297,7 +297,7 @@ func _show_credits() -> void:
 	body.add_child(UiKit.label("Made with Godot 4.7", "heading"))
 	body.add_child(UiKit.para("Font: Pixelify Sans, OFL\nCharacter art by the project owner.", "body"))
 	body.add_child(UiKit.para("Audio: Kenney, Zane Little Music, MintoDog, marcelofg55, JaggedStone, artisticdude and Brian MacIntosh (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md", "dim"))
-	var back := UiKit.primary("Back [Esc]", _show_menu, false)
+	var back := UiKit.primary("Back [Esc]", _show_menu, false, "cancel")
 	Icons.apply_to_button(back, "back", _app.settings.text_scale)
 	body.add_child(back)
 	_content = _attach_narrow_panel(body, 470, 150.0)
@@ -353,6 +353,8 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_THEME_CHANGED and _app != null and is_instance_valid(_content):
 		if _content.has_meta("narrow_title_panel"):
 			_layout_narrow_panel(_content as PanelContainer)
+			# Children resize after their parent hears about the new theme, so measure again.
+			_layout_narrow_panel.call_deferred(_content as PanelContainer)
 		elif _view == "story_setup":
 			var top := _top(float(_content.get_meta("base_y", 150.0)))
 			# Story setup panel is anchored TOP_WIDE with a finite height

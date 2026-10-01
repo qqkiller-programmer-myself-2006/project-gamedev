@@ -49,15 +49,15 @@ msgstr ""
 msgid "%d Gold"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:395
+#: src/client/match/camp/camp_view.gd:393
 msgid "%d Gold   (%d left)"
 msgstr ""
 
-#: src/client/match/vote_panel.gd:191
+#: src/client/match/vote_panel.gd:192
 msgid "%d of %d ready"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:483
+#: src/client/match/camp/camp_view.gd:481
 msgid "%d/%d %s %s"
 msgstr ""
 
@@ -69,15 +69,15 @@ msgstr ""
 msgid "%ds left to act%s"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:625
-msgid "%s   Lv %d"
-msgstr ""
-
 #: src/client/match/match_screen.gd:349
 msgid "%s  (Layer %d, %s)"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:555
+#: src/client/match/battle/battle_view.gd:629
+msgid "%s  Lv %d"
+msgstr ""
+
+#: src/client/match/battle/battle_view.gd:559
 msgid "%s  Lv %d - %s"
 msgstr ""
 
@@ -93,15 +93,15 @@ msgstr ""
 msgid "%s %s: %s."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:465 src/client/match/camp/camp_view.gd:131
+#: src/client/match/battle/battle_view.gd:465 src/client/match/camp/camp_view.gd:129
 msgid "%s (%d/%d)"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1073 src/client/match/battle/combat_panel.gd:231
+#: src/client/match/battle/battle_view.gd:1079 src/client/match/battle/combat_panel.gd:231
 msgid "%s (AI) is acting..."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:800
+#: src/client/match/battle/battle_view.gd:805
 msgid "%s - Lv %d"
 msgstr ""
 
@@ -113,7 +113,7 @@ msgstr ""
 msgid "%s Defends."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:895
+#: src/client/match/camp/camp_view.gd:900
 msgid "%s Skills"
 msgstr ""
 
@@ -133,7 +133,7 @@ msgstr ""
 msgid "%s gathers power for %s..."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1075
+#: src/client/match/battle/battle_view.gd:1081
 msgid "%s is acting..."
 msgstr ""
 
@@ -185,7 +185,7 @@ msgstr ""
 msgid "%s takes %d%s"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:593
+#: src/client/match/camp/camp_view.gd:592
 msgid "%s · Lv %d"
 msgstr ""
 
@@ -193,7 +193,7 @@ msgstr ""
 msgid "%s, %s, blocks the way!"
 msgstr ""
 
-#: src/client/ui/ui_kit.gd:455
+#: src/client/ui/ui_kit.gd:472
 msgid "%s: %s stack(s), %s turn(s) left"
 msgstr ""
 
@@ -465,11 +465,11 @@ msgstr ""
 msgid "Advanced connection options"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:593
+#: src/client/match/camp/camp_view.gd:592
 msgid "Adventurer"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:665
+#: src/client/match/camp/camp_view.gd:664
 msgid "Aggro"
 msgstr ""
 
@@ -581,7 +581,7 @@ msgstr ""
 msgid "Balanced and dependable. Strong melee strikes, solid health."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:517
+#: src/client/match/battle/battle_view.gd:521
 msgid "Beat the trainer within %d rounds to learn the %s Class. Nobody can fall here."
 msgstr ""
 
@@ -597,11 +597,11 @@ msgstr ""
 msgid "Bleed"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:662
+#: src/client/match/camp/camp_view.gd:661
 msgid "Block Chance"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:663
+#: src/client/match/camp/camp_view.gd:662
 msgid "Block Damage Reduction"
 msgstr ""
 
@@ -625,7 +625,7 @@ msgstr ""
 msgid "Bone Pit"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:855
+#: src/client/match/camp/camp_view.gd:860
 msgid "Bonuses"
 msgstr ""
 
@@ -705,7 +705,7 @@ msgstr ""
 msgid "Camp: craft from materials on the left, equip gear from the shared bag in the middle, and spend stat points on the right. Press [R] when you are done; the camp moves on when every player is Ready."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:943 src/client/match/camp/camp_view.gd:956 src/client/ui/confirm_dialog.gd:27
+#: src/client/match/camp/camp_view.gd:948 src/client/match/camp/camp_view.gd:961 src/client/ui/confirm_dialog.gd:27
 msgid "Cancel [Esc]"
 msgstr ""
 
@@ -721,11 +721,11 @@ msgstr ""
 msgid "Cave Mouth"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1037 src/client/match/battle/combat_panel.gd:242
+#: src/client/match/battle/battle_view.gd:1043 src/client/match/battle/combat_panel.gd:242
 msgid "Challenge won!"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:516
+#: src/client/match/battle/battle_view.gd:520
 msgid "Challenge: %s"
 msgstr ""
 
@@ -737,7 +737,7 @@ msgstr ""
 msgid "Chapter %d"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:569
+#: src/client/match/camp/camp_view.gd:568
 msgid "Character"
 msgstr ""
 
@@ -745,7 +745,7 @@ msgstr ""
 msgid "Character Setup"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:809
+#: src/client/match/camp/camp_view.gd:814
 msgid "Charm"
 msgstr ""
 
@@ -761,7 +761,7 @@ msgstr ""
 msgid "Charms"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:812
+#: src/client/match/camp/camp_view.gd:817
 msgid "Chest"
 msgstr ""
 
@@ -781,7 +781,7 @@ msgstr ""
 msgid "Choose a Class for every traveller."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:776
+#: src/client/match/battle/battle_view.gd:781
 msgid "Choose a target on the field (1-%d), Esc to go back"
 msgstr ""
 
@@ -793,7 +793,7 @@ msgstr ""
 msgid "Choose one path."
 msgstr ""
 
-#: src/client/match/vote_panel.gd:160
+#: src/client/match/vote_panel.gd:161
 msgid "Choose path [%d]"
 msgstr ""
 
@@ -805,7 +805,7 @@ msgstr ""
 msgid "Choose your path into the forest."
 msgstr ""
 
-#: src/client/match/vote_panel.gd:160 src/client/ui/ui_text.gd:client_literal
+#: src/client/match/vote_panel.gd:161 src/client/ui/ui_text.gd:client_literal
 msgid "Chosen"
 msgstr ""
 
@@ -849,7 +849,7 @@ msgstr ""
 msgid "Close [C]"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:861 src/client/match/camp/camp_view.gd:911 src/client/title/settings_panel.gd:92
+#: src/client/match/camp/camp_view.gd:866 src/client/match/camp/camp_view.gd:916 src/client/title/settings_panel.gd:92
 msgid "Close [Esc]"
 msgstr ""
 
@@ -857,7 +857,7 @@ msgstr ""
 msgid "Clue log [C]"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1047
+#: src/client/match/battle/battle_view.gd:1053
 msgid "Clue: %s"
 msgstr ""
 
@@ -889,7 +889,7 @@ msgstr ""
 msgid "Connecting to %s ..."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:335
+#: src/client/match/camp/camp_view.gd:333
 msgid "Consumable\n"
 msgstr ""
 
@@ -921,7 +921,7 @@ msgstr ""
 msgid "Could not reach the server. Check the address and try again."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:460 src/client/ui/ui_text.gd:client_literal
+#: src/client/match/camp/camp_view.gd:458 src/client/ui/ui_text.gd:client_literal
 msgid "Craft"
 msgstr ""
 
@@ -941,11 +941,11 @@ msgstr ""
 msgid "Credits"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:660
+#: src/client/match/camp/camp_view.gd:659
 msgid "Crit Chance"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:661
+#: src/client/match/camp/camp_view.gd:660
 msgid "Crit Damage"
 msgstr ""
 
@@ -973,7 +973,7 @@ msgstr ""
 msgid "DEFEND"
 msgstr ""
 
-#: src/client/client_app.gd:687
+#: src/client/client_app.gd:702
 msgid "DEV PLAYTEST"
 msgstr ""
 
@@ -989,7 +989,7 @@ msgstr ""
 msgid "Dain"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:878
+#: src/client/match/camp/camp_view.gd:883
 msgid "Damage: %d %s"
 msgstr ""
 
@@ -1057,7 +1057,7 @@ msgstr ""
 msgid "DoTs (Bleed BLD, Poison PSN, Toxin TOX) hurt at the start of each of their holder's turns, ignoring armour. The badge shows stacks (x) and turns left (t)."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:664
+#: src/client/match/camp/camp_view.gd:663
 msgid "Dodge Chance"
 msgstr ""
 
@@ -1105,7 +1105,7 @@ msgstr ""
 msgid "Elf"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:619
+#: src/client/match/camp/camp_view.gd:618
 msgid "Empty"
 msgstr ""
 
@@ -1117,7 +1117,7 @@ msgstr ""
 msgid "Enemies defeated"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:648
+#: src/client/match/camp/camp_view.gd:647
 msgid "Energy"
 msgstr ""
 
@@ -1133,11 +1133,11 @@ msgstr ""
 msgid "Energy Conserver"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:667
+#: src/client/match/camp/camp_view.gd:666
 msgid "Energy Regen"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:905
+#: src/client/match/camp/camp_view.gd:910
 msgid "Energy: %d | Cooldown: %d turn(s)"
 msgstr ""
 
@@ -1153,7 +1153,7 @@ msgstr ""
 msgid "Enter an amount of at least 1."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:535
+#: src/client/match/camp/camp_view.gd:533
 msgid "Equip"
 msgstr ""
 
@@ -1245,11 +1245,11 @@ msgstr ""
 msgid "Father's apprentice"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:827
+#: src/client/match/battle/battle_view.gd:832
 msgid "Fight"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:828 src/client/ui/ui_text.gd:client_literal
+#: src/client/match/battle/battle_view.gd:833 src/client/ui/ui_text.gd:client_literal
 msgid "Fight [F]"
 msgstr ""
 
@@ -1273,7 +1273,7 @@ msgstr ""
 msgid "Firebomb"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:836
+#: src/client/match/battle/battle_view.gd:841
 msgid "Focus"
 msgstr ""
 
@@ -1345,7 +1345,7 @@ msgstr ""
 msgid "Goblin"
 msgstr ""
 
-#: src/client/match/vote_panel.gd:143
+#: src/client/match/vote_panel.gd:144
 msgid "Gold"
 msgstr ""
 
@@ -1421,7 +1421,7 @@ msgstr ""
 msgid "Healing Herb"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:873
+#: src/client/match/camp/camp_view.gd:878
 msgid "Healing: %d HP"
 msgstr ""
 
@@ -1433,7 +1433,7 @@ msgstr ""
 msgid "Heavy Charge"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:811
+#: src/client/match/camp/camp_view.gd:816
 msgid "Helmet"
 msgstr ""
 
@@ -1441,7 +1441,7 @@ msgstr ""
 msgid "Herbs and tonics traded for coin."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:104 src/client/ui/ui_text.gd:client_literal
+#: src/client/match/camp/camp_view.gd:102 src/client/ui/ui_text.gd:client_literal
 msgid "Hide"
 msgstr ""
 
@@ -1449,7 +1449,7 @@ msgstr ""
 msgid "Hide Jerkin"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:105 src/client/ui/ui_text.gd:client_literal
+#: src/client/match/camp/camp_view.gd:103 src/client/ui/ui_text.gd:client_literal
 msgid "Hide the camp to look at the field"
 msgstr ""
 
@@ -1493,7 +1493,7 @@ msgstr ""
 msgid "ID: %s…"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:659
+#: src/client/match/camp/camp_view.gd:658
 msgid "Initiative"
 msgstr ""
 
@@ -1505,7 +1505,7 @@ msgstr ""
 msgid "Inside a lightning-split oak, wrapped in oilcloth, is a letter addressed to Mother in Father's hand. It was never sent."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:413 src/client/match/camp/camp_view.gd:467 src/client/match/camp/camp_view.gd:538 src/client/match/camp/camp_view.gd:637 src/client/ui/ui_text.gd:client_literal
+#: src/client/match/camp/camp_view.gd:411 src/client/match/camp/camp_view.gd:465 src/client/match/camp/camp_view.gd:536 src/client/match/camp/camp_view.gd:636 src/client/ui/ui_text.gd:client_literal
 msgid "Inspect"
 msgstr ""
 
@@ -1513,7 +1513,7 @@ msgstr ""
 msgid "Inventory"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:673 src/client/match/camp/camp_view.gd:949
+#: src/client/match/camp/camp_view.gd:672 src/client/match/camp/camp_view.gd:954
 msgid "Invest Points (%d)"
 msgstr ""
 
@@ -1529,11 +1529,11 @@ msgstr ""
 msgid "Item [I]"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:831
+#: src/client/match/battle/battle_view.gd:836
 msgid "Items"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:832 src/client/ui/ui_text.gd:client_literal
+#: src/client/match/battle/battle_view.gd:837 src/client/ui/ui_text.gd:client_literal
 msgid "Items [I]"
 msgstr ""
 
@@ -1605,11 +1605,11 @@ msgstr ""
 msgid "Leave the room?"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:813
+#: src/client/match/camp/camp_view.gd:818
 msgid "Legs"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:649
+#: src/client/match/camp/camp_view.gd:648
 msgid "Level"
 msgstr ""
 
@@ -1617,7 +1617,7 @@ msgstr ""
 msgid "Level: %d/5"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:666
+#: src/client/match/camp/camp_view.gd:665
 msgid "Lifesteal"
 msgstr ""
 
@@ -1685,7 +1685,7 @@ msgstr ""
 msgid "Materials"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:485
+#: src/client/match/camp/camp_view.gd:483
 msgid "Mats: %s"
 msgstr ""
 
@@ -1713,7 +1713,7 @@ msgstr ""
 msgid "Merchant"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:849
+#: src/client/match/camp/camp_view.gd:854
 msgid "Merchant stock: %d"
 msgstr ""
 
@@ -1745,11 +1745,11 @@ msgstr ""
 msgid "Music volume"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:484
+#: src/client/match/camp/camp_view.gd:482
 msgid "NEED"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:405 src/client/match/camp/merchant_panel.gd:71
+#: src/client/match/camp/camp_view.gd:403 src/client/match/camp/merchant_panel.gd:71
 msgid "Need %d Gold"
 msgstr ""
 
@@ -1781,7 +1781,7 @@ msgstr ""
 msgid "No clues yet. Story Events (and some fights) reveal where Father went."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:478
+#: src/client/match/camp/camp_view.gd:476
 msgid "No materials needed"
 msgstr ""
 
@@ -1853,7 +1853,7 @@ msgstr ""
 msgid "Nothing matches \"%s\". Clear the search to see everything."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:484
+#: src/client/match/camp/camp_view.gd:482
 msgid "OK"
 msgstr ""
 
@@ -1985,7 +1985,7 @@ msgstr ""
 msgid "Prestige: %d (MAX)"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:847
+#: src/client/match/camp/camp_view.gd:852
 msgid "Price: %d Gold"
 msgstr ""
 
@@ -2005,7 +2005,7 @@ msgstr ""
 msgid "Purchase this Race before selecting it."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:845
+#: src/client/match/camp/camp_view.gd:850
 msgid "Quantity: %d"
 msgstr ""
 
@@ -2065,19 +2065,19 @@ msgstr ""
 msgid "Reads every page of Father's journal twice."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:877
+#: src/client/match/battle/battle_view.gd:882
 msgid "Ready"
 msgstr ""
 
-#: src/client/match/vote_panel.gd:227 src/client/ui/ui_text.gd:client_literal
+#: src/client/match/vote_panel.gd:228 src/client/ui/ui_text.gd:client_literal
 msgid "Ready %d of %d."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:699
+#: src/client/match/camp/camp_view.gd:701
 msgid "Ready (%d/%d) [R]"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:699 src/client/ui/ui_text.gd:client_literal
+#: src/client/match/camp/camp_view.gd:701 src/client/ui/ui_text.gd:client_literal
 msgid "Ready [R]"
 msgstr ""
 
@@ -2089,7 +2089,7 @@ msgstr ""
 msgid "Recommended Stats: %s"
 msgstr ""
 
-#: src/client/match/vote_panel.gd:178
+#: src/client/match/vote_panel.gd:179
 msgid "Recommended route"
 msgstr ""
 
@@ -2141,7 +2141,7 @@ msgstr ""
 msgid "Restores 70 HP to one ally."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:875
+#: src/client/match/camp/camp_view.gd:880
 msgid "Revive HP: %s"
 msgstr ""
 
@@ -2201,7 +2201,7 @@ msgstr ""
 msgid "Search the ashes"
 msgstr ""
 
-#: src/client/lobby/character_setup.gd:385 src/client/match/camp/camp_view.gd:356 src/client/ui/ui_text.gd:client_literal
+#: src/client/lobby/character_setup.gd:385 src/client/match/camp/camp_view.gd:354 src/client/ui/ui_text.gd:client_literal
 msgid "Search..."
 msgstr ""
 
@@ -2249,7 +2249,7 @@ msgstr ""
 msgid "Shop closes in %ds"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:985
+#: src/client/match/camp/camp_view.gd:990
 msgid "Show camp [Esc]"
 msgstr ""
 
@@ -2285,7 +2285,7 @@ msgstr ""
 msgid "Slime"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:852
+#: src/client/match/camp/camp_view.gd:857
 msgid "Slot: %s"
 msgstr ""
 
@@ -2449,7 +2449,7 @@ msgstr ""
 msgid "Target for %s?"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:871
+#: src/client/match/camp/camp_view.gd:876
 msgid "Target: %s"
 msgstr ""
 
@@ -2585,7 +2585,7 @@ msgstr ""
 msgid "The Party falls, their journey through the Forest unfinished."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1052 src/client/match/battle/combat_panel.gd:254 src/client/match/match_screen.gd:513
+#: src/client/match/battle/battle_view.gd:1058 src/client/match/battle/combat_panel.gd:254 src/client/match/match_screen.gd:513
 msgid "The Party has fallen..."
 msgstr ""
 
@@ -2657,7 +2657,7 @@ msgstr ""
 msgid "The fastest of the Party. Shoots any enemy, even in the back row, and often lands critical hits."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1067
+#: src/client/match/battle/battle_view.gd:1073
 msgid "The fight is over."
 msgstr ""
 
@@ -2797,7 +2797,7 @@ msgstr ""
 msgid "This Class has reached maximum Prestige."
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:899
+#: src/client/match/camp/camp_view.gd:904
 msgid "This character has no Class Skills."
 msgstr ""
 
@@ -2853,7 +2853,7 @@ msgstr ""
 msgid "Time is up for the Challenge."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1049
+#: src/client/match/battle/battle_view.gd:1055
 msgid "Time is up!"
 msgstr ""
 
@@ -2861,11 +2861,11 @@ msgstr ""
 msgid "Time played"
 msgstr ""
 
-#: src/client/client_app.gd:471 src/client/ui/ui_text.gd:client_literal
+#: src/client/client_app.gd:480 src/client/ui/ui_text.gd:client_literal
 msgid "Tip"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:930
+#: src/client/match/camp/camp_view.gd:935
 msgid "To:"
 msgstr ""
 
@@ -2889,15 +2889,15 @@ msgstr ""
 msgid "Toxin"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:531
+#: src/client/match/camp/camp_view.gd:529
 msgid "Transfer"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:506
+#: src/client/match/camp/camp_view.gd:504
 msgid "Transfer Gold"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:924
+#: src/client/match/camp/camp_view.gd:929
 msgid "Transfer from %s"
 msgstr ""
 
@@ -2925,11 +2925,11 @@ msgstr ""
 msgid "Treasure! +%d Gold."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:865
+#: src/client/match/battle/battle_view.gd:870
 msgid "Turn"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:530
+#: src/client/match/battle/battle_view.gd:534
 msgid "Turn %d"
 msgstr ""
 
@@ -2953,7 +2953,7 @@ msgstr ""
 msgid "Upgrade"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:869
+#: src/client/match/camp/camp_view.gd:874
 msgid "Use"
 msgstr ""
 
@@ -2989,7 +2989,7 @@ msgstr ""
 msgid "Vials"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1037 src/client/match/battle/combat_panel.gd:244
+#: src/client/match/battle/battle_view.gd:1043 src/client/match/battle/combat_panel.gd:244
 msgid "Victory!"
 msgstr ""
 
@@ -3013,7 +3013,7 @@ msgstr ""
 msgid "Vote closes in %ds"
 msgstr ""
 
-#: src/client/match/vote_panel.gd:161
+#: src/client/match/vote_panel.gd:162
 msgid "Vote for this path [%d]"
 msgstr ""
 
@@ -3021,7 +3021,7 @@ msgstr ""
 msgid "Voted so far: %d"
 msgstr ""
 
-#: src/client/match/vote_panel.gd:151
+#: src/client/match/vote_panel.gd:152
 msgid "Votes: %d"
 msgstr ""
 
@@ -3053,7 +3053,7 @@ msgstr ""
 msgid "Waiting for %s (Host) to start the Match..."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1071 src/client/match/battle/combat_panel.gd:227
+#: src/client/match/battle/battle_view.gd:1077 src/client/match/battle/combat_panel.gd:227
 msgid "Waiting for %s to act..."
 msgstr ""
 
@@ -3065,7 +3065,7 @@ msgstr ""
 msgid "Waiting for the others..."
 msgstr ""
 
-#: src/client/match/vote_panel.gd:229
+#: src/client/match/vote_panel.gd:230
 msgid "Waiting: %s."
 msgstr ""
 
@@ -3085,11 +3085,11 @@ msgstr ""
 msgid "We will find him. The road beyond the Forest is open."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:700 src/client/match/battle/combat_panel.gd:124
+#: src/client/match/battle/battle_view.gd:705 src/client/match/battle/combat_panel.gd:124
 msgid "Weak to: %s"
 msgstr ""
 
-#: src/client/match/camp/camp_view.gd:814
+#: src/client/match/camp/camp_view.gd:819
 msgid "Weapon"
 msgstr ""
 
@@ -3281,7 +3281,7 @@ msgstr ""
 msgid "Your turn! Fight [F] opens your attacks, Items [I] uses your personal Gold and consumable slot, and Focus [O] restores Energy when available. Story turns have no countdown."
 msgstr ""
 
-#: src/client/match/vote_panel.gd:161
+#: src/client/match/vote_panel.gd:162
 msgid "Your vote"
 msgstr ""
 
@@ -3321,7 +3321,7 @@ msgstr ""
 msgid "the Party raises its guard"
 msgstr ""
 
-#: src/client/match/battle/combat_panel.gd:96
+#: src/client/match/battle/battle_view.gd:504 src/client/match/battle/combat_panel.gd:96
 msgid "the whole Party"
 msgstr ""
 
