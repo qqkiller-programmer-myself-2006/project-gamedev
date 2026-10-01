@@ -61,7 +61,7 @@ msgstr ""
 msgid "%d/%d %s %s"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:306
+#: src/client/match/battle/battle_view.gd:307
 msgid "%ds"
 msgstr ""
 
@@ -73,11 +73,7 @@ msgstr ""
 msgid "%s  (Layer %d, %s)"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:629
-msgid "%s  Lv %d"
-msgstr ""
-
-#: src/client/match/battle/battle_view.gd:559
+#: src/client/match/battle/battle_view.gd:560
 msgid "%s  Lv %d - %s"
 msgstr ""
 
@@ -93,15 +89,15 @@ msgstr ""
 msgid "%s %s: %s."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:465 src/client/match/camp/camp_view.gd:129
+#: src/client/match/battle/battle_view.gd:466 src/client/match/camp/camp_view.gd:129
 msgid "%s (%d/%d)"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1079 src/client/match/battle/combat_panel.gd:231
+#: src/client/match/battle/battle_view.gd:1107 src/client/match/battle/combat_panel.gd:231
 msgid "%s (AI) is acting..."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:805
+#: src/client/match/battle/battle_view.gd:820
 msgid "%s - Lv %d"
 msgstr ""
 
@@ -133,7 +129,7 @@ msgstr ""
 msgid "%s gathers power for %s..."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1081
+#: src/client/match/battle/battle_view.gd:1109
 msgid "%s is acting..."
 msgstr ""
 
@@ -554,7 +550,7 @@ msgid "Attack whom?"
 msgstr ""
 
 #: src/client/title/title_screen.gd:299
-msgid "Audio: Kenney, Zane Little Music, MintoDog, marcelofg55, JaggedStone, artisticdude and Brian MacIntosh (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md"
+msgid "Audio: Kenney, Zane Little Music, MintoDog, Emma_MA, marcelofg55, JaggedStone, artisticdude and Brian MacIntosh (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md"
 msgstr ""
 
 #: src/client/match/battle/combat_panel.gd:116
@@ -581,7 +577,7 @@ msgstr ""
 msgid "Balanced and dependable. Strong melee strikes, solid health."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:521
+#: src/client/match/battle/battle_view.gd:522
 msgid "Beat the trainer within %d rounds to learn the %s Class. Nobody can fall here."
 msgstr ""
 
@@ -721,11 +717,11 @@ msgstr ""
 msgid "Cave Mouth"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1043 src/client/match/battle/combat_panel.gd:242
+#: src/client/match/battle/battle_view.gd:1071 src/client/match/battle/combat_panel.gd:242
 msgid "Challenge won!"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:520
+#: src/client/match/battle/battle_view.gd:521
 msgid "Challenge: %s"
 msgstr ""
 
@@ -781,7 +777,7 @@ msgstr ""
 msgid "Choose a Class for every traveller."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:781
+#: src/client/match/battle/battle_view.gd:790
 msgid "Choose a target on the field (1-%d), Esc to go back"
 msgstr ""
 
@@ -857,7 +853,7 @@ msgstr ""
 msgid "Clue log [C]"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1053
+#: src/client/match/battle/battle_view.gd:1081
 msgid "Clue: %s"
 msgstr ""
 
@@ -1033,11 +1029,11 @@ msgstr ""
 msgid "Defend [D]"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:506 src/client/match/battle/combat_panel.gd:99
+#: src/client/match/battle/battle_view.gd:507 src/client/match/battle/combat_panel.gd:99
 msgid "Defend [D] to halve it, or have a Guardian Protect them."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:506 src/client/match/battle/combat_panel.gd:99
+#: src/client/match/battle/battle_view.gd:507 src/client/match/battle/combat_panel.gd:99
 msgid "Defend [D] to halve it, or raise Shield Wall."
 msgstr ""
 
@@ -1245,11 +1241,11 @@ msgstr ""
 msgid "Father's apprentice"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:832
+#: src/client/match/battle/battle_view.gd:847
 msgid "Fight"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:833 src/client/ui/ui_text.gd:client_literal
+#: src/client/match/battle/battle_view.gd:848 src/client/ui/ui_text.gd:client_literal
 msgid "Fight [F]"
 msgstr ""
 
@@ -1273,7 +1269,7 @@ msgstr ""
 msgid "Firebomb"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:841
+#: src/client/match/battle/battle_view.gd:856
 msgid "Focus"
 msgstr ""
 
@@ -1529,11 +1525,11 @@ msgstr ""
 msgid "Item [I]"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:836
+#: src/client/match/battle/battle_view.gd:851
 msgid "Items"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:837 src/client/ui/ui_text.gd:client_literal
+#: src/client/match/battle/battle_view.gd:852 src/client/ui/ui_text.gd:client_literal
 msgid "Items [I]"
 msgstr ""
 
@@ -1647,6 +1643,10 @@ msgstr ""
 
 #: content/forest.json:meta.races.Lunaeia
 msgid "Lunaeia"
+msgstr ""
+
+#: src/client/match/battle/battle_view.gd:636
+msgid "Lv %d"
 msgstr ""
 
 #: src/client/match/match_screen.gd:843
@@ -1933,7 +1933,7 @@ msgstr ""
 msgid "Phase %d - %s: %s"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:499
+#: src/client/match/battle/battle_view.gd:500
 msgid "Phase %d/%d"
 msgstr ""
 
@@ -2065,7 +2065,7 @@ msgstr ""
 msgid "Reads every page of Father's journal twice."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:882
+#: src/client/match/battle/battle_view.gd:897
 msgid "Ready"
 msgstr ""
 
@@ -2585,7 +2585,7 @@ msgstr ""
 msgid "The Party falls, their journey through the Forest unfinished."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1058 src/client/match/battle/combat_panel.gd:254 src/client/match/match_screen.gd:513
+#: src/client/match/battle/battle_view.gd:1086 src/client/match/battle/combat_panel.gd:254 src/client/match/match_screen.gd:513
 msgid "The Party has fallen..."
 msgstr ""
 
@@ -2657,7 +2657,7 @@ msgstr ""
 msgid "The fastest of the Party. Shoots any enemy, even in the back row, and often lands critical hits."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1073
+#: src/client/match/battle/battle_view.gd:1101
 msgid "The fight is over."
 msgstr ""
 
@@ -2853,7 +2853,7 @@ msgstr ""
 msgid "Time is up for the Challenge."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1055
+#: src/client/match/battle/battle_view.gd:1083
 msgid "Time is up!"
 msgstr ""
 
@@ -2925,15 +2925,15 @@ msgstr ""
 msgid "Treasure! +%d Gold."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:870
+#: src/client/match/battle/battle_view.gd:885
 msgid "Turn"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:534
+#: src/client/match/battle/battle_view.gd:535
 msgid "Turn %d"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:93
+#: src/client/match/battle/battle_view.gd:94
 msgid "Turn 1"
 msgstr ""
 
@@ -2989,7 +2989,7 @@ msgstr ""
 msgid "Vials"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1043 src/client/match/battle/combat_panel.gd:244
+#: src/client/match/battle/battle_view.gd:1071 src/client/match/battle/combat_panel.gd:244
 msgid "Victory!"
 msgstr ""
 
@@ -3041,7 +3041,7 @@ msgstr ""
 msgid "WARNING: %s"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:505 src/client/match/battle/combat_panel.gd:97
+#: src/client/match/battle/battle_view.gd:506 src/client/match/battle/combat_panel.gd:97
 msgid "WARNING: %s next turn, aimed at %s!"
 msgstr ""
 
@@ -3053,7 +3053,7 @@ msgstr ""
 msgid "Waiting for %s (Host) to start the Match..."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:1077 src/client/match/battle/combat_panel.gd:227
+#: src/client/match/battle/battle_view.gd:1105 src/client/match/battle/combat_panel.gd:227
 msgid "Waiting for %s to act..."
 msgstr ""
 
@@ -3085,7 +3085,7 @@ msgstr ""
 msgid "We will find him. The road beyond the Forest is open."
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:705 src/client/match/battle/combat_panel.gd:124
+#: src/client/match/battle/battle_view.gd:712 src/client/match/battle/combat_panel.gd:124
 msgid "Weak to: %s"
 msgstr ""
 
@@ -3321,7 +3321,7 @@ msgstr ""
 msgid "the Party raises its guard"
 msgstr ""
 
-#: src/client/match/battle/battle_view.gd:504 src/client/match/battle/combat_panel.gd:96
+#: src/client/match/battle/battle_view.gd:505 src/client/match/battle/combat_panel.gd:96
 msgid "the whole Party"
 msgstr ""
 
