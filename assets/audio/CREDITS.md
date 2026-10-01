@@ -6,6 +6,20 @@
 - `sfx/level_up.ogg`, `sfx/reward_sting.ogg`, `sfx/defeat_sting.ogg`: 85 Short music jingles, https://opengameart.org/content/85-short-music-jingles
   Attribution is not required; included for provenance.
 
+## JaggedStone — CC0 1.0
+- `sfx/magic_cast.ogg`: magical_3.ogg from Magic Spell SFX, https://opengameart.org/content/magic-spell-sfx
+  Attribution is not required; included for provenance.
+
+## leohpaz — CC-BY 4.0
+- `sfx/heal.ogg`: 02_Heal_02.wav from 8 Heals and Buffs SFX, https://opengameart.org/content/8-heals-and-buffs-sfx
+- `sfx/buff.ogg`: 16_Atk_buff_04.wav from 8 Heals and Buffs SFX, https://opengameart.org/content/8-heals-and-buffs-sfx
+- `sfx/debuff.ogg`: 21_Debuff_01.wav from 8 Heals and Buffs SFX, https://opengameart.org/content/8-heals-and-buffs-sfx
+- Required credit: “8 Heals and Buffs SFX” by leohpaz, https://opengameart.org/content/8-heals-and-buffs-sfx, licensed under CC BY 4.0, https://creativecommons.org/licenses/by/4.0/.
+
+## artisticdude — CC0 1.0
+- `sfx/miss.ogg`: swish-7.wav from Swishes Sound Pack, https://opengameart.org/content/swishes-sound-pack
+  Attribution is not required; included for provenance.
+
 ## Zane Little Music — CC0
 - `music/music_forest.ogg`, `music/music_battle.ogg`, `music/music_victory.ogg`: Glizzy Elf Forest RPG Music Pack, https://opengameart.org/content/glizzy-elf-forest-rpg-music-pack
   Attribution is not required; included for provenance.
@@ -21,3 +35,4 @@
 ## Changes made
 - Converted the Glizzy Elf Forest Loop, Grizzly Dwarf Battle Loop, and Grizzly Dwarf Battle Victory Loop from WAV to OGG Vorbis with FFmpeg; no edits or trims.
 - Renamed selected samples to the lowercase filenames listed above. `music_title.ogg` is used for both title and lobby; `defeat_sting.ogg` is used for both the defeat cue and one-shot defeat music.
+- Converted `magical_3.ogg` to mono 22.05 kHz OGG Vorbis and removed leading/trailing silence; converted the heal, attack buff, and debuff WAVs to mono 22.05 kHz OGG Vorbis, removed silence, and trimmed the source samples to under 3 seconds. Converted `swish-7.wav` to mono 22.05 kHz OGG Vorbis and removed silence. Peak-normalized all five new files to an approximately -1.5 dB true-peak ceiling; each is under 300 KB.

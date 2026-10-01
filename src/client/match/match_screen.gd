@@ -578,6 +578,9 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				float_text(str(event["target"]), "+%s" % UiKit.status_tag(applied),
 						UiKit.status_color(str(event.get("color", ""))))
 		"action_resolved":
+			var spell_skill := str(event.get("skill", "")) in ["fireball", "frost_lance"]
+			if spell_skill:
+				client.sounds.play("magic_cast")
 			if _battle_mode:
 				_battle.handle_event(event)
 				var named := ""
@@ -590,20 +593,48 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				if not named.is_empty():
 					_battle.announce(named)
 			var hurt := false
+			var missed := false
+			var critical := false
+			var healed := false
+			var buffed := false
+			var debuffed := false
 			for result in event.get("results", []):
 				var target := str(result["target"])
 				if result.has("damage"):
-					hurt = true
+					hurt = hurt or int(result.get("damage", 0)) > 0
+					missed = missed or bool(result.get("dodged", false))
+					critical = critical or bool(result.get("crit", false))
 					var text := "-%d" % int(result["damage"])
 					if result.get("crit", false):
 						text += " CRIT"
 					_show_action_hit.call_deferred(client, target, text,
 							UiKit.ENEMY if target.begins_with("p") else UiKit.ACCENT)
 				elif result.has("heal"):
+					healed = true
 					client.flash(anchors.get(target), Color(0.8, 1.5, 0.8))
 					float_text(target, "+%d" % int(result["heal"]), UiKit.GOOD)
-			if hurt:
+				var status := str(result.get("status", ""))
+				if status in ["protected", "shielded"]:
+					buffed = true
+				for applied in result.get("applied", []):
+					var applied_status := str(applied.get("status", ""))
+					if applied_status == "venom_coat":
+						buffed = true
+					elif applied_status in ["bleed", "poison", "toxin"]:
+						debuffed = true
+			var has_status_sound := healed or buffed or debuffed
+			if healed:
+				client.sounds.play("heal")
+			if buffed:
+				client.sounds.play("buff")
+			if debuffed:
+				client.sounds.play("debuff")
+			if critical:
+				client.sounds.play("critical")
+			elif hurt and not spell_skill and not has_status_sound:
 				client.sounds.play("hit")
+			elif missed and not hurt and not has_status_sound:
+				client.sounds.play("miss")
 		"vote_resolved":
 			client.banner("Next: %s" % event["name"], 2.2, "vote")
 		"combat_ended":
