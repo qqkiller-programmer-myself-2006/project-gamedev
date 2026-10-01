@@ -84,6 +84,8 @@ These are historical executor task specs retained for reference.
 - [T41-r2-ux-fixes.md](T41-r2-ux-fixes.md) — Apply UI fixes found in reviewer QA.
 - [T42-vote-summary-fit.md](T42-vote-summary-fit.md) — Fix Path Vote overflow and Summary banner overlap at large text scale.
 - [T42b-vote-horizontal.md](T42b-vote-horizontal.md) — Fix Path Vote overflowing to the right at text scale 1.4.
+- [T44-battle-scale14.md](T44-battle-scale14.md) — Fix three Battle layout bugs at text scale 1.4.
+- [T44-r2-finish.md](T44-r2-finish.md) — Finish the T44 scale-1.4 fixes after an interrupted run.
 - [T44-a11y-baseline.md](T44-a11y-baseline.md) — Complete the keyboard and accessibility baseline.
 - [T45-responsive.md](T45-responsive.md) — Verify responsive layouts for Battle, Merchant, and Rest.
 - [T87-visual-polish.md](T87-visual-polish.md) — Complete remaining visual polish found on main.
