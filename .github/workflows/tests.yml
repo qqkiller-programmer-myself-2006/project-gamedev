@@ -40,7 +40,7 @@ jobs:
       - name: Layout smoke tests (real control rects at large text)
         run: |
           set -e
-          for t in t35_layout_smoke t42_vote_summary_layout_smoke t43_camp_battle_fit_smoke t88_skill_badge_layout; do
+          for t in t35_layout_smoke t42_vote_summary_layout_smoke t43_camp_battle_fit_smoke t88_skill_badge_layout t46_skill_menu_layout_smoke; do
             echo "== $t"
             ~/godot/godot --headless --path . -s tests/client/$t.gd
           done
