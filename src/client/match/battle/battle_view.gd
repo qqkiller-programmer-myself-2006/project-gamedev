@@ -44,6 +44,7 @@ var _turn_banner: PanelContainer
 var _region: Label
 var _region_sub: Label
 var _header: VBoxContainer
+var _boss_warning_panel: PanelContainer
 var _bottom: VBoxContainer
 var _rewards: VBoxContainer
 var _log: RichTextLabel
@@ -183,9 +184,12 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	bottom_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_log = RichTextLabel.new()
 	_log.bbcode_enabled = false
+	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_log.scroll_following = true
+	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var log_lines := 3 if _app.settings.text_scale <= 1.0 else 2
-	var log_width := maxf(110.0, 245.0 - 300.0 * (_app.settings.text_scale - 1.0))
+	# The log must retain enough line width for names plus damage text at 1.4x.
+	var log_width := maxf(210.0, 245.0 - 80.0 * (_app.settings.text_scale - 1.0))
 	_log.custom_minimum_size = Vector2(log_width, 22.0 * log_lines * maxf(1.0, _app.settings.text_scale))
 	_log.scroll_active = false
 	_log.fit_content = false
@@ -195,6 +199,8 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_log.add_theme_color_override("default_color", UiKit.TEXT_DIM)
 	_log.add_theme_color_override("font_outline_color", Color.BLACK)
 	_log.add_theme_constant_override("outline_size", 3)
+	if _app.settings.text_scale > 1.0:
+		_log.add_theme_font_size_override("normal_font_size", int(20.0 / _app.settings.text_scale))
 	var log_panel := UiKit.panel(_log, "HudPanel")
 	log_panel.custom_minimum_size = Vector2(log_width, 0)
 	_rewards = UiKit.vbox(0)
@@ -391,7 +397,8 @@ func _set_action_row_visible(visible: bool) -> void:
 
 func add_log(line: String) -> void:
 	_log_lines.append(line)
-	while _log_lines.size() > 3:
+	var max_entries := 3 if _app.settings.text_scale <= 1.0 else 1
+	while _log_lines.size() > max_entries:
 		_log_lines.pop_front()
 	_log.clear()
 	_log.append_text("\n".join(_log_lines))
@@ -474,22 +481,34 @@ func _encounter_title(view: Dictionary) -> String:
 
 func _build_header(view: Dictionary) -> void:
 	UiKit.clear(_header)
+	_boss_warning_panel = null
+	_header.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_header.offset_left = -260
+	_header.offset_right = 260
+	_header.custom_minimum_size.x = 520
 	var encounter: Dictionary = view.get("encounter", {}) if view.get("encounter") != null else {}
 	if encounter.get("kind") == "boss":
+		# Keep the expandable warning between the initiative list and boss plate.
+		# Its VBox grows downward, with enough width to keep the guidance readable.
+		_header.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		_header.offset_left = 260
+		_header.offset_right = 744
+		_header.custom_minimum_size.x = 0
 		var boss: Dictionary = encounter["boss"]
 		var head := UiKit.vbox(2)
-		head.add_child(_centered(UiKit.pixel_label("Phase %d/%d: %s" % [int(boss["phase"]), int(boss["phases_total"]),
-				boss["phase_name"]], "small", UiKit.WARN)))
+		head.add_child(_centered(UiKit.pixel_label("Phase %d/%d" % [int(boss["phase"]), int(boss["phases_total"])], "small", UiKit.WARN)))
 		_header.add_child(UiKit.panel(head, "HudPanel"))
 		var telegraph: Dictionary = boss.get("telegraph", {})
 		if not telegraph.is_empty():
 			var box := UiKit.vbox(2)
 			var target := "the whole Party" if telegraph["target"] == "all" else _screen.name_of(str(telegraph["target"]))
-			box.add_child(UiKit.para("WARNING: %s next turn, aimed at %s!" % [telegraph["name"], target], "body", UiKit.WARN))
+			box.add_child(UiKit.para("WARNING: %s next turn, aimed at %s!" % [telegraph["name"], target], "small", UiKit.WARN))
 			var advice := "Guard to halve it"
 			advice += ", or raise Shield Wall." if telegraph["target"] == "all" else ", or have a Guardian Protect them."
 			box.add_child(UiKit.para(advice, "small"))
-			_header.add_child(UiKit.panel(box, "HudWarnPanel"))
+			_boss_warning_panel = UiKit.panel(box, "HudWarnPanel")
+			_boss_warning_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			_header.add_child(_boss_warning_panel)
 		_app.hint("boss")
 	elif encounter.get("kind") == "class":
 		var info: Dictionary = encounter.get("class_info", {})
@@ -880,15 +899,31 @@ func _build_bottom(view: Dictionary) -> void:
 		_skill_marks.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 		_skill_marks.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 		_skill_marks.grow_vertical = Control.GROW_DIRECTION_BEGIN
-		_skill_marks.offset_left = -20 - squares.get_combined_minimum_size().x
-		_skill_marks.offset_right = -20
+		const STATUS_GUTTER := 40.0
+		_skill_marks.offset_left = -STATUS_GUTTER - squares.get_combined_minimum_size().x
+		_skill_marks.offset_right = -STATUS_GUTTER
 		_skill_marks.offset_top = -262
 		_skill_marks.offset_bottom = -220
 		_skill_marks.add_child(squares)
 		squares.set_anchors_preset(Control.PRESET_FULL_RECT)
 		squares.alignment = BoxContainer.ALIGNMENT_END
 		add_child(_skill_marks)
+		# The label theme can increase each badge's minimum width after it enters
+		# the tree. Recompute the anchored row width once those sizes are known so
+		# the last skill badge stays inside the viewport at larger text scales.
+		call_deferred("_fit_skill_marks")
 	_bottom.add_child(row)
+
+
+func _fit_skill_marks() -> void:
+	if not is_instance_valid(_skill_marks) or _skill_marks.get_child_count() == 0:
+		return
+	var squares := _skill_marks.get_child(0) as HBoxContainer
+	if squares == null:
+		return
+	var row_width := squares.get_combined_minimum_size().x
+	_skill_marks.offset_left = -20.0 - row_width
+	_skill_marks.offset_right = -20.0
 
 
 ## Grid of cards for Skills (with Attack and Defend first, like the

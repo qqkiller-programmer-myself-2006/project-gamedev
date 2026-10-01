@@ -17,7 +17,9 @@ The three Kenney packs form a practical, consistently stylized SFX base. The mus
 
 ### Scope and gaps
 
-This shortlist is deliberately small and uses five creators/packs plus a single optional boss track. The Kenney SFX pages do not claim dedicated fantasy spell, heal, buff/debuff, critical, miss or countdown sounds. The `magic_cast`, `heal`, `buff`, `debuff`, `miss`, and `critical` cues now use separately sourced short samples (see `assets/audio/CREDITS.md`); `critical` uses `bing1.wav` from BMacZero's CC0 Metal Impact Sounds pack. The music shortlist has no explicit defeat loop or dedicated Guardian boss composition; Kenney loss jingles can serve as defeat stings, and Hope is only a possible boss loop. A dedicated boss/defeat score remains a sourcing gap.
+The enemy-death sourcing gap is resolved with `Monster SFX.wav` by marcelofg55 (CC0) from [Monster SFX](https://opengameart.org/content/monster-sfx); the in-game cue uses a trimmed version. `player_down` continues to use the existing Kenney sample.
+
+This shortlist is deliberately small and uses six creators/packs plus a single optional boss track. The Kenney SFX pages do not claim dedicated fantasy spell, heal, buff/debuff, critical, miss or countdown sounds. The `magic_cast`, `heal`, `buff`, `debuff`, `miss`, and `critical` cues now use separately sourced short samples (see `assets/audio/CREDITS.md`); `critical` uses `bing1.wav` from BMacZero's CC0 Metal Impact Sounds pack. The music shortlist has no explicit defeat loop or dedicated Guardian boss composition; Kenney loss jingles can serve as defeat stings, and Hope is only a possible boss loop. A dedicated boss/defeat score remains a sourcing gap.
 
 ## Cue mapping
 
@@ -43,7 +45,8 @@ This shortlist is deliberately small and uses five creators/packs plus a single 
 | `debuff` (new) | leohpaz's 8 Heals and Buffs SFX, `21_Debuff_01.wav` (CC-BY 4.0). |
 | `critical` (new) | Metal Impact Sounds: `bing1.wav` by BMacZero (CC0); sharp metallic impact/ring. |
 | `miss` (new) | artisticdude's Swishes Sound Pack, `swish-7.wav` (CC0). |
-| `enemy_death` / `player_down` (new) | RPG sound effects: inspect impact/metal/cloth samples; no exact death/down cue is promised by the listing. |
+| `enemy_death` (source update) | `Monster SFX.wav` by marcelofg55 from [Monster SFX](https://opengameart.org/content/monster-sfx) (CC0); monster/creature sound selected and trimmed for enemy defeat. |
+| `player_down` | Kenney's 50 RPG sound effects pack; existing `player_down.ogg`. |
 | `level_up` / `exp_gain` (new) | 85 Short music jingles: ascending/reward candidate. |
 | `loot_pickup` / `gem_pickup` (new) | RPG sound effects coin candidate; 85 Short music jingles for a higher-tier gem reward. |
 | `victory_sting` / `defeat_sting` (new) | 85 Short music jingles win/lose tags; Glizzy Victory Intro as an expanded victory transition. |
