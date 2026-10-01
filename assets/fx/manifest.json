@@ -1,0 +1,102 @@
+{
+  "power_slash": {
+    "frames": 8,
+    "size": [
+      192,
+      192
+    ],
+    "fps": 14,
+    "anchor": "target",
+    "tier": "ultimate"
+  },
+  "aimed_shot": {
+    "frames": 6,
+    "size": [
+      128,
+      128
+    ],
+    "fps": 14,
+    "anchor": "target",
+    "tier": "normal"
+  },
+  "fireball": {
+    "frames": 8,
+    "size": [
+      192,
+      192
+    ],
+    "fps": 14,
+    "anchor": "target",
+    "tier": "ultimate"
+  },
+  "frost_lance": {
+    "frames": 8,
+    "size": [
+      192,
+      192
+    ],
+    "fps": 14,
+    "anchor": "target",
+    "tier": "ultimate"
+  },
+  "protect": {
+    "frames": 6,
+    "size": [
+      128,
+      128
+    ],
+    "fps": 14,
+    "anchor": "target",
+    "tier": "normal"
+  },
+  "shield_wall": {
+    "frames": 8,
+    "size": [
+      192,
+      192
+    ],
+    "fps": 14,
+    "anchor": "party",
+    "tier": "ultimate"
+  },
+  "stab": {
+    "frames": 6,
+    "size": [
+      128,
+      128
+    ],
+    "fps": 14,
+    "anchor": "target",
+    "tier": "normal"
+  },
+  "prep_time": {
+    "frames": 6,
+    "size": [
+      128,
+      128
+    ],
+    "fps": 14,
+    "anchor": "actor",
+    "tier": "normal"
+  },
+  "poke_up": {
+    "frames": 6,
+    "size": [
+      128,
+      128
+    ],
+    "fps": 14,
+    "anchor": "target",
+    "tier": "normal"
+  },
+  "inject_venom": {
+    "frames": 8,
+    "size": [
+      192,
+      192
+    ],
+    "fps": 14,
+    "anchor": "target",
+    "tier": "ultimate"
+  }
+}
