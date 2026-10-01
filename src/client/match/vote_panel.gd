@@ -61,7 +61,7 @@ func tick(screen: MatchScreen, app: ClientApp) -> void:
 		return
 	var left := app.seconds_left(_deadline)
 	_bar.value = left
-	_countdown.text = "Vote closes in %ds%s" % [ceili(left), "  - hurry!" if left <= 5.0 else ""]
+	_countdown.text = Tr.t("Vote closes in %ds%s" % [ceili(left), "  - hurry!" if left <= 5.0 else ""])
 	if not _voted:
 		screen.warn_if_short(_deadline, left)
 
@@ -128,8 +128,8 @@ func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full:
 
 func _vote_button(screen: MatchScreen, app: ClientApp, option: Dictionary, mine: bool, solo: bool, kind: String) -> Button:
 	var index := int(option["index"])
-	var text := ("Chosen" if mine else "[%d] Choose this path" % (index + 1)) if solo \
-		else ("Your vote" if mine else "[%d] Vote for this path" % (index + 1))
+	var text := Tr.t(("Chosen" if mine else "[%d] Choose this path" % (index + 1))) if solo \
+		else Tr.t("Your vote" if mine else "[%d] Vote for this path" % (index + 1))
 	var button := UiKit.button(text, func() -> void: _vote(screen, app, index), false, "selected" if mine else kind)
 	UiKit.disable(button, _voted, UiText.WHY["voted"])
 	button.set_meta("focus_id", "vote_%d" % index)
@@ -161,7 +161,7 @@ static func _voter_status(screen: MatchScreen, view: Dictionary, vote: Dictionar
 		var who := str(slots[slot]["owner_name"]) if slot < slots.size() else str(character["name"])
 		(voted if vote["voted_slots"].has(slot) else waiting).append(who)
 	var total := voted.size() + waiting.size()
-	var text := "Ready %d of %d." % [voted.size(), total]
+	var text := Tr.t("Ready %d of %d." % [voted.size(), total])
 	if not waiting.is_empty():
-		text += " Waiting: %s." % ", ".join(waiting)
+		text += Tr.t(" Waiting: %s." % ", ".join(waiting))
 	return text

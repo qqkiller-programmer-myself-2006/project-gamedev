@@ -172,11 +172,11 @@ static func error(code: String) -> String:
 
 
 static func gems(amount: int) -> String:
-	return LABELS["gems"] % amount
+	return Tr.t(LABELS["gems"] % amount)
 
 
 static func gold(amount: int) -> String:
-	return LABELS["gold"] % amount
+	return Tr.t(LABELS["gold"] % amount)
 
 
 static func type_label(type: String) -> String:

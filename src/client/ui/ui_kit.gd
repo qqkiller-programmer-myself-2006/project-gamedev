@@ -362,6 +362,14 @@ static func _has_digit(text: String) -> bool:
 	return false
 
 
+static func _has_thai(text: String) -> bool:
+	for i in text.length():
+		var code := text.unicode_at(i)
+		if code >= 0x0E00 and code <= 0x0E7F:
+			return true
+	return false
+
+
 ## A bar with its numbers written on it (HP in red, Energy in blue...).
 static func stat_bar(value: int, max_value: int, color: Color, text: String, height: float = 18.0,
 		style: String = "small") -> ProgressBar:
@@ -447,8 +455,11 @@ static func status_badge(entry: Dictionary, compact: bool = false) -> PanelConta
 ## A single-line label (does not wrap; keep it short).
 static func label(text: String, style: String = "body", color: Color = Color(0, 0, 0, 0)) -> Label:
 	var node := Label.new()
-	node.text = Tr.t(text)
+	var display_text := Tr.t(text)
+	node.text = display_text
 	node.theme_type_variation = "DimLabel" if style == "dim" else style.capitalize() + "Label"
+	if _has_thai(display_text):
+		node.add_theme_font_override("font", number_font())
 	if _has_digit(text):
 		node.add_theme_font_override("font", number_font())
 	if color.a > 0.0:
@@ -470,10 +481,13 @@ static func para(text: String, style: String = "body", color: Color = Color(0, 0
 ## "danger" (destructive, ask first) or "small" (dense rows).
 static func button(text: String, callback: Callable, big: bool = false, kind: String = "secondary") -> Button:
 	var node := Button.new()
-	node.text = Tr.t(text)
+	var display_text := Tr.t(text)
+	node.text = display_text
 	node.focus_mode = Control.FOCUS_ALL
 	node.theme_type_variation = button_variation(kind, big)
 	if _has_digit(text):
+		node.add_theme_font_override("font", number_font())
+	if _has_thai(display_text):
 		node.add_theme_font_override("font", number_font())
 	node.pressed.connect(callback)
 	return node

@@ -420,75 +420,75 @@ func describe(event: Dictionary) -> String:
 		"player_joined":
 			if ClientApp.is_story_view(room_view()):
 				return ""
-			return "%s joined (slot %d)." % [event["name"], int(event["slot"]) + 1]
+			return Tr.t("%s joined (slot %d)." % [event["name"], int(event["slot"]) + 1])
 		"player_left":
-			var why := "lost connection" if event["reason"] == "disconnected" else "left"
-			return "%s %s. Slot %d is now played by AI." % [event["name"], why, int(event["slot"]) + 1]
+			var why := Tr.t("lost connection") if event["reason"] == "disconnected" else Tr.t("left")
+			return Tr.t("%s %s. Slot %d is now played by AI." % [event["name"], Tr.t(why), int(event["slot"]) + 1])
 		"slot_ai_takeover":
-			return "AI takes over %s." % event["character"]
+			return Tr.t("AI takes over %s." % event["character"])
 		"host_changed":
 			if ClientApp.is_story_view(room_view()):
 				return ""
-			return "%s is now the Host." % event["name"]
+			return Tr.t("%s is now the Host." % event["name"])
 		"match_started":
-			return "The journey into the Forest begins."
+			return Tr.t("The journey into the Forest begins.")
 		"vote_started":
-			return "Layer %d: choose the next path." % int(event["layer"])
+			return Tr.t("Layer %d: choose the next path." % int(event["layer"]))
 		"vote_resolved":
 			var how := ""
 			if event["no_votes"]:
-				how = " Nobody voted, so it was picked at random."
+				how = Tr.t(" Nobody voted, so it was picked at random.")
 			elif event["tie_broken"]:
-				how = " It was a tie, broken at random."
-			return "The Party heads for %s (%s).%s" % [event["name"], UiText.type_label(event["encounter_type"]), how]
+				how = Tr.t(" It was a tie, broken at random.")
+			return Tr.t("The Party heads for %s (%s).%s" % [event["name"], UiText.type_label(event["encounter_type"]), Tr.t(how)])
 		"encounter_started":
-			return "Arrived: %s." % event["name"]
+			return Tr.t("Arrived: %s." % event["name"])
 		"combat_started":
-			return "Enemies appear!"
+			return Tr.t("Enemies appear!")
 		"action_resolved":
 			return _describe_action(event)
 		"combat_ended":
 			if event["result"] == "victory":
 				var rewards: Dictionary = event.get("rewards", {})
 				if rewards.is_empty() or int(rewards.get("exp", 0)) + int(rewards.get("gold", 0)) == 0:
-					return "The enemy falls!"
-				return "Victory! +%d EXP each, +%d Gold." % [int(rewards.get("exp", 0)), int(rewards.get("gold", 0))]
+					return Tr.t("The enemy falls!")
+				return Tr.t("Victory! +%d EXP each, +%d Gold." % [int(rewards.get("exp", 0)), int(rewards.get("gold", 0))])
 			if event["result"] == "timeout":
-				return "Time is up for the Challenge."
-			return "The Party has fallen..."
+				return Tr.t("Time is up for the Challenge.")
+			return Tr.t("The Party has fallen...")
 		"level_up":
-			return "%s reached level %d!" % [name_of("p%d" % int(event["slot"])), int(event["level"])]
+			return Tr.t("%s reached level %d!" % [name_of("p%d" % int(event["slot"])), int(event["level"])])
 		"class_challenge_ended":
-			return str(event["text"])
+			return Tr.t(str(event["text"]))
 		"class_choice":
-			return "%s %s the %s Class." % [name_of("p%d" % int(event["slot"])),
-					"takes" if event["accepted"] else "declines", str(event["class"]).capitalize()]
+			return Tr.t("%s %s the %s Class." % [name_of("p%d" % int(event["slot"])),
+					Tr.t("takes" if event["accepted"] else "declines"), str(event["class"]).capitalize()])
 		"purchase":
-			return "%s bought %s for %d Gold." % [name_of("p%d" % int(event["slot"])),
-				BattleView.item_display_name(str(event["item"])), int(event["price"])]
+			return Tr.t("%s bought %s for %d Gold." % [name_of("p%d" % int(event["slot"])),
+				BattleView.item_display_name(str(event["item"])), int(event["price"])] )
 		"rested":
-			return "The Party rests and recovers."
+			return Tr.t("The Party rests and recovers.")
 		"treasure_found":
-			return "Treasure! +%d Gold." % int(event["gold"])
+			return Tr.t("Treasure! +%d Gold." % int(event["gold"]))
 		"clue_found":
-			return "Story Clue found: %s." % event["clue"]["title"]
+			return Tr.t("Story Clue found: %s." % event["clue"]["title"])
 		"boss_started":
-			return "%s, %s, blocks the way!" % [event["name"], event["title"]]
+			return Tr.t("%s, %s, blocks the way!" % [event["name"], event["title"]])
 		"boss_telegraph":
-			return "WARNING: %s" % event["text"]
+			return Tr.t("WARNING: %s" % event["text"])
 		"boss_phase":
-			return "Phase %d - %s: %s" % [int(event["phase"]), event["name"], event["text"]]
+			return Tr.t("Phase %d - %s: %s" % [int(event["phase"]), event["name"], event["text"]])
 		"match_ended":
-			var region := UiText.region_of(match_view())
-			return "Victory! The %s is behind you." % region if event["result"] == "victory" else "Defeat. The %s wins this time." % region
+			var region := Tr.t(UiText.region_of(match_view()))
+			return Tr.t("Victory! The %s is behind you." % region) if event["result"] == "victory" else Tr.t("Defeat. The %s wins this time." % region)
 		"status_applied":
 			if str(event.get("kind", "")) == "dot":
 				return "%s suffers %s (x%d, %d turns)." % [name_of(str(event["target"])), event["name"],
 						int(event["stacks"]), int(event["turns"])]
-			return "%s gains %s." % [name_of(str(event["target"])), event["name"]]
+			return Tr.t("%s gains %s." % [name_of(str(event["target"])), event["name"]])
 		"status_tick":
-			return "%s takes %d from %s%s." % [name_of(str(event["target"])), int(event["damage"]), event["name"],
-					" and falls" if event.get("down", false) else ""]
+			return Tr.t("%s takes %d from %s%s." % [name_of(str(event["target"])), int(event["damage"]), event["name"],
+					Tr.t(" and falls") if event.get("down", false) else ""])
 	return ""
 
 
@@ -496,39 +496,39 @@ func _describe_action(event: Dictionary) -> String:
 	var actor := name_of(str(event["actor"]))
 	match str(event["action"]):
 		"defend":
-			return "%s %s." % [actor, "ran out of time and Defends" if event["automatic"] else "Defends"]
+			return Tr.t("%s ran out of time and defends." % actor) if event["automatic"] else Tr.t("%s defends." % actor)
 		"charge":
-			return "%s gathers power for %s..." % [actor, event.get("move_name", "something big")]
-	var what := "attacks"
+			return Tr.t("%s gathers power for %s..." % [actor, event.get("move_name", "something big")])
+	var what := Tr.t("attacks")
 	if event.has("skill"):
-		what = "uses %s" % str(event.get("skill", "")).replace("_", " ").capitalize()
+		what = Tr.t("uses %s" % str(event.get("skill", "")).replace("_", " ").capitalize())
 	if event.has("move_name"):
-		what = "uses %s" % event["move_name"]
+		what = Tr.t("uses %s" % event["move_name"])
 	if event.has("item"):
-		what = "uses %s" % BattleView.item_display_name(str(event["item"]))
+		what = Tr.t("uses %s" % BattleView.item_display_name(str(event["item"])))
 	var parts: Array[String] = []
 	for result in event.get("results", []):
 		var target := name_of(str(result["target"]))
 		if result.has("damage"):
 			var note := ""
 			if result.get("crit", false):
-				note += " critical!"
+				note += Tr.t(" critical!")
 			if result.get("weak", false):
-				note += " weak spot!"
+				note += Tr.t(" weak spot!")
 			if result.has("protected"):
-				note += " (shielding %s)" % name_of(str(result["protected"]))
+				note += Tr.t(" (shielding %s)" % name_of(str(result["protected"])))
 			if result.get("down", false):
-				note += " - down"
-			parts.append("%s takes %d%s" % [target, int(result["damage"]), note])
+				note += Tr.t(" - down")
+			parts.append(Tr.t("%s takes %d%s" % [target, int(result["damage"]), note]))
 		elif result.has("heal"):
-			parts.append("%s recovers %d HP" % [target, int(result["heal"])])
+			parts.append(Tr.t("%s recovers %d HP" % [target, int(result["heal"])]) )
 		elif result.get("revived", false):
-			parts.append("%s is back on their feet" % target)
+			parts.append(Tr.t("%s is back on their feet" % target))
 		elif result.get("status", "") == "protected":
-			parts.append("%s is protected" % target)
+			parts.append(Tr.t("%s is protected" % target))
 		elif result.get("status", "") == "shielded":
-			parts.append("the Party raises its guard")
-	return "%s %s: %s." % [actor, what, ", ".join(parts)] if not parts.is_empty() else "%s %s." % [actor, what]
+			parts.append(Tr.t("the Party raises its guard"))
+	return Tr.t("%s %s: %s." % [actor, what, ", ".join(parts)]) if not parts.is_empty() else Tr.t("%s %s." % [actor, what])
 
 
 ## A big announcement: the battle band while fighting, else the app banner.
@@ -585,7 +585,7 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 			if hurt:
 				client.sounds.play("hit")
 		"vote_resolved":
-			client.banner("Next: %s" % event["name"], 2.2, "vote")
+			client.banner(Tr.t("Next: %s" % event["name"]), 2.2, "vote")
 		"combat_ended":
 			_float_generation += 1
 			_float_stack.clear()
@@ -596,31 +596,30 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				_battle.clear_turn_notice()
 			var rewards: Dictionary = event.get("rewards", {})
 			if event["result"] == "victory" and int(rewards.get("exp", 0)) > 0:
-				_announce(client, "Victory! +%d EXP, +%d Gold" % [int(rewards["exp"]), int(rewards.get("gold", 0))], 2.5, "good")
+				_announce(client, Tr.t("Victory! +%d EXP, +%d Gold" % [int(rewards["exp"]), int(rewards.get("gold", 0))]), 2.5, "good")
 		"player_joined":
 			if not ClientApp.is_story_view(room_view()):
-				client.toast("%s joined." % event["name"])
+				client.toast(Tr.t("%s joined." % event["name"]))
 				client.sounds.play("click")
 		"profile_unavailable":
 			client.toast(UiText.error("profile_unavailable"), 6.0)
 		"treasure_found":
-			client.banner("Treasure! +%d Gold" % int(event["gold"]), 2.0, "good")
+			client.banner(Tr.t("Treasure! +%d Gold" % int(event["gold"])), 2.0, "good")
 		"clue_found":
-			client.banner("Story Clue: %s" % event["clue"]["title"], 2.5, "good")
+			client.banner(Tr.t("Story Clue: %s" % event["clue"]["title"]), 2.5, "good")
 		"level_up":
 			float_text("p%d" % int(event["slot"]), "LEVEL UP", UiKit.GOOD)
 			client.sounds.play("good")
 		"class_changed":
 			client.sounds.play("good")
 		"boss_telegraph":
-			_announce(client, "Warning: %s next turn!" % event["name"], 2.5, "warn")
+			_announce(client, Tr.t("Warning: %s next turn!" % event["name"]), 2.5, "warn")
 		"boss_phase":
-			_announce(client, "Phase %d: %s" % [int(event["phase"]), event["name"]], 2.5, "warn")
+			_announce(client, Tr.t("Phase %d: %s" % [int(event["phase"]), event["name"]]), 2.5, "warn")
 		"slot_ai_takeover":
-			client.toast("%s is now controlled by AI." % event["character"])
+			client.toast(Tr.t("%s is now controlled by AI." % event["character"]))
 		"match_ended":
-			client.banner("Victory!" if event["result"] == "victory" else "Defeat", 3.0,
-					"good" if event["result"] == "victory" else "bad")
+			client.clear_banner()
 
 
 func _collect_names(view: Dictionary) -> void:
@@ -633,10 +632,11 @@ func _collect_names(view: Dictionary) -> void:
 	var combat: Dictionary = MatchScreen.combat_of(encounter)
 	var counts := {}
 	for enemy in combat.get("enemies", []):
-		counts[enemy["name"]] = int(counts.get(enemy["name"], 0)) + 1
+		var enemy_name := Tr.t(str(enemy["name"]))
+		counts[enemy_name] = int(counts.get(enemy_name, 0)) + 1
 	var seen := {}
 	for enemy in combat.get("enemies", []):
-		var base := str(enemy["name"])
+		var base := Tr.t(str(enemy["name"]))
 		if int(counts[base]) > 1:
 			seen[base] = int(seen.get(base, 0)) + 1
 			names[enemy["id"]] = "%s %s" % [base, "ABCDE"[int(seen[base]) - 1]]
@@ -646,7 +646,7 @@ func _collect_names(view: Dictionary) -> void:
 
 func _build_top(view: Dictionary) -> void:
 	UiKit.clear(_top)
-	_top.add_child(UiKit.label(UiText.region_of(view), "heading", UiKit.ACCENT))
+	_top.add_child(UiKit.label(Tr.t(UiText.region_of(view)), "heading", UiKit.ACCENT))
 	var total := int(view.get("layers_total", 5))
 	var layer := int(view.get("layer", 0))
 	var phase := str(view.get("phase", ""))
@@ -685,7 +685,7 @@ func _build_party(view: Dictionary) -> void:
 		var card := UiKit.vbox(2)
 		var head := UiKit.hbox(6)
 		head.add_child(UiKit.label(str(character["name"]), "body", UiKit.ACCENT if slot == your_slot() else UiKit.TEXT))
-		head.add_child(UiKit.label("Lv %d %s" % [int(character["level"]), character["class_name"]], "dim"))
+		head.add_child(UiKit.label("Lv %d %s" % [int(character["level"]), Tr.t(str(character["class_name"]).capitalize())], "dim"))
 		head.add_child(UiKit.spacer())
 		if slot == your_slot():
 			head.add_child(UiKit.badge("YOU", UiKit.GOOD))

@@ -40,18 +40,18 @@ func setup(app: ClientApp) -> void:
 func _build_chrome() -> void:
 	var logo := UiKit.vbox(0)
 	logo.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	logo.position = Vector2(0, 28)
-	logo.offset_bottom = 118
-	var title := UiKit.pixel_label("BEYOND THE WORLD'S END", "huge", UiKit.ACCENT)
+	logo.position = Vector2(0, 16)
+	logo.offset_bottom = 106
+	var title := UiKit.pixel_label(Tr.t("BEYOND THE WORLD'S END"), "huge", UiKit.ACCENT)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	title.add_theme_color_override("font_outline_color", UiKit.BG)
 	title.add_theme_constant_override("outline_size", 10)
 	logo.add_child(title)
-	var subtitle := UiKit.label("Beyond the World's End - a co-op journey", "heading")
+	var subtitle := UiKit.label(Tr.t("Beyond the World's End - a co-op journey"), "heading")
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	subtitle.position.y = 70
+	subtitle.position.y = 62
 	logo.add_child(subtitle)
 	add_child(logo)
 	var build := UiKit.label("BUILD 0.10  |  CO-OP JOURNEY", "small", UiKit.TEXT_DIM)
@@ -71,14 +71,14 @@ func _show_menu() -> void:
 	body.custom_minimum_size = Vector2(340, 0)
 	var panel := UiKit.panel(body)
 	panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	panel.set_meta("base_y", 150.0)
-	panel.position = Vector2(88, _top(150))
+	panel.set_meta("base_y", 176.0)
+	panel.position = Vector2(88, _top(176))
 	panel.size = Vector2(390, 0)
 	add_child(panel)
 	_content = panel
-	body.add_child(UiKit.label("WELCOME, TRAVELLER", "heading", UiKit.ACCENT))
-	body.add_child(UiKit.para("Choose your path into the forest.", "dim"))
-	var play := UiKit.primary("Play", _show_play)
+	body.add_child(UiKit.label(Tr.t("WELCOME, TRAVELLER"), "heading", UiKit.ACCENT))
+	body.add_child(UiKit.para(Tr.t("Choose your path into the forest."), "dim"))
+	var play := UiKit.primary(Tr.t("Play"), _show_play)
 	Icons.apply_to_button(play, "play", _app.settings.text_scale)
 	play.set_meta("focus_id", "play")
 	body.add_child(play)
@@ -89,16 +89,16 @@ func _show_menu() -> void:
 		dev.tooltip_text = "DEV: embedded server, single-player; start at any scene"
 		dev.add_theme_color_override("font_color", UiKit.WARN)
 		body.add_child(dev)
-	var settings := UiKit.button("Settings [F2]", _app.open_settings)
+	var settings := UiKit.button(Tr.t("Settings [F2]"), _app.open_settings)
 	Icons.apply_to_button(settings, "settings", _app.settings.text_scale)
 	settings.set_meta("focus_id", "settings")
 	body.add_child(settings)
-	var credits := UiKit.button("Credits", _show_credits)
+	var credits := UiKit.button(Tr.t("Credits"), _show_credits)
 	Icons.apply_to_button(credits, "credits", _app.settings.text_scale)
 	credits.set_meta("focus_id", "credits")
 	body.add_child(credits)
 	if not OS.has_feature("web"):
-		var quit := UiKit.button("Quit", func() -> void: _app.stop_dev_playtest(); get_tree().quit())
+		var quit := UiKit.button(Tr.t("Quit"), func() -> void: _app.stop_dev_playtest(); get_tree().quit())
 		Icons.apply_to_button(quit, "quit", _app.settings.text_scale)
 		body.add_child(quit)
 	UiKit.focus_first(body)
@@ -341,7 +341,7 @@ func _show_multiplayer() -> void:
 	row.add_child(join)
 	body.add_child(row)
 	var advanced := CheckButton.new()
-	advanced.text = "Advanced connection options"
+	advanced.text = Tr.t("Advanced connection options")
 	advanced.toggled.connect(func(on: bool) -> void: _server.visible = on)
 	body.add_child(advanced)
 	_server = _line_edit(_app.server_url(), ClientApp.DEFAULT_URL, 200)

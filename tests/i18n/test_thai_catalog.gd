@@ -40,6 +40,37 @@ func test_every_extracted_msgid_is_translated() -> void:
 			assert_false(str(po[message]).is_empty(), "empty msgstr: %s" % message)
 
 
+func test_every_client_tr_literal_is_translated() -> void:
+	var po := _read_po(PO_PATH)
+	var files: Array[String] = []
+	_collect_client_scripts("res://src/client", files)
+	var regex := RegEx.new()
+	regex.compile("Tr\\.t\\(\\s*\"((?:\\\\.|[^\"\\\\])*)\"")
+	for path in files:
+		var source := FileAccess.get_file_as_string(path)
+		for found in regex.search_all(source):
+			var parsed = JSON.parse_string("\"%s\"" % found.get_string(1))
+			if parsed is String:
+				assert_true(po.has(parsed) and not str(po.get(parsed, "")).is_empty(), "Tr.t literal missing Thai: %s (%s)" % [parsed, path])
+				assert_eq(_placeholders(parsed), _placeholders(str(po.get(parsed, ""))), "Tr.t placeholder mismatch: %s" % parsed)
+
+
+func _collect_client_scripts(directory: String, files: Array[String]) -> void:
+	var dir := DirAccess.open(directory)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var name := dir.get_next()
+	while not name.is_empty():
+		var path := directory.path_join(name)
+		if dir.current_is_dir():
+			_collect_client_scripts(path, files)
+		elif name.ends_with(".gd"):
+			files.append(path)
+		name = dir.get_next()
+	dir.list_dir_end()
+
+
 func test_placeholders_are_preserved() -> void:
 	var pot := _read_po(POT_PATH)
 	var po := _read_po(PO_PATH)

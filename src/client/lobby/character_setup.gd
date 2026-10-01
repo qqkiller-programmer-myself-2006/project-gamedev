@@ -100,7 +100,7 @@ func _build_shell() -> void:
 	for i in NAV.size():
 		var tab_name: String = NAV[i]
 		var button := Button.new()
-		button.text = tab_name
+		button.text = Tr.t(tab_name)
 		Icons.apply_to_button(button, NAV_ICONS[i], _app.settings.text_scale)
 		button.custom_minimum_size = Vector2(210, 72)
 		button.focus_mode = Control.FOCUS_ALL
@@ -108,7 +108,7 @@ func _build_shell() -> void:
 		button.pressed.connect(func() -> void: _switch_tab(tab_name))
 		button.set_meta("tab", tab_name)
 		button.set_meta("focus_id", "tab_" + tab_name)
-		button.tooltip_text = "%s [%d]" % [tab_name, i + 1]
+		button.tooltip_text = Tr.t("%s [%d]" % [tab_name, i + 1])
 		nav.add_child(button)
 	_content = Control.new()
 	_content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -229,7 +229,8 @@ func _render_class() -> void:
 	var right := _column_panel(row, 0.39)
 	var prestige := int(_profile().get("prestige", {}).get(_class_id, 0))
 	right.add_child(_center("%s (%d)" % [UiText.class_display(_classes, _class_id), prestige], "title"))
-	right.add_child(_center("Prestige: %d%s" % [prestige, " (MAX)" if prestige >= 25 else ""], "body"))
+	var prestige_text := Tr.t("Prestige: %d (MAX)" % prestige) if prestige >= 25 else Tr.t("Prestige: %d" % prestige)
+	right.add_child(_center(prestige_text, "body"))
 	var tree := Control.new()
 	tree.custom_minimum_size.y = 274
 	tree.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -381,7 +382,7 @@ func _render_boons() -> void:
 				button.tooltip_text = "Not enough Boon slots: %d/5 used." % _used_slots()
 			list.add_child(button)
 	var search := LineEdit.new()
-	search.placeholder_text = "Search..."
+	search.placeholder_text = Tr.t("Search...")
 	search.text = _search
 	search.text_changed.connect(func(value: String) -> void:
 		_search = value
@@ -557,23 +558,23 @@ func _scroll(parent: VBoxContainer) -> ScrollContainer:
 
 
 func _heading(value: String) -> Label:
-	return UiKit.pixel_label(value, "heading")
+	return UiKit.pixel_label(Tr.t(value), "heading")
 
 
 func _center(value: String, style: String) -> Label:
-	var label := UiKit.pixel_label(value, style)
+	var label := UiKit.pixel_label(Tr.t(value), style)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	return label
 
 
 func _text(value: String) -> Label:
-	var label := UiKit.pixel_label(value, "body")
+	var label := UiKit.pixel_label(Tr.t(value), "body")
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return label
 
 
 func _button(value: String, action: Callable, big: bool = false) -> Button:
-	return UiKit.button(value, action, big)
+	return UiKit.button(Tr.t(value), action, big)
 
 
 func _gems() -> int:
