@@ -39,6 +39,7 @@ var _capture := ErrorCapture.new()
 
 func _init() -> void:
 	OS.add_logger(_capture)
+	Tr.setup("en")
 	var filter := _read_filter()
 	var files := _find_test_files(TEST_ROOT)
 	files.sort()
@@ -76,6 +77,7 @@ func _init() -> void:
 
 func _run_one(script: Script, method: String) -> Array[String]:
 	_capture.take()
+	Tr.setup("en")
 	var instance = script.new()
 	if instance.has_method("before_each"):
 		instance.before_each()

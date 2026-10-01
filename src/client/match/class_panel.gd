@@ -100,5 +100,5 @@ static func class_card(info: Dictionary) -> Control:
 	for skill in info.get("skills", []):
 		box.add_child(UiKit.para("Skill - %s: %s" % [skill["name"], skill["description"]]))
 	var card := UiKit.panel(box, "CardPanel")
-	card.tooltip_text = str(info["description"])
+	card.tooltip_text = Tr.t(str(info["description"]))
 	return card

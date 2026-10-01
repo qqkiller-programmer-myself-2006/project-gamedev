@@ -181,7 +181,7 @@ func setup(data: Dictionary) -> void:
 	_plate.custom_minimum_size = Vector2(width, 0)
 	_plate.size = Vector2(width, plate_height)
 	add_child(_plate)
-	tooltip_text = str(data.get("tooltip", ""))
+	tooltip_text = Tr.t(str(data.get("tooltip", "")))
 	modulate = Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
 	_set_animation("dead" if down else "idle")
 	if updating and old_down == down and old_animation != "idle" and sprite_set != null:

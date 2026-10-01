@@ -50,6 +50,7 @@ func configure(launch_options: Dictionary) -> void:
 
 
 func _ready() -> void:
+	Tr.setup(str(options.get("lang", "th")))
 	settings = ClientSettings.load_saved()
 	player_token = _load_player_token()
 	if options.has("name"):
@@ -399,7 +400,7 @@ func _show_screen(screen: String) -> void:
 # --- Feedback -----------------------------------------------------------------
 
 func toast(message: String, seconds: float = 4.0) -> void:
-	_toast_label.text = message
+	_toast_label.text = Tr.t(message)
 	_toast_until = _local_now() + seconds
 	var top_offset := 118.0 if _current_name == "lobby" else 12.0
 	_toast.offset_top = top_offset
@@ -409,7 +410,7 @@ func toast(message: String, seconds: float = 4.0) -> void:
 
 ## A big announcement across the screen (the visual twin of sound cues).
 func banner(message: String, seconds: float = 2.5, cue: String = "") -> void:
-	_banner_label.text = message
+	_banner_label.text = Tr.t(message)
 	_banner_until = _local_now() + seconds
 	_banner.visible = true
 	if not cue.is_empty():
@@ -548,7 +549,8 @@ func open_settings() -> void:
 ## the text's %s / %d).
 func confirm(key: String, on_confirm: Callable, args: Array = []) -> void:
 	var texts: Array = UiText.CONFIRM[key]
-	confirm_custom(str(texts[0]), str(texts[1]) % args if not args.is_empty() else str(texts[1]), str(texts[2]), on_confirm)
+	var body := Tr.t(str(texts[1]))
+	confirm_custom(str(texts[0]), body % args if not args.is_empty() else body, str(texts[2]), on_confirm)
 
 
 func confirm_custom(title: String, text: String, confirm_label: String, on_confirm: Callable) -> void:
@@ -557,7 +559,7 @@ func confirm_custom(title: String, text: String, confirm_label: String, on_confi
 			return
 	var dialog := ConfirmDialog.new()
 	_overlay_holder.add_child(dialog)
-	dialog.setup(title, text, confirm_label, on_confirm)
+	dialog.setup(Tr.t(title), text, Tr.t(confirm_label), on_confirm)
 
 
 ## Leaves the room or Match after asking.

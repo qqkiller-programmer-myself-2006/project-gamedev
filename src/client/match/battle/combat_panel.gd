@@ -129,7 +129,7 @@ func _build_enemies(screen: MatchScreen) -> void:
 		if target_index >= 0:
 			box.add_child(UiKit.badge("TARGET [%d]" % (target_index + 1), UiKit.ACCENT))
 		var card := UiKit.panel(box, "HighlightPanel" if target_index >= 0 else "CardPanel")
-		card.tooltip_text = str(enemy.get("description", ""))
+		card.tooltip_text = Tr.t(str(enemy.get("description", "")))
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.custom_minimum_size = Vector2(230, 0)
 		row.add_child(card)
@@ -349,5 +349,5 @@ static func _action_button(text: String, callback: Callable, id: String) -> Butt
 static func _item_description(screen: MatchScreen, item_id: String) -> String:
 	for entry in screen.match_view().get("inventory", []):
 		if entry["item"] == item_id:
-			return str(entry["description"])
+			return Tr.t(str(entry["description"]))
 	return ""
