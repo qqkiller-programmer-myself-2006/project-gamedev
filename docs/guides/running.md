@@ -25,13 +25,12 @@ godot --path . -- --url=ws://127.0.0.1:8910 --name=Ann  # กรอกค่า�
 
 ### Dev Playtest (กระโดดไปฉากที่ต้องการ)
 
-เฉพาะ debug build หรือ `--dev` (ไม่มีใน release export): ปุ่ม **[DEV] Playtest** บนหน้าแรกเปิด panel ให้เลือก
-**Start at** (Journey start, Combat, Merchant, Rest camp, Class Encounter, Story event, Cave = Layer 5 combat, Boss),
-**Class** ของผู้เล่น (Classless/Swordsman/Archer/Mage/Guardian/Assassin) และ **Seed** แล้วเริ่ม match คนเดียวบน server ในตัวเกม
-แล้วข้ามไปฉากนั้นทันที (ตั้ง Layer และเลเวล/EXP ให้เหมาะกับ Layer นั้น, ใช้ seed เดิม = ฉากเดิม)
+เฉพาะ debug build หรือ `--dev` (ไม่มีใน release export): เริ่ม playtest ผ่าน command line โดยระบุฉาก, Class และ Seed
+แล้วเริ่ม match คนเดียวบน server ในตัวเกม ก่อนข้ามไปฉากนั้นทันที (ตั้ง Layer และเลเวล/EXP ให้เหมาะกับ Layer นั้น,
+ใช้ seed เดิม = ฉากเดิม)
 
 ```bash
-godot --path . -- --dev --playtest --jump=boss --class=mage --seed=7   # ข้าม panel
+godot --path . -- --dev --playtest --jump=boss --class=mage --seed=7
 ```
 
 `--jump=` journey|combat|merchant|rest|class|story|cave|boss (ตั้งค่าเริ่มต้น journey), `--class=` classless|swordsman|archer|mage|guardian|assassin, `--seed=` ตัวเลข.
