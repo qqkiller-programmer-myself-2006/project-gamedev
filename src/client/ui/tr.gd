@@ -50,7 +50,9 @@ static func t(msgid: String) -> String:
 		if source.length() > 1 and embedded.contains(source):
 			var translated_source := TranslationServer.translate(source)
 			if translated_source != source:
-				embedded = embedded.replace(source, translated_source)
+				var whole_word := RegEx.new()
+				whole_word.compile("\\b" + _regex_escape(source) + "\\b")
+				embedded = whole_word.sub(embedded, translated_source, true)
 	return embedded
 
 
@@ -60,7 +62,9 @@ static func _pattern_for(msgid: String) -> RegEx:
 	placeholders.compile("\\{[^{}]+\\}|%[sd]")
 	var cursor := 0
 	for found in placeholders.search_all(msgid):
-		pattern += _regex_escape(msgid.substr(cursor, found.get_start() - cursor)) + "(.+?)"
+		var token := found.get_string()
+		var capture := "(\\d+)" if token.begins_with("%d") else "(.+?)"
+		pattern += _regex_escape(msgid.substr(cursor, found.get_start() - cursor)) + capture
 		cursor = found.get_end()
 	pattern += _regex_escape(msgid.substr(cursor)) + "$"
 	var regex := RegEx.new()

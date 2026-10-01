@@ -30,6 +30,8 @@ var _language := "th"
 var _sprite_idle_after := 0.0
 var _used_focus := false
 var _used_item := false
+var _scan_latin := false
+var _latin_allowlist := ["Beyond", "World", "End", "Ann", "Bob", "HP", "ATK", "DEF", "MAG", "RES", "SPD", "EXP", "LVL", "STR", "DEX", "CON", "INT", "FTH", "CHA", "LCK", "F", "I", "O", "H", "R", "Esc", "F2"]
 
 
 func _initialize() -> void:
@@ -50,6 +52,8 @@ func _initialize() -> void:
 			reduced = true
 		elif arg == "--setup-only":
 			_setup_only = true
+		elif arg == "--scan-latin":
+			_scan_latin = true
 		elif arg.begins_with("--class="):
 			only_class = arg.trim_prefix("--class=")
 		elif arg.begins_with("--resolution="):
@@ -341,6 +345,8 @@ func _press(keycode: int) -> void:
 
 func _shot(name: String) -> void:
 	shots[name] = true
+	if _scan_latin:
+		_scan_visible_latin(root, name)
 	var image := root.get_viewport().get_texture().get_image()
 	image.save_png(out_dir.path_join(name + ".png"))
 	print("screenshot ", name)
@@ -353,6 +359,35 @@ func _shot(name: String) -> void:
 				break
 		for enemy in battle._combat.get("enemies", []):
 			print("enemy energy ", enemy.get("id", "?"), "=", enemy.get("energy", "missing"))
+
+
+## Read the live Control tree at each captured screen; this is a text scan, not OCR.
+func _scan_visible_latin(node: Node, screen_name: String) -> void:
+	if node is Control and (node as Control).is_visible_in_tree():
+		var visible_text := ""
+		if node is Button:
+			visible_text = (node as Button).text
+		elif node is Label:
+			visible_text = (node as Label).text
+		elif node is RichTextLabel:
+			visible_text = (node as RichTextLabel).text
+		var room_code := _code()
+		if not room_code.is_empty():
+			visible_text = visible_text.replace(room_code, "")
+		var words := RegEx.new()
+		words.compile("[A-Za-z0-9]+")
+		var found: Array[String] = []
+		for match in words.search_all(visible_text):
+			var word := match.get_string()
+			var allowed_token := RegEx.new()
+			allowed_token.compile("^(?:[A-Z0-9]{6}|[PE]\\d+|[xX]?\\d+s?)$")
+			if word.length() > 1 and allowed_token.search(word) == null \
+					and not _latin_allowlist.has(word) and not found.has(word):
+				found.append(word)
+		if not found.is_empty():
+			print("ui_preview Latin (", screen_name, ") ", node.get_path(), ": ", ", ".join(found), " | ", visible_text.replace("\n", " / "))
+	for child in node.get_children():
+		_scan_visible_latin(child, screen_name)
 
 
 func _code() -> String:

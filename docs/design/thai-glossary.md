@@ -126,6 +126,9 @@ msgstr ต้องไม่มีอักษรอังกฤษ ยกเว
 | Forest Tonic | ยาบำรุงแห่งป่า | |
 | Firebomb | ระเบิดเพลิง | |
 | Spirit Bloom | บุปผาวิญญาณ | |
+| Trapper's Stall | แผงพรานดักสัตว์ | ชื่อสถานที่ค้าขาย |
+| Travelling Merchant | พ่อค้าเร่ | ชื่อ encounter |
+| Quiet Glade | ลานป่าเงียบสงบ | ชื่อ encounter |
 | Boar Tusk / Bramble Wood / Wolf Pelt / Wisp Dust | เขี้ยวหมูป่า / ไม้หนาม / หนังหมาป่า / ฝุ่นวิสป์ | วัสดุ |
 | Pelt Boots / Hide Jerkin / Wisp-thread Robe | รองเท้าหนังสัตว์ / เสื้อหนัง / เสื้อคลุมใยวิสป์ | อุปกรณ์ |
 | Tusk Charm / Wisp Charm / Bramble Quiver | เครื่องรางเขี้ยว / เครื่องรางวิสป์ / กระบอกธนูหนาม | อุปกรณ์ |

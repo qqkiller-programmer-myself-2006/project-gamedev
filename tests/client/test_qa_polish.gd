@@ -50,11 +50,36 @@ func test_camp_uses_the_content_backdrop_for_each_region() -> void:
 
 func test_floating_damage_numbers_queue_without_overlap() -> void:
 	var screen := MatchScreen.new()
-	var first := screen._queue_float_start("e0", 1000)
-	var second := screen._queue_float_start("e0", 1000)
+	var first: int = screen._queue_float_start("e0", 1000)
+	var second: int = screen._queue_float_start("e0", 1000)
 	assert_eq(first, 1000, "the first floating number starts immediately")
 	assert_eq(second, 1720, "the next number for the same card waits for the first")
 	screen.free()
+
+
+func test_large_camp_layout_uses_vertical_scroll_and_keeps_equipment_column() -> void:
+	var app := ClientApp.new()
+	app.settings = ClientSettings.new()
+	app.settings.text_scale = 1.45
+	app.settings.seen_hints.append("merchant")
+	app.sounds = SoundBank.new()
+	app._overlay_holder = Control.new()
+	app.add_child(app._overlay_holder)
+	app.snapshot = {"room": {"your_slot": 0, "story": false, "slots": []}, "match": {"story": false}}
+	var screen := MatchScreen.new()
+	screen.app = app
+	var camp := CampView.new()
+	camp.setup(screen, app)
+	camp.build({"layer": 1, "layers_total": 5, "gold": 100, "party": [], "inventory": []}, {
+		"kind": "merchant", "name": "Mar", "you_are_ready": false, "stock": [],
+	})
+	assert_eq((camp._workspace as ScrollContainer).horizontal_scroll_mode, ScrollContainer.SCROLL_MODE_DISABLED)
+	assert_eq((camp._workspace as ScrollContainer).vertical_scroll_mode, ScrollContainer.SCROLL_MODE_AUTO)
+	assert_true(camp._columns is VBoxContainer, "large text stacks camp sections vertically")
+	assert_true(camp._columns.get_child_count() >= 4, "equipment remains in the vertically scrollable workspace")
+	camp.free()
+	screen.free()
+	app.free()
 
 
 func test_hp_bars_share_battle_color_and_room_for_large_text() -> void:
@@ -147,8 +172,22 @@ func test_battle_token_updates_keep_node_and_apply_reduced_motion_bars() -> void
 
 
 func test_battle_item_labels_use_content_names() -> void:
-	assert_eq(BattleView.item_display_name("herb"), "Healing Herb")
-	assert_eq(BattleView.item_display_name("tonic"), "Forest Tonic")
+	assert_eq(UiText.item_name("herb"), "Healing Herb")
+	assert_eq(UiText.item_name("tonic"), "Forest Tonic")
+
+
+func test_battle_event_log_translates_names_and_combat_pattern() -> void:
+	Tr.setup("th")
+	var screen := MatchScreen.new()
+	screen.names = {"p0": "Arin", "e0": "Goblin"}
+	var line := screen._describe_action({
+		"actor": "p0", "action": "attack", "results": [{"target": "e0", "damage": 15, "crit": true}],
+	})
+	assert_true(line.contains("อาริน") and line.contains("โจมตี"), "event log translates actor and action")
+	assert_true(line.contains("ก็อบลิน") and line.contains("ได้รับความเสียหาย 15"), "event log translates target and hit")
+	assert_false(line.contains("attacks") or line.contains("takes"), "event log does not leak English combat verbs")
+	screen.free()
+	Tr.setup("en")
 
 
 func test_trainer_sprite_uses_hero_scale_and_down_tint_survives_flashes() -> void:
@@ -158,7 +197,8 @@ func test_trainer_sprite_uses_hero_scale_and_down_tint_survives_flashes() -> voi
 	assert_true(trainer.figure_height >= 92.0, "trainer sprites are raised to the hero display size")
 	trainer.setup({"id": "e0", "side": "enemy", "name": "Trainer", "kind": "thief", "sprite": "thief",
 		"trainer": true, "hp": 0, "max_hp": 10})
-	assert_eq(trainer.resting_modulate(), Color(0.55, 0.55, 0.55, 0.85), "down tint remains after a flash tween")
+	trainer.play_animation("dead")
+	assert_eq(trainer.modulate, Color(0.55, 0.55, 0.55, 0.85), "down tint remains on the defeated trainer")
 	trainer.free()
 
 

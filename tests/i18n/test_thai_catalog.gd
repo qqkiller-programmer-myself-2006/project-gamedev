@@ -20,6 +20,10 @@ func test_every_ui_text_string_is_in_catalog() -> void:
 func test_locale_switch_and_formatted_placeholder() -> void:
 	Tr.setup("th")
 	assert_eq(Tr.t("Forest"), "ป่า", "Thai catalog active")
+	assert_eq(Tr.t("Class"), "อาชีพ", "word labels cannot be mistaken for numeric placeholders")
+	assert_eq(Tr.t("5s"), "5 วินาที", "numeric placeholders preserve seconds")
+	assert_eq(Tr.t("WAITING"), "กำลังรอ", "literal status translates")
+	assert_eq(Tr.t("AWAITING"), "AWAITING", "embedded replacements do not corrupt unrelated words")
 	assert_eq(Tr.t("%d Gems" % 5), "อัญมณี 5 เม็ด", "formatted msgid preserves its number")
 	assert_eq(Tr.t("Not enough Gems: this costs 10, you have 4."), "อัญมณีไม่พอ: ต้องใช้ 10 เม็ด คุณมี 4 เม็ด.", "each placeholder keeps its own value")
 	assert_eq(Tr.t("Something went wrong (server_error)."), "เกิดข้อผิดพลาด (server_error).", "translated fallback keeps its code placeholder")

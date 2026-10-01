@@ -174,7 +174,7 @@ func _render_class() -> void:
 	var row := UiKit.hbox(9)
 	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_content.add_child(row)
-	var left := _column_panel(row, 0.31, "Class")
+	var left := _column_panel(row, 0.31, Tr.t("Class"))
 	var left_scroll := _scroll(left)
 	var portrait_host := UiKit.vbox(0)
 	portrait_host.custom_minimum_size.x = 330
@@ -322,7 +322,7 @@ func _render_races() -> void:
 	space.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	space.size_flags_stretch_ratio = 41.0
 	row.add_child(space)
-	var right := _column_panel(row, 0.31, "Description")
+	var right := _column_panel(row, 0.31, Tr.t("Description"))
 	var details := _scroll(right)
 	var info := UiKit.vbox(12)
 	info.custom_minimum_size.x = 320
@@ -361,7 +361,7 @@ func _render_boons() -> void:
 	list.custom_minimum_size.x = 340
 	scroll.add_child(list)
 	for slots in range(5, 0, -1):
-		list.add_child(_heading("Slots: %d" % slots))
+		list.add_child(_heading(Tr.t("Slots: %d" % slots)))
 		for boon in _meta.get("boons", {}):
 			if int(_meta["boons"][boon].get("slots", 0)) != slots:
 				continue
@@ -379,7 +379,7 @@ func _render_boons() -> void:
 				button.disabled = true
 				button.tooltip_text = "Requires 5 total Prestige."
 			elif not _boons.has(boon_name) and _used_slots() + slots > 5:
-				button.tooltip_text = "Not enough Boon slots: %d/5 used." % _used_slots()
+				button.tooltip_text = Tr.t("Not enough Boon slots: %d/5 used." % _used_slots())
 			list.add_child(button)
 	var search := LineEdit.new()
 	search.placeholder_text = Tr.t("Search...")
@@ -391,7 +391,7 @@ func _render_boons() -> void:
 				child.visible = value.is_empty() or str(child.get_meta("boon", "")).to_lower().contains(value.to_lower()))
 	middle.add_child(search)
 	var right := _column_panel(row, 0.33)
-	right.add_child(_heading("Slots: %d/5" % _used_slots()))
+	right.add_child(_heading(Tr.t("Slots: %d/5" % _used_slots())))
 	for boon in _boons:
 		var boon_name: String = boon
 		var remove := _button("%s   ×" % boon_name, func() -> void: _boons.erase(boon_name); _send_loadout(); _render())
@@ -409,7 +409,7 @@ func _show_boon_details(boon: String) -> void:
 		return
 	var slots := int(_meta.get("boons", {}).get(boon, {}).get("slots", 0))
 	_boon_details.add_child(_center(boon, "title"))
-	_boon_details.add_child(_text("Slots: %d" % slots))
+	_boon_details.add_child(_text(Tr.t("Slots: %d" % slots)))
 	_boon_details.add_child(_text(str(_meta.get("boons", {}).get(boon, {}).get("text", ""))))
 	var status := ""
 	var color := UiKit.TEXT_DIM
@@ -420,10 +420,10 @@ func _show_boon_details(boon: String) -> void:
 		status = "Locked: requires 5 total Prestige (you have %d)." % _prestige_total()
 		color = UiKit.WARN
 	elif _used_slots() + slots > 5:
-		status = "Not enough Boon slots: %d/5 used." % _used_slots()
+		status = Tr.t("Not enough Boon slots: %d/5 used." % _used_slots())
 		color = UiKit.WARN
 	else:
-		status = "Click to equip (%d/5 slots used)." % _used_slots()
+		status = Tr.t("Click to equip (%d/5 slots used)." % _used_slots())
 	var status_label := _text(status)
 	status_label.add_theme_color_override("font_color", color)
 	_boon_details.add_child(status_label)
@@ -450,7 +450,7 @@ func _select_boon(boon: String) -> void:
 	if not _boons.has(boon):
 		var slots := int(_meta.get("boons", {}).get(boon, {}).get("slots", 0))
 		if _used_slots() + slots > 5:
-			_app.toast("Not enough Boon slots: %d/5 used." % _used_slots())
+			_app.toast(Tr.t("Not enough Boon slots: %d/5 used." % _used_slots()))
 		else:
 			_boons.append(boon)
 			_send_loadout()

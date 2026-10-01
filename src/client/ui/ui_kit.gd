@@ -348,7 +348,7 @@ class DiamondBox extends StyleBox:
 ## This is the central routing point so para(), badge() and every caller share
 ## the same rule.
 static func pixel_label(text: String, style: String = "body", color: Color = Color(0, 0, 0, 0)) -> Label:
-	var node := label(text, style, color)
+	var node := label(Tr.t(text), style, color)
 	node.theme_type_variation = "Pixel" + style.capitalize() + "Label"
 	return node
 

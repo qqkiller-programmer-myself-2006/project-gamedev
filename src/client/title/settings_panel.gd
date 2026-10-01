@@ -25,7 +25,7 @@ func setup(app: ClientApp) -> void:
 
 	box.add_child(UiKit.label("Text size", "heading"))
 	var sizes := UiKit.hbox(8)
-	var names := ["Small", "Normal", "Large", "Extra large"]
+	var names := [Tr.t("Small"), Tr.t("Normal"), Tr.t("Large"), Tr.t("Extra large")]
 	var first_button: Button = null
 	for i in ClientSettings.TEXT_SCALES.size():
 		var scale: float = ClientSettings.TEXT_SCALES[i]

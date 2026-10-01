@@ -67,7 +67,7 @@ func tick(screen: MatchScreen, app: ClientApp) -> void:
 		return
 	var left := app.seconds_left(_deadline)
 	_bar.value = left
-	_countdown.text = "Vote closes in %ds%s" % [ceili(left), "  - hurry!" if left <= 5.0 else ""]
+	_countdown.text = Tr.t("Vote closes in %ds%s" % [ceili(left), "  - hurry!" if left <= 5.0 else ""])
 	if not _voted:
 		screen.warn_if_short(_deadline, left)
 
@@ -95,12 +95,12 @@ func _compact_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> C
 	var box := UiKit.hbox(8)
 	box.add_child(Icons.rect(str(TYPE_ICONS.get(str(option["type"]), "info")), Icons.size_for_scale(app.settings.text_scale)))
 	box.add_child(UiKit.badge(UiText.type_tag(option["type"]), UiKit.ACCENT))
-	var detail := "Other path: %s" % str(option["name"])
+	var detail := Tr.t("Other path: %s" % Tr.t(str(option["name"])))
 	if not ClientApp.is_story_view(screen.match_view()):
 		var voters: Array = option.get("voters", [])
 		var voter_names: Array[String] = []
 		for slot in voters: voter_names.append(_voter_name(screen, int(slot)))
-		detail += "  Votes: %d%s" % [voters.size(), " (%s)" % ", ".join(voter_names) if not voter_names.is_empty() else ""]
+		detail += Tr.t("  Votes: %d%s" % [voters.size(), " (%s)" % ", ".join(voter_names) if not voter_names.is_empty() else ""])
 	var title := UiKit.label(detail, "body")
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.tooltip_text = str(option.get("hint", ""))
@@ -132,7 +132,7 @@ func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full:
 	if full:
 		box.add_child(UiKit.para(hint_text))
 		var rewards := UiKit.flow(5)
-		for reward in [["exp", "EXP"], ["gold", "Gold"], ["items", "Items"]]:
+		for reward in [["exp", "EXP"], ["gold", Tr.t("Gold")], ["items", "Items"]]:
 			var chip := UiKit.hbox(3)
 			chip.add_child(Icons.rect(str(reward[0]), Icons.size_for_scale(app.settings.text_scale)))
 			chip.add_child(UiKit.label(str(reward[1]), "small"))
@@ -142,7 +142,7 @@ func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full:
 	if not solo:
 		var voters: Array = option.get("voters", [])
 		var tally := UiKit.flow(4)
-		tally.add_child(UiKit.label("Votes: %d" % voters.size(), "heading" if not voters.is_empty() else "dim"))
+		tally.add_child(UiKit.label(Tr.t("Votes: %d" % voters.size()), "heading" if not voters.is_empty() else "dim"))
 		for slot in voters:
 			tally.add_child(UiKit.badge(_voter_name(screen, int(slot)), UiKit.ALLY))
 		box.add_child(tally)
@@ -151,8 +151,8 @@ func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full:
 
 func _vote_button(screen: MatchScreen, app: ClientApp, option: Dictionary, mine: bool, solo: bool, kind: String) -> Button:
 	var index := int(option["index"])
-	var text := ("Chosen" if mine else "Choose path [%d]" % (index + 1)) if solo \
-		else ("Your vote" if mine else "Vote for this path [%d]" % (index + 1))
+	var text := ("Chosen" if mine else Tr.t("Choose path [%d]" % (index + 1))) if solo \
+		else ("Your vote" if mine else Tr.t("Vote for this path [%d]" % (index + 1)))
 	var button := UiKit.button(text, func() -> void: _vote(screen, app, index), false, "selected" if mine else kind)
 	UiKit.disable(button, _voted, UiText.WHY["voted"])
 	button.set_meta("focus_id", "vote_%d" % index)
@@ -182,7 +182,7 @@ func _ready_status(screen: MatchScreen, view: Dictionary, vote: Dictionary) -> C
 	var row := UiKit.hbox(8)
 	row.custom_minimum_size = Vector2(150, 0)
 	row.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	row.add_child(UiKit.label("%d of %d ready" % [mini(ready, human_count), human_count], "heading"))
+	row.add_child(UiKit.label(Tr.t("%d of %d ready" % [mini(ready, human_count), human_count]), "heading"))
 	var segments := UiKit.hbox(3)
 	for i in range(human_count):
 		var segment := ColorRect.new()
@@ -218,7 +218,7 @@ static func _voter_status(screen: MatchScreen, view: Dictionary, vote: Dictionar
 		var who := str(slots[slot]["owner_name"]) if slot < slots.size() else str(character["name"])
 		(voted if vote["voted_slots"].has(slot) else waiting).append(who)
 	var total := voted.size() + waiting.size()
-	var text := "Ready %d of %d." % [voted.size(), total]
+	var text := Tr.t("Ready %d of %d." % [voted.size(), total])
 	if not waiting.is_empty():
-		text += " Waiting: %s." % ", ".join(waiting)
+		text += Tr.t(" Waiting: %s." % ", ".join(waiting))
 	return text

@@ -103,6 +103,8 @@ func setup(data: Dictionary) -> void:
 	figure_height = 150.0 if side == "boss" else 110.0
 	if sprite_set != null and sprite_set.is_enemy:
 		figure_height = sprite_set.size_px() * 1.65
+	if bool(data.get("trainer", false)):
+		figure_height = maxf(figure_height, 92.0)
 	custom_minimum_size = Vector2(width, badge_height + figure_height + (plate_height if show_plate else 0.0))
 	size = custom_minimum_size
 	if side == "party":
@@ -127,11 +129,11 @@ func setup(data: Dictionary) -> void:
 
 	var plate_box := UiKit.vbox(1)
 	plate_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var who := str(data.get("name", unit_id))
+	var who := Tr.t(str(data.get("name", unit_id)))
 	if bool(data.get("you", false)):
-		who += " (you)"
+		who += " (%s)" % Tr.t("you")
 	elif str(data.get("controller", "")) == "ai":
-		who += " (AI)"
+		who += " (%s)" % Tr.t("AI")
 	var name_color := tint if side == "party" else (UiKit.ACCENT if bool(data.get("you", false)) else UiKit.TEXT)
 	var name_label := UiKit.pixel_label(who, "small", name_color)
 	name_label.add_theme_font_size_override("font_size", int(12 * (0.95 if side == "boss" else 1.0) * text_factor))

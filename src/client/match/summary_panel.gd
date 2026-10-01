@@ -38,7 +38,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 		stats.add_child(UiKit.label(row[1], "heading"))
 	add_child(UiKit.panel(stats, "CardPanel"))
 	for clue in summary.get("clues", []):
-		add_child(UiKit.para("- %s: %s" % [clue["title"], clue["text"]], "dim"))
+		add_child(UiKit.para("- %s: %s" % [Tr.t(str(clue["title"])), Tr.t(str(clue["text"]))], "dim"))
 
 
 static func _reached(summary: Dictionary, won: bool) -> String:

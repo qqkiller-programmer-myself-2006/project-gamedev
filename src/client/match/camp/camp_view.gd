@@ -16,7 +16,7 @@ var _last_countdown_color := Color.TRANSPARENT
 var _region: Label
 var _encounter_label: Label
 var _encounter_icon: TextureRect
-var _columns: HBoxContainer
+var _columns: Control
 var _bottom: HBoxContainer
 var _workspace: Control
 var _hide_button: Button
@@ -87,10 +87,11 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_workspace.offset_right = -24
 	_workspace.offset_top = 64
 	_workspace.offset_bottom = -66
-	(_workspace as ScrollContainer).horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	(_workspace as ScrollContainer).vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	var large_text := _app.settings.text_scale >= 1.4
+	(_workspace as ScrollContainer).horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED if large_text else ScrollContainer.SCROLL_MODE_AUTO
+	(_workspace as ScrollContainer).vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO if large_text else ScrollContainer.SCROLL_MODE_DISABLED
 	add_child(_workspace)
-	_columns = UiKit.hbox(10)
+	_columns = UiKit.vbox(10) if large_text else UiKit.hbox(10)
 	_columns.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_workspace.add_child(_columns)
 	_bottom = UiKit.hbox(12)
@@ -124,7 +125,7 @@ func build(view: Dictionary, encounter: Dictionary) -> void:
 	_encounter = encounter
 	var layer := str(view.get("layer", 1))
 	var viewport_width := get_viewport_rect().size.x if is_inside_tree() else 1280.0
-	_columns.custom_minimum_size.x = maxf(0.0, viewport_width - 48.0) * maxf(1.0, _app.settings.text_scale)
+	_columns.custom_minimum_size.x = maxf(0.0, viewport_width - 48.0)
 	if _inspect < 0: _inspect = maxi(0, _screen.your_slot())
 	# T34: build() tears down _columns/_bottom, so remember scroll positions
 	# and the focused control first and restore them after the rebuild.
@@ -134,7 +135,7 @@ func build(view: Dictionary, encounter: Dictionary) -> void:
 	_backdrop.set_backdrop(backdrop_name)
 	var merchant := str(encounter.get("kind", "")) == "merchant"
 	_encounter_icon.texture = Icons.texture("merchant") if merchant else Icons.texture("rest")
-	_encounter_label.text = "\"%s\"" % str(encounter.get("name", "Merchant" if merchant else "Rest")).replace("\"", "")
+	_encounter_label.text = "\"%s\"" % Tr.t(str(encounter.get("name", "Merchant" if merchant else "Rest")).replace("\"", ""))
 	_stock = encounter.get("stock", []) if merchant else []
 	_ready = bool(encounter.get("you_are_ready", false))
 	_deadline = encounter.get("deadline", encounter.get("ends_at"))
@@ -236,6 +237,17 @@ func _find_by_focus_id(node: Node, focus_id: String) -> Node:
 
 func _build_columns(view: Dictionary, merchant: bool) -> void:
 	UiKit.clear(_columns)
+	if _app.settings.text_scale >= 1.4:
+		# At large text sizes, use a vertical reading order so the Equipment
+		# column stays available without horizontal panning.
+		_columns.add_child(_column("Shop" if merchant else "Crafting", _left_panel(view, merchant), 1.0))
+		var selectors := UiKit.hbox(8)
+		selectors.add_child(_vertical_tabs(["Stash", "Shop" if merchant else "Craft"], true))
+		selectors.add_child(_vertical_tabs(["Inventory", "Abilities"], false, view))
+		_columns.add_child(selectors)
+		_columns.add_child(_column("Inventory", _inventory_panel(view), 1.0))
+		_columns.add_child(_column("Equipment", _equipment_panel(view, merchant), 1.0))
+		return
 	_columns.add_child(_column("Shop" if merchant else "Crafting", _left_panel(view, merchant), 0.28))
 	_columns.add_child(_vertical_tabs(["Stash", "Shop" if merchant else "Craft"], true))
 	_columns.add_child(_column("Inventory", _inventory_panel(view), 0.30))
@@ -443,14 +455,14 @@ func _recipe_row(recipe: Dictionary, index: int) -> Control:
 func _materials_text(recipe: Dictionary) -> String:
 	var materials: Array = recipe.get("materials", [])
 	if materials.is_empty():
-		return "No materials needed"
+		return Tr.t("No materials needed")
 	var parts: Array[String] = []
 	for material in materials:
 		var need := int(material.get("need", 0))
 		var have := int(material.get("have", 0))
-		parts.append("%d/%d %s %s" % [have, need, str(material.get("name", material.get("item", ""))),
-				"OK" if have >= need else "NEED"])
-	return "Mats: " + ", ".join(parts)
+		parts.append(Tr.t("%d/%d %s %s" % [have, need, Tr.t(str(material.get("name", material.get("item", "")))),
+				Tr.t("OK") if have >= need else Tr.t("NEED")]))
+	return Tr.t("Mats: %s" % ", ".join(parts))
 
 func _build_stash(view: Dictionary, body: VBoxContainer) -> void:
 	for entry in view.get("inventory", []):
@@ -611,8 +623,8 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	var attrs: Dictionary = character.get("attributes", {})
 	var derived: Dictionary = character.get("derived", {})
 	stats.add_child(_stat("HP", "%d/%d" % [int(character.get("hp", 0)), int(character.get("max_hp", 0))], "hp"))
-	stats.add_child(_stat("Energy", str(character.get("energy", 0)), "energy"))
-	stats.add_child(_stat("Level", str(int(character.get("level", 1))), "level"))
+	stats.add_child(_stat(Tr.t("Energy"), str(character.get("energy", 0)), "energy"))
+	stats.add_child(_stat(Tr.t("Level"), str(int(character.get("level", 1))), "level"))
 	stats.add_child(_stat("EXP", "%d/%d" % [int(character.get("exp", 0)), int(character.get("exp_next", 0))], "exp"))
 	var separator_one := Control.new()
 	separator_one.custom_minimum_size = Vector2(0, 8)
@@ -622,15 +634,15 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	var separator_two := Control.new()
 	separator_two.custom_minimum_size = Vector2(0, 8)
 	stats.add_child(separator_two)
-	stats.add_child(_stat("Initiative", str(int(derived["initiative"])) if derived.has("initiative") else "\u2014"))
-	stats.add_child(_stat("Crit Chance", _percent(derived.get("crit", character.get("crit"))), "crit"))
-	stats.add_child(_stat("Crit Damage", _percent(derived.get("crit_damage"))))
-	stats.add_child(_stat("Block Chance", _percent(derived.get("block"))))
-	stats.add_child(_stat("Block Damage Reduction", _percent(derived.get("block_reduction"))))
-	stats.add_child(_stat("Dodge Chance", _percent(derived.get("dodge")), "dodge"))
-	stats.add_child(_stat("Aggro", _percent(derived.get("aggro"))))
-	stats.add_child(_stat("Lifesteal", _percent(derived.get("lifesteal"))))
-	stats.add_child(_stat("Energy Regen", str(int(derived["energy_regen"])) if derived.has("energy_regen") else "\u2014"))
+	stats.add_child(_stat(Tr.t("Initiative"), str(int(derived["initiative"])) if derived.has("initiative") else "\u2014"))
+	stats.add_child(_stat(Tr.t("Crit Chance"), _percent(derived.get("crit", character.get("crit"))), "crit"))
+	stats.add_child(_stat(Tr.t("Crit Damage"), _percent(derived.get("crit_damage"))))
+	stats.add_child(_stat(Tr.t("Block Chance"), _percent(derived.get("block"))))
+	stats.add_child(_stat(Tr.t("Block Damage Reduction"), _percent(derived.get("block_reduction"))))
+	stats.add_child(_stat(Tr.t("Dodge Chance"), _percent(derived.get("dodge")), "dodge"))
+	stats.add_child(_stat(Tr.t("Aggro"), _percent(derived.get("aggro"))))
+	stats.add_child(_stat(Tr.t("Lifesteal"), _percent(derived.get("lifesteal"))))
+	stats.add_child(_stat(Tr.t("Energy Regen"), str(int(derived["energy_regen"])) if derived.has("energy_regen") else "\u2014"))
 	var stat_scroll := _scroll_body(stats)
 	var stat_panel := UiKit.panel(stat_scroll, "HudCard")
 	stat_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -770,8 +782,13 @@ func _move_inspect(delta: int, party: Array) -> void:
 	_screen.refresh(_app, true)
 
 func _slot_name(slot: String) -> String:
-	if slot.begins_with("charm"): return "Charm " + slot.trim_prefix("charm")
-	return slot.capitalize()
+	if slot.begins_with("charm"): return Tr.t("Charm") + " " + slot.trim_prefix("charm")
+	match slot:
+		"helmet": return Tr.t("Helmet")
+		"chest": return Tr.t("Chest")
+		"legs": return Tr.t("Legs")
+		"weapon": return Tr.t("Weapon")
+	return Tr.t(slot.capitalize())
 
 
 func _slot_icon(slot: String) -> String:

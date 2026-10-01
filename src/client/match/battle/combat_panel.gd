@@ -93,11 +93,10 @@ func _header(screen: MatchScreen, encounter: Dictionary) -> void:
 		var telegraph: Dictionary = boss.get("telegraph", {})
 		if not telegraph.is_empty():
 			var box := UiKit.vbox(4)
-			var target := "the whole Party" if telegraph["target"] == "all" else screen.name_of(str(telegraph["target"]))
-			box.add_child(UiKit.para("WARNING: %s next turn, aimed at %s!" % [telegraph["name"], target], "heading", UiKit.WARN))
+			var target := Tr.t("the whole Party") if telegraph["target"] == "all" else screen.name_of(str(telegraph["target"]))
+			box.add_child(UiKit.para(Tr.t("WARNING: %s next turn, aimed at %s!" % [Tr.t(str(telegraph["name"])), target]), "heading", UiKit.WARN))
 			box.add_child(UiKit.para(str(telegraph["text"])))
-			var advice := "Defend [D] to halve it"
-			advice += ", or raise Shield Wall." if telegraph["target"] == "all" else ", or have a Guardian Protect them."
+			var advice := Tr.t("Defend [D] to halve it, or raise Shield Wall.") if telegraph["target"] == "all" else Tr.t("Defend [D] to halve it, or have a Guardian Protect them.")
 			box.add_child(UiKit.para(advice, "dim"))
 			add_child(UiKit.panel(box, "HighlightPanel"))
 		screen.app.hint("boss")
