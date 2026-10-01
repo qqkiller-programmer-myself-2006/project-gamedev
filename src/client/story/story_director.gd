@@ -23,6 +23,14 @@ var restoring := false
 var text_scale := 1.0
 var reduced_motion := false
 
+
+func apply_settings(scale: float, reduced: bool) -> void:
+	text_scale = scale
+	reduced_motion = reduced
+	if is_instance_valid(current) and current.has_method("apply_settings"):
+		current.apply_settings(scale, reduced)
+
+
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string(STORY_PATH))
