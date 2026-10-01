@@ -64,7 +64,7 @@ func handle_key(screen: MatchScreen, app: ClientApp, key: int) -> bool:
 			if not choices.get("skills", {}).is_empty():
 				_set_mode(screen, "skills")
 			else:
-				app.toast(UiText.error("skill_unavailable"))
+				app.toast_error(UiText.error("skill_unavailable"))
 			return true
 		KEY_D:
 			_send(app, {"action": "defend"})
@@ -196,7 +196,7 @@ func _build_your_turn(screen: MatchScreen, app: ClientApp, view: Dictionary) -> 
 				button.set_meta("focus_id", "skill_" + skill_id)
 				list.add_child(button)
 				var reason := "not_enough_energy" if not affordable else "skill_on_cooldown"
-				_choices.append(pick if usable else func() -> void: app.toast(UiText.error(reason)))
+				_choices.append(pick if usable else func() -> void: app.toast_error(UiText.error(reason)))
 		"items":
 			list.add_child(UiKit.label("Use which Item?", "heading"))
 			for item_id in choices.get("items", {}):
@@ -209,14 +209,14 @@ func _build_your_turn(screen: MatchScreen, app: ClientApp, view: Dictionary) -> 
 				button.disabled = not usable
 				button.set_meta("focus_id", "item_" + item_id)
 				list.add_child(button)
-				_choices.append(pick if usable else func() -> void: app.toast(UiText.error("invalid_target")))
+				_choices.append(pick if usable else func() -> void: app.toast_error(UiText.error("invalid_target")))
 		_:
 			var parts := mode.split(":")
 			var info: Dictionary = choices.get("skills" if parts[0] == "skill" else "items", {}).get(parts[1], {})
 			list.add_child(UiKit.label("Target for %s?" % parts[1].replace("_", " ").capitalize(), "heading"))
 			var cmd := {"action": parts[0], parts[0]: parts[1]}
 			_target_buttons(screen, app, list, info.get("targets", []), cmd)
-	list.add_child(UiKit.button("Back [Esc]", func() -> void: _set_mode(screen, "")))
+	list.add_child(UiKit.button("Back [Esc]", func() -> void: _set_mode(screen, ""), false, "secondary", "cancel"))
 	add_child(list)
 
 
