@@ -12,17 +12,16 @@ extends Control
 ## Keys: A Attack, S Skill, D Defend, I Item, 1-9 pick a card or target,
 ## Esc back. Tokens and cards are buttons, so Tab/arrows + Enter work too.
 
-const CONTENT_PATH := "res://content/forest.json"
-static var _content_cache: Dictionary = {}
-static var _content_loaded := false
-
 ## Where one-time tips appear while the battle is on screen.
 var tips: VBoxContainer
 
 var _screen: MatchScreen
 var _app: ClientApp
 var _combat: Dictionary = {}
-var _latest_view: Dictionary = {}
+var _view: Dictionary = {}
+var _content: Dictionary = {}
+static var _forest_content: Dictionary = {}
+static var forest_parse_count := 0
 var _me := ""
 var _deadline: Variant = null
 var _countdown: Label
@@ -46,7 +45,7 @@ var _region_sub: Label
 var _header: VBoxContainer
 var _bottom: VBoxContainer
 var _rewards: VBoxContainer
-var _log: Label
+var _log: RichTextLabel
 var _log_lines: Array[String] = []
 var _center_text: Label
 var _turn_notice: Label
@@ -61,6 +60,7 @@ var _target_caption: Control
 func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_screen = screen
 	_app = app
+	_content = _load_forest_content()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	_backdrop = BattleBackdrop.new()
@@ -74,8 +74,8 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 
 	var left := UiKit.vbox(4)
 	left.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	left.offset_top = 52
-	left.offset_bottom = -170
+	left.offset_top = 70
+	left.offset_bottom = -160
 	# Keep the timeline title and first row clear of the two top-left controls.
 	left.offset_left = 104
 	left.custom_minimum_size = Vector2(150, 0)
@@ -156,26 +156,29 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_turn_notice.visible = false
 	add_child(_turn_notice)
 
+	# Keep the log below the hero lane and clear of the centered action HUD.
 	var bottom_left := UiKit.vbox(2)
 	bottom_left.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	bottom_left.grow_horizontal = Control.GROW_DIRECTION_END
 	bottom_left.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	bottom_left.offset_left = 14
-	bottom_left.offset_bottom = -10
+	bottom_left.offset_bottom = -8
 	bottom_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_log = UiKit.pixel_label("", "small", UiKit.TEXT_DIM)
-	_log.custom_minimum_size = Vector2(180, 0)
+	_log = RichTextLabel.new()
+	_log.bbcode_enabled = false
+	_log.scroll_following = true
+	var log_width := maxf(110.0, 245.0 - 300.0 * (_app.settings.text_scale - 1.0))
+	_log.custom_minimum_size = Vector2(log_width, 102)
+	_log.scroll_active = false
+	_log.fit_content = false
 	_log.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_log.max_lines_visible = 4
-	_log.add_theme_color_override("font_outline_color", Color.BLACK)
-	_log.add_theme_constant_override("outline_size", 3)
+	_log.focus_mode = Control.FOCUS_NONE
+	_log.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_log.add_theme_color_override("default_color", UiKit.TEXT_DIM)
+	var log_panel := UiKit.panel(_log, "HudPanel")
+	log_panel.custom_minimum_size = Vector2(log_width, 110)
 	_rewards = UiKit.vbox(0)
 	bottom_left.add_child(_rewards)
-	var log_panel := UiKit.panel(_log, "HudPanel")
-	log_panel.custom_minimum_size = Vector2(180, 0)
-	log_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bottom_left.add_child(log_panel)
 	add_child(bottom_left)
 
 	_bottom = UiKit.vbox(6)
@@ -191,8 +194,8 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_banner.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_banner.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_banner.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_banner.offset_top = -280
-	_banner.offset_bottom = -210
+	_banner.offset_top = -610
+	_banner.offset_bottom = -535
 	_banner.resized.connect(func() -> void: _banner.pivot_offset = _banner.size * 0.5)
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_banner_label = UiKit.pixel_label("", "title")
@@ -205,12 +208,22 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 ## Rebuilds everything that depends on the snapshot.
 func _backdrop_name(view: Dictionary, encounter: Dictionary) -> String:
 	if str(encounter.get("kind", "")) == "boss":
-		return str(encounter.get("backdrop", _content().get("boss", {}).get("backdrop", "")))
-	return str(_content().get("journey", {}).get("backdrops", {}).get(str(view.get("layer", 1)), ""))
+		return str(encounter.get("backdrop", _content.get("boss", {}).get("backdrop", "")))
+	return str(_content.get("journey", {}).get("backdrops", {}).get(str(view.get("layer", 1)), ""))
+
+static func _load_forest_content() -> Dictionary:
+	if _forest_content.is_empty():
+		var content_file := FileAccess.open("res://content/forest.json", FileAccess.READ)
+		if content_file != null:
+			var parsed = JSON.parse_string(content_file.get_as_text())
+			if parsed is Dictionary:
+				_forest_content = parsed
+				forest_parse_count += 1
+	return _forest_content
 
 
 func build(view: Dictionary, combat: Dictionary) -> void:
-	_latest_view = view
+	_view = view
 	_combat = combat
 	var encounter: Dictionary = view.get("encounter", {}) if view.get("encounter") is Dictionary else {}
 	_backdrop.set_backdrop(_backdrop_name(view, encounter))
@@ -232,14 +245,24 @@ func build(view: Dictionary, combat: Dictionary) -> void:
 	tick()
 
 
-static func _content() -> Dictionary:
-	if not _content_loaded:
-		_content_loaded = true
-		var content_file := FileAccess.open(CONTENT_PATH, FileAccess.READ)
-		var parsed = JSON.parse_string(content_file.get_as_text()) if content_file != null else {}
-		_content_cache = parsed if parsed is Dictionary else {}
-	return _content_cache
-
+func refresh_action_panel() -> void:
+	_choices.clear()
+	for token_value in _tokens.values():
+		var token := token_value as BattleToken
+		token.set_target(0, Callable())
+	var targets := _current_targets()
+	for i in targets.size():
+		var target := str(targets[i])
+		var token := _tokens.get(target) as BattleToken
+		if token == null:
+			continue
+		var command := _target_command(target)
+		var pick := func() -> void: _send(command)
+		token.set_target(i + 1, pick)
+		_choices.append(pick)
+	_build_bottom(_view)
+	if not targets.is_empty():
+		focus_default()
 
 func tick() -> void:
 	if _countdown == null or not is_instance_valid(_countdown):
@@ -253,10 +276,9 @@ func tick() -> void:
 		return
 	var left := _app.seconds_left(_deadline)
 	_countdown.text = "%ds" % ceili(left)
-	var countdown_color := UiKit.WARN if left <= 5.0 else UiKit.TEXT
-	if countdown_color != _last_countdown_color:
-		_countdown.add_theme_color_override("font_color", countdown_color)
-		_last_countdown_color = countdown_color
+	var next_color := UiKit.WARN if left <= 5.0 else UiKit.TEXT
+	if _countdown.get_theme_color("font_color") != next_color:
+		_countdown.add_theme_color_override("font_color", next_color)
 	if _combat.get("your_turn", false):
 		_screen.warn_if_short(_deadline, left)
 
@@ -334,6 +356,8 @@ func announce(text: String) -> void:
 			_banner_tween.tween_property(_banner, "modulate:a", 0.0, 0.3)
 		_banner_tween.tween_callback(func() -> void:
 			_banner.visible = false
+			if _combat_grid != null and is_instance_valid(_combat_grid):
+				_combat_grid.visible = true
 		)
 
 
@@ -349,7 +373,9 @@ func add_log(line: String) -> void:
 	_log_lines.append(line)
 	while _log_lines.size() > 4:
 		_log_lines.pop_front()
-	_log.text = "\n".join(_log_lines)
+	_log.clear()
+	_log.append_text("\n".join(_log_lines))
+	_log.scroll_to_line(_log.get_line_count())
 
 ## Apply a server event to the existing token animations. The server event is
 ## the source of truth; this method never infers an action from local input.
@@ -420,7 +446,7 @@ func _build_header(view: Dictionary) -> void:
 	if encounter.get("kind") == "boss":
 		var boss: Dictionary = encounter["boss"]
 		var head := UiKit.vbox(2)
-		var boss_title := UiKit.pixel_label("%s, %s" % [boss["name"], boss["title"]], "small", UiKit.ENEMY)
+		var boss_title := UiKit.pixel_label("%s, %s" % [UiText.region_text(str(boss["name"]), view), UiText.region_text(str(boss["title"]), view)], "small", UiKit.ENEMY)
 		head.add_child(_centered(boss_title))
 		head.add_child(_centered(UiKit.pixel_label("Phase %d/%d: %s" % [int(boss["phase"]), int(boss["phases_total"]),
 				boss["phase_name"]], "small", UiKit.WARN)))
@@ -486,6 +512,7 @@ func _build_timeline(view: Dictionary) -> void:
 			if not weakness.is_empty():
 				var weak_label := UiKit.pixel_label("Weak: " + ", ".join(weakness), "tiny", UiKit.WARN)
 				weak_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				weak_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				entry.add_child(weak_label)
 		var card := UiKit.panel(entry, "HudHighlightPanel" if is_actor else "HudPanel")
 		card.set_meta("actor_id", str(id))
@@ -549,7 +576,7 @@ func _build_stage(view: Dictionary) -> void:
 						int(character["mag"]), int(character["res"]), int(character["spd"])],
 			}
 			var px: float = [300.0, 460.0, 620.0][slot] if slot < 3 else [380.0, 540.0][slot - 3]
-			var py: float = 220.0 if slot < 3 else 390.0
+			var py: float = (205.0 if slot < 3 else 265.0) if _screen.combat_mode in ["skills", "items"] else (300.0 if slot < 3 else 480.0)
 			_spots[id] = [px / 1280.0, py / 720.0]
 			_add_token(data)
 	var enemies: Array = _combat.get("enemies", [])
@@ -577,7 +604,7 @@ func _build_stage(view: Dictionary) -> void:
 			if not enemy.has("energy"):
 				data.erase("energy")
 			var ex := 960.0 if boss else float(group[1][i])
-			var ey := 440.0 if boss else float(group[2])
+			var ey := (255.0 if _screen.combat_mode in ["skills", "items"] else 440.0) if boss else (265.0 if _screen.combat_mode in ["skills", "items"] and float(group[2]) > 400.0 else (205.0 if _screen.combat_mode in ["skills", "items"] else float(group[2])))
 			_spots[id] = [ex / 1280.0, ey / 720.0]
 			_add_token(data)
 	var targets := _current_targets()
@@ -589,6 +616,12 @@ func _build_stage(view: Dictionary) -> void:
 		var pick := func() -> void: _send(cmd)
 		token.set_target(i + 1, pick)
 		_choices.append(pick)
+	for id in _tokens.keys():
+		if not _spots.has(id):
+			var stale: BattleToken = _tokens[id]
+			_stage.remove_child(stale)
+			stale.queue_free()
+			_tokens.erase(id)
 	_place_tokens()
 	var active_ids: Array[String] = []
 	for id in _spots:
@@ -602,14 +635,16 @@ func _build_stage(view: Dictionary) -> void:
 
 
 func _add_token(data: Dictionary) -> void:
-	var token: BattleToken = _tokens.get(data["id"])
-	if token == null:
+	var id := str(data["id"])
+	var token: BattleToken = _tokens.get(id)
+	if token == null or not is_instance_valid(token):
 		token = BattleToken.new()
 		token.text_scale = _app.settings.text_scale
+		token.setup(data)
 		_stage.add_child(token)
-	token.setup(data)
-	_stage.move_child(token, _stage.get_child_count() - 1)
-	_tokens[data["id"]] = token
+		_tokens[id] = token
+	else:
+		token.update_data(data)
 	_screen.anchors[data["id"]] = token
 
 
@@ -637,11 +672,11 @@ func _build_bottom(view: Dictionary) -> void:
 		_combat_grid = _card_grid(mode, choices)
 		_combat_grid.set_anchors_preset(Control.PRESET_CENTER_TOP)
 		_combat_grid.grow_horizontal = Control.GROW_DIRECTION_BOTH
-		_combat_grid.offset_left = -480
-		_combat_grid.offset_right = 480
-		_combat_grid.offset_top = 460
-		_combat_grid.custom_minimum_size = Vector2(960, 0)
-		_combat_grid.visible = true
+		_combat_grid.offset_left = -295
+		_combat_grid.offset_right = 435
+		_combat_grid.offset_top = 410
+		_combat_grid.custom_minimum_size = Vector2(730, 0)
+		_combat_grid.visible = not _banner.visible
 		_combat_grid.z_index = 5
 		add_child(_combat_grid)
 	if _target_caption != null and is_instance_valid(_target_caption):
@@ -719,8 +754,9 @@ func _build_bottom(view: Dictionary) -> void:
 	if your_turn and not choices.get("skills", {}).is_empty():
 		var squares := UiKit.hbox(4)
 		squares.size_flags_vertical = Control.SIZE_SHRINK_END
-		var hourglass := UiKit.panel(UiKit.pixel_label("TIME", "tiny", UiKit.TEXT_DIM), "HudPanel")
-		hourglass.custom_minimum_size = Vector2(38, 42)
+		var text_scale: float = _app.settings.text_scale
+		var hourglass := UiKit.panel(UiKit.pixel_label(Tr.t("Turn"), "small", UiKit.TEXT_DIM), "HudPanel")
+		hourglass.custom_minimum_size = Vector2(56 * text_scale, 42 * text_scale)
 		hourglass.tooltip_text = UiText.LABELS["action_window"]
 		squares.add_child(hourglass)
 		for skill_id in choices["skills"]:
@@ -733,7 +769,7 @@ func _build_bottom(view: Dictionary) -> void:
 			skill_name.max_lines_visible = 2
 			mark.add_child(skill_name)
 			var affordable := bool(info_skill.get("affordable", true))
-			var state := "READY"
+			var state := Tr.t("Ready")
 			var state_color := UiKit.GOOD
 			if left > 0:
 				state = str(left)
@@ -745,8 +781,8 @@ func _build_bottom(view: Dictionary) -> void:
 			count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			mark.add_child(count)
 			var square := UiKit.panel(mark, "HudPanel")
-			square.custom_minimum_size = Vector2(58, 50)
-			var why := "ready"
+			square.custom_minimum_size = Vector2(38 * text_scale, 42 * text_scale)
+			var why := "Ready to use"
 			if left > 0:
 				why = "%d turn(s) of cooldown left" % left
 			elif not affordable:
@@ -771,7 +807,7 @@ func _refresh_local_mode() -> void:
 		var pick := func() -> void: _send(command)
 		token.set_target(i + 1, pick)
 		_choices.append(pick)
-	_build_bottom(_latest_view)
+	_build_bottom(_view)
 	UiKit.focus_first(_bottom)
 
 
@@ -878,7 +914,7 @@ func _build_result() -> void:
 			var rewards: Dictionary = _combat.get("rewards", {})
 			if not _combat.get("trial", false) and not rewards.is_empty():
 				for item in rewards.get("items", {}):
-					_rewards.add_child(_reward_line("%s%s" % [item.replace("_", " ").capitalize(),
+					_rewards.add_child(_reward_line("%s%s" % [UiText.item_name(str(item)),
 							" x%d" % int(rewards["items"][item]) if int(rewards["items"][item]) > 1 else ""], UiKit.TEXT))
 				_rewards.add_child(_reward_line("+%d Gold" % int(rewards.get("gold", 0)), UiKit.ACCENT))
 				_rewards.add_child(_reward_line("%d EXP" % int(rewards.get("exp", 0)), UiKit.TEXT))
@@ -972,8 +1008,12 @@ func _pick_item(item_id: String, info: Dictionary) -> void:
 
 
 func _set_mode(mode: String) -> void:
+	if not mode.is_empty() and _banner.visible:
+		if _banner_tween != null:
+			_banner_tween.kill()
+		_banner.visible = false
 	_screen.combat_mode = mode
-	_refresh_local_mode()
+	refresh_action_panel()
 
 
 func _send(cmd: Dictionary) -> void:
@@ -990,7 +1030,7 @@ func _item_description(item_id: String) -> String:
 
 
 static func item_display_name(item_id: String) -> String:
-	var item: Dictionary = _content().get("items", {}).get(item_id, {})
+	var item: Dictionary = _load_forest_content().get("items", {}).get(item_id, {})
 	return str(item.get("name", item_id.replace("_", " ").capitalize()))
 
 

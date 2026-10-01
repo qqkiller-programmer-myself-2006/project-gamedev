@@ -35,10 +35,7 @@ func test_party_view_carries_crit_for_the_camp_stat_sheet() -> void:
 
 func test_battle_backdrop_uses_cached_content_by_layer_and_boss() -> void:
 	var battle := BattleView.new()
-	BattleView._content_cache = {"journey": {"backdrops": {"5": "cave"}}, "boss": {"backdrop": "guardian"}}
-	BattleView._content_loaded = true
+	battle._content = {"journey": {"backdrops": {"5": "cave"}}, "boss": {"backdrop": "guardian"}}
 	assert_eq(battle._backdrop_name({"layer": 5}, {}), "cave")
 	assert_eq(battle._backdrop_name({"layer": 1}, {"kind": "boss"}), "guardian")
-	BattleView._content_cache = {}
-	BattleView._content_loaded = false
 	battle.free()

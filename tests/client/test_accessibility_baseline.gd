@@ -235,6 +235,34 @@ func test_battle_timeline_starts_clear_of_corner_controls() -> void:
 	battle._combat = {"round": 2, "round_order": [], "turn_order": []}
 	battle._build_timeline({})
 	assert_eq(battle._timeline_title.text, "Turn 2", "the timeline title stays outside the scrolling cards")
+
+func test_primary_battle_actions_are_keyboard_focusable() -> void:
+	var battle := _battle()
+	var view := {
+		"layer": 1, "layers_total": 5, "gold": 0, "story": false,
+		"phase": "combat",
+		"encounter": {"kind": "combat", "name": "Wolves"},
+		"party": [{
+			"slot": 0, "name": "Alice", "class": "classless", "class_name": "Classless",
+			"level": 1, "hp": 10, "max_hp": 10, "atk": 3, "def": 1, "mag": 1, "res": 1,
+			"spd": 10, "exp": 0, "exp_next": 20, "controller": "human",
+		}],
+	}
+	var combat := {
+		"actor": "p0", "round": 1, "your_turn": true, "deadline": -1,
+		"round_order": ["p0", "e0"], "turn_order": ["p0", "e0"],
+		"choices": {"focus": true, "skills": {"slash": {"name": "Slash", "energy": 1,
+			"cooldown": 0, "affordable": true, "targets": ["e0"]}}, "items": {"potion": {}}},
+		"enemies": [{"id": "e0", "name": "Grey Wolf", "kind": "grey_wolf", "row": "front",
+			"hp": 12, "max_hp": 12, "spd": 13}],
+	}
+	battle.build(view, combat)
+	var found := {}
+	for button in _buttons(battle):
+		found[str(button.get_meta("focus_id", ""))] = button.focus_mode
+	assert_eq(found.get("action_fight", Control.FOCUS_NONE), Control.FOCUS_ALL, "Fight is keyboard focusable")
+	assert_eq(found.get("action_items", Control.FOCUS_NONE), Control.FOCUS_ALL, "Items is keyboard focusable")
+	assert_eq(found.get("action_focus", Control.FOCUS_NONE), Control.FOCUS_ALL, "Focus is keyboard focusable")
 	var screen: MatchScreen = battle._screen
 	var app: ClientApp = battle._app
 	battle.free()
@@ -248,6 +276,35 @@ func test_summary_keeps_one_outcome_heading_and_hides_timeline() -> void:
 	battle._build_result()
 	assert_eq(battle._center_text.text, "Victory!", "summary has one victory heading")
 	assert_false(battle._timeline.visible, "turn order is hidden in summary")
+
+func test_merchant_and_rest_primary_actions_are_keyboard_focusable() -> void:
+	_make_camp()
+	_camp.build(_view(), _merchant())
+	var merchant_ids := {}
+	for button in _buttons(_camp):
+		merchant_ids[str(button.get_meta("focus_id", ""))] = button.focus_mode
+	assert_eq(merchant_ids.get("buy_bread", Control.FOCUS_NONE), Control.FOCUS_ALL, "Buy is keyboard focusable")
+	assert_eq(merchant_ids.get("ready", Control.FOCUS_NONE), Control.FOCUS_ALL, "Merchant Ready is keyboard focusable")
+	var rest := {
+		"kind": "rest", "name": "Camp", "you_are_ready": false, "ready": [], "humans": 1,
+		"recipes": [{"recipe": "patch", "name": "Patch Up", "category": "Care", "craftable": true,
+			"materials": []}],
+	}
+	_app.settings.text_scale = 1.4
+	_camp.build(_view(), rest)
+	var rest_ids := {}
+	for button in _buttons(_camp):
+		rest_ids[str(button.get_meta("focus_id", ""))] = button.focus_mode
+	assert_eq(rest_ids.get("craft_patch", Control.FOCUS_NONE), Control.FOCUS_ALL, "Craft is keyboard focusable")
+	assert_eq(rest_ids.get("ready", Control.FOCUS_NONE), Control.FOCUS_ALL, "Rest Ready is keyboard focusable")
+
+
+func test_reduced_motion_keeps_action_announcement_visible() -> void:
+	var battle := _battle()
+	battle._app.settings.reduced_motion = true
+	battle.announce("Alice attacks Grey Wolf")
+	assert_true(battle._banner.visible, "reduced motion leaves the action banner visible")
+	assert_eq(battle._banner_label.text, "Alice attacks Grey Wolf", "the action result stays readable")
 	var screen: MatchScreen = battle._screen
 	var app: ClientApp = battle._app
 	battle.free()
@@ -261,15 +318,12 @@ func test_reduced_motion_applies_hp_change_without_a_tween() -> void:
 		"hp": 20, "max_hp": 30, "energy": 3, "energy_max": 6, "statuses": [], "reduced_motion": true}
 	token.setup(data)
 	data["hp"] = 10
-	token.setup(data)
-	var bars := token.find_children("*", "ProgressBar", true, false)
-	assert_eq((bars[0] as ProgressBar).value, 20.0, "reduced motion keeps the old bar until hit feedback completes")
-	token.animate_bars()
-	assert_eq((bars[0] as ProgressBar).value, 10.0, "reduced motion applies the hit without a tween")
+	token.update_data(data)
+	assert_eq(token._hp_bar.value, 10.0, "reduced motion applies the HP update immediately without a tween")
 	token.free()
 
 
-func test_combat_ended_does_not_skip_the_final_hit_bar_sequence() -> void:
+func test_combat_ended_keeps_final_reduced_motion_hit_bars() -> void:
 	var battle := _battle()
 	var screen: MatchScreen = battle._screen
 	var app: ClientApp = battle._app
@@ -279,15 +333,15 @@ func test_combat_ended_does_not_skip_the_final_hit_bar_sequence() -> void:
 	screen.add_child(screen._log)
 	var token := BattleToken.new()
 	var data := {"id": "p0", "side": "party", "name": "Alice", "kind": "classless",
-		"hp": 20, "max_hp": 30, "energy": 3, "energy_max": 6, "statuses": []}
+		"hp": 20, "max_hp": 30, "energy": 3, "energy_max": 6, "statuses": [], "reduced_motion": true}
 	token.setup(data)
 	data["hp"] = 10
 	data["energy"] = 2
-	token.setup(data)
+	token.update_data(data)
 	battle._tokens["p0"] = token
 	screen.show_events(app, [{"type": "combat_ended", "result": "victory", "rewards": {}}])
-	assert_eq(token._pending_bar_targets, [10.0, 2.0],
-			"combat_ended leaves the final HP/Energy update pending for hit feedback")
+	assert_eq([token._hp_bar.value, token._energy_bar.value], [10.0, 2.0],
+			"combat_ended keeps the final HP/Energy snapshot visible")
 	token.free()
 	battle.free()
 	screen.free()

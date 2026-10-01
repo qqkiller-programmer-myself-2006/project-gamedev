@@ -65,7 +65,7 @@ func _ready() -> void:
 	offset_bottom = -14.0
 	if not reduced_motion:
 		modulate.a = 0.0
-		create_tween().tween_property(self, "modulate:a", 1.0, 0.18)
+		create_tween().tween_property(self, "modulate:a", 1.0, 0.22)
 
 func _draw() -> void:
 	draw_style_box(_box, Rect2(Vector2.ZERO, size))

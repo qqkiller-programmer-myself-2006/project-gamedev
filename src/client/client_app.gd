@@ -315,11 +315,14 @@ func _on_update(events: Array, snap: Dictionary) -> void:
 				story_save.clear()
 	_publish_for_web(snap)
 	var wanted := _screen_for(snap)
+	var events_before_refresh := wanted == _current_name and _current != null and _current.has_method("show_events")
+	if events_before_refresh and not events.is_empty():
+		_current.show_events(self, events)
 	if wanted != _current_name:
 		_show_screen(wanted)
 	if _current != null and _current.has_method("refresh"):
 		_current.refresh(self)
-	if _current != null and _current.has_method("show_events") and not events.is_empty():
+	if not events_before_refresh and _current != null and _current.has_method("show_events") and not events.is_empty():
 		_current.show_events(self, events)
 	for event in events:
 		if str(event.get("type", "")) == "profile_save_failed":
@@ -400,11 +403,12 @@ func _show_screen(screen: String) -> void:
 # --- Feedback -----------------------------------------------------------------
 
 func toast(message: String, seconds: float = 4.0) -> void:
+	if _current is LobbyScreen:
+		_toast.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, 12)
+	else:
+		_toast.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 16)
 	_toast_label.text = Tr.t(message)
 	_toast_until = _local_now() + seconds
-	var top_offset := 118.0 if _current_name == "lobby" else 12.0
-	_toast.offset_top = top_offset
-	_toast.offset_bottom = top_offset
 	_toast.visible = true
 
 
@@ -549,8 +553,16 @@ func open_settings() -> void:
 ## the text's %s / %d).
 func confirm(key: String, on_confirm: Callable, args: Array = []) -> void:
 	var texts: Array = UiText.CONFIRM[key]
+	var title := Tr.t(str(texts[0]))
 	var body := Tr.t(str(texts[1]))
-	confirm_custom(str(texts[0]), body % args if not args.is_empty() else body, str(texts[2]), on_confirm)
+	if key == "buy_item" and args.size() >= 2:
+		title = title % str(args[0])
+		body = body % int(args[1])
+	elif not args.is_empty():
+		if title.contains("%"):
+			title = title % args[0]
+		body = body % args
+	confirm_custom(title, body, Tr.t(str(texts[2])), on_confirm)
 
 
 func confirm_custom(title: String, text: String, confirm_label: String, on_confirm: Callable) -> void:
@@ -641,14 +653,11 @@ func _exit_tree() -> void:
 
 
 func _build_toast() -> void:
-	# Toasts always appear at the top centre, on every screen.
+	# Keep lobby notices in the unused top-right corner, away from the room-code
+	# row and action buttons. Other screens use the bottom-right safe area.
 	_toast_label = UiKit.label("")
 	_toast = UiKit.panel(_toast_label, "ToastPanel")
-	_toast.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	_toast.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_toast.grow_vertical = Control.GROW_DIRECTION_END
-	_toast.offset_top = 12
-	_toast.offset_bottom = 12
+	_toast.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 16)
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_toast.visible = false
 	add_child(_toast)

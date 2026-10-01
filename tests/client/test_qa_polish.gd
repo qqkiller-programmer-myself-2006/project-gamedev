@@ -20,6 +20,96 @@ func test_region_of_reads_boss_from_the_snapshot() -> void:
 	assert_eq(UiText.region_of({"layer": 5, "phase": "boss"}), "Cave")
 	assert_eq(UiText.region_of({"layer": 2, "phase": "combat"}), "Forest")
 	assert_eq(UiText.region_of({"layer": 5, "phase": "combat"}), "Cave")
+	assert_eq(UiText.region_text("Guardian of the Forest", {"layer": 5, "phase": "boss"}), "Guardian of the Cave")
+	assert_eq(UiText.region_text("The Forest waits", {"layer": 2, "phase": "combat"}), "The Forest waits")
+
+
+func test_item_ids_use_content_names_in_client_text() -> void:
+	assert_eq(UiText.item_name("herb"), "Healing Herb")
+	assert_eq(UiText.item_name("forest_tonic"), "Forest Tonic")
+	assert_eq(UiText.item_name("unknown_item"), "Unknown Item", "unknown ids keep a readable fallback")
+
+
+func test_battle_encounter_caption_has_no_placeholder_target_text() -> void:
+	var battle := BattleView.new()
+	battle._region = Label.new()
+	battle._region_sub = Label.new()
+	battle._combat = {}
+	battle._build_region({"phase": "combat", "layer": 1, "layers_total": 5,
+		"encounter": {"kind": "combat", "name": "Wolf Trail"}})
+	assert_eq(battle._region_sub.text, "\"Wolf Trail\"")
+	assert_false(battle._region_sub.text.contains("All"), "placeholder target text is removed")
+	battle.free()
+
+
+func test_camp_uses_the_content_backdrop_for_each_region() -> void:
+	var content := ForestContent.load_default().data
+	assert_eq(CampView.backdrop_for_layer(content, 1), "forest")
+	assert_eq(CampView.backdrop_for_layer(content, 5), "cave")
+
+
+func test_floating_damage_numbers_queue_without_overlap() -> void:
+	var screen := MatchScreen.new()
+	var first := screen._queue_float_start("e0", 1000)
+	var second := screen._queue_float_start("e0", 1000)
+	assert_eq(first, 1000, "the first floating number starts immediately")
+	assert_eq(second, 1720, "the next number for the same card waits for the first")
+	screen.free()
+
+
+func test_hp_bars_share_battle_color_and_room_for_large_text() -> void:
+	var bar := UiKit.hp_bar(10, 20)
+	var fill := bar.get_theme_stylebox("fill") as StyleBoxFlat
+	assert_eq(fill.bg_color, UiKit.BAR_HP, "party and battle HP fills use one color")
+	assert_eq(bar.custom_minimum_size.y, 30.0, "large HP digits fit inside the bar")
+	bar.free()
+
+
+func test_defeated_tokens_keep_their_down_state_after_a_hit() -> void:
+	var token := BattleToken.new()
+	token.setup({"id": "e0", "side": "enemy", "name": "Wolf", "kind": "grey_wolf", "hp": 8, "max_hp": 20})
+	token.play_animation("dead")
+	assert_true(token.down, "death state is applied even when there is no sprite animation")
+	assert_eq(token.modulate, Color(0.55, 0.55, 0.55, 0.85), "the defeated token remains dim")
+	token.free()
+
+
+func test_merchant_buy_confirmation_exists() -> void:
+	assert_true(UiText.CONFIRM.has("buy_item"), "merchant purchases have a confirmation template")
+	assert_true(UiText.CONFIRM["buy_item"][0].contains("%s"))
+	assert_true(UiText.CONFIRM["buy_item"][1].contains("%d"))
+	var app := ClientApp.new()
+	app.settings = ClientSettings.new()
+	app.settings.seen_hints.append("merchant")
+	app._overlay_holder = Control.new()
+	app.add_child(app._overlay_holder)
+	app.snapshot = {"room": {"your_slot": 0, "slots": []}}
+	var screen := MatchScreen.new()
+	screen.app = app
+	var merchant := MerchantPanel.new()
+	merchant.build(screen, app, {"gold": 50, "encounter": {
+		"name": "The Shop", "greeting": "Welcome.", "deadline": -1.0, "you_are_ready": false,
+		"ready": [], "stock": [{"item": "herb", "name": "Healing Herb", "price": 10,
+			"remaining": 2, "affordable": true, "description": "Restores HP."}]}})
+	assert_true(merchant.handle_key(screen, app, KEY_1), "the shortcut is handled")
+	assert_true(app._overlay_holder.get_child(0) is ConfirmDialog, "the shortcut opens a confirmation before buying")
+	var dialog := app._overlay_holder.get_child(0) as ConfirmDialog
+	assert_true(_node_has_text(dialog, "Buy Healing Herb?"), "the dialog names the item")
+	assert_true(_node_has_text(dialog, "Spend 10 Gold"), "the dialog states the price")
+	merchant.free()
+	screen.free()
+	app.free()
+
+
+func _node_has_text(node: Node, wanted: String) -> bool:
+	if node is Label and str(node.text).contains(wanted):
+		return true
+	if node is Button and str(node.text).contains(wanted):
+		return true
+	for child in node.get_children():
+		if _node_has_text(child, wanted):
+			return true
+	return false
 
 
 func test_every_class_has_a_capitalised_display_name() -> void:
@@ -41,20 +131,18 @@ func test_nameplates_stay_inside_their_slot_at_every_text_size() -> void:
 		token.free()
 
 
-func test_battle_token_updates_keep_node_and_defer_hp_bar_change() -> void:
+func test_battle_token_updates_keep_node_and_apply_reduced_motion_bars() -> void:
 	var token := BattleToken.new()
 	var data := {"id": "p0", "side": "party", "name": "Arin", "kind": "swordsman", "hp": 20,
-		"max_hp": 30, "energy": 3, "energy_max": 6, "statuses": []}
+		"max_hp": 30, "energy": 3, "energy_max": 6, "statuses": [], "reduced_motion": true}
 	token.setup(data)
 	var instance_id := token.get_instance_id()
 	data["hp"] = 10
 	data["energy"] = 2
-	token.setup(data)
+	token.update_data(data)
 	assert_eq(token.get_instance_id(), instance_id, "snapshot updates retain the existing stage token")
-	var bars := token.find_children("*", "ProgressBar", true, false)
-	assert_eq((bars[0] as ProgressBar).value, 20.0, "HP remains at the old value until the event animation")
-	assert_eq((bars[1] as ProgressBar).value, 3.0, "Energy remains at the old value until the update animation")
-	assert_eq(token._pending_bar_targets, [10.0, 2.0], "the new values are queued for the HP/Energy tween")
+	assert_eq(token._hp_bar.value, 10.0, "reduced motion applies the new HP immediately")
+	assert_eq(token._energy_bar.value, 2.0, "reduced motion applies the new Energy immediately")
 	token.free()
 
 

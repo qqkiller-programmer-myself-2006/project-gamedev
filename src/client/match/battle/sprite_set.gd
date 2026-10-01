@@ -56,7 +56,7 @@ static func portrait(class_id_value: String) -> Texture2D:
 	var set := for_class(class_id_value)
 	if set == null:
 		return null
-	return _texture(ROOT + set.class_id + "/portrait.png")
+	return _cached_texture(ROOT + set.class_id + "/portrait.png")
 
 func frames(animation: String) -> Array[Texture2D]:
 	animation = _key(animation)
@@ -65,7 +65,7 @@ func frames(animation: String) -> Array[Texture2D]:
 			animation = "idle"
 	if is_enemy and not variant.is_empty() and animation == "idle":
 		var variant_path := ENEMY_ROOT + enemy_id + "/variants/" + variant + ".png"
-		var variant_texture := _texture(variant_path)
+		var variant_texture := _cached_texture(variant_path)
 		if variant_texture != null:
 			return [variant_texture]
 	var listed = data.get("animations", {}).get(animation, [])
@@ -93,7 +93,7 @@ func frames(animation: String) -> Array[Texture2D]:
 	var result: Array[Texture2D] = []
 	for filename in listed:
 		var base := ENEMY_ROOT + enemy_id + "/" if is_enemy else ROOT + class_id + "/"
-		var texture := _texture(base + str(filename))
+		var texture := _cached_texture(base + str(filename))
 		if texture != null:
 			result.append(texture)
 	return result
@@ -129,7 +129,7 @@ func baseline(animation: String) -> float:
 func canvas(animation: String) -> Vector2:
 	animation = _key(animation)
 	if is_enemy and not variant.is_empty() and animation == "idle":
-		var texture := _texture(ENEMY_ROOT + enemy_id + "/variants/" + variant + ".png")
+		var texture := _cached_texture(ENEMY_ROOT + enemy_id + "/variants/" + variant + ".png")
 		if texture != null:
 			return Vector2(texture.get_width(), texture.get_height())
 	var size: Array = data.get("canvas", {}).get(animation, [1, 1])
@@ -144,7 +144,7 @@ func _key(animation: String) -> String:
 func size_px() -> float:
 	return float(data.get("size_px", 48))
 
-static func _texture(path: String) -> Texture2D:
+static func _cached_texture(path: String) -> Texture2D:
 	if not _texture_cache.has(path):
 		_texture_cache[path] = load(path) as Texture2D
 	return _texture_cache[path] as Texture2D

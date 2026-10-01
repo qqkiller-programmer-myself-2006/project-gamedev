@@ -23,37 +23,43 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	var me := screen.your_slot()
 	_voted = vote["voted_slots"].has(me)
 	var solo := ClientApp.is_story_view(view)
-	add_child(UiKit.para("Choose your path" if solo else "Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])], "heading"))
-	var description := UiKit.para("Choose one path." if solo else "Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random.", "tiny")
+	add_child(UiKit.para(Tr.t("Choose your path") if solo else Tr.t("Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])]), "heading"))
+	var description := UiKit.para(Tr.t("Choose one path.") if solo else Tr.t("Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random."), "tiny")
 	description.max_lines_visible = 2
 	description.clip_text = true
 	add_child(description)
-	var timer_row := UiKit.hbox(6)
-	_countdown = UiKit.label("", "small")
+	var option_scroll := ScrollContainer.new()
+	option_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	option_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	option_scroll.custom_minimum_size = Vector2(0, 150)
+	var option_stack := UiKit.vbox(3)
+	option_stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	option_scroll.add_child(option_stack)
+	add_child(option_scroll)
+	if _options.is_empty():
+		option_stack.add_child(UiKit.para(Tr.t("No routes available."), "dim"))
+	else:
+		# First server-ordered route is featured with full detail; the rest
+		# stay in server order as compact alternatives. Keys 1-3 still follow
+		# that same server order so the featured card is always [1].
+		option_stack.add_child(_featured_card(screen, app, _options[0]))
+		if _options.size() > 1:
+			for i in range(1, _options.size()):
+				option_stack.add_child(_compact_card(screen, app, _options[i]))
+	var timer_row := UiKit.hbox(10)
+	if not solo:
+		timer_row.add_child(_ready_status(screen, view, vote))
+	_countdown = UiKit.label("", "heading")
 	timer_row.add_child(_countdown)
 	_bar = ProgressBar.new()
 	_bar.show_percentage = false
 	_bar.max_value = maxf(1.0, float(vote.get("seconds", 20.0)))
 	_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_bar.custom_minimum_size = Vector2(0, 10)
+	_bar.custom_minimum_size = Vector2(0, 14)
 	timer_row.add_child(_bar)
 	if not view.get("story", false):
 		add_child(timer_row)
-	if not solo:
 		add_child(UiKit.para(_voter_status(screen, view, vote), "tiny"))
-	if _options.is_empty():
-		add_child(UiKit.para("No routes available.", "dim"))
-	else:
-		# First server-ordered route is featured with full detail; the rest
-		# stay in server order as compact alternatives. Keys 1-3 still follow
-		# that same server order so the featured card is always [1].
-		add_child(_featured_card(screen, app, _options[0]))
-		if _options.size() > 1:
-			add_child(UiKit.label("Alternatives", "small"))
-			var alt_row := UiKit.flow(6)
-			for i in range(1, _options.size()):
-				alt_row.add_child(_compact_card(screen, app, _options[i]))
-			add_child(alt_row)
 	tick(screen, app)
 	if not solo:
 		app.hint("vote")
@@ -90,37 +96,49 @@ func _featured_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> 
 
 
 func _compact_card(screen: MatchScreen, app: ClientApp, option: Dictionary) -> Control:
-	var box := _option_body(screen, app, option, false)
+	var box := UiKit.hbox(8)
+	box.add_child(Icons.rect(str(TYPE_ICONS.get(str(option["type"]), "info")), Icons.size_for_scale(app.settings.text_scale)))
+	box.add_child(UiKit.badge(UiText.type_tag(option["type"]), UiKit.ACCENT))
+	var detail := Tr.t("Other path: %s" % Tr.t(str(option["name"])))
+	if not ClientApp.is_story_view(screen.match_view()):
+		var voters: Array = option.get("voters", [])
+		var voter_names: Array[String] = []
+		for slot in voters: voter_names.append(_voter_name(screen, int(slot)))
+		detail += Tr.t("  Votes: %d%s" % [voters.size(), " (%s)" % ", ".join(voter_names) if not voter_names.is_empty() else ""])
+	var title := UiKit.label(detail, "body")
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.tooltip_text = str(option.get("hint", ""))
+	box.add_child(title)
 	var index := int(option["index"])
 	var solo := ClientApp.is_story_view(screen.match_view())
 	var mine: bool = screen.get_meta("my_vote_%d" % int(screen.match_view()["layer"]), -1) == index
 	box.add_child(_vote_button(screen, app, option, mine, solo, "secondary"))
 	var card := UiKit.panel(box, "CompactHighlightPanel" if mine else "CompactPanel")
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size = Vector2(220, 0)
+	card.custom_minimum_size = Vector2(0, 44)
 	return card
 
 
 func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full: bool) -> VBoxContainer:
-	var box := UiKit.vbox(6)
+	var box := UiKit.vbox(2)
 	var head := UiKit.hbox(6)
 	head.add_child(Icons.rect(str(TYPE_ICONS.get(str(option["type"]), "info")), Icons.size_for_scale(app.settings.text_scale)))
 	head.add_child(UiKit.badge(UiText.type_tag(option["type"]), UiKit.ACCENT))
 	head.add_child(UiKit.label(UiText.type_label(option["type"]), "dim"))
 	if full:
-		head.add_child(UiKit.badge("Featured", UiKit.ACCENT))
+		head.add_child(UiKit.badge(Tr.t("Recommended"), UiKit.ACCENT))
 	box.add_child(head)
-	var option_name := UiKit.para(str(option["name"]), "heading")
+	var option_name := UiKit.para(Tr.t(str(option["name"])), "heading")
 	option_name.max_lines_visible = 2
 	option_name.clip_text = true
 	box.add_child(option_name)
-	var hint_text := str(option.get("hint", ""))
+	var hint_text := Tr.t(str(option.get("hint", "")))
 	if full:
 		var hint := UiKit.para(hint_text, "small")
 		hint.max_lines_visible = 2
 		hint.clip_text = true
 		box.add_child(hint)
-		var type_help := UiKit.para(str(UiText.TYPE_HELP.get(option["type"], "")), "tiny")
+		var type_help := UiKit.para(Tr.t(str(UiText.TYPE_HELP.get(option["type"], ""))), "tiny")
 		type_help.max_lines_visible = 1
 		type_help.clip_text = true
 		box.add_child(type_help)
@@ -134,7 +152,7 @@ func _option_body(screen: MatchScreen, app: ClientApp, option: Dictionary, full:
 	if not solo:
 		var voters: Array = option.get("voters", [])
 		var tally := UiKit.flow(4)
-		tally.add_child(UiKit.label("Votes: %d" % voters.size(), "heading" if not voters.is_empty() else "dim"))
+		tally.add_child(UiKit.label(Tr.t("Votes: %d" % voters.size()), "heading" if not voters.is_empty() else "dim"))
 		for slot in voters:
 			tally.add_child(UiKit.badge(_voter_name(screen, int(slot)), UiKit.ALLY))
 		box.add_child(tally)
@@ -149,6 +167,40 @@ func _vote_button(screen: MatchScreen, app: ClientApp, option: Dictionary, mine:
 	UiKit.disable(button, _voted, UiText.WHY["voted"])
 	button.set_meta("focus_id", "vote_%d" % index)
 	return button
+
+
+func _art_strip(screen: MatchScreen, app: ClientApp) -> Control:
+	var layer := int(screen.match_view().get("layer", 1))
+	var path := "res://assets/backgrounds/%s.png" % ("cave" if layer >= 4 else "forest")
+	var art := TextureRect.new()
+	art.texture = load(path)
+	art.custom_minimum_size = Vector2(0, 18)
+	art.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	art.tooltip_text = Tr.t("Recommended route")
+	return art
+
+
+func _ready_status(screen: MatchScreen, view: Dictionary, vote: Dictionary) -> Control:
+	var human_count := 0
+	for character in view.get("party", []):
+		if character.get("controller") == "human" and (not view.get("story", false) or int(character["slot"]) == 0):
+			human_count += 1
+	var ready: int = vote.get("voted_slots", []).size()
+	var row := UiKit.hbox(8)
+	row.custom_minimum_size = Vector2(150, 0)
+	row.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	row.add_child(UiKit.label(Tr.t("%d of %d ready" % [mini(ready, human_count), human_count]), "heading"))
+	var segments := UiKit.hbox(3)
+	for i in range(human_count):
+		var segment := ColorRect.new()
+		segment.color = UiKit.GOOD if i < ready else UiKit.SLATE
+		segment.custom_minimum_size = Vector2(20, 10)
+		segments.add_child(segment)
+	row.add_child(segments)
+	return row
 
 
 func _vote(screen: MatchScreen, app: ClientApp, index: int) -> void:
