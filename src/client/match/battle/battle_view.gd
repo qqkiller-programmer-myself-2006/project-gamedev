@@ -782,7 +782,7 @@ func _build_bottom(view: Dictionary) -> void:
 		_combat_grid.set_anchors_preset(Control.PRESET_TOP_WIDE)
 		_combat_grid.offset_left = 275
 		_combat_grid.offset_right = -275
-		_combat_grid.offset_top = 205 if _app.settings.text_scale >= 1.4 else 235
+		_combat_grid.offset_top = 235
 		_combat_grid.offset_bottom = minf(600.0, size.y - 285.0)
 		_combat_grid.visible = not _banner.visible
 		_combat_grid.z_index = 5
