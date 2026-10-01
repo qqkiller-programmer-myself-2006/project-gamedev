@@ -183,9 +183,11 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	bottom_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_log = RichTextLabel.new()
 	_log.bbcode_enabled = false
+	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_log.scroll_following = true
 	var log_lines := 3 if _app.settings.text_scale <= 1.0 else 2
-	var log_width := maxf(110.0, 245.0 - 300.0 * (_app.settings.text_scale - 1.0))
+	# The log must retain enough line width for names plus damage text at 1.4x.
+	var log_width := maxf(210.0, 245.0 - 80.0 * (_app.settings.text_scale - 1.0))
 	_log.custom_minimum_size = Vector2(log_width, 22.0 * log_lines * maxf(1.0, _app.settings.text_scale))
 	_log.scroll_active = false
 	_log.fit_content = false
@@ -880,8 +882,9 @@ func _build_bottom(view: Dictionary) -> void:
 		_skill_marks.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 		_skill_marks.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 		_skill_marks.grow_vertical = Control.GROW_DIRECTION_BEGIN
-		_skill_marks.offset_left = -20 - squares.get_combined_minimum_size().x
-		_skill_marks.offset_right = -20
+		const STATUS_GUTTER := 40.0
+		_skill_marks.offset_left = -STATUS_GUTTER - squares.get_combined_minimum_size().x
+		_skill_marks.offset_right = -STATUS_GUTTER
 		_skill_marks.offset_top = -262
 		_skill_marks.offset_bottom = -220
 		_skill_marks.add_child(squares)
