@@ -428,12 +428,12 @@ func float_text(id: String, text: String, color: Color) -> void:
 	# stack upwards instead of drawing over each other.
 	var now := Time.get_ticks_msec()
 	var recent: Array = _float_stack.get(id, [])
-	recent = recent.filter(func(t: int) -> bool: return now - t < 700)
+	recent = recent.filter(func(t: int) -> bool: return now - t < 1200)
 	var lane := recent.size()
 	recent.append(now)
 	_float_stack[id] = recent
 	var rect := anchor.get_global_rect()
-	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -42.0 * lane)
+	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -56.0 * lane)
 	var tween := create_tween()
 	if app.settings.reduced_motion:
 		tween.tween_interval(1.2)

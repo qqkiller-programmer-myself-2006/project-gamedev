@@ -755,7 +755,7 @@ func _build_bottom(view: Dictionary) -> void:
 		_combat_grid.z_index = 5
 		add_child(_combat_grid)
 	elif your_turn and not mode.is_empty():
-		var caption := UiKit.pixel_label("Choose a target on the field (1-%d), Esc to go back" % _choices.size(), "body", UiKit.ACCENT)
+		var caption := UiKit.pixel_label("Choose a target on the field (1-%d), Esc to go back" % _choices.size(), "small", UiKit.ACCENT)
 		caption.add_theme_color_override("font_outline_color", Color.BLACK)
 		caption.add_theme_constant_override("outline_size", 5)
 		_bottom.add_child(_centered(caption))
@@ -926,18 +926,20 @@ func _card_grid(mode: String, choices: Dictionary) -> Control:
 			var info: Dictionary = choices["items"][item_id]
 			var usable: bool = not info["targets"].is_empty()
 			var pretty := UiText.item_name(str(item_id))
+			var description := _item_description(item_id)
 			var pick := func() -> void: _pick_item(item_id, info)
-			grid.add_child(_card("%s x%d" % [pretty, int(info["count"])], _item_description(item_id), "items",
-					-1, usable, _item_description(item_id), pick))
+			grid.add_child(_card(pretty, "x%d | %s" % [int(info["count"]), description], "items",
+					-1, usable, description, pick, true))
 	var holder := UiKit.panel(grid, "HudPanel")
 	return _centered(holder)
 
 
-func _card(title: String, sub: String, icon_name: String, energy_cost: int, usable: bool, tip: String, pick: Callable) -> Button:
+func _card(title: String, sub: String, icon_name: String, energy_cost: int, usable: bool, tip: String, pick: Callable,
+		wrap_sub: bool = false) -> Button:
 	var number := _choices.size() + 1
 	var button := Button.new()
 	button.theme_type_variation = "HudButton"
-	button.custom_minimum_size = Vector2(232, 50)
+	button.custom_minimum_size = Vector2(232, 96 if wrap_sub else 50)
 	button.focus_mode = Control.FOCUS_ALL
 	button.disabled = not usable
 	button.tooltip_text = tip
@@ -956,16 +958,27 @@ func _card(title: String, sub: String, icon_name: String, energy_cost: int, usab
 	row.add_child(icon_box)
 	var text := UiKit.vbox(0)
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if wrap_sub:
+		text.custom_minimum_size.x = 150
 	text.alignment = BoxContainer.ALIGNMENT_CENTER
 	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var name_label := UiKit.pixel_label("[%d] %s" % [number, title], "body", UiKit.TEXT if usable else UiKit.TEXT_DIM)
-	name_label.clip_text = true
+	var name_label := UiKit.pixel_label("[%d] %s" % [number, title], "small" if wrap_sub else "body",
+			UiKit.TEXT if usable else UiKit.TEXT_DIM)
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if wrap_sub else TextServer.AUTOWRAP_OFF
+	name_label.clip_text = not wrap_sub
 	text.add_child(name_label)
 	var sub_row := UiKit.hbox(4)
+	sub_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if wrap_sub:
+		sub_row.custom_minimum_size.x = 150
 	if energy_cost >= 0:
 		sub_row.add_child(Icons.rect("energy", Icons.size_for_scale(_app.settings.text_scale)))
 	var sub_label := UiKit.pixel_label(sub, "tiny", UiKit.TEXT_DIM)
-	sub_label.clip_text = false
+	sub_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if wrap_sub:
+		sub_label.custom_minimum_size.x = 150
+	sub_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if wrap_sub else TextServer.AUTOWRAP_OFF
+	sub_label.clip_text = not wrap_sub
 	sub_row.add_child(sub_label)
 	text.add_child(sub_row)
 	row.add_child(text)

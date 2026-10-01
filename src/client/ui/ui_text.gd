@@ -30,7 +30,7 @@ const ERRORS := {
 	"invalid_option": "That choice does not exist.",
 	"already_voted": "You already voted.",
 	"ai_cannot_vote": "AI-controlled characters do not vote.",
-	"not_enough_gold": "The Party does not have enough Gold.",
+	"not_enough_gold": "You do not have enough Gold.",
 	"out_of_stock": "Sold out.",
 	"invalid_item": "The merchant does not sell that.",
 	"already_ready": "You are already marked as ready.",
