@@ -11,6 +11,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	Tr.setup("en")
 	var failed := false
 	for resolution in [Vector2i(1280, 720), Vector2i(1920, 1080)]:
 		for scale in [1.0, 1.4]:
