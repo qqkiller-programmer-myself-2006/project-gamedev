@@ -44,6 +44,7 @@ var _turn_banner: PanelContainer
 var _region: Label
 var _region_sub: Label
 var _header: VBoxContainer
+var _boss_warning_panel: PanelContainer
 var _bottom: VBoxContainer
 var _rewards: VBoxContainer
 var _log: RichTextLabel
@@ -185,6 +186,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_log.bbcode_enabled = false
 	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_log.scroll_following = true
+	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var log_lines := 3 if _app.settings.text_scale <= 1.0 else 2
 	# The log must retain enough line width for names plus damage text at 1.4x.
 	var log_width := maxf(210.0, 245.0 - 80.0 * (_app.settings.text_scale - 1.0))
@@ -197,6 +199,8 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_log.add_theme_color_override("default_color", UiKit.TEXT_DIM)
 	_log.add_theme_color_override("font_outline_color", Color.BLACK)
 	_log.add_theme_constant_override("outline_size", 3)
+	if _app.settings.text_scale > 1.0:
+		_log.add_theme_font_size_override("normal_font_size", int(20.0 / _app.settings.text_scale))
 	var log_panel := UiKit.panel(_log, "HudPanel")
 	log_panel.custom_minimum_size = Vector2(log_width, 0)
 	_rewards = UiKit.vbox(0)
@@ -393,7 +397,8 @@ func _set_action_row_visible(visible: bool) -> void:
 
 func add_log(line: String) -> void:
 	_log_lines.append(line)
-	while _log_lines.size() > 3:
+	var max_entries := 3 if _app.settings.text_scale <= 1.0 else 1
+	while _log_lines.size() > max_entries:
 		_log_lines.pop_front()
 	_log.clear()
 	_log.append_text("\n".join(_log_lines))
@@ -476,22 +481,34 @@ func _encounter_title(view: Dictionary) -> String:
 
 func _build_header(view: Dictionary) -> void:
 	UiKit.clear(_header)
+	_boss_warning_panel = null
+	_header.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_header.offset_left = -260
+	_header.offset_right = 260
+	_header.custom_minimum_size.x = 520
 	var encounter: Dictionary = view.get("encounter", {}) if view.get("encounter") != null else {}
 	if encounter.get("kind") == "boss":
+		# Keep the expandable warning between the initiative list and boss plate.
+		# Its VBox grows downward, with enough width to keep the guidance readable.
+		_header.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		_header.offset_left = 260
+		_header.offset_right = 744
+		_header.custom_minimum_size.x = 0
 		var boss: Dictionary = encounter["boss"]
 		var head := UiKit.vbox(2)
-		head.add_child(_centered(UiKit.pixel_label("Phase %d/%d: %s" % [int(boss["phase"]), int(boss["phases_total"]),
-				boss["phase_name"]], "small", UiKit.WARN)))
+		head.add_child(_centered(UiKit.pixel_label("Phase %d/%d" % [int(boss["phase"]), int(boss["phases_total"])], "small", UiKit.WARN)))
 		_header.add_child(UiKit.panel(head, "HudPanel"))
 		var telegraph: Dictionary = boss.get("telegraph", {})
 		if not telegraph.is_empty():
 			var box := UiKit.vbox(2)
 			var target := "the whole Party" if telegraph["target"] == "all" else _screen.name_of(str(telegraph["target"]))
-			box.add_child(UiKit.para("WARNING: %s next turn, aimed at %s!" % [telegraph["name"], target], "body", UiKit.WARN))
+			box.add_child(UiKit.para("WARNING: %s next turn, aimed at %s!" % [telegraph["name"], target], "small", UiKit.WARN))
 			var advice := "Guard to halve it"
 			advice += ", or raise Shield Wall." if telegraph["target"] == "all" else ", or have a Guardian Protect them."
 			box.add_child(UiKit.para(advice, "small"))
-			_header.add_child(UiKit.panel(box, "HudWarnPanel"))
+			_boss_warning_panel = UiKit.panel(box, "HudWarnPanel")
+			_boss_warning_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			_header.add_child(_boss_warning_panel)
 		_app.hint("boss")
 	elif encounter.get("kind") == "class":
 		var info: Dictionary = encounter.get("class_info", {})
