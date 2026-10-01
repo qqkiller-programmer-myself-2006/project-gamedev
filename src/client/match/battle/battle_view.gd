@@ -934,16 +934,18 @@ func _card_grid(mode: String, choices: Dictionary) -> Control:
 	grid.add_theme_constant_override("h_separation", 6)
 	grid.add_theme_constant_override("v_separation", 6)
 	if mode == "skills":
-		grid.add_child(_card("Strike", "Cost: 0 | Cooldown: 0", "strike", 0, true,
+		# "Cooldown" does not fit the card at large text, so the number would be cut off.
+		var cd_word := "CD" if _app.settings.text_scale >= 1.4 else "Cooldown"
+		grid.add_child(_card("Strike", "Cost: 0 | %s: 0" % cd_word, "strike", 0, true,
 				"A basic attack.", func() -> void: _set_mode("attack")))
-		grid.add_child(_card("Guard", "Cost: 0 | Cooldown: 0", "guard", 0, true,
+		grid.add_child(_card("Guard", "Cost: 0 | %s: 0" % cd_word, "guard", 0, true,
 				"Halve damage until your next turn.", func() -> void: _send({"action": "defend"})))
 		for skill_id in choices.get("skills", {}):
 			var info: Dictionary = choices["skills"][skill_id]
 			var cooldown := int(info["cooldown"])
 			var affordable := bool(info.get("affordable", true))
 			var usable: bool = cooldown == 0 and affordable and not info["targets"].is_empty()
-			var sub := "Cost: %d | Cooldown: %d" % [int(info.get("energy", 0)), cooldown]
+			var sub := "Cost: %d | %s: %d" % [int(info.get("energy", 0)), cd_word, cooldown]
 			var why := ""
 			if cooldown > 0:
 				why = "Cooling down: %d more turn(s)." % cooldown
