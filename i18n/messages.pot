@@ -770,7 +770,7 @@ msgid "Loses 5 HP per stack at the start of each of its turns, ignoring armour. 
 msgstr ""
 
 #: content/forest.json:ending.defeat.title
-msgid "Lost in the Forest"
+msgid "Lost in the Dark"
 msgstr ""
 
 #: content/forest.json:meta.races.Lunaeia
@@ -1110,7 +1110,7 @@ msgid "The Forest Falls Silent"
 msgstr ""
 
 #: content/forest.json:ending.defeat.text
-msgid "The Forest closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
+msgid "Darkness closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
 msgstr ""
 
 #: content/story_mode.json:prologue[0].text
@@ -1424,4 +1424,3 @@ msgstr ""
 #: content/forest.json:party.members[3].role
 msgid "Youngest sibling"
 msgstr ""
-

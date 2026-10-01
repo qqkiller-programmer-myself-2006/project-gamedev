@@ -57,10 +57,16 @@ func test_floating_damage_numbers_stack_with_readable_spacing() -> void:
 	var app := ClientApp.new()
 	app.settings = ClientSettings.new()
 	screen.app = app
-	# The lane stride stays larger than the rendered title text height.
-	assert_true(screen.get_script().source_code.contains("-42.0 * lane"), "stacked damage numbers use a full text-line stride")
+	# The lane stride stays larger than the rendered title text height, and the
+	# stack lifetime covers the full damage-number animation.
+	assert_true(screen.get_script().source_code.contains("-56.0 * lane"), "stacked damage numbers use a full text-line stride")
+	assert_true(screen.get_script().source_code.contains("now - t < 1200"), "stack lanes last until their labels fade")
 	screen.free()
 	app.free()
+
+
+func test_not_enough_gold_error_is_personal() -> void:
+	assert_eq(UiText.error("not_enough_gold"), "You do not have enough Gold.")
 
 
 func test_hp_bars_share_battle_color_and_room_for_large_text() -> void:
