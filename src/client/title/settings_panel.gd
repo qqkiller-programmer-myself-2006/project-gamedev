@@ -44,7 +44,7 @@ func setup(app: ClientApp) -> void:
 
 	box.add_child(UiKit.label("Motion", "heading"))
 	var motion := CheckButton.new()
-	motion.text = "Reduce motion (no sliding, fading or floating numbers)"
+	motion.text = Tr.t("Reduce motion (no sliding, fading or floating numbers)")
 	motion.button_pressed = app.settings.reduced_motion
 	motion.toggled.connect(func(on: bool) -> void:
 		app.settings.reduced_motion = on

@@ -46,7 +46,7 @@ func tick(screen: MatchScreen, app: ClientApp) -> void:
 		return
 	var left := app.seconds_left(_deadline)
 	if _combat.get("your_turn", false):
-		_countdown.text = "%ds left to act%s" % [ceili(left), " - hurry! Time out means Defend." if left <= 5.0 else ""]
+		_countdown.text = Tr.t("%ds left to act%s" % [ceili(left), " - hurry! Time out means Defend." if left <= 5.0 else ""])
 		screen.warn_if_short(_deadline, left)
 	else:
 		_countdown.text = "%ds" % ceili(left)
@@ -149,14 +149,14 @@ func _build_your_turn(screen: MatchScreen, app: ClientApp, view: Dictionary) -> 
 	var mode := screen.combat_mode
 	if mode.is_empty():
 		var actions := UiKit.flow(10)
-		actions.add_child(_action_button("Attack [A]", func() -> void: _set_mode(screen, "attack"), "attack"))
+		actions.add_child(_action_button(Tr.t("Attack [A]"), func() -> void: _set_mode(screen, "attack"), "attack"))
 		var skill := _action_button("Skill [S]", func() -> void: _set_mode(screen, "skills"), "skill")
 		if choices.get("skills", {}).is_empty():
 			skill.disabled = true
-			skill.text = "Skill [S] - needs a Class"
+			skill.text = Tr.t("Skill [S] - needs a Class")
 			skill.tooltip_text = UiText.error("skill_unavailable")
 		actions.add_child(skill)
-		actions.add_child(_action_button("Defend [D]", func() -> void: _send(app, {"action": "defend"}), "defend"))
+		actions.add_child(_action_button(Tr.t("Defend [D]"), func() -> void: _send(app, {"action": "defend"}), "defend"))
 		var item := _action_button("Item [I]", func() -> void: _set_mode(screen, "items"), "item")
 		UiKit.disable(item, choices.get("items", {}).is_empty(), UiText.WHY["no_items"])
 		actions.add_child(item)

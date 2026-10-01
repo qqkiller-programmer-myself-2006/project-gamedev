@@ -27,12 +27,12 @@ func show_events(app: ClientApp, events: Array) -> void:
 	for event in events:
 		match str(event["type"]):
 			"player_joined":
-				app.toast("%s joined the room." % event["name"])
+				app.toast(Tr.t("%s joined the room." % event["name"]))
 				app.sounds.play("good")
 			"player_left":
-				app.toast("%s left. Their slot is AI controlled now." % event["name"])
+				app.toast(Tr.t("%s left. Their slot is AI controlled now." % event["name"]))
 			"host_changed":
-				app.toast("%s is now the Host." % event["name"])
+				app.toast(Tr.t("%s is now the Host." % event["name"]))
 			"profile_unavailable":
 				app.toast(UiText.error("profile_unavailable"), 6.0)
 
@@ -56,7 +56,7 @@ func refresh(app: ClientApp, force: bool = false) -> void:
 	heading.add_child(code)
 	var copy := UiKit.button("Copy code", func() -> void:
 		DisplayServer.clipboard_set(str(room.get("code", "")))
-		app.toast("Room code copied."))
+		app.toast(Tr.t("Room code copied.")))
 	copy.set_meta("focus_id", "copy")
 	heading.add_child(copy)
 	_body.add_child(heading)

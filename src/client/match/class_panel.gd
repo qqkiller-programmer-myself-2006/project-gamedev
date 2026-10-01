@@ -64,7 +64,7 @@ func tick(screen: MatchScreen, app: ClientApp) -> void:
 		_combat.tick(screen, app)
 	elif _countdown != null and not _offer.is_empty() and ClientApp.has_timer(_offer.get("deadline")):
 		var left := app.seconds_left(_offer["deadline"])
-		_countdown.text = "Offer closes in %ds" % ceili(left)
+		_countdown.text = Tr.t("Offer closes in %ds" % ceili(left))
 		if _offer["you_can_decide"]:
 			screen.warn_if_short(_offer["deadline"], left)
 	elif _countdown != null:

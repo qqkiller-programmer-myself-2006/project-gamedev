@@ -96,8 +96,8 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_bottom.offset_bottom = -10
 	_bottom.alignment = BoxContainer.ALIGNMENT_CENTER
 	add_child(_bottom)
-	_hide_button = _button("Hide", func() -> void: _toggle_hidden())
-	_hide_button.tooltip_text = "Hide the camp to look at the field"
+	_hide_button = _button(Tr.t("Hide"), func() -> void: _toggle_hidden())
+	_hide_button.tooltip_text = Tr.t("Hide the camp to look at the field")
 	_hide_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	_hide_button.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_hide_button.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -126,7 +126,7 @@ func build(view: Dictionary, encounter: Dictionary) -> void:
 	# T34: build() tears down _columns/_bottom, so remember scroll positions
 	# and the focused control first and restore them after the rebuild.
 	var camp_state := _snapshot_camp_state()
-	_region.text = "%s (%d/%d)" % [UiText.region_of(view), int(view.get("layer", 0)), int(view.get("layers_total", 5))]
+	_region.text = Tr.t("%s (%d/%d)" % [Tr.t(UiText.region_of(view)), int(view.get("layer", 0)), int(view.get("layers_total", 5))])
 	var merchant := str(encounter.get("kind", "")) == "merchant"
 	_encounter_icon.texture = Icons.texture("merchant") if merchant else Icons.texture("rest")
 	_encounter_label.text = "\"%s\"" % str(encounter.get("name", "Merchant" if merchant else "Rest")).replace("\"", "")
@@ -316,7 +316,7 @@ func _scroll_body(body: Control) -> ScrollContainer:
 
 func _search_box(text: String, on_change: Callable, focus_id: String) -> LineEdit:
 	var search := LineEdit.new()
-	search.placeholder_text = "Search..."
+	search.placeholder_text = Tr.t("Search...")
 	search.text = text
 	search.clear_button_enabled = true
 	search.set_meta("focus_id", focus_id)
@@ -365,7 +365,7 @@ func _build_shop(view: Dictionary, body: VBoxContainer) -> void:
 		if int(entry.get("remaining", 0)) <= 0:
 			buy_label = "Sold out"
 		elif not affordable:
-			buy_label = "Need %d Gold" % int(entry.get("price", 0))
+			buy_label = Tr.t("Need %d Gold" % int(entry.get("price", 0)))
 		var buy := _button(buy_label, func() -> void: _app.send({"type": "buy", "slot": _acting_slot(), "item": entry.get("item", "")}))
 		if int(entry.get("remaining", 0)) <= 0:
 			UiKit.disable(buy, true, UiText.WHY["sold_out"])
@@ -557,7 +557,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 			UiKit.disable(off, not _can_manage_inspected(), UiText.WHY["equip_not_yours"])
 			controls.add_child(off)
 			var info := _button("?", func() -> void: _show_info(worn))
-			info.tooltip_text = "Inspect"
+			info.tooltip_text = Tr.t("Inspect")
 			controls.add_child(info)
 		cell.add_child(controls)
 		var cell_panel := UiKit.panel(cell, "HudCard")
@@ -619,7 +619,7 @@ func _stat(label: String, value: String, icon_name: String = "") -> Control:
 func _build_bottom() -> void:
 	UiKit.clear(_bottom)
 	var story := ClientApp.is_story_view(_screen.room_view())
-	var ready_text := "Ready [R]" if story else "Ready (%d/%d) [R]" % [int(_encounter.get("ready", []).size()), maxi(1, int(_encounter.get("humans", 1)))]
+	var ready_text := Tr.t("Ready [R]") if story else Tr.t("Ready (%d/%d) [R]" % [int(_encounter.get("ready", []).size()), maxi(1, int(_encounter.get("humans", 1)))])
 	var ready := UiKit.primary(ready_text, func() -> void: _app.send({"type": "ready"}), false)
 	Icons.apply_to_button(ready, "ready", _app.settings.text_scale)
 	UiKit.disable(ready, _ready, UiText.WHY["ready"])

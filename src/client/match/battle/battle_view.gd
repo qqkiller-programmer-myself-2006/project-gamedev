@@ -398,7 +398,7 @@ func _build_region(view: Dictionary) -> void:
 	var phase := str(view.get("phase", ""))
 	var total := int(view.get("layers_total", 5))
 	var encounter = view.get("encounter")
-	_region.text = "%s (%d/%d)" % [UiText.region_of(view), int(view.get("layer", 0)), total]
+	_region.text = Tr.t("%s (%d/%d)" % [Tr.t(UiText.region_of(view)), int(view.get("layer", 0)), total])
 	var sub := "\"%s\"" % _encounter_title(view)
 	if _combat.get("trial", false):
 		sub = "Challenge  %d/%d" % [int(_combat.get("round", 1)), int(_combat.get("round_limit", 3))]
@@ -691,14 +691,14 @@ func _build_bottom(view: Dictionary) -> void:
 		var actions := UiKit.hbox(8)
 		actions.set_meta("combat_action_row", true)
 		var has_skills: bool = not choices.get("skills", {}).is_empty()
-		var fight := _action_button("Fight [F]", "fight", func() -> void: _set_mode("skills"), mode == "skills" or mode == "attack" or mode.begins_with("skill:"))
+		var fight := _action_button(Tr.t("Fight [F]"), "fight", func() -> void: _set_mode("skills"), mode == "skills" or mode == "attack" or mode.begins_with("skill:"))
 		Icons.apply_to_button(fight, "fight", _app.settings.text_scale)
 		actions.add_child(fight)
-		var item := _action_button("Items [I]", "items", func() -> void: _set_mode("items"), mode == "items" or mode.begins_with("item:"))
+		var item := _action_button(Tr.t("Items [I]"), "items", func() -> void: _set_mode("items"), mode == "items" or mode.begins_with("item:"))
 		Icons.apply_to_button(item, "items", _app.settings.text_scale)
 		UiKit.disable(item, choices.get("items", {}).is_empty(), UiText.WHY["no_items"])
 		actions.add_child(item)
-		var focus := _action_button("Focus [O]", "focus", func() -> void: _send({"action": "focus"}), false)
+		var focus := _action_button(Tr.t("Focus [O]"), "focus", func() -> void: _send({"action": "focus"}), false)
 		Icons.apply_to_button(focus, "focus", _app.settings.text_scale)
 		focus.disabled = not choices.get("focus", false)
 		focus.tooltip_text = UiText.WHY["focus_unavailable"] if focus.disabled else UiText.WHY["focus_ready"]
@@ -873,7 +873,7 @@ func _build_result() -> void:
 		_banner.visible = false
 	match outcome:
 		"victory":
-			_center_text.text = "Challenge won!" if _combat.get("trial", false) else "Victory!"
+			_center_text.text = Tr.t("Challenge won!") if _combat.get("trial", false) else Tr.t("Victory!")
 			_center_text.add_theme_color_override("font_color", UiKit.GOOD)
 			var rewards: Dictionary = _combat.get("rewards", {})
 			if not _combat.get("trial", false) and not rewards.is_empty():
@@ -885,10 +885,10 @@ func _build_result() -> void:
 				if rewards.has("clue"):
 					_rewards.add_child(_reward_line("Clue: %s" % rewards["clue"]["title"], UiKit.ALLY))
 		"timeout":
-			_center_text.text = "Time is up!"
+			_center_text.text = Tr.t("Time is up!")
 			_center_text.add_theme_color_override("font_color", UiKit.WARN)
 		"defeat":
-			_center_text.text = "The Party has fallen..."
+			_center_text.text = Tr.t("The Party has fallen...")
 			_center_text.add_theme_color_override("font_color", UiKit.ENEMY)
 
 

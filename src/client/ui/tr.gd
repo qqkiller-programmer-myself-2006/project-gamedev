@@ -29,14 +29,18 @@ static func t(msgid: String) -> String:
 	var translated := TranslationServer.translate(msgid)
 	if translated != msgid:
 		return translated
-	for entry in _formatted:
-		var regex: RegEx = entry["regex"]
+	for source in _msgids:
+		if not source.contains("%") and not source.contains("{"):
+			continue
+		var regex := _pattern_for(source)
+		if regex == null:
+			continue
 		var found := regex.search(msgid)
 		if found == null:
 			continue
-		var result := TranslationServer.translate(str(entry["msgid"]))
+		var result := TranslationServer.translate(source)
 		for index in range(1, found.get_group_count() + 1):
-			var placeholder := _placeholders(str(entry["msgid"]))[index - 1]
+			var placeholder := _placeholders(source)[index - 1]
 			var placeholder_regex := RegEx.new()
 			placeholder_regex.compile(_regex_escape(placeholder))
 			result = placeholder_regex.sub(result, found.get_string(index), false)
