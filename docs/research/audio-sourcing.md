@@ -17,7 +17,7 @@ The three Kenney packs form a practical, consistently stylized SFX base. The mus
 
 ### Scope and gaps
 
-This shortlist is deliberately small and uses five creators/packs plus a single optional boss track. The Kenney SFX pages do not claim dedicated fantasy spell, heal, buff/debuff, critical, miss or countdown sounds. Treat those as new cues to build from layered/varied existing licensed samples only after listening, or source separately. The music shortlist has no explicit defeat loop or dedicated Guardian boss composition; Kenney loss jingles can serve as defeat stings, and Hope is only a possible boss loop. A dedicated boss/defeat score remains a sourcing gap. Sound quality/style is not independently judged here; preview each file before final selection.
+This shortlist is deliberately small and uses five creators/packs plus a single optional boss track. The Kenney SFX pages do not claim dedicated fantasy spell, heal, buff/debuff, critical, miss or countdown sounds. The `magic_cast`, `heal`, `buff`, `debuff`, and `miss` cues now use separately sourced short samples (see `assets/audio/CREDITS.md`). A dedicated `critical` sample remains a sourcing gap and stays on the synth fallback; no suitable short, clearly licensed sharp impact/ring was confirmed. The music shortlist has no explicit defeat loop or dedicated Guardian boss composition; Kenney loss jingles can serve as defeat stings, and Hope is only a possible boss loop. A dedicated boss/defeat score remains a sourcing gap.
 
 ## Cue mapping
 
@@ -37,10 +37,12 @@ This shortlist is deliberately small and uses five creators/packs plus a single 
 | `error` (new) | Interface Sounds: negative switch; audition. |
 | `countdown_warn` (new) | Interface Sounds short alert, repeated by timer; dedicated countdown asset not verified. |
 | `sword_hit` / `weapon_hit` (new) | RPG sound effects: metal/knife sample. |
-| `magic_cast` (new) | No exact match verified in shortlist; source a CC0/CC-BY spell sample later. |
-| `heal` (new) | No exact match verified; source a dedicated restorative/magic sample later. |
-| `buff` / `debuff` (new) | No exact match verified; source dedicated positive/negative magic samples later. |
-| `critical` / `miss` (new) | RPG impact candidate for critical only after pitch/layer variation; no dedicated critical or miss sample verified. |
+| `magic_cast` (new) | JaggedStone's Magic Spell SFX, `magical_3.ogg` (CC0). |
+| `heal` (new) | leohpaz's 8 Heals and Buffs SFX, `02_Heal_02.wav` (CC-BY 4.0). |
+| `buff` (new) | leohpaz's 8 Heals and Buffs SFX, `16_Atk_buff_04.wav` (CC-BY 4.0). |
+| `debuff` (new) | leohpaz's 8 Heals and Buffs SFX, `21_Debuff_01.wav` (CC-BY 4.0). |
+| `critical` (new) | Still on synth fallback; no dedicated short, clearly licensed sharp impact/ring was confirmed. |
+| `miss` (new) | artisticdude's Swishes Sound Pack, `swish-7.wav` (CC0). |
 | `enemy_death` / `player_down` (new) | RPG sound effects: inspect impact/metal/cloth samples; no exact death/down cue is promised by the listing. |
 | `level_up` / `exp_gain` (new) | 85 Short music jingles: ascending/reward candidate. |
 | `loot_pickup` / `gem_pickup` (new) | RPG sound effects coin candidate; 85 Short music jingles for a higher-tier gem reward. |
