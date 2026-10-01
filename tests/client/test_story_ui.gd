@@ -51,7 +51,7 @@ func test_story_path_choice_hides_vote_status_and_multiplayer_keeps_it() -> void
 	app.snapshot["match"]["story"] = false
 	var multi := VotePanel.new()
 	multi.build(screen, app, _vote_view(false))
-	assert_true(_has_text(multi, "Voted:"), "Multiplayer keeps vote status")
+	assert_true(_has_text(multi, "Ready 0 of 0"), "Multiplayer keeps the current ready status")
 	assert_true(_has_text(multi, "Votes:"), "Multiplayer keeps vote tallies")
 	assert_true(_has_text(multi, "Vote for this path"), "Multiplayer keeps vote labels")
 	story.free()
