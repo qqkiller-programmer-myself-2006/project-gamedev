@@ -353,6 +353,8 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_THEME_CHANGED and _app != null and is_instance_valid(_content):
 		if _content.has_meta("narrow_title_panel"):
 			_layout_narrow_panel(_content as PanelContainer)
+			# Children resize after their parent hears about the new theme, so measure again.
+			_layout_narrow_panel.call_deferred(_content as PanelContainer)
 		elif _view == "story_setup":
 			var top := _top(float(_content.get_meta("base_y", 150.0)))
 			# Story setup panel is anchored TOP_WIDE with a finite height
