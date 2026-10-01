@@ -60,6 +60,11 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), UiKit.BG, true)
 	draw_line(Vector2(150, size.y / 2 + 110), Vector2(size.x - 150, size.y / 2 + 110), Color(UiKit.GOLD, 0.45), 2)
 
+func _ready() -> void:
+	if not reduced_motion:
+		modulate.a = 0.0
+		create_tween().tween_property(self, "modulate:a", 1.0, 0.25)
+
 func _process(delta: float) -> void:
 	if reduced_motion:
 		return
