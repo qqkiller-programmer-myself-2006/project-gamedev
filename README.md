@@ -104,3 +104,89 @@ export_presets.cfg  preset Web / Windows / Linux Server
 - [docs/history/](docs/history/) — log งานเก่า (ย้ายออกจาก README เดิมที่ยาว 451 บรรทัด)
 - [.ai/tasks/README.md](.ai/tasks/README.md) — สารบัญ task spec ของ AI executor
 - [docs/review/README.md](docs/review/README.md) — สารบัญรีวิวและ QA
+
+## แกลเลอรี UI (ภาพจาก preview จริง)
+
+ภาพด้านล่างคือภาพหน้าจอจริงจากสคริปต์ preview (`tools/dev/ui_preview.gd`
+และ `tools/dev/story_preview.gd --full`) โดยรวมภาพจากหลาย multiplayer seed
+เข้ากับ Story preview ครอบคลุมเฉพาะฉากที่สคริปต์เรนเดอร์ได้จริงในการรัน
+เหล่านี้ ทั้งฉาก Victory และ Defeat ถูกบันทึกไว้แล้ว ส่วนฉากที่ยังขาดอยู่
+ใน UI gallery คือ `05_class_offer` และ `10_treasure` เท่านั้น; ส่วน Story mode
+preview ไม่มีภาพ combat แรกเพราะหยุดก่อนหน้าต่าง human action แรกของ combat
+แรก (`story_preview: first combat never reached a visible human action window`
+ทำให้ไม่มี `05_story_battle.png`)
+
+<details>
+<summary>Title / Lobby / Setup (9 ภาพ)</summary>
+
+![Title screen](docs/screenshots/playthrough/01_title.png)
+![Lobby](docs/screenshots/playthrough/02_lobby.png)
+![Character setup — class tab](docs/screenshots/playthrough/02a_setup_class.png)
+![Character setup — races tab](docs/screenshots/playthrough/02b_setup_races.png)
+![Character setup — boons tab](docs/screenshots/playthrough/02c_setup_boons.png)
+![Character setup — boon equipped](docs/screenshots/playthrough/02d_setup_boons_equipped.png)
+![Lobby with loadout](docs/screenshots/playthrough/02e_lobby_loadout.png)
+![Confirm leave dialog](docs/screenshots/playthrough/02f_confirm_leave.png)
+![Settings panel](docs/screenshots/playthrough/02g_settings.png)
+
+</details>
+
+<details>
+<summary>Voting / Normal combat (6 ภาพ)</summary>
+
+![Path voting](docs/screenshots/playthrough/03_vote.png)
+![Normal combat — turn](docs/screenshots/playthrough/04_combat_turn.png)
+![Normal combat — targets](docs/screenshots/playthrough/04_combat_targets.png)
+![Normal combat — skills](docs/screenshots/playthrough/04_combat_skills.png)
+![Normal combat — items](docs/screenshots/playthrough/04_combat_items.png)
+![Normal combat — hint overlay](docs/screenshots/playthrough/04_combat_hint.png)
+
+</details>
+
+<details>
+<summary>Class challenge (2 ภาพ)</summary>
+
+![Class challenge — turn (ท้าทายคลาส — เทิร์น)](docs/screenshots/playthrough/05_class_challenge_turn.png)
+![Class challenge — skills (ท้าทายคลาส — เลือกสกิล)](docs/screenshots/playthrough/05_class_challenge_skills.png)
+
+</details>
+
+<details>
+<summary>Boss / Merchant / Rest / Reward (8 ภาพ)</summary>
+
+![Action banner](docs/screenshots/playthrough/06_action_banner.png)
+![Boss combat — turn](docs/screenshots/playthrough/06_boss_turn.png)
+![Boss combat — targets](docs/screenshots/playthrough/06_boss_targets.png)
+![Boss combat — skills](docs/screenshots/playthrough/06_boss_skills.png)
+![Boss telegraph warning](docs/screenshots/playthrough/07_boss_warning.png)
+![Merchant](docs/screenshots/playthrough/08_merchant.png)
+![Rest (พักผ่อน)](docs/screenshots/playthrough/10_rest.png)
+![Combat reward](docs/screenshots/playthrough/11_combat_reward.png)
+
+</details>
+
+<details>
+<summary>Story event — multiplayer seeds (2 ภาพ)</summary>
+
+![Story event — choice (อีเวนต์เนื้อเรื่อง — ตัวเลือก)](docs/screenshots/playthrough/09_story_choice.png)
+![Story event — outcome (อีเวนต์เนื้อเรื่อง — ผลลัพธ์)](docs/screenshots/playthrough/09_story_outcome.png)
+
+</details>
+
+<details>
+<summary>Endings — defeat and victory (2 ภาพ)</summary>
+
+![Defeat ending (seed 7)](docs/screenshots/playthrough/90_summary_defeat.png)
+![Victory ending (seed 7 with class assassin)](docs/screenshots/playthrough/90_summary_victory.png)
+
+</details>
+
+<details>
+<summary>Story mode preview (4 ภาพ)</summary>
+
+![Story mode — home Play entry](docs/screenshots/playthrough/story_01_home_play.png)
+![Story setup — class pick](docs/screenshots/playthrough/story_02_class_pick.png)
+![Prologue dialogue in match](docs/screenshots/playthrough/story_03_prologue_match.png)
+![Chapter card](docs/screenshots/playthrough/story_04_chapter_card.png)
+
+</details>
