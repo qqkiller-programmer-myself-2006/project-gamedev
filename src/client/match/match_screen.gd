@@ -85,7 +85,7 @@ func setup(client: ClientApp) -> void:
 	_log.bbcode_enabled = false
 	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_log.scroll_following = true
-	_log.custom_minimum_size = Vector2(0, 90)
+	_log.custom_minimum_size = Vector2(0, 64 if client.settings.text_scale >= 1.4 or (is_inside_tree() and get_viewport_rect().size.y <= 760.0) else 90)
 	_log.focus_mode = Control.FOCUS_NONE
 	_log.add_theme_color_override("default_color", UiKit.TEXT_DIM)
 	_log.text = "Waiting for match events..."

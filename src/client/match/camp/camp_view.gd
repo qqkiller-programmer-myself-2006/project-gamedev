@@ -82,12 +82,13 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	add_child(encounter_box)
 	_workspace = Control.new()
 	_workspace.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_workspace.offset_left = 24
-	_workspace.offset_right = -24
+	var edge := 10.0 if _app.settings.text_scale >= 1.4 else 24.0
+	_workspace.offset_left = edge
+	_workspace.offset_right = -edge
 	_workspace.offset_top = 126
-	_workspace.offset_bottom = -(66.0 + 90.0 * _app.settings.text_scale)
+	_workspace.offset_bottom = -78.0
 	add_child(_workspace)
-	_columns = UiKit.hbox(10)
+	_columns = UiKit.hbox(4 if _app.settings.text_scale >= 1.4 else 10)
 	_columns.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_workspace.add_child(_columns)
 	_bottom = UiKit.hbox(12)
@@ -506,6 +507,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	var character := _character(view, _inspect)
 	var switcher := UiKit.hbox(4)
 	var previous := _button("<", func() -> void: _move_inspect(-1, party))
+	var compact: bool = _app.settings.text_scale >= 1.4
 	previous.custom_minimum_size = Vector2(36, 36)
 	previous.tooltip_text = "Previous character"
 	switcher.add_child(previous)
@@ -513,7 +515,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 		var member_slot := int(member.get("slot", 0))
 		var member_button := Button.new()
 		member_button.flat = true
-		member_button.custom_minimum_size = Vector2(52, 56)
+		member_button.custom_minimum_size = Vector2(40 if compact else 52, 48 if compact else 56)
 		member_button.tooltip_text = str(member.get("name", "Character"))
 		member_button.focus_mode = Control.FOCUS_ALL
 		member_button.pressed.connect(func() -> void: _inspect = member_slot; _screen.refresh(_app, true))
@@ -530,6 +532,8 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	var who := UiKit.pixel_label(str(character.get("name", "Character")), "heading", UiKit.ACCENT)
 	who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	who.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	who.clip_text = true
+	who.custom_minimum_size.x = 0
 	switcher.add_child(who)
 	var next := _button(">", func() -> void: _move_inspect(1, party))
 	next.custom_minimum_size = Vector2(36, 36)
@@ -542,7 +546,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 		var frames := idle_set.frames("idle")
 		if not frames.is_empty():
 			var figure := TextureRect.new()
-			figure.custom_minimum_size = Vector2(104, 124)
+			figure.custom_minimum_size = Vector2(60, 76) if compact else Vector2(104, 124)
 			figure.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			figure.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			figure.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -566,7 +570,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	var gear: Dictionary = character.get("gear", {})
 	for slot in SLOTS:
 		var cell := UiKit.vbox(1)
-		cell.custom_minimum_size = Vector2(0, 54 if _app.settings.text_scale >= 1.4 else 70)
+		cell.custom_minimum_size = Vector2(0, 40 if _app.settings.text_scale >= 1.4 else 70)
 		cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var worn: Dictionary = gear.get(slot, {})
 		var slot_row := UiKit.hbox(2)
@@ -581,7 +585,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 		slot_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		slot_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		slot_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		slot_label.custom_minimum_size = Vector2(0, 44)
+		slot_label.custom_minimum_size = Vector2(0, 36 if large_text else 44)
 		slot_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		slot_row.add_child(slot_label)
 		cell.add_child(slot_row)
@@ -638,6 +642,9 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	else:
 		UiKit.disable(invest, not _screen.room_view().get("story", false) and _inspect != _screen.your_slot(), UiText.WHY["invest_not_yours"])
 	root.add_child(invest)
+	if compact:
+		# Large text: the whole sheet scrolls so it can never push the other columns past the screen.
+		return _scroll_body(root)
 	return root
 
 func _stat(label: String, value: String, icon_name: String = "") -> Control:
