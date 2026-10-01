@@ -17,6 +17,7 @@ Start with [`../CONTEXT.md`](../CONTEXT.md) (domain words) and [`../AGENTS.md`](
 ## Decisions and plans
 - [adr/](adr/) — architecture decision records (0001–0014); newer ADRs replace parts of older ones as they say
 - [plans/](plans/) — plans for large changes (e.g. the 2026-09-29 restructure)
+- [history/](history/) — milestone logs and the old long README, moved out of the root README
 - [review/](review/) — code reviews and the development plan made from them
 
 ## References

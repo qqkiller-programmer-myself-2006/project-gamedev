@@ -229,13 +229,21 @@ func _find_by_focus_id(node: Node, focus_id: String) -> Node:
 
 func _build_columns(view: Dictionary, merchant: bool) -> void:
 	UiKit.clear(_columns)
-	_columns.add_child(_column("Shop" if merchant else "Crafting", _left_panel(view, merchant), 1.0))
-	_columns.add_child(_vertical_tabs(["Stash", "Shop" if merchant else "Craft"], true))
-	_columns.add_child(_column("Inventory", _inventory_panel(view), 1.0))
-	_columns.add_child(_vertical_tabs(["Inventory", "Abilities"], false, view))
-	_columns.add_child(_column("Equipment", _equipment_panel(view, merchant), 1.0))
+	var left_content := UiKit.vbox(6)
+	left_content.add_child(_vertical_tabs(["Stash", "Shop" if merchant else "Craft"], true, {}, true))
+	var left_panel := _left_panel(view, merchant)
+	left_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	left_content.add_child(left_panel)
+	_columns.add_child(_column("Shop" if merchant else "Crafting", left_content, 1.0))
+	var inventory_content := UiKit.vbox(6)
+	inventory_content.add_child(_vertical_tabs(["Inventory", "Abilities"], false, view, true))
+	var inventory_panel := _inventory_panel(view)
+	inventory_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	inventory_content.add_child(inventory_panel)
+	_columns.add_child(_column("Inventory", inventory_content, 1.0))
+	_columns.add_child(_column("Equipment", _equipment_panel(view, merchant), 1.0, true))
 
-func _column(title: String, content: Control, ratio: float) -> Control:
+func _column(title: String, content: Control, ratio: float, scroll_content: bool = false) -> Control:
 	var column := UiKit.vbox(6)
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	column.size_flags_stretch_ratio = ratio
@@ -251,15 +259,33 @@ func _column(title: String, content: Control, ratio: float) -> Control:
 	column.add_child(tag)
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	var panel := UiKit.panel(content, "HudPanel")
+	var panel_content := content
+	if scroll_content:
+		# Equipment can be taller than the workspace once the full stat sheet
+		# and slot grid are present. Scroll that sheet, while the shop and
+		# inventory keep their existing independently scrollable item lists.
+		var scroll := ScrollContainer.new()
+		scroll.name = title + "Scroll"
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+		scroll.follow_focus = true
+		scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		scroll.add_child(content)
+		panel_content = scroll
+	var panel := UiKit.panel(panel_content, "HudPanel")
+	panel.clip_contents = true
+	panel.custom_minimum_size = Vector2(0, 0)
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(panel)
 	return column
 
-func _vertical_tabs(labels: Array, left: bool, view: Dictionary = {}) -> Control:
+func _vertical_tabs(labels: Array, left: bool, view: Dictionary = {}, horizontal: bool = false) -> Control:
 	var tabs := UiKit.vbox(6)
+	var tab_row := UiKit.hbox(6)
 	var tab_width := tab_width_for_scale(_app.settings.text_scale)
-	tabs.custom_minimum_size = Vector2(tab_width, 0)
+	if not horizontal:
+		tabs.custom_minimum_size = Vector2(tab_width, 0)
 	tabs.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	for i in labels.size():
 		var label: String = labels[i]
@@ -286,7 +312,13 @@ func _vertical_tabs(labels: Array, left: bool, view: Dictionary = {}) -> Control
 		if active:
 			button.theme_type_variation = "SelectedButton"
 			button.add_theme_font_size_override("font_size", int(UiKit.SIZES["small"] * _app.settings.text_scale))
-		tabs.add_child(button)
+		button.tooltip_text = label
+		if horizontal:
+			tab_row.add_child(button)
+		else:
+			tabs.add_child(button)
+	if horizontal:
+		tabs.add_child(tab_row)
 	if not left:
 		var you := _character(view, _acting_slot())
 		var consumable = you.get("consumable")
@@ -530,16 +562,16 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 			member_button.theme_type_variation = "SelectedButton"
 		switcher.add_child(member_button)
 	var who := UiKit.pixel_label(str(character.get("name", "Character")), "heading", UiKit.ACCENT)
-	who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	who.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	who.clip_text = true
-	who.custom_minimum_size.x = 0
-	switcher.add_child(who)
 	var next := _button(">", func() -> void: _move_inspect(1, party))
 	next.custom_minimum_size = Vector2(36, 36)
 	next.tooltip_text = "Next character"
 	switcher.add_child(next)
 	root.add_child(switcher)
+	# Keep the selected name on its own line. Placing it beside five portrait
+	# buttons makes this otherwise scrollable equipment column too wide.
+	who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	root.add_child(who)
 	var profile := UiKit.hbox(8)
 	var idle_set := SpriteSet.for_class(str(character.get("class", "classless")))
 	if idle_set != null:

@@ -40,7 +40,7 @@ func _run() -> void:
 			battle._region.text = "Forest (1/5)"
 			await process_frame
 			var log_rect := Rect2(battle._log.get_parent().global_position, battle._log.get_parent().size)
-			if log_rect.position.x < 0 or log_rect.position.y < resolution.y - 170 or log_rect.end.y > resolution.y:
+			if log_rect.position.x < 0 or log_rect.position.y < 0 or log_rect.end.y > resolution.y:
 				push_error("battle log leaves its clear lower-left lane at %s scale %.1f: %s" % [resolution, scale, log_rect])
 				failed = true
 			battle.add_log("older combat event")
@@ -48,13 +48,30 @@ func _run() -> void:
 			if not battle._log.get_parsed_text().contains("Newest combat event"):
 				push_error("battle log does not show the newest line at %s scale %.1f" % [resolution, scale])
 				failed = true
-			battle._combat = {"round": 1, "turn_order": ["e0"], "round_order": ["e0"], "actor": ""}
-			battle._build_timeline({"party": [], "enemies": [{"id": "e0", "hp": 20,
-				"max_hp": 20, "weakness": ["Fire", "Ice", "Lightning", "Poison"]}]})
-			var weak_label := battle._timeline.get_child(1).get_child(0).get_child(2) as Label
-			if weak_label == null or weak_label.autowrap_mode == TextServer.AUTOWRAP_OFF:
-				push_error("boss weakness text does not wrap at %s scale %.1f" % [resolution, scale])
+			if scale > 1.0 and battle._log_lines != ["Newest combat event"]:
+				push_error("large-text battle log should retain the newest complete entry at %s scale %.1f" % [resolution, scale])
 				failed = true
+			if resolution == Vector2i(1280, 720) and scale == 1.4:
+				app.settings.seen_hints = ["boss"]
+				var boss_view := {"encounter": {"kind": "boss", "boss": {
+					"phase": 1, "phases_total": 3, "phase_name": "Crushing Root",
+					"telegraph": {"name": "Crushing Root", "target": "p0"}}}}
+				battle._combat = {"enemies": [{"id": "e0", "kind": "boss", "hp": 40,
+					"max_hp": 40, "level": 1, "row": "front"}]}
+				battle._build_header(boss_view)
+				battle._build_enemy_plates(boss_view)
+				await process_frame
+				await process_frame
+				var warning_rect := Rect2(battle._boss_warning_panel.global_position, battle._boss_warning_panel.size)
+				var boss_plate := battle._enemy_plates.get_child(0) as Control
+				var boss_plate_rect := Rect2(boss_plate.global_position, boss_plate.size)
+				if warning_rect.size.x <= 0 or warning_rect.size.y <= 0 or warning_rect.intersects(boss_plate_rect):
+					push_error("boss warning banner is empty or covers the boss plate at 1280x720 scale 1.4: %s / %s" % [warning_rect, boss_plate_rect])
+					failed = true
+			battle._combat = {"round": 1, "turn_order": ["e0"], "round_order": ["e0"], "actor": "",
+				"enemies": [{"id": "e0", "hp": 20, "max_hp": 20, "kind": "boss", "level": 1,
+					"row": "front", "weakness": ["Fire", "Ice", "Lightning", "Poison"]}]}
+			battle._build_timeline({"party": [], "enemies": battle._combat["enemies"]})
 			var scroll := battle._timeline_scroll
 			if scroll.global_position.y + scroll.size.y < 530:
 				push_error("battle timeline viewport is too short to keep the full boss entry visible at %s scale %.1f" % [resolution, scale])

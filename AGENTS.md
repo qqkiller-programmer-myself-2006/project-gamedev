@@ -38,5 +38,5 @@ Issues และ specs ของรีโปนี้อยู่ใน GitHub I
 - `src/client/ui/`: shared UI; `title/`, `lobby/`, `match/`, `story/`: player-facing screens; `match/battle/` and `match/camp/`: phase views.
 - `tests/`: mirrors `src/`, with runner and support at the root/support folder.
 - `tools/dev/`, `tools/art/`, `tools/ci/`: development, art, and CI tools; `tools/run_tests.sh`: test runner.
-- `deploy/`: staging; `docs/design/`, `docs/guides/`, `docs/adr/`, `docs/agents/`, `docs/plans/`, `docs/review/`, `docs/references/`, `docs/screenshots/`: documentation by kind.
-- `.ai/`: task specs, runner, checkpoint; `.claude/agents/`: agent definitions.
+- `deploy/`: staging; `docs/design/`, `docs/guides/`, `docs/adr/`, `docs/agents/`, `docs/plans/`, `docs/review/`, `docs/history/`, `docs/references/`, `docs/screenshots/`: documentation by kind.
+- `.ai/`: task specs (index: `.ai/tasks/README.md`), runner, checkpoint; `.claude/agents/`: agent definitions.

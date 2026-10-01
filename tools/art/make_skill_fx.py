@@ -100,31 +100,107 @@ def frame(skill, index, n, size):
                         WHITE if t < .82 else GOLD)
 
     elif skill == "fireball":
-        # Ember swells and wobbles, then leaves an expanding ring and embers.
-        if t < .54:
-            q = ease(t/.54)
-            r = 5 + 17*q
-            x = int(31 + 33*ease(t/.54))
-            y = int(64 + math.sin(t*math.pi*5)*4)
-            for k in range(8):
-                a = k*math.pi/4
-                wobble = 1 + .09*math.sin(t*math.pi*8+k)
-                xx, yy = x+math.cos(a)*r*wobble, y+math.sin(a)*r*wobble
-                d.ellipse((int(xx-r*.55),int(yy-r*.55),int(xx+r*.55),int(yy+r*.55)),
-                          fill=RED, outline=NAVY, width=2)
-            d.ellipse((x-r*.55,y-r*.55,x+r*.55,y+r*.55),fill=GOLD,outline=NAVY,width=2)
-            d.ellipse((x-r*.24,y-r*.24,x+r*.24,y+r*.24),fill=WHITE)
+        # A compact, uneven flame travels into a blobby impact and breaks into embers.
+        def fire_blob(cx, cy, rx, ry, phase, color, alpha=255, outline=True):
+            points = []
+            for k in range(16):
+                a = 2 * math.pi * k / 16
+                wobble = (1 + .18 * math.sin(3 * a + phase)
+                          + .11 * math.sin(5 * a - phase) + .05 * math.sin(7 * a + phase))
+                points.append((int(cx + math.cos(a) * rx * wobble),
+                               int(cy + math.sin(a) * ry * wobble)))
+            d.polygon(points, fill=(*ImageColor(color), alpha),
+                      outline=(10, 16, 32, alpha) if outline else None)
+
+        def ImageColor(color):
+            if isinstance(color, tuple):
+                return color
+            return tuple(int(color[i:i+2], 16) for i in (1, 3, 5))
+
+        def flame_tail(cx, cy, scale, alpha=255):
+            # Three pointed tongues stream back along the projectile's path.
+            tongues = [
+                [(-4, -3), (-11, -10), (-10, -3), (-18, -5), (-12, 1), (-5, 2)],
+                [(-5, 1), (-13, -1), (-19, 2), (-12, 4), (-8, 8), (-4, 4)],
+                [(-3, 4), (-9, 8), (-11, 14), (-5, 10), (0, 7)],
+            ]
+            for j, tongue in enumerate(tongues):
+                pts = [(int(cx + x * scale), int(cy + y * scale)) for x, y in tongue]
+                color = RED if j == 0 else (255, 113, 63)
+                if isinstance(color, str):
+                    color = ImageColor(color)
+                d.polygon(pts, fill=(*color, alpha), outline=(10, 16, 32, alpha))
+
+        def spark(x, y, dx, dy, alpha=255, color=GOLD):
+            # Short square streak plus a bright block at its tip.
+            line([(int(x), int(y)), (int(x + dx), int(y + dy))], (10, 16, 32, alpha), 3)
+            line([(int(x), int(y)), (int(x + dx), int(y + dy))], (*ImageColor(color), alpha), 1)
+            d.rectangle((int(x + dx) - 1, int(y + dy) - 1,
+                         int(x + dx) + 1, int(y + dy) + 1), fill=(*ImageColor(WHITE), alpha))
+
+        if index <= 2:
+            # Move down-right while the fireball grows; all tongues trail upper-left.
+            q = index / 2
+            cx, cy = 37 + index * 10, 48 + index * 7
+            scale = .72 + q * .36
+            flame_tail(cx, cy, scale, 255)
+            fire_blob(cx, cy, 8 + index * 2, 7 + index * 2, index * .8, RED)
+            fire_blob(cx, cy, 6 + index, 5 + index, index * .8 + .5,
+                      (255, 113, 63), outline=False)
+            # Uneven orange tongues break the silhouette so it reads as fire, not petals.
+            for pts in (
+                [(-4, -5), (-8, -12), (-1, -9), (2, -5)],
+                [(3, -5), (8, -11), (7, -4), (5, -1)],
+                [(5, 1), (12, -2), (8, 4), (4, 5)],
+                [(-2, 5), (-5, 11), (-1, 8), (2, 5)],
+            ):
+                shape = [(cx + int(x * scale), cy + int(y * scale)) for x, y in pts]
+                d.polygon(shape, fill=(255, 113, 63, 255), outline=(10, 16, 32, 255))
+            fire_blob(cx, cy, 5 + index, 4 + index, index * .8, GOLD, outline=False)
+            fire_blob(cx - 1, cy - 1, 2 + index // 2, 2 + index // 2,
+                      index * .8, WHITE, outline=False)
+            spark(cx - 10, cy - 12, -3, -2)
+            spark(cx - 8, cy + 9, -2, 2, color=RED)
+            if index == 2:
+                spark(cx + 3, cy - 14, 1, -3)
+        elif index <= 5:
+            # Irregular blast swells over three frames; dark puffs and embers escape it.
+            q = (index - 3) / 2
+            cx, cy = 70, 66
+            rx, ry = 13 + q * 17, 12 + q * 14
+            # Smoke stays behind the flame, pushed outward as the blast grows.
+            for dx, dy, r in ((-23, -17, 4), (21, -24, 4), (26, 13, 3)):
+                if index >= 4 or dx < 0:
+                    d.ellipse((cx + dx - r, cy + dy - r, cx + dx + r, cy + dy + r),
+                              fill=(46, 48, 62, 255), outline=(10, 16, 32, 255))
+            fire_blob(cx, cy, rx, ry, index * .7, RED)
+            fire_blob(cx, cy, rx * .78, ry * .76, index * .7 + .8, (255, 113, 63), outline=False)
+            # Broken hot lobes keep the blast chunky and asymmetrical.
+            for dx, dy, sx, sy in ((-9, -7, 8, 7), (7, -9, 7, 8),
+                                   (11, 3, 7, 6), (-5, 10, 8, 6)):
+                fire_blob(cx + dx * (1 + q * .3), cy + dy * (1 + q * .3),
+                          sx * (.8 + q * .25), sy * (.8 + q * .25),
+                          index + dx, GOLD, outline=False)
+            if index < 5:
+                fire_blob(cx - 2, cy - 2, 7 + q * 4, 6 + q * 3,
+                          index, WHITE, outline=False)
+            for j, (sx, sy) in enumerate(((-1, -1), (1, -1), (1, 1), (-1, 1), (0, -1))):
+                distance = 19 + q * 17 + (j % 2) * 4
+                ex, ey = cx + sx * distance, cy + sy * distance
+                spark(ex, ey, sx * 2, sy * 2, color=GOLD if j % 2 == 0 else RED)
         else:
-            q = ease((t-.54)/.46)
-            radius = 8 + 43*q
-            alpha = int(255*(1-q))
-            d.ellipse((64-radius,64-radius,64+radius,64+radius),
-                      outline=(255,113,63,alpha),width=5)
-            for k in range(8):
-                a=k*math.pi/4
-                dist=12+40*q
-                x,y=64+math.cos(a)*dist,64+math.sin(a)*dist
-                diamond(x,y,max(2,4-int(q*2)),WHITE if k%2 else GOLD)
+            # The blast lifts and collapses; only dim falling embers remain at f7.
+            q = index - 6
+            cx, cy = 70 - q * 4, 61 - q * 7
+            alpha = 105 if index == 6 else 20
+            if index == 6:
+                fire_blob(cx, cy, 13, 10, 4.5, RED, alpha)
+                fire_blob(cx, cy, 8, 6, 4.5, (255, 113, 63), alpha, outline=False)
+            embers = ((-17, 3), (-8, -10), (8, -5), (18, 4), (3, 13))
+            for j, (dx, dy) in enumerate(embers):
+                fall = q * (5 + (j % 3) * 2)
+                spark(cx + dx, cy + dy + fall, (j % 2) * 2 - 1, 2,
+                      alpha, GOLD if j % 2 == 0 else RED)
 
     elif skill == "frost_lance":
         # Spear streaks in; radial shards and an icy ring take over on impact.
