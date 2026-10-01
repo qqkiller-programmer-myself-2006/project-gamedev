@@ -334,7 +334,7 @@ func handle_key(key: int) -> bool:
 			if not choices.get("skills", {}).is_empty():
 				_set_mode("skills")
 			else:
-				_app.toast(UiText.error("skill_unavailable"))
+				_app.toast_error(UiText.error("skill_unavailable"))
 			return true
 		KEY_D:
 			_send({"action": "defend"})
@@ -506,7 +506,11 @@ func _build_header(view: Dictionary) -> void:
 			box.add_child(UiKit.para("WARNING: %s next turn, aimed at %s!" % [telegraph["name"], target], "small", UiKit.WARN))
 			var advice := "Guard to halve it"
 			advice += ", or raise Shield Wall." if telegraph["target"] == "all" else ", or have a Guardian Protect them."
-			box.add_child(UiKit.para(advice, "small"))
+			if _app.settings.text_scale >= 1.4:
+				# Large text: keep the banner short so it never covers the party; the advice moves to the tooltip.
+				box.tooltip_text = advice
+			else:
+				box.add_child(UiKit.para(advice, "small"))
 			_boss_warning_panel = UiKit.panel(box, "HudWarnPanel")
 			_boss_warning_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			_header.add_child(_boss_warning_panel)
@@ -947,19 +951,20 @@ func _fit_skill_marks() -> void:
 func _card_grid(mode: String, choices: Dictionary) -> Control:
 	var grid := GridContainer.new()
 	grid.columns = 3
+	var cost_text := "Cost: %d | Cooldown: %d" if _app.settings.text_scale < 1.4 else "Cost %d | CD %d"
 	grid.add_theme_constant_override("h_separation", 6)
 	grid.add_theme_constant_override("v_separation", 6)
 	if mode == "skills":
-		grid.add_child(_card("Strike", "Cost: 0\nCooldown: 0", "strike", 0, true,
+		grid.add_child(_card("Strike", cost_text % [0, 0], "strike", 0, true,
 				"A basic attack.", func() -> void: _set_mode("attack")))
-		grid.add_child(_card("Guard", "Cost: 0\nCooldown: 0", "guard", 0, true,
+		grid.add_child(_card("Guard", cost_text % [0, 0], "guard", 0, true,
 				"Halve damage until your next turn.", func() -> void: _send({"action": "defend"})))
 		for skill_id in choices.get("skills", {}):
 			var info: Dictionary = choices["skills"][skill_id]
 			var cooldown := int(info["cooldown"])
 			var affordable := bool(info.get("affordable", true))
 			var usable: bool = cooldown == 0 and affordable and not info["targets"].is_empty()
-			var sub := "Cost: %d\nCooldown: %d" % [int(info.get("energy", 0)), cooldown]
+			var sub := cost_text % [int(info.get("energy", 0)), cooldown]
 			var why := ""
 			if cooldown > 0:
 				why = "Cooling down: %d more turn(s)." % cooldown

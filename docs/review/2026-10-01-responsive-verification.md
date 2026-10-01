@@ -1,35 +1,40 @@
-# Responsive layout verification — 2026-10-01 (issue #45)
+# Responsive layout verification — 2026-10-01 (issue #45), redone on the redesigned UI
 
-Screens: Battle, Merchant, Rest camp. Captured with `tools/dev/ui_preview.gd` (`--resolution=`, `--scale=`; Merchant seed 11, Rest seed 5) and inspected by eye.
+The first version of this report (written before PR #119/#125 redesigned combat and camp) no longer applied. Everything below was re-captured on `main` after the redesign and the follow-up fixes (#127 polish, #130 badges, #134 boss banner, f23ece0 camp/battle at 1.4×). Tool: `tools/dev/ui_preview.gd` (`--resolution=`, `--scale=`; Rest seed 5/9, Merchant seed 9/11).
+
+"Viewed" = I looked at the PNG myself. "Reported" = a Codex run reported pass but I did not open that image.
 
 | Screen | 1280×720 ×1.0 | 1280×720 ×1.4 | 1920×1080 ×1.0 | 1920×1080 ×1.4 |
 | --- | --- | --- | --- | --- |
-| Battle | Pass | Pass (after badge fix) | Pass | Pass |
-| Merchant | Pass | Pass† | Pass | Pass |
-| Rest | Pass | Pass* | Pass | Pass* |
+| Battle (turn) | Viewed, pass | Viewed (boss turn), pass | Reported | Viewed, pass |
+| Boss warning banner | Viewed, pass | Viewed, pass | Reported | Viewed, pass |
+| Rest camp | Viewed, pass | Viewed, pass | Viewed, pass | Reported |
+| Merchant | Not viewed | Not viewed | Not viewed | Viewed, pass |
 
-† The 1280×720 ×1.4 Merchant capture came out at 1920×1080 size (preview window stretches from the 1280×720 base), so it is judged from the 1080p ×1.4 image; the layout is proportional. Re-shoot at true 1280×720 if the team wants strict evidence.
+## What was found and fixed during this pass
 
-\* Known, deliberate behavior at 1.4× text: the Equipment grid switches to 2 columns, so the stat sheet (HP, Energy, STR…) shrinks to about one visible row and must be scrolled. Nothing overlaps, but this is the "1.45× text scrolling" decision awaiting team sign-off in #39. The Tip box also covers the last visible row of the left list (it scrolls). No change made.
+- Combat status badges (Turn / Ready / energy) ran off the right edge after the redesign → #130.
+- Boss WARNING banner covered the boss nameplate and the first turn-list row at ×1.4; battle log clipped its newest line → #134.
+- Items card text clipped, target caption over nameplates, Summary banner over the title, Gold wording → #127.
+- Camp overflowed the screen at 1280×720 ×1.4 (Equipment panel off the right edge, buttons below the screen, mid-word breaks) → fixed on main by f23ece0 (tabs moved inside their columns; the middle tab labels now read in full).
 
-## Fix made
+## Remaining minor items (not fixed)
 
-- `src/client/match/battle/battle_view.gd`: the Turn and skill cooldown badges now scale their minimum size with `settings.text_scale`; at 1.4× they were compressed beside the action panel.
+- At ×1.4 the Equipment gear grid is below a scrolling area; the stat sheet and slots need scrolling (known; sign-off pending in #39).
+- At 1920×1080 ×1.4 an enemy sprite on the far right can sit under the Turn/Ready/energy badges, and the "Frost Lance"/"Crushing Root" move caption bar is faint under the enemy plates.
+- Turn-list heading flush to the left screen edge at 1920×1080.
 
 ## Other checks
 
-- Minor, not fixed: at 1920×1080 ×1.0 the "Turn 1" heading above the turn list sits flush against the left screen edge and its first letter touches the edge.
-
-- No important text, number, badge or control overlaps or clips at 1.0×. Transient floating damage numbers may overlap nameplates mid-animation (by design).
-- Keyboard focus and reduced-motion behavior: covered by `tests/client/test_accessibility_baseline.gd` (merged in #112); this change does not alter them.
-- Browsers: local web smoke cannot run here (no `build/web`, no Playwright). CI job "Export PC, browser and server builds + cross-platform smoke test" runs `tools/ci/web_smoke.mjs` on Chromium and is green on main. No browser-specific issue observed; Firefox/Safari are not covered by automation.
-- Tests: 447 passed, 0 failed.
+- Keyboard focus and reduced-motion behavior are covered by `tests/client/test_accessibility_baseline.gd` (#112) and the layout smokes `t35`/`t43`/`t88`.
+- Browsers: local web smoke cannot run here (no `build/web`, no Playwright). CI "Export PC, browser and server builds + cross-platform smoke test" runs `tools/ci/web_smoke.mjs` on Chromium and is green. Firefox/Safari are not covered.
+- Full suite on main after these merges: 453 passed, 0 failed.
 
 ## Screenshots
 
-- [Battle 1280×720 ×1.4](img/2026-10-01-battle-1280x720-scale-1.4.png)
 - [Battle 1920×1080 ×1.4](img/2026-10-01-battle-1920x1080-scale-1.4.png)
-- [Merchant 1280×720 ×1.0](img/2026-10-01-merchant-1280x720-scale-1.0.png)
-- [Merchant 1920×1080 ×1.4](img/2026-10-01-merchant-1920x1080-scale-1.4.png)
+- [Boss warning 1280×720 ×1.4](img/2026-10-01-boss-warning-1280x720-scale-1.4.png)
+- [Rest 1280×720 ×1.0](img/2026-10-01-rest-1280x720-scale-1.0.png)
 - [Rest 1280×720 ×1.4](img/2026-10-01-rest-1280x720-scale-1.4.png)
-- [Rest 1920×1080 ×1.4](img/2026-10-01-rest-1920x1080-scale-1.4.png)
+- [Rest 1920×1080 ×1.0](img/2026-10-01-rest-1920x1080-scale-1.0.png)
+- [Merchant 1920×1080 ×1.4](img/2026-10-01-merchant-1920x1080-scale-1.4.png)

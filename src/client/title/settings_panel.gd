@@ -89,7 +89,7 @@ func setup(app: ClientApp) -> void:
 	box.add_child(music_volume_row)
 	box.add_child(UiKit.label("Every sound cue also appears on screen as a banner or log line.", "dim"))
 
-	var close := UiKit.primary("Close [Esc]", queue_free)
+	var close := UiKit.primary("Close [Esc]", queue_free, true, "cancel")
 	box.add_child(close)
 	(first_button if first_button != null else close).grab_focus.call_deferred()
 
@@ -99,6 +99,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 	if event.keycode == KEY_ESCAPE and not event.echo:
 		queue_free()
+		UiKit.play_sound("cancel")
 	get_viewport().set_input_as_handled()
 
 

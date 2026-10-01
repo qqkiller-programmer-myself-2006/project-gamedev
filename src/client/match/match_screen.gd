@@ -675,7 +675,7 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				client.toast("%s joined." % event["name"])
 				client.sounds.play("click")
 		"profile_unavailable":
-			client.toast(UiText.error("profile_unavailable"), 6.0)
+			client.toast_error(UiText.error("profile_unavailable"), 6.0)
 		"treasure_found":
 			client.banner("Treasure! +%d Gold" % int(event["gold"]), 2.0, "loot_pickup")
 		"clue_found":

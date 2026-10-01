@@ -6,6 +6,8 @@ extends Node
 const RATE := 22050
 const SFX_POOL_SIZE := 3
 const MUSIC_FADE_SECONDS := 0.6
+const HOVER_COOLDOWN_MSEC := 70
+const HOVER_VOLUME_DB := -8.0
 
 const CUE_ASSETS := {
 	"turn": "res://assets/audio/sfx/ui_turn.ogg",
@@ -75,6 +77,7 @@ var _music_players: Array[AudioStreamPlayer] = []
 var _music_tween: Tween
 var _music_track := ""
 var _music_active_index := -1
+var _last_hover_msec := -1
 
 
 func _ready() -> void:
@@ -95,11 +98,22 @@ func _ready() -> void:
 func play(cue: String) -> void:
 	if not _players.has(cue):
 		return
+	if cue == "hover" and _hover_is_rate_limited(Time.get_ticks_msec()):
+		return
 	var pool: Array = _players[cue]
 	var index := int(_player_indices.get(cue, 0))
 	var player: AudioStreamPlayer = pool[index]
 	_player_indices[cue] = (index + 1) % pool.size()
 	player.play()
+
+
+## Returns true when a hover should be suppressed; passing time keeps the
+## throttle deterministic in tests and avoids coupling it to audio playback.
+func _hover_is_rate_limited(now_msec: int) -> bool:
+	if _last_hover_msec >= 0 and now_msec - _last_hover_msec < HOVER_COOLDOWN_MSEC:
+		return true
+	_last_hover_msec = now_msec
+	return false
 
 
 func has_cue(cue: String) -> bool:
@@ -201,6 +215,8 @@ func _register_cue(cue: String, path: String) -> void:
 		player.name = "%sPlayer%d" % [cue.capitalize(), i]
 		player.stream = stream
 		player.bus = "SFX"
+		if cue == "hover":
+			player.volume_db = HOVER_VOLUME_DB
 		add_child(player)
 		pool.append(player)
 	_players[cue] = pool
