@@ -141,11 +141,18 @@ func test_shortcuts_still_fire_without_text_focus() -> void:
 	_camp.build(_view(), _merchant())
 	_stub.sent.clear()
 	assert_true(_camp.handle_key(KEY_R), "r still readies when no text editor is focused")
-	assert_true(_camp.handle_key(KEY_1), "1 still buys when no text editor is focused")
-	assert_eq(_stub.sent.size(), 2, "Ready and buy are both sent")
+	assert_true(_camp.handle_key(KEY_1), "1 requests purchase confirmation")
+	assert_eq(_stub.sent.size(), 1, "a purchase does not send before confirmation")
 	assert_eq(str(_stub.sent[0].get("type", "")), "ready", "r sends Ready")
-	assert_eq(str(_stub.sent[1].get("type", "")), "buy", "1 sends a buy")
-	assert_eq(str(_stub.sent[1].get("item", "")), "sword", "1 buys the first stock entry")
+	var dialogs := _app._overlay_holder.find_children("*", "ConfirmDialog", true, false)
+	var dialog := dialogs[0] as ConfirmDialog if not dialogs.is_empty() else null
+	assert_true(dialog is ConfirmDialog, "1 opens a purchase confirmation")
+	for button in dialog.find_children("*", "Button", true, false):
+		if (button as Button).text.begins_with("Buy "):
+			(button as Button).pressed.emit()
+	assert_eq(_stub.sent.size(), 2, "confirming sends the purchase")
+	assert_eq(str(_stub.sent[1].get("type", "")), "buy", "confirmation sends a buy")
+	assert_eq(str(_stub.sent[1].get("item", "")), "sword", "confirmation buys the first stock entry")
 
 
 func test_scroll_positions_survive_update() -> void:

@@ -64,6 +64,9 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	offset_top = -210.0
 	offset_bottom = -14.0
+	if not reduced_motion:
+		modulate.a = 0.0
+		create_tween().tween_property(self, "modulate:a", 1.0, 0.18)
 
 func _draw() -> void:
 	draw_style_box(_box, Rect2(Vector2.ZERO, size))
@@ -80,7 +83,7 @@ func _process(delta: float) -> void:
 	if _shown < _full_text.length() and not reduced_motion:
 		_elapsed += delta
 		_shown = mini(_full_text.length(), int(_elapsed * 52.0))
-		_text_label.text = _full_text.substr(0, _shown)
+		_text_label.visible_characters = _shown
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed:
@@ -94,18 +97,25 @@ func _unhandled_key_input(event: InputEvent) -> void:
 func advance() -> void:
 	if _shown < _full_text.length():
 		_shown = _full_text.length()
-		_text_label.text = _full_text
+		_text_label.visible_characters = -1
 		return
 	line_index += 1
 	if line_index >= lines.size():
-		finished.emit()
-		queue_free()
+		_close()
 	else:
 		_show_line()
 
 func skip() -> void:
+	_close()
+
+func _close() -> void:
 	finished.emit()
-	queue_free()
+	if reduced_motion or not is_inside_tree():
+		queue_free()
+		return
+	var tween := create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, 0.16)
+	tween.tween_callback(queue_free)
 
 func _show_line() -> void:
 	var line: Dictionary = lines[line_index]
@@ -114,7 +124,8 @@ func _show_line() -> void:
 	_shown = _full_text.length() if reduced_motion else 0
 	_elapsed = 0.0
 	_name_label.text = _speaker
-	_text_label.text = _full_text if reduced_motion else ""
+	_text_label.text = _full_text
+	_text_label.visible_characters = -1 if reduced_motion else 0
 	_portrait = _find_portrait(str(line.get("speaker", "")))
 	queue_redraw()
 

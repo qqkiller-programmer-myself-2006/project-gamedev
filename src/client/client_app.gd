@@ -401,6 +401,9 @@ func _show_screen(screen: String) -> void:
 func toast(message: String, seconds: float = 4.0) -> void:
 	_toast_label.text = message
 	_toast_until = _local_now() + seconds
+	var top_offset := 118.0 if _current_name == "lobby" else 12.0
+	_toast.offset_top = top_offset
+	_toast.offset_bottom = top_offset
 	_toast.visible = true
 
 
@@ -444,7 +447,8 @@ func flash(node: CanvasItem, color: Color) -> void:
 		return
 	var tween := create_tween()
 	tween.tween_property(node, "modulate", color, 0.08)
-	tween.tween_property(node, "modulate", Color.WHITE, 0.25)
+	var resting: Color = node.call("resting_modulate") if node.has_method("resting_modulate") else Color.WHITE
+	tween.tween_property(node, "modulate", resting, 0.25)
 
 
 ## Shows a one-time tutorial hint unless the player has seen it already.
@@ -543,13 +547,17 @@ func open_settings() -> void:
 ## Asks before a destructive action (`key` in UiText.CONFIRM; `args` fill
 ## the text's %s / %d).
 func confirm(key: String, on_confirm: Callable, args: Array = []) -> void:
+	var texts: Array = UiText.CONFIRM[key]
+	confirm_custom(str(texts[0]), str(texts[1]) % args if not args.is_empty() else str(texts[1]), str(texts[2]), on_confirm)
+
+
+func confirm_custom(title: String, text: String, confirm_label: String, on_confirm: Callable) -> void:
 	for child in _overlay_holder.get_children():
 		if child is ConfirmDialog:
 			return
-	var texts: Array = UiText.CONFIRM[key]
 	var dialog := ConfirmDialog.new()
 	_overlay_holder.add_child(dialog)
-	dialog.setup(str(texts[0]), str(texts[1]) % args if not args.is_empty() else str(texts[1]), str(texts[2]), on_confirm)
+	dialog.setup(title, text, confirm_label, on_confirm)
 
 
 ## Leaves the room or Match after asking.

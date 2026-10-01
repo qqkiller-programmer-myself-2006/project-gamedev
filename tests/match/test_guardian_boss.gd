@@ -68,7 +68,7 @@ func test_boss_appears_after_the_fifth_layer() -> void:
 	var encounter: Dictionary = view["encounter"]
 	assert_eq(encounter["kind"], "boss")
 	assert_eq(encounter["boss"]["name"], "Elder Thornwarden")
-	assert_eq(encounter["boss"]["title"], "Guardian of the Forest")
+	assert_eq(encounter["boss"]["title"], "Guardian Beneath the Forest")
 	assert_eq(encounter["enemies"][0]["max_hp"], h.content.get_int("enemies.elder_thornwarden.stats.max_hp"),
 			"Boss numbers come from content")
 	assert_eq(bot.events_of_type("boss_started").size(), 1)
@@ -162,7 +162,7 @@ func test_defeating_the_boss_is_victory_with_forest_ending_and_summary() -> void
 	assert_eq(view["phase"], "victory")
 	var summary: Dictionary = view["summary"]
 	assert_eq(summary["result"], "victory")
-	assert_eq(summary["title"], "The Forest Falls Silent")
+	assert_eq(summary["title"], "The Guardian Falls Silent")
 	assert_false(str(summary["text"]).is_empty())
 	for key in ["clues_found", "clues", "classes_discovered", "elapsed", "enemies_defeated"]:
 		assert_has(summary, key)
@@ -177,7 +177,7 @@ func test_party_wipe_against_the_boss_is_defeat() -> void:
 	_play(60.0, _defend)
 	var view := _view()
 	assert_eq(view["phase"], "defeat")
-	assert_eq(view["summary"]["title"], "Lost in the Forest")
+	assert_eq(view["summary"]["title"], "Lost in the Cave")
 
 
 func test_host_starts_a_new_match_in_the_same_room_after_it_ends() -> void:

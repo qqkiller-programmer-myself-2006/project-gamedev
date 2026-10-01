@@ -48,13 +48,13 @@ func _build_chrome() -> void:
 	title.add_theme_color_override("font_outline_color", UiKit.BG)
 	title.add_theme_constant_override("outline_size", 10)
 	logo.add_child(title)
-	var subtitle := UiKit.label("Forest - a co-op journey", "heading")
+	var subtitle := UiKit.label("Beyond the World's End - a co-op journey", "heading")
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	subtitle.position.y = 70
 	logo.add_child(subtitle)
 	add_child(logo)
-	var build := UiKit.label("BUILD 0.10  |  FOREST SLICE", "small", UiKit.TEXT_DIM)
+	var build := UiKit.label("BUILD 0.10  |  CO-OP JOURNEY", "small", UiKit.TEXT_DIM)
 	build.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	build.autowrap_mode = TextServer.AUTOWRAP_OFF
 	build.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)

@@ -33,6 +33,7 @@ var _battle_mode := false
 var _camp: CampView
 ## Card id -> times (ms) of recent floating numbers, to stack them.
 var _float_stack: Dictionary = {}
+var _float_generation := 0
 var _camp_mode := false
 var _scroll_to_top := false
 var _story_director: StoryDirector = null
@@ -171,6 +172,12 @@ func refresh(client: ClientApp, force: bool = false) -> void:
 	_build_top(view)
 	_build_party(view)
 	_build_panel(view)
+	if _panel is VotePanel:
+		# Keep the route title and timer visible on short, large-text layouts.
+		# Number keys still vote; scrolling remains available for lower routes.
+		_center_scroll.scroll_vertical = 0
+		_scroll_to_top = false
+		return
 	if not _restore_focus(focus_id):
 		UiKit.focus_first(_center)
 	var viewport := get_viewport()
@@ -219,6 +226,8 @@ func show_events(client: ClientApp, events: Array) -> void:
 		if not line.is_empty():
 			_add_log(line)
 		_feedback(client, event)
+		if _battle_mode and str(event.get("type", "")) != "action_resolved":
+			_battle.animate_bars()
 
 func _on_story_presentation_finished(_item: Dictionary) -> void:
 	_sync_story_presentation_visibility()
@@ -371,7 +380,10 @@ func build_corner_menu(host: Control) -> PanelContainer:
 ## A number or word that rises from a character or enemy card.
 func float_text(id: String, text: String, color: Color) -> void:
 	# Cards may have just been rebuilt: wait for layout before measuring.
+	var generation := _float_generation
 	await get_tree().process_frame
+	if generation != _float_generation:
+		return
 	var anchor: Control = anchors.get(id)
 	if anchor == null or not is_instance_valid(anchor) or not anchor.is_inside_tree():
 		return
@@ -380,6 +392,7 @@ func float_text(id: String, text: String, color: Color) -> void:
 	label.add_theme_color_override("font_outline_color", Color.BLACK)
 	label.add_theme_constant_override("outline_size", 6)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_to_group("combat_floating_text")
 	add_child(label)
 	# Numbers that land on the same card together (several DoTs ticking)
 	# stack upwards instead of drawing over each other.
@@ -390,7 +403,7 @@ func float_text(id: String, text: String, color: Color) -> void:
 	recent.append(now)
 	_float_stack[id] = recent
 	var rect := anchor.get_global_rect()
-	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -26.0 * lane)
+	label.global_position = rect.position + Vector2(rect.size.x * 0.5 - 20, -38.0 * lane)
 	var tween := create_tween()
 	if app.settings.reduced_motion:
 		tween.tween_interval(1.2)
@@ -451,7 +464,8 @@ func describe(event: Dictionary) -> String:
 			return "%s %s the %s Class." % [name_of("p%d" % int(event["slot"])),
 					"takes" if event["accepted"] else "declines", str(event["class"]).capitalize()]
 		"purchase":
-			return "%s bought %s for %d Gold." % [name_of("p%d" % int(event["slot"])), str(event["item"]).capitalize(), int(event["price"])]
+			return "%s bought %s for %d Gold." % [name_of("p%d" % int(event["slot"])),
+				BattleView.item_display_name(str(event["item"])), int(event["price"])]
 		"rested":
 			return "The Party rests and recovers."
 		"treasure_found":
@@ -465,7 +479,8 @@ func describe(event: Dictionary) -> String:
 		"boss_phase":
 			return "Phase %d - %s: %s" % [int(event["phase"]), event["name"], event["text"]]
 		"match_ended":
-			return "Victory! The Forest is behind you." if event["result"] == "victory" else "Defeat. The Forest wins this time."
+			var region := UiText.region_of(match_view())
+			return "Victory! The %s is behind you." % region if event["result"] == "victory" else "Defeat. The %s wins this time." % region
 		"status_applied":
 			if str(event.get("kind", "")) == "dot":
 				return "%s suffers %s (x%d, %d turns)." % [name_of(str(event["target"])), event["name"],
@@ -490,7 +505,7 @@ func _describe_action(event: Dictionary) -> String:
 	if event.has("move_name"):
 		what = "uses %s" % event["move_name"]
 	if event.has("item"):
-		what = "uses %s" % str(event["item"]).replace("_", " ").capitalize()
+		what = "uses %s" % BattleView.item_display_name(str(event["item"]))
 	var parts: Array[String] = []
 	for result in event.get("results", []):
 		var target := name_of(str(result["target"]))
@@ -551,7 +566,7 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				elif event.has("skill"):
 					named = str(event["skill"]).replace("_", " ").capitalize()
 				elif event.has("item"):
-					named = str(event["item"]).replace("_", " ").capitalize()
+					named = BattleView.item_display_name(str(event["item"]))
 				if not named.is_empty():
 					_battle.announce(named)
 			var hurt := false
@@ -572,6 +587,13 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 		"vote_resolved":
 			client.banner("Next: %s" % event["name"], 2.2, "vote")
 		"combat_ended":
+			_float_generation += 1
+			_float_stack.clear()
+			for label in get_tree().get_nodes_in_group("combat_floating_text"):
+				if is_instance_valid(label):
+					label.queue_free()
+			if is_instance_valid(_battle):
+				_battle.clear_turn_notice()
 			var rewards: Dictionary = event.get("rewards", {})
 			if event["result"] == "victory" and int(rewards.get("exp", 0)) > 0:
 				_announce(client, "Victory! +%d EXP, +%d Gold" % [int(rewards["exp"]), int(rewards.get("gold", 0))], 2.5, "good")

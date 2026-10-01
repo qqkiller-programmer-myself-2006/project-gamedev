@@ -12,16 +12,22 @@ extends Control
 ## Keys: A Attack, S Skill, D Defend, I Item, 1-9 pick a card or target,
 ## Esc back. Tokens and cards are buttons, so Tab/arrows + Enter work too.
 
+const CONTENT_PATH := "res://content/forest.json"
+static var _content_cache: Dictionary = {}
+static var _content_loaded := false
+
 ## Where one-time tips appear while the battle is on screen.
 var tips: VBoxContainer
 
 var _screen: MatchScreen
 var _app: ClientApp
 var _combat: Dictionary = {}
+var _latest_view: Dictionary = {}
 var _me := ""
 var _deadline: Variant = null
 var _countdown: Label
 var _window_seconds := 15.0
+var _last_countdown_color := Color.TRANSPARENT
 ## Actor shown last time, so the timeline only animates when the turn moves.
 var _last_actor := ""
 ## Callables for keys 1-9 in the current list (cards or targets).
@@ -29,7 +35,6 @@ var _choices: Array[Callable] = []
 ## Token id -> [x, y] fraction of the stage for its top-left corner.
 var _spots: Dictionary = {}
 var _tokens: Dictionary = {}
-var _previous_tokens: Dictionary = {}
 
 var _stage: Control
 var _backdrop: BattleBackdrop
@@ -49,6 +54,7 @@ var _banner_label: Label
 var _banner_tween: Tween = null
 var _menu_panel: PanelContainer
 var _combat_grid: Control
+var _target_caption: Control
 
 
 func setup(screen: MatchScreen, app: ClientApp) -> void:
@@ -150,7 +156,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	bottom_left.offset_bottom = -10
 	bottom_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_log = UiKit.pixel_label("", "small", UiKit.TEXT_DIM)
-	_log.custom_minimum_size = Vector2(220, 0)
+	_log.custom_minimum_size = Vector2(180, 0)
 	_log.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_log.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_log.max_lines_visible = 4
@@ -158,7 +164,10 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_log.add_theme_constant_override("outline_size", 3)
 	_rewards = UiKit.vbox(0)
 	bottom_left.add_child(_rewards)
-	bottom_left.add_child(_log)
+	var log_panel := UiKit.panel(_log, "HudPanel")
+	log_panel.custom_minimum_size = Vector2(180, 0)
+	log_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bottom_left.add_child(log_panel)
 	add_child(bottom_left)
 
 	_bottom = UiKit.vbox(6)
@@ -187,10 +196,10 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 
 ## Rebuilds everything that depends on the snapshot.
 func build(view: Dictionary, combat: Dictionary) -> void:
+	_latest_view = view
 	_combat = combat
 	var encounter: Dictionary = view.get("encounter", {}) if view.get("encounter") is Dictionary else {}
-	var content_file := FileAccess.open("res://content/forest.json", FileAccess.READ)
-	var content: Dictionary = JSON.parse_string(content_file.get_as_text()) if content_file != null else {}
+	var content := _content()
 	var boss := str(encounter.get("kind", "")) == "boss"
 	var backdrop_name := str(encounter.get("backdrop", content.get("boss", {}).get("backdrop", ""))) if boss else str(content.get("journey", {}).get("backdrops", {}).get(str(view.get("layer", 1)), ""))
 	_backdrop.set_backdrop(backdrop_name)
@@ -212,6 +221,15 @@ func build(view: Dictionary, combat: Dictionary) -> void:
 	tick()
 
 
+static func _content() -> Dictionary:
+	if not _content_loaded:
+		_content_loaded = true
+		var content_file := FileAccess.open(CONTENT_PATH, FileAccess.READ)
+		var parsed = JSON.parse_string(content_file.get_as_text()) if content_file != null else {}
+		_content_cache = parsed if parsed is Dictionary else {}
+	return _content_cache
+
+
 func tick() -> void:
 	if _countdown == null or not is_instance_valid(_countdown):
 		return
@@ -224,7 +242,10 @@ func tick() -> void:
 		return
 	var left := _app.seconds_left(_deadline)
 	_countdown.text = "%ds" % ceili(left)
-	_countdown.add_theme_color_override("font_color", UiKit.WARN if left <= 5.0 else UiKit.TEXT)
+	var countdown_color := UiKit.WARN if left <= 5.0 else UiKit.TEXT
+	if countdown_color != _last_countdown_color:
+		_countdown.add_theme_color_override("font_color", countdown_color)
+		_last_countdown_color = countdown_color
 	if _combat.get("your_turn", false):
 		_screen.warn_if_short(_deadline, left)
 
@@ -281,6 +302,8 @@ func announce(text: String) -> void:
 	if not str(_combat.get("result", "")).is_empty():
 		return
 	if text == "Your turn!":
+		if _combat.get("result", "") != "":
+			return
 		_turn_notice.text = text
 		_turn_notice.visible = true
 		var notice_tween := create_tween()
@@ -313,7 +336,7 @@ func _set_action_row_visible(visible: bool) -> void:
 
 func add_log(line: String) -> void:
 	_log_lines.append(line)
-	while _log_lines.size() > 3:
+	while _log_lines.size() > 4:
 		_log_lines.pop_front()
 	_log.text = "\n".join(_log_lines)
 
@@ -338,6 +361,16 @@ func handle_event(event: Dictionary) -> void:
 				token.play_animation("hurt")
 		elif bool(result.get("revived", false)):
 			token.play_animation("revive")
+	if is_inside_tree():
+		var tween := create_tween()
+		tween.tween_interval(0.3 if not _app.settings.reduced_motion else 0.0)
+		tween.tween_callback(animate_bars)
+
+
+func animate_bars() -> void:
+	for token in _tokens.values():
+		if is_instance_valid(token):
+			(token as BattleToken).animate_bars()
 
 
 # --- Parts --------------------------------------------------------------------
@@ -347,7 +380,7 @@ func _build_region(view: Dictionary) -> void:
 	var total := int(view.get("layers_total", 5))
 	var encounter = view.get("encounter")
 	_region.text = "%s (%d/%d)" % [UiText.region_of(view), int(view.get("layer", 0)), total]
-	var sub := "\"%s\"\nAll" % _encounter_title(view)
+	var sub := "\"%s\"" % _encounter_title(view)
 	if _combat.get("trial", false):
 		sub = "Challenge  %d/%d" % [int(_combat.get("round", 1)), int(_combat.get("round_limit", 3))]
 	_region_sub.text = sub
@@ -477,11 +510,6 @@ func _controller_tag(id: String, unit: Dictionary) -> Array:
 
 
 func _build_stage(view: Dictionary) -> void:
-	_previous_tokens = _tokens.duplicate()
-	for child in _stage.get_children():
-		_stage.remove_child(child)
-		child.queue_free()
-	_tokens.clear()
 	_spots.clear()
 	var statuses: Dictionary = _combat.get("statuses", {})
 	var party: Array = view.get("party", [])
@@ -505,14 +533,14 @@ func _build_stage(view: Dictionary) -> void:
 						int(character["mag"]), int(character["res"]), int(character["spd"])],
 			}
 			var px: float = [300.0, 460.0, 620.0][slot] if slot < 3 else [380.0, 540.0][slot - 3]
-			var py: float = 300.0 if slot < 3 else 480.0
+			var py: float = 220.0 if slot < 3 else 390.0
 			_spots[id] = [px / 1280.0, py / 720.0]
 			_add_token(data)
 	var enemies: Array = _combat.get("enemies", [])
 	var fronts: Array = enemies.filter(func(e): return e["row"] == "front")
 	var backs: Array = enemies.filter(func(e): return e["row"] != "front")
 	var boss: bool = view.get("encounter") != null and view["encounter"].get("kind") == "boss"
-	for group in [[fronts, [800.0, 960.0, 1120.0], 300.0], [backs, [880.0, 1040.0], 480.0]]:
+	for group in [[fronts, [800.0, 960.0, 1120.0], 220.0], [backs, [880.0, 1040.0], 390.0]]:
 		var list: Array = group[0]
 		for i in list.size():
 			var enemy: Dictionary = list[i]
@@ -525,6 +553,7 @@ func _build_stage(view: Dictionary) -> void:
 				"energy": enemy["energy"] if enemy.has("energy") else null,
 				"energy_max": enemy.get("energy_max", 4), "statuses": statuses.get(id, enemy.get("statuses", [])),
 				"acting": _combat.get("actor", "") == id,
+				"trainer": bool(_combat.get("trial", false)),
 				"sprite": sprite_name, "sprite_variant": enemy.get("sprite_variant", ""),
 				"tooltip": "%s\n%s%s" % [_screen.name_of(id), enemy.get("description", ""),
 						("\nWeak to: " + ", ".join(weakness)) if not weakness.is_empty() else ""],
@@ -545,17 +574,25 @@ func _build_stage(view: Dictionary) -> void:
 		token.set_target(i + 1, pick)
 		_choices.append(pick)
 	_place_tokens()
-	_previous_tokens.clear()
+	var active_ids: Array[String] = []
+	for id in _spots:
+		active_ids.append(str(id))
+	for id in _tokens.keys():
+		if not active_ids.has(str(id)):
+			var stale: BattleToken = _tokens[id]
+			_stage.remove_child(stale)
+			stale.queue_free()
+			_tokens.erase(id)
 
 
 func _add_token(data: Dictionary) -> void:
-	var token := BattleToken.new()
-	token.text_scale = _app.settings.text_scale
+	var token: BattleToken = _tokens.get(data["id"])
+	if token == null:
+		token = BattleToken.new()
+		token.text_scale = _app.settings.text_scale
+		_stage.add_child(token)
 	token.setup(data)
-	var previous: BattleToken = _previous_tokens.get(data["id"])
-	if previous != null:
-		token.continue_animation(previous)
-	_stage.add_child(token)
+	_stage.move_child(token, _stage.get_child_count() - 1)
 	_tokens[data["id"]] = token
 	_screen.anchors[data["id"]] = token
 
@@ -571,6 +608,7 @@ func _place_tokens() -> void:
 
 func _build_bottom(view: Dictionary) -> void:
 	UiKit.clear(_bottom)
+	_turn_notice.visible = false if not _combat.get("result", "").is_empty() else _turn_notice.visible
 	if _combat_grid != null and is_instance_valid(_combat_grid):
 		_combat_grid.queue_free()
 	_combat_grid = null
@@ -583,18 +621,29 @@ func _build_bottom(view: Dictionary) -> void:
 		_combat_grid = _card_grid(mode, choices)
 		_combat_grid.set_anchors_preset(Control.PRESET_CENTER_TOP)
 		_combat_grid.grow_horizontal = Control.GROW_DIRECTION_BOTH
-		_combat_grid.offset_left = -365
-		_combat_grid.offset_right = 365
-		_combat_grid.offset_top = 360
-		_combat_grid.custom_minimum_size = Vector2(730, 0)
-		_combat_grid.visible = not _banner.visible
+		_combat_grid.offset_left = -480
+		_combat_grid.offset_right = 480
+		_combat_grid.offset_top = 460
+		_combat_grid.custom_minimum_size = Vector2(960, 0)
+		_combat_grid.visible = true
 		_combat_grid.z_index = 5
 		add_child(_combat_grid)
-	elif your_turn and not mode.is_empty():
+	if _target_caption != null and is_instance_valid(_target_caption):
+		_target_caption.queue_free()
+	_target_caption = null
+	if your_turn and not mode.is_empty() and not (mode in ["skills", "items"]):
 		var caption := UiKit.pixel_label("Choose a target on the field (1-%d), Esc to go back" % _choices.size(), "body", UiKit.ACCENT)
 		caption.add_theme_color_override("font_outline_color", Color.BLACK)
 		caption.add_theme_constant_override("outline_size", 5)
-		_bottom.add_child(_centered(caption))
+		caption.set_anchors_preset(Control.PRESET_CENTER_TOP)
+		caption.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		caption.offset_top = 142
+		caption.offset_bottom = 174
+		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		caption.z_index = 20
+		_target_caption = caption
+		add_child(caption)
 
 	var hud := UiKit.vbox(6)
 	hud.custom_minimum_size = Vector2(510, 0)
@@ -654,7 +703,7 @@ func _build_bottom(view: Dictionary) -> void:
 	if your_turn and not choices.get("skills", {}).is_empty():
 		var squares := UiKit.hbox(4)
 		squares.size_flags_vertical = Control.SIZE_SHRINK_END
-		var hourglass := UiKit.panel(UiKit.pixel_label("...", "heading", UiKit.TEXT_DIM), "HudPanel")
+		var hourglass := UiKit.panel(UiKit.pixel_label("TIME", "tiny", UiKit.TEXT_DIM), "HudPanel")
 		hourglass.custom_minimum_size = Vector2(38, 42)
 		hourglass.tooltip_text = UiText.LABELS["action_window"]
 		squares.add_child(hourglass)
@@ -662,11 +711,13 @@ func _build_bottom(view: Dictionary) -> void:
 			var info_skill: Dictionary = choices["skills"][skill_id]
 			var left := int(info_skill["cooldown"])
 			var mark := UiKit.vbox(0)
-			var initial := UiKit.pixel_label(str(info_skill["name"]).substr(0, 1), "small", UiKit.TEXT_DIM)
-			initial.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			mark.add_child(initial)
+			var skill_name := UiKit.pixel_label(str(info_skill["name"]), "tiny", UiKit.TEXT)
+			skill_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			skill_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			skill_name.max_lines_visible = 2
+			mark.add_child(skill_name)
 			var affordable := bool(info_skill.get("affordable", true))
-			var state := "OK"
+			var state := "READY"
 			var state_color := UiKit.GOOD
 			if left > 0:
 				state = str(left)
@@ -678,7 +729,7 @@ func _build_bottom(view: Dictionary) -> void:
 			count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			mark.add_child(count)
 			var square := UiKit.panel(mark, "HudPanel")
-			square.custom_minimum_size = Vector2(38, 42)
+			square.custom_minimum_size = Vector2(58, 50)
 			var why := "ready"
 			if left > 0:
 				why = "%d turn(s) of cooldown left" % left
@@ -690,11 +741,29 @@ func _build_bottom(view: Dictionary) -> void:
 	_bottom.add_child(row)
 
 
+func _refresh_local_mode() -> void:
+	_choices.clear()
+	for id in _tokens:
+		(_tokens[id] as BattleToken).set_target(0, Callable())
+	var targets := _current_targets()
+	for i in targets.size():
+		var target_id := str(targets[i])
+		var token: BattleToken = _tokens.get(target_id)
+		if token == null:
+			continue
+		var command := _target_command(target_id)
+		var pick := func() -> void: _send(command)
+		token.set_target(i + 1, pick)
+		_choices.append(pick)
+	_build_bottom(_latest_view)
+	UiKit.focus_first(_bottom)
+
+
 ## Grid of cards for Skills (with Attack and Defend first, like the
 ## reference's Strike and Guard) or Items (05).
 func _card_grid(mode: String, choices: Dictionary) -> Control:
 	var grid := GridContainer.new()
-	grid.columns = 3
+	grid.columns = 4
 	grid.add_theme_constant_override("h_separation", 6)
 	grid.add_theme_constant_override("v_separation", 6)
 	if mode == "skills":
@@ -724,9 +793,9 @@ func _card_grid(mode: String, choices: Dictionary) -> Control:
 		for item_id in choices.get("items", {}):
 			var info: Dictionary = choices["items"][item_id]
 			var usable: bool = not info["targets"].is_empty()
-			var pretty: String = item_id.replace("_", " ").capitalize()
+			var pretty := item_display_name(item_id)
 			var pick := func() -> void: _pick_item(item_id, info)
-			grid.add_child(_card("%s x%d" % [pretty, int(info["count"])], _item_description(item_id), "items",
+			grid.add_child(_card("%s x%d" % [pretty, int(info["count"])], "%d available" % int(info["count"]), "items",
 					-1, usable, _item_description(item_id), pick))
 	var holder := UiKit.panel(grid, "HudPanel")
 	return _centered(holder)
@@ -736,7 +805,7 @@ func _card(title: String, sub: String, icon_name: String, energy_cost: int, usab
 	var number := _choices.size() + 1
 	var button := Button.new()
 	button.theme_type_variation = "HudButton"
-	button.custom_minimum_size = Vector2(232, 50)
+	button.custom_minimum_size = Vector2(232, 72 if _app.settings.text_scale >= 1.35 else 50)
 	button.focus_mode = Control.FOCUS_ALL
 	button.disabled = not usable
 	button.tooltip_text = tip
@@ -758,7 +827,9 @@ func _card(title: String, sub: String, icon_name: String, energy_cost: int, usab
 	text.alignment = BoxContainer.ALIGNMENT_CENTER
 	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var name_label := UiKit.pixel_label("[%d] %s" % [number, title], "body", UiKit.TEXT if usable else UiKit.TEXT_DIM)
-	name_label.clip_text = true
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	name_label.max_lines_visible = 2
+	name_label.clip_text = false
 	text.add_child(name_label)
 	var sub_row := UiKit.hbox(4)
 	if energy_cost >= 0:
@@ -780,6 +851,7 @@ func _build_result() -> void:
 	# Turn order is irrelevant after the fight and can crowd longer reward lists.
 	_timeline.visible = outcome.is_empty()
 	if not outcome.is_empty():
+		_turn_notice.visible = false
 		if _banner_tween != null:
 			_banner_tween.kill()
 		_banner.visible = false
@@ -802,6 +874,10 @@ func _build_result() -> void:
 		"defeat":
 			_center_text.text = "The Party has fallen..."
 			_center_text.add_theme_color_override("font_color", UiKit.ENEMY)
+
+
+func clear_turn_notice() -> void:
+	_turn_notice.visible = false
 
 
 func _reward_line(text: String, color: Color) -> Label:
@@ -881,7 +957,7 @@ func _pick_item(item_id: String, info: Dictionary) -> void:
 
 func _set_mode(mode: String) -> void:
 	_screen.combat_mode = mode
-	_screen.refresh(_app, true)
+	_refresh_local_mode()
 
 
 func _send(cmd: Dictionary) -> void:
@@ -895,6 +971,11 @@ func _item_description(item_id: String) -> String:
 		if entry["item"] == item_id:
 			return str(entry["description"])
 	return ""
+
+
+static func item_display_name(item_id: String) -> String:
+	var item: Dictionary = _content().get("items", {}).get(item_id, {})
+	return str(item.get("name", item_id.replace("_", " ").capitalize()))
 
 
 func _action_button(text: String, id: String, callback: Callable, active: bool) -> Button:

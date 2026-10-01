@@ -25,6 +25,19 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	var solo := ClientApp.is_story_view(view)
 	add_child(UiKit.para("Choose your path" if solo else "Layer %d of %d: choose the next path" % [int(vote["layer"]), int(view["layers_total"])], "title"))
 	add_child(UiKit.para("Choose one path." if solo else "Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random.", "dim"))
+	var timer_row := UiKit.hbox(10)
+	_countdown = UiKit.label("", "heading")
+	timer_row.add_child(_countdown)
+	_bar = ProgressBar.new()
+	_bar.show_percentage = false
+	_bar.max_value = maxf(1.0, float(vote.get("seconds", 20.0)))
+	_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_bar.custom_minimum_size = Vector2(0, 14)
+	timer_row.add_child(_bar)
+	if not view.get("story", false):
+		add_child(timer_row)
+	if not solo:
+		add_child(UiKit.para(_voter_status(screen, view, vote)))
 	if _options.is_empty():
 		add_child(UiKit.para("No routes available.", "dim"))
 	else:
@@ -38,19 +51,6 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 			for i in range(1, _options.size()):
 				alt_row.add_child(_compact_card(screen, app, _options[i]))
 			add_child(alt_row)
-	if not solo:
-		add_child(UiKit.para(_voter_status(screen, view, vote)))
-	var timer_row := UiKit.hbox(10)
-	_countdown = UiKit.label("", "heading")
-	timer_row.add_child(_countdown)
-	_bar = ProgressBar.new()
-	_bar.show_percentage = false
-	_bar.max_value = maxf(1.0, float(vote.get("seconds", 20.0)))
-	_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_bar.custom_minimum_size = Vector2(0, 14)
-	timer_row.add_child(_bar)
-	if not view.get("story", false):
-		add_child(timer_row)
 	tick(screen, app)
 	if not solo:
 		app.hint("vote")
