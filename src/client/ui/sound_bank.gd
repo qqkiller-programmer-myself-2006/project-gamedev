@@ -19,7 +19,7 @@ const CUE_ASSETS := {
 	"cancel": "res://assets/audio/sfx/ui_cancel.ogg",
 	"error": "res://assets/audio/sfx/ui_error.ogg",
 	"sword_hit": "res://assets/audio/sfx/sword_hit.ogg",
-	"enemy_death": "res://assets/audio/sfx/hit.ogg",
+	"enemy_death": "res://assets/audio/sfx/enemy_death.ogg",
 	"player_down": "res://assets/audio/sfx/player_down.ogg",
 	"level_up": "res://assets/audio/sfx/level_up.ogg",
 	"loot_pickup": "res://assets/audio/sfx/loot_pickup.ogg",

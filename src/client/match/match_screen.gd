@@ -614,8 +614,15 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 			var healed := false
 			var buffed := false
 			var debuffed := false
+			var enemy_down := false
+			var player_down := false
 			for result in event.get("results", []):
 				var target := str(result["target"])
+				if bool(result.get("down", false)):
+					if target.begins_with("p"):
+						player_down = true
+					else:
+						enemy_down = true
 				if result.has("damage"):
 					hurt = hurt or int(result.get("damage", 0)) > 0
 					missed = missed or bool(result.get("dodged", false))
@@ -645,9 +652,13 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 				client.sounds.play("buff")
 			if debuffed:
 				client.sounds.play("debuff")
+			if enemy_down:
+				client.sounds.play("enemy_death")
+			if player_down:
+				client.sounds.play("player_down")
 			if critical:
 				client.sounds.play("critical")
-			elif hurt and not spell_skill and not has_status_sound:
+			elif hurt and not spell_skill and not has_status_sound and not enemy_down and not player_down:
 				client.sounds.play("hit")
 			elif missed and not hurt and not has_status_sound:
 				client.sounds.play("miss")
