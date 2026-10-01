@@ -2,6 +2,8 @@ extends SceneTree
 ## Extract player-facing content strings into a gettext POT and Thai PO catalog.
 
 const INPUTS := ["content/forest.json", "content/story_mode.json"]
+const UI_TEXT_PATH := "res://src/client/ui/ui_text.gd"
+const UI_TEXT_GROUPS := ["ERRORS", "TYPE_LABELS", "TYPE_TAGS", "TYPE_HELP", "HINTS", "CONFIRM", "LABELS", "EMPTY", "WHY"]
 const POT_PATH := "i18n/messages.pot"
 const PO_PATH := "i18n/th.po"
 
@@ -23,11 +25,25 @@ func _init() -> void:
 			quit(1)
 			return
 		_walk(parsed, input_path, "")
+	var ui_text = load(UI_TEXT_PATH)
+	for group in UI_TEXT_GROUPS:
+		_add_ui_value(ui_text.get_script_constant_map()[group], group)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://i18n"))
 	_write_pot()
 	_write_po()
 	print("Extracted %d msgids" % _messages.size())
 	quit(0)
+
+
+func _add_ui_value(value: Variant, path: String) -> void:
+	if value is Dictionary:
+		for key in value:
+			_add_ui_value(value[key], "%s.%s" % [path, str(key)])
+	elif value is Array:
+		for index in value.size():
+			_add_ui_value(value[index], "%s[%d]" % [path, index])
+	elif value is String:
+		_add_message(value, "src/client/ui/ui_text.gd:%s" % path)
 
 
 func _walk(value: Variant, source: String, path: String) -> void:

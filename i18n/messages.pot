@@ -21,6 +21,14 @@ msgstr ""
 msgid "\"You were carrying his journal, lad, and shaking. You kept saying: it asks for a life. Then you slept for three days.\""
 msgstr ""
 
+#: src/client/ui/ui_text.gd:LABELS.gems
+msgid "%d Gems"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:LABELS.gold
+msgid "%d Gold"
+msgstr ""
+
 #: content/forest.json:story.events.hollow_tree.outcome.text
 msgid "'If the Chalice asks a price, I will pay it. Not you. Not the children. Never the children.'"
 msgstr ""
@@ -113,6 +121,14 @@ msgstr ""
 msgid "5% Lifesteal."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:LABELS.dialogue_hint
+msgid "> Next [Enter]     Skip [Esc]"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:TYPE_HELP.class
+msgid "A Challenge that can teach a new Class."
+msgstr ""
+
 #: content/forest.json:story.clues.wolf_collar.text
 msgid "A brass token from the western port, found among the wolves' leavings. Father bought passage there once."
 msgstr ""
@@ -129,6 +145,10 @@ msgstr ""
 msgid "A cavern spider that weakens its prey with venomous webs."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:TYPE_HELP.story
+msgid "A clue about Father's journey."
+msgstr ""
+
 #: content/forest.json:items.boar_tusk.description
 msgid "A curved, heavy tusk. Crafting material."
 msgstr ""
@@ -139,6 +159,10 @@ msgstr ""
 
 #: content/forest.json:enemies.kobold.description
 msgid "A fast spear skirmisher that darts in before foes can react."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:TYPE_HELP.combat
+msgid "A fight for EXP, Gold and maybe Items."
 msgstr ""
 
 #: content/forest.json:skills.power_slash.description
@@ -225,8 +249,20 @@ msgstr ""
 msgid "A wave, a lighthouse and an upside-down cup: the road leads past the last lighthouse, beyond the sea."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.ai_cannot_vote
+msgid "AI-controlled characters do not vote."
+msgstr ""
+
 #: content/forest.json:journey.sites.treasure[0].name
 msgid "Abandoned Cabin"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:HINTS.class_offer
+msgid "Accept [Y] to take this Class, or Decline [N] to stay Classless and wait for another. Several characters can share a Class."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:LABELS.action_window
+msgid "Action window"
 msgstr ""
 
 #: content/forest.json:meta.passives.adaptable.name
@@ -301,6 +337,10 @@ msgstr ""
 msgid "Assassin"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:TYPE_TAGS.boss
+msgid "BOSS"
+msgstr ""
+
 #: content/forest.json:classes.swordsman.description
 msgid "Balanced and dependable. Strong melee strikes, solid health."
 msgstr ""
@@ -369,6 +409,18 @@ msgstr ""
 msgid "Bull Rush"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:TYPE_TAGS.choice
+msgid "CHOICE"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:TYPE_TAGS.class
+msgid "CLASS"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:HINTS.rest
+msgid "Camp: craft from materials on the left, equip gear from the shared bag in the middle, and spend stat points on the right. Press [R] when you are done; the camp moves on when every player is Ready."
+msgstr ""
+
 #: content/forest.json:journey.sites.story[1].name
 msgid "Carved Stone"
 msgstr ""
@@ -379,6 +431,10 @@ msgstr ""
 
 #: content/forest.json:journey.sites.combat[4].name
 msgid "Cave Mouth"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:LABELS.chapter
+msgid "Chapter %d"
 msgstr ""
 
 #: content/forest.json:items.tusk_charm.description
@@ -401,7 +457,15 @@ msgstr ""
 msgid "Chest gear: +2 MAG, +2 RES."
 msgstr ""
 
-#: content/forest.json:journey.type_labels.class
+#: src/client/ui/ui_text.gd:TYPE_LABELS.choice
+msgid "Choice"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_class
+msgid "Choose one of the available Classes."
+msgstr ""
+
+#: content/forest.json:journey.type_labels.class src/client/ui/ui_text.gd:TYPE_LABELS.class
 msgid "Class Encounter"
 msgstr ""
 
@@ -417,6 +481,10 @@ msgstr ""
 msgid "Claw-Marked Shield"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:LABELS.clues_tip
+msgid "Clues [C]"
+msgstr ""
+
 #: content/forest.json:skills.prep_time.description
 msgid "Coat your weapon with poison: your next 3 damaging actions also apply Poison. Costs 1 Energy. Cooldown: 6 turns."
 msgstr ""
@@ -429,12 +497,24 @@ msgstr ""
 msgid "Cold ashes and a familiar knot in the rope. Was Father here?"
 msgstr ""
 
-#: content/forest.json:journey.type_labels.combat
+#: content/forest.json:journey.type_labels.combat src/client/ui/ui_text.gd:TYPE_LABELS.combat
 msgid "Combat"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:LABELS.connecting
+msgid "Connecting to %s ..."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:LABELS.continue
+msgid "Continue [Enter]"
 msgstr ""
 
 #: content/forest.json:party.members[2].name
 msgid "Cora"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.cannot_connect
+msgid "Could not reach the server. Check the address and try again."
 msgstr ""
 
 #: content/forest.json:meta.passives.masterwork.text
@@ -477,6 +557,14 @@ msgstr ""
 msgid "Deep marks are cut into a standing stone: a wave, a lighthouse, and a cup drawn upside down. Beneath them, a single letter: E. Father's initial."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.dev_offline_only
+msgid "Developer shortcuts only work in the local Playtest."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:HINTS.dot
+msgid "DoTs (Bleed BLD, Poison PSN, Toxin TOX) hurt at the start of each of their holder's turns, ignoring armour. The badge shows stacks (x) and turns left (t)."
+msgstr ""
+
 #: content/forest.json:enemies.masked_outlaw.special.name
 msgid "Double Strike"
 msgstr ""
@@ -493,6 +581,10 @@ msgstr ""
 msgid "Dwarven Resilience"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:HINTS.merchant
+msgid "Each character buys with their own Gold, and you can Transfer Gold to a friend. Press [R] when you are done; the shop closes when everyone is ready."
+msgstr ""
+
 #: content/forest.json:boss.name content/forest.json:enemies.elder_thornwarden.name
 msgid "Elder Thornwarden"
 msgstr ""
@@ -505,6 +597,10 @@ msgstr ""
 msgid "Elf"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:HINTS.energy
+msgid "Energy (the blue bar) pays for Skills: you start each Combat with 1 and regain 1 every later turn, up to 6. Strike, Guard, Focus and Items are free."
+msgstr ""
+
 #: content/forest.json:meta.boons["Energy%20Conserver"]
 msgid "Energy Conserver"
 msgstr ""
@@ -515,6 +611,18 @@ msgstr ""
 
 #: content/forest.json:story.clues.tin_cup.text
 msgid "Engraved with Mother's name. He carried it the whole way."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_amount
+msgid "Enter an amount of at least 1."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:CONFIRM.reset_skills[1]
+msgid "Every Skill Tree level of the %s Class goes back to 0. This costs %d Gems."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:TYPE_TAGS.combat
+msgid "FIGHT"
 msgstr ""
 
 #: content/story_mode.json:chapters[5].subtitle
@@ -593,6 +701,10 @@ msgstr ""
 msgid "Firebomb"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:WHY.focus_unavailable
+msgid "Focus is not available right now."
+msgstr ""
+
 #: content/forest.json:journey.sites.combat[0].name
 msgid "Follow the Stream"
 msgstr ""
@@ -613,12 +725,20 @@ msgstr ""
 msgid "Frail"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:TYPE_HELP.treasure
+msgid "Free Gold or Items."
+msgstr ""
+
 #: content/forest.json:journey.sites.combat[0].hint
 msgid "Fresh tracks in the mud. Something hunts along the water."
 msgstr ""
 
 #: content/forest.json:skills.frost_lance.name
 msgid "Frost Lance"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:WHY.focus_ready
+msgid "Gain Energy and Dodge this turn."
 msgstr ""
 
 #: content/forest.json:enemies.giant_spider.name
@@ -637,6 +757,10 @@ msgstr ""
 msgid "Golem Watch"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:LABELS.got_it
+msgid "Got it [H]"
+msgstr ""
+
 #: content/forest.json:meta.passives.grace.name
 msgid "Grace"
 msgstr ""
@@ -651,6 +775,10 @@ msgstr ""
 
 #: content/story_mode.json:chapters[5].title
 msgid "Guardian Beneath the Forest"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:TYPE_LABELS.boss
+msgid "Guardian Boss"
 msgstr ""
 
 #: content/forest.json:boss.title
@@ -729,6 +857,10 @@ msgstr ""
 msgid "Inside a lightning-split oak, wrapped in oilcloth, is a letter addressed to Mother in Father's hand. It was never sent."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.not_your_turn
+msgid "It is not your turn."
+msgstr ""
+
 #: content/forest.json:boss.phases[2].text
 msgid "Its glowing heart is laid bare. The Thornwarden fights with everything it has left!"
 msgstr ""
@@ -741,12 +873,32 @@ msgstr ""
 msgid "Kobold"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:TYPE_TAGS.treasure
+msgid "LOOT"
+msgstr ""
+
 #: content/forest.json:story.events.ranger_hut.choices[1].hint
 msgid "Learn what happened to Wren."
 msgstr ""
 
 #: content/forest.json:story.events.ranger_hut.choices[0].hint
 msgid "Learn where he went."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:CONFIRM.leave_match[2]
+msgid "Leave Match"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:CONFIRM.leave_room[2]
+msgid "Leave room"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:CONFIRM.leave_match[0]
+msgid "Leave the Match?"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:CONFIRM.leave_room[0]
+msgid "Leave the room?"
 msgstr ""
 
 #: content/story_mode.json:scenes.first_combat_won[1].text
@@ -817,7 +969,11 @@ msgstr ""
 msgid "Mends wounded allies and hurls spirit fire when none need healing."
 msgstr ""
 
-#: content/forest.json:journey.type_labels.merchant
+#: src/client/ui/ui_text.gd:LABELS.menu_tip
+msgid "Menu [Esc]"
+msgstr ""
+
+#: content/forest.json:journey.type_labels.merchant src/client/ui/ui_text.gd:TYPE_LABELS.merchant
 msgid "Merchant"
 msgstr ""
 
@@ -837,12 +993,72 @@ msgstr ""
 msgid "Next time, we reach the Guardian in the cave together."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:EMPTY.boons
+msgid "No Boons equipped. Pick one from the middle column."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.nothing_to_reset
+msgid "No Skill Tree levels to reset for this Class."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.skill_unavailable
+msgid "No Skill yet. Find a Class at a Class Encounter first."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:EMPTY.clues
+msgid "No clues yet. Story Events (and some fights) reveal where Father went."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:EMPTY.recipes
+msgid "No recipes to craft right now. Gather materials in fights first."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:EMPTY.records
+msgid "No records yet. Finish a Match to start your history."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.room_not_found
+msgid "No room uses that code. Check it with your friend."
+msgstr ""
+
 #: content/forest.json:classes.classless.description
 msgid "No special training yet. Can Attack, Defend and use Items."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.no_points
+msgid "No stat points left to spend."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:WHY.invest_none
+msgid "No stat points to spend. Level up to earn more."
+msgstr ""
+
 #: content/forest.json:journey.sites.treasure[0].hint
 msgid "Nobody has lived here for years. Maybe something was left behind."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.not_enough_energy
+msgid "Not enough Energy. Attack, Defend or wait a turn to regain it."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:WHY.need_gems
+msgid "Not enough Gems: this costs %d, you have %d."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:WHY.need_gold
+msgid "Not enough Gold: this costs %d."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:EMPTY.stash
+msgid "Nothing in the stash yet. Items you find land here."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.nothing_equipped
+msgid "Nothing is worn there."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:EMPTY.search
+msgid "Nothing matches \"%s\". Clear the search to see everything."
 msgstr ""
 
 #: content/forest.json:journey.sites.story[0].name
@@ -869,6 +1085,14 @@ msgstr ""
 msgid "One fight down. The Forest is testing us already."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:WHY.transfer_unavailable
+msgid "Only a character carrying Gold can transfer it."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.not_host
+msgid "Only the Host can start the Match."
+msgstr ""
+
 #: content/forest.json:journey.sites.combat[3].name
 msgid "Overgrown Road"
 msgstr ""
@@ -877,8 +1101,24 @@ msgstr ""
 msgid "Past the Last Light"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:HINTS.vote
+msgid "Path Voting: every player has one vote and AI never votes. The most votes wins; ties are broken at random. Press 1-3 to vote."
+msgstr ""
+
 #: content/forest.json:items.pelt_boots.name
 msgid "Pelt Boots"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_target
+msgid "Pick one of the highlighted targets."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_name
+msgid "Please enter a display name."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_stat
+msgid "Points cannot go into that stat."
 msgstr ""
 
 #: content/forest.json:statuses.poison.name
@@ -905,6 +1145,10 @@ msgstr ""
 msgid "Protect"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.race_not_owned
+msgid "Purchase this Race before selecting it."
+msgstr ""
+
 #: content/forest.json:journey.sites.rest[0].name
 msgid "Quiet Glade"
 msgstr ""
@@ -915,6 +1159,14 @@ msgstr ""
 
 #: content/forest.json:crafting.categories[4] content/forest.json:items.bramble_quiver.category
 msgid "Quivers"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:TYPE_TAGS.rest
+msgid "REST"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:WHY.prestige_locked
+msgid "Raise every Skill Tree node to 5/5 first."
 msgstr ""
 
 #: content/forest.json:skills.shield_wall.description
@@ -933,11 +1185,23 @@ msgstr ""
 msgid "Reads every page of Father's journal twice."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:TYPE_HELP.rest
+msgid "Recover HP, craft gear and spend stat points."
+msgstr ""
+
 #: content/forest.json:enemies.grey_wolf.special.name
 msgid "Rend"
 msgstr ""
 
-#: content/forest.json:journey.type_labels.rest
+#: src/client/ui/ui_text.gd:CONFIRM.reset_skills[2]
+msgid "Reset Skills"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:CONFIRM.reset_skills[0]
+msgid "Reset Skills?"
+msgstr ""
+
+#: content/forest.json:journey.type_labels.rest src/client/ui/ui_text.gd:TYPE_LABELS.rest
 msgid "Rest"
 msgstr ""
 
@@ -965,6 +1229,10 @@ msgstr ""
 msgid "Robes"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.invalid_code
+msgid "Room codes are 6 letters or numbers, like K7PQ2M."
+msgstr ""
+
 #: content/forest.json:boss.phases[0].name
 msgid "Rooted Sentinel"
 msgstr ""
@@ -975,6 +1243,14 @@ msgstr ""
 
 #: content/forest.json:journey.sites.class[2].name
 msgid "Ruined Shrine"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:TYPE_TAGS.merchant
+msgid "SHOP"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:TYPE_TAGS.story
+msgid "STORY"
 msgstr ""
 
 #: content/forest.json:story.clues.journal_page.title
@@ -1037,6 +1313,10 @@ msgstr ""
 msgid "Soft moss and clean water. A place to recover."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.out_of_stock src/client/ui/ui_text.gd:WHY.sold_out
+msgid "Sold out."
+msgstr ""
+
 #: content/forest.json:journey.sites.story[2].hint
 msgid "Someone who remembers travellers lives here."
 msgstr ""
@@ -1045,12 +1325,24 @@ msgstr ""
 msgid "Something is tucked deep inside a lightning-split tree."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.fallback
+msgid "Something went wrong (%s)."
+msgstr ""
+
 #: content/forest.json:enemies.kobold.special.name
 msgid "Spear Rush"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:WHY.invest_merchant
+msgid "Spend stat points at a Rest camp."
+msgstr ""
+
 #: content/story_mode.json:scenes.merchant_first[1].text
 msgid "Spend the Party's Gold carefully. We may not see another stall."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:TYPE_HELP.merchant
+msgid "Spend your own Gold on Items; each character buys with their own."
 msgstr ""
 
 #: content/forest.json:journey.sites.combat[6].name
@@ -1069,8 +1361,12 @@ msgstr ""
 msgid "Stab"
 msgstr ""
 
-#: content/forest.json:journey.type_labels.story
+#: content/forest.json:journey.type_labels.story src/client/ui/ui_text.gd:TYPE_LABELS.story
 msgid "Story Event"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.story_offline_only
+msgid "Story mode is an offline journey. Play alone or over Local Network."
 msgstr ""
 
 #: content/forest.json:classes.swordsman.name
@@ -1085,8 +1381,80 @@ msgstr ""
 msgid "Tank / Defense"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.invalid_boon
+msgid "That Boon is unavailable."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.not_consumable
+msgid "That Item cannot be used."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_jump
+msgid "That Playtest jump does not exist."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_race
+msgid "That Race is unavailable."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_loadout
+msgid "That Race, Class or Boon choice is not allowed."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_node
+msgid "That Skill Tree node is unavailable."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.skill_on_cooldown
+msgid "That Skill is still cooling down."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_action
+msgid "That action is not available."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.wrong_phase
+msgid "That can't be done right now."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.not_your_slot
+msgid "That character is not yours."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_slot
+msgid "That character slot does not exist."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_option
+msgid "That choice does not exist."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.wrong_gear_slot
+msgid "That gear does not go in that slot."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.not_gear
+msgid "That is not gear."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.item_unusable
+msgid "That is not something you can use in a fight."
+msgstr ""
+
 #: content/story_mode.json:scenes.class_gained[0].text
 msgid "That power answered you. It is yours now."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.room_closed
+msgid "That room has closed."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.room_full
+msgid "That room is full: all 5 slots have players."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.match_in_progress
+msgid "That room is in the middle of a Match. Try again when it ends."
 msgstr ""
 
 #: content/forest.json:story.clues.carved_map.title content/forest.json:story.events.carved_stone.title
@@ -1133,8 +1501,20 @@ msgstr ""
 msgid "The Hollow Tree"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:EMPTY.shop
+msgid "The Merchant has nothing left to sell."
+msgstr ""
+
 #: content/forest.json:story.events.old_campfire.title
 msgid "The Old Campfire"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.not_enough_gold
+msgid "The Party does not have enough Gold."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.item_unavailable
+msgid "The Party has none of that Item left."
 msgstr ""
 
 #: content/forest.json:encounters.rest.text
@@ -1173,6 +1553,10 @@ msgstr ""
 msgid "The cave beneath the Forest will not yield its secrets freely."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.connection_lost
+msgid "The connection to the server was lost."
+msgstr ""
+
 #: content/story_mode.json:scenes.story_clue[2].text
 msgid "The cup… I remember him saying the Chalice asks a price."
 msgstr ""
@@ -1191,6 +1575,10 @@ msgstr ""
 
 #: content/forest.json:classes.mage.challenge.pass
 msgid "The flames bow low. \"The old words are yours now. Use them gently.\""
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_item
+msgid "The merchant does not sell that."
 msgstr ""
 
 #: content/forest.json:classes.swordsman.challenge.pass
@@ -1213,12 +1601,44 @@ msgstr ""
 msgid "The roots part, revealing a cave blackened by old fire."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.unsupported_encounter
+msgid "The route led somewhere the game does not know. The Match was stopped."
+msgstr ""
+
 #: content/forest.json:classes.guardian.challenge.fail
 msgid "The sentinel does not move. \"You are not yet a wall. Return when you are.\""
 msgstr ""
 
 #: content/forest.json:classes.guardian.challenge.pass
 msgid "The sentinel kneels and offers its shield. \"Stand before those you love. That is the Guardian's oath.\""
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.connect_timeout src/client/ui/ui_text.gd:ERRORS.handshake_timeout
+msgid "The server did not answer in time. Check the address and try again."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.bad_message src/client/ui/ui_text.gd:ERRORS.unknown_command
+msgid "The server did not understand that."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.server_stopping
+msgid "The server is shutting down."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.missing_materials
+msgid "The shared bag does not hold enough materials for that."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.not_in_stash
+msgid "The shared bag does not hold that Item."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:WHY.no_items
+msgid "The shared bag has no Item you can use now."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:EMPTY.inventory
+msgid "The shared bag is empty. Win fights, open Treasure or buy from a Merchant to fill it."
 msgstr ""
 
 #: content/forest.json:classes.guardian.challenge.intro
@@ -1245,6 +1665,10 @@ msgstr ""
 msgid "Then we search every Layer until the Forest gives us an answer."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.invalid_recipe
+msgid "There is no such recipe."
+msgstr ""
+
 #: content/story_mode.json:scenes.boss_won[1].text
 msgid "There—in the roots. A compass, still pointing west."
 msgstr ""
@@ -1261,8 +1685,28 @@ msgstr ""
 msgid "Third sibling"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.max_prestige src/client/ui/ui_text.gd:WHY.prestige_max
+msgid "This Class has reached maximum Prestige."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.locked
+msgid "This choice is still locked."
+msgstr ""
+
 #: content/story_mode.json:scenes.rest_first[1].text
 msgid "This feels familiar. Two bedrolls beneath a pine… and Father's knot in the rope."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.max_level src/client/ui/ui_text.gd:WHY.max_level
+msgid "This node is already at level 5."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.old_save
+msgid "This save is from an older build."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_save
+msgid "This story save file is broken or from a different version."
 msgstr ""
 
 #: content/forest.json:boss.moves.thorn_storm.name
@@ -1277,6 +1721,10 @@ msgstr ""
 msgid "Thorns rise around the whole Party. Brace yourselves before its next turn!"
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.over_capacity
+msgid "Those Boons use more than five slots."
+msgstr ""
+
 #: content/forest.json:skills.poke_up.description
 msgid "Three quick stabs at 55% ATK each on one enemy; every stab causes Bleed. Costs 2 Energy. Cooldown: 3 turns."
 msgstr ""
@@ -1287,6 +1735,10 @@ msgstr ""
 
 #: content/story_mode.json:prologue[6].text
 msgid "Together, the Party steps beneath the ancient boughs."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.action_window_closed
+msgid "Too late: your turn ran out and you Defended."
 msgstr ""
 
 #: content/forest.json:party.members[3].bio
@@ -1317,7 +1769,7 @@ msgstr ""
 msgid "Travelling Merchant"
 msgstr ""
 
-#: content/forest.json:journey.type_labels.treasure
+#: content/forest.json:journey.type_labels.treasure src/client/ui/ui_text.gd:TYPE_LABELS.treasure
 msgid "Treasure"
 msgstr ""
 
@@ -1347,6 +1799,10 @@ msgstr ""
 
 #: content/forest.json:crafting.categories[3] content/forest.json:items.herb.category content/forest.json:items.spirit_bloom.category content/forest.json:items.tonic.category
 msgid "Vials"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:HINTS.boss
+msgid "Watch the warnings: the Guardian announces its heaviest blows a turn early. Defend, Protect or raise Shield Wall before they land."
 msgstr ""
 
 #: content/story_mode.json:scenes.story_clue[3].text
@@ -1417,11 +1873,99 @@ msgstr ""
 msgid "Wren's missing memories begin to stir."
 msgstr ""
 
+#: src/client/ui/ui_text.gd:ERRORS.already_decided
+msgid "You already answered."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.already_owned
+msgid "You already own this Race."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.already_voted
+msgid "You already voted."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:WHY.voted
+msgid "You already voted. Waiting for the others."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.already_in_room
+msgid "You are already in a room."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.already_ready
+msgid "You are already marked as ready."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.not_in_room
+msgid "You are not in a room."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:WHY.ready
+msgid "You are ready. Waiting for the other players."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:WHY.equip_not_yours
+msgid "You can only change your own character's gear."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:WHY.invest_not_yours
+msgid "You can only spend your own character's points."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.not_enough_gems
+msgid "You do not have enough Gems."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:CONFIRM.leave_match[1]
+msgid "You go back to the title screen and your character is played by AI for the rest of this Match."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:CONFIRM.leave_room[1]
+msgid "You go back to the title screen. Your slot is played by AI until someone takes it."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:HINTS.skill
+msgid "You have a Class now. Fight [F] opens your Skills; each Skill costs Energy and has a cooldown counted in your own turns."
+msgstr ""
+
 #: content/forest.json:story.events.old_campfire.choices[1].outcome.text
 msgid "You rekindle the fire and rest where Father once rested. Tucked under a stone you find his tin cup, engraved with Mother's name."
 msgstr ""
 
 #: content/forest.json:party.members[3].role
 msgid "Youngest sibling"
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.not_eligible
+msgid "Your character cannot take this Class."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.profile_changed_elsewhere
+msgid "Your profile changed in another session. This session's latest progress was not saved. Rejoin to refresh it."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.profile_unavailable
+msgid "Your profile could not be loaded. Progress will not be saved this session."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.profile_save_failed
+msgid "Your profile could not be saved. Rejoin and check your progress before continuing."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_token
+msgid "Your profile could not be verified. Restart the game and try again."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:ERRORS.unknown_session
+msgid "Your session expired. Please reconnect."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:HINTS.combat
+msgid "Your turn! Fight [F] opens your attacks, Items [I] uses your personal Gold and consumable slot, and Focus [O] restores Energy when available. In timed Combats you have 15 seconds; if time runs out you Defend."
+msgstr ""
+
+#: src/client/ui/ui_text.gd:HINTS.combat_story
+msgid "Your turn! Fight [F] opens your attacks, Items [I] uses your personal Gold and consumable slot, and Focus [O] restores Energy when available. Story turns have no countdown."
 msgstr ""
 

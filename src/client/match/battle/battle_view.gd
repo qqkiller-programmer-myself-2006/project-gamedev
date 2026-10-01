@@ -441,10 +441,10 @@ func _build_timeline(view: Dictionary) -> void:
 		var card := UiKit.panel(entry, "HudHighlightPanel" if is_actor else "HudPanel")
 		card.set_meta("actor_id", str(id))
 		card.modulate = Color(1, 1, 1, 0.6) if hp <= 0 or acted else Color.WHITE
-		card.tooltip_text = "%s (%s) - %s - Speed %d - HP %d/%d%s%s" % [tag[0], _screen.name_of(str(id)), tag[2],
+		card.tooltip_text = Tr.t("%s (%s) - %s - Speed %d - HP %d/%d%s%s" % [tag[0], _screen.name_of(str(id)), tag[2],
 				int(unit.get("spd", 0)), hp, int(unit.get("max_hp", 1)),
 				(", Energy %d/%d" % [int(unit["energy"]), int(unit.get("energy_max", 6))]) if unit.has("energy") else "",
-				" (already acted this round)" if acted else (" - acting now" if is_actor else "")]
+				" (already acted this round)" if acted else (" - acting now" if is_actor else "")])
 		_timeline.add_child(card)
 		if is_actor and actor != _last_actor:
 			_app.fade_in(card, 0.3)
@@ -893,7 +893,7 @@ func _send(cmd: Dictionary) -> void:
 func _item_description(item_id: String) -> String:
 	for entry in _screen.match_view().get("inventory", []):
 		if entry["item"] == item_id:
-			return str(entry["description"])
+			return Tr.t(str(entry["description"]))
 	return ""
 
 

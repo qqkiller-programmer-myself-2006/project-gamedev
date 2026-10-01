@@ -3,7 +3,6 @@ extends Control
 
 signal finished
 
-const FONT_PATH := "res://assets/fonts/PixelifySans.ttf"
 const PORTRAIT_ROOT := "res://assets/heroes/"
 
 var lines: Array = []
@@ -28,7 +27,7 @@ func _init(dialogue: Array = [], scale: float = 1.0, reduced: bool = false, clas
 	text_scale = scale
 	reduced_motion = reduced
 	class_map = classes
-	_font = load(FONT_PATH)
+	_font = UiKit.pixel_font()
 	if _font == null:
 		_font = ThemeDB.fallback_font
 	position.y = -210.0
@@ -51,7 +50,7 @@ func _init(dialogue: Array = [], scale: float = 1.0, reduced: bool = false, clas
 	_text_label.size = Vector2(1010, 86)
 	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text_label.add_theme_font_size_override("font_size", int(UiKit.SIZES["heading"] * text_scale))
-	_hint_label.text = UiText.LABELS["dialogue_hint"]
+	_hint_label.text = Tr.t(UiText.LABELS["dialogue_hint"])
 	_hint_label.position = Vector2(840, 157)
 	_hint_label.size = Vector2(350, 26)
 	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -110,10 +109,10 @@ func skip() -> void:
 func _show_line() -> void:
 	var line: Dictionary = lines[line_index]
 	_speaker = str(line.get("speaker", "narrator")).capitalize()
-	_full_text = str(line.get("text", ""))
+	_full_text = Tr.t(str(line.get("text", "")))
 	_shown = _full_text.length() if reduced_motion else 0
 	_elapsed = 0.0
-	_name_label.text = _speaker
+	_name_label.text = Tr.t(_speaker)
 	_text_label.text = _full_text if reduced_motion else ""
 	_portrait = _find_portrait(str(line.get("speaker", "")))
 	queue_redraw()

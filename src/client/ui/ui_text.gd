@@ -4,6 +4,7 @@ extends RefCounted
 ## Encounter type labels and short explanations used by hints.
 
 const ERRORS := {
+	"fallback": "Something went wrong (%s).",
 	"profile_unavailable": "Your profile could not be loaded. Progress will not be saved this session.",
 	"profile_changed_elsewhere": "Your profile changed in another session. This session's latest progress was not saved. Rejoin to refresh it.",
 	"profile_save_failed": "Your profile could not be saved. Rejoin and check your progress before continuing.",
@@ -167,7 +168,7 @@ const STORY_TRIGGERS := ["first_combat_won", "class_gained", "story_clue", "merc
 
 
 static func error(code: String) -> String:
-	return str(ERRORS.get(code, "Something went wrong (%s)." % code))
+	return str(ERRORS.get(code, ERRORS["fallback"] % code))
 
 
 static func gems(amount: int) -> String:

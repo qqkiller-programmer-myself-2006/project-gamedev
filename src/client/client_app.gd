@@ -50,6 +50,7 @@ func configure(launch_options: Dictionary) -> void:
 
 
 func _ready() -> void:
+	Tr.setup(str(options.get("lang", "th")))
 	settings = ClientSettings.load_saved()
 	player_token = _load_player_token()
 	if options.has("name"):
@@ -399,14 +400,14 @@ func _show_screen(screen: String) -> void:
 # --- Feedback -----------------------------------------------------------------
 
 func toast(message: String, seconds: float = 4.0) -> void:
-	_toast_label.text = message
+	_toast_label.text = Tr.t(message)
 	_toast_until = _local_now() + seconds
 	_toast.visible = true
 
 
 ## A big announcement across the screen (the visual twin of sound cues).
 func banner(message: String, seconds: float = 2.5, cue: String = "") -> void:
-	_banner_label.text = message
+	_banner_label.text = Tr.t(message)
 	_banner_until = _local_now() + seconds
 	_banner.visible = true
 	if not cue.is_empty():
@@ -549,7 +550,8 @@ func confirm(key: String, on_confirm: Callable, args: Array = []) -> void:
 	var texts: Array = UiText.CONFIRM[key]
 	var dialog := ConfirmDialog.new()
 	_overlay_holder.add_child(dialog)
-	dialog.setup(str(texts[0]), str(texts[1]) % args if not args.is_empty() else str(texts[1]), str(texts[2]), on_confirm)
+	var body := str(texts[1]) % args if not args.is_empty() else str(texts[1])
+	dialog.setup(Tr.t(str(texts[0])), Tr.t(body), Tr.t(str(texts[2])), on_confirm)
 
 
 ## Leaves the room or Match after asking.

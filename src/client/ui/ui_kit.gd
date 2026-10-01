@@ -54,17 +54,26 @@ const SIZES := {"tiny": 11, "small": 15, "body": 18, "heading": 23, "title": 34,
 ## Numeric labels use the Godot body font: its digits are deliberately easier
 ## to distinguish at a glance than Pixelify's 5/S and 7/1.
 const PIXEL_FONT_PATH := "res://assets/fonts/PixelifySans.ttf"
+const THAI_FONT_PATH := "res://assets/fonts/NotoSansThai-Regular.ttf"
 const NO_LIGATURES := {"liga": 0, "clig": 0, "dlig": 0}
 ## Story files load the TTF directly; `.import` is not tracked, so apply overrides here.
 
 static var _pixel_font: Font = null
 static var _number_font: Font = null
+static var _thai_font: FontFile = null
+
+
+static func thai_font() -> FontFile:
+	if _thai_font == null:
+		_thai_font = load(THAI_FONT_PATH) as FontFile
+	return _thai_font
 
 
 static func pixel_font() -> Font:
 	if _pixel_font == null:
 		var file: FontFile = load(PIXEL_FONT_PATH)
 		file.opentype_feature_overrides = NO_LIGATURES
+		file.fallbacks = [thai_font()]
 		var variation := FontVariation.new()
 		variation.base_font = file
 		variation.opentype_features = NO_LIGATURES
@@ -83,7 +92,12 @@ static func number_font() -> Font:
 static func make_theme(scale: float) -> Theme:
 	var theme := Theme.new()
 	var pixel := pixel_font()
+	var body_font := number_font()
+	body_font.fallbacks = [thai_font()]
+	theme.default_font = body_font
 	theme.default_font_size = int(SIZES["body"] * scale)
+	theme.set_constant("line_spacing", "Label", int(5 * scale))
+	theme.set_constant("line_spacing", "Button", int(5 * scale))
 	for style in SIZES:
 		var variation: String = style.capitalize() + "Label"
 		theme.set_type_variation(variation, "Label")
@@ -425,15 +439,15 @@ static func status_badge(entry: Dictionary, compact: bool = false) -> PanelConta
 	style.content_margin_top = 0
 	style.content_margin_bottom = 0
 	badge_panel.add_theme_stylebox_override("panel", style)
-	badge_panel.tooltip_text = "%s: %s stack(s), %s turn(s) left" % [entry.get("name", status),
-			entry.get("stacks", 1), entry.get("turns", 0)]
+	badge_panel.tooltip_text = Tr.t("%s: %s stack(s), %s turn(s) left" % [Tr.t(str(entry.get("name", status))),
+			entry.get("stacks", 1), entry.get("turns", 0)])
 	return badge_panel
 
 
 ## A single-line label (does not wrap; keep it short).
 static func label(text: String, style: String = "body", color: Color = Color(0, 0, 0, 0)) -> Label:
 	var node := Label.new()
-	node.text = text
+	node.text = Tr.t(text)
 	node.theme_type_variation = "DimLabel" if style == "dim" else style.capitalize() + "Label"
 	if _has_digit(text):
 		node.add_theme_font_override("font", number_font())
@@ -456,7 +470,7 @@ static func para(text: String, style: String = "body", color: Color = Color(0, 0
 ## "danger" (destructive, ask first) or "small" (dense rows).
 static func button(text: String, callback: Callable, big: bool = false, kind: String = "secondary") -> Button:
 	var node := Button.new()
-	node.text = text
+	node.text = Tr.t(text)
 	node.focus_mode = Control.FOCUS_ALL
 	node.theme_type_variation = button_variation(kind, big)
 	if _has_digit(text):
@@ -486,7 +500,7 @@ static func primary(text: String, callback: Callable, big: bool = true) -> Butto
 static func disable(control: BaseButton, off: bool, reason: String) -> void:
 	control.disabled = off
 	if off:
-		control.tooltip_text = reason
+		control.tooltip_text = Tr.t(reason)
 
 
 static func vbox(separation: int = 8) -> VBoxContainer:

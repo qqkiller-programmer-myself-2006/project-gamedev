@@ -2,7 +2,6 @@ class_name ChapterCard
 extends Control
 
 signal finished
-const FONT_PATH := "res://assets/fonts/PixelifySans.ttf"
 var chapter := {}
 var reduced_motion := false
 var _timer := 0.0
@@ -13,12 +12,12 @@ var _font: Font
 func _init(data: Dictionary = {}, reduced: bool = false) -> void:
 	chapter = data
 	reduced_motion = reduced
-	_font = load(FONT_PATH)
+	_font = UiKit.pixel_font()
 	if _font == null:
 		_font = ThemeDB.fallback_font
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_title.text = "%s\n%s" % [UiText.LABELS["chapter"] % int(chapter.get("number", 0)), chapter.get("title", "")]
-	_subtitle.text = str(chapter.get("subtitle", ""))
+	_title.text = "%s\n%s" % [Tr.t(UiText.LABELS["chapter"] % int(chapter.get("number", 0))), Tr.t(str(chapter.get("title", "")))]
+	_subtitle.text = Tr.t(str(chapter.get("subtitle", "")))
 	for label in [_title, _subtitle]:
 		label.add_theme_font_override("font", _font)
 		label.add_theme_color_override("font_outline_color", UiKit.BG)
@@ -43,7 +42,7 @@ func _init(data: Dictionary = {}, reduced: bool = false) -> void:
 	if reduced_motion:
 		# Without motion the card waits for a key: say which.
 		var hint := Label.new()
-		hint.text = UiText.LABELS["continue"]
+		hint.text = Tr.t(UiText.LABELS["continue"])
 		hint.add_theme_font_override("font", _font)
 		hint.add_theme_font_size_override("font_size", UiKit.SIZES["small"])
 		hint.add_theme_color_override("font_color", UiKit.TEXT_DIM)

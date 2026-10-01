@@ -26,6 +26,7 @@ var _think_until := 0.0
 var _last_key := ""
 var _done_at := -1
 var _setup_only := false
+var _language := "th"
 var _sprite_idle_after := 0.0
 var _used_focus := false
 var _used_item := false
@@ -55,6 +56,8 @@ func _initialize() -> void:
 			var parts := arg.trim_prefix("--resolution=").split("x")
 			if parts.size() == 2 and parts[0].is_valid_int() and parts[1].is_valid_int():
 				DisplayServer.window_set_size(Vector2i(int(parts[0]), int(parts[1])))
+		elif arg.begins_with("--lang="):
+			_language = arg.trim_prefix("--lang=")
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	var overrides := {}
 	if not only_class.is_empty():
@@ -63,7 +66,7 @@ func _initialize() -> void:
 				"rules": {"ai_class_cap": 5}}
 	harness = MatchHarness.new(seed_value, overrides)
 	app = ClientApp.new()
-	app.configure({"name": "Ann"})
+	app.configure({"name": "Ann", "lang": _language})
 	root.add_child(app)
 	set_meta("scale", scale)
 	set_meta("reduced", reduced)
