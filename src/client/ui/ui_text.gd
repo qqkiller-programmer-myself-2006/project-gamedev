@@ -128,6 +128,11 @@ const LABELS := {
 	"menu_tip": "Menu [Esc]",
 	"clues_tip": "Clues [C]",
 	"action_window": "Action window",
+	"story_choose_class": "Choose a Class for %s",
+	"story_picker_choose_hint": "Click a card or press 1-5 to choose. Esc closes.",
+	"story_picker_navigation_hint": "Arrows / Tab move focus · Enter confirms · gold marks the current choice",
+	"story_skill": "Skill: %s",
+	"story_skill_energy": "Skill: %s · %d Energy",
 	"gold": "%d Gold",
 	"gems": "%d Gems",
 }

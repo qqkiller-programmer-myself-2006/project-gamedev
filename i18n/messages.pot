@@ -469,6 +469,10 @@ msgstr ""
 msgid "Dark Thicket"
 msgstr ""
 
+#: content/forest.json:ending.defeat.text
+msgid "Darkness closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
+msgstr ""
+
 #: content/forest.json:items.firebomb.description
 msgid "Deals 18 fire damage to every enemy."
 msgstr ""
@@ -563,10 +567,6 @@ msgstr ""
 
 #: content/story_mode.json:scenes.merchant_first[2].text
 msgid "Father traded for supplies before the Guardian. He knew the way would be hard."
-msgstr ""
-
-#: content/story_mode.json:scenes.party_defeated[1].text
-msgid "Father waited three winters. We can gather our strength and try again."
 msgstr ""
 
 #: content/forest.json:story.clues.unsent_letter.text
@@ -834,7 +834,7 @@ msgid "More direct damage per DoT type; stronger outgoing DoTs, but more incomin
 msgstr ""
 
 #: content/story_mode.json:scenes.party_defeated[2].text
-msgid "Next time, we reach the Guardian in the cave together."
+msgid "Next time, we will be ready."
 msgstr ""
 
 #: content/forest.json:classes.classless.description
@@ -1109,10 +1109,6 @@ msgstr ""
 msgid "The Forest Falls Silent"
 msgstr ""
 
-#: content/forest.json:ending.defeat.text
-msgid "Darkness closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
-msgstr ""
-
 #: content/story_mode.json:prologue[0].text
 msgid "The Forest has kept Father's trail for three long winters."
 msgstr ""
@@ -1135,6 +1131,10 @@ msgstr ""
 
 #: content/forest.json:story.events.old_campfire.title
 msgid "The Old Campfire"
+msgstr ""
+
+#: content/story_mode.json:scenes.party_defeated[0].text
+msgid "The Party falls, their journey through the Forest unfinished."
 msgstr ""
 
 #: content/forest.json:encounters.rest.text
@@ -1163,10 +1163,6 @@ msgstr ""
 
 #: content/forest.json:story.clues.unsent_letter.title
 msgid "The Unsent Letter"
-msgstr ""
-
-#: content/story_mode.json:scenes.party_defeated[0].text
-msgid "The cave beneath the Forest closes around the fallen Party."
 msgstr ""
 
 #: content/story_mode.json:chapters[4].subtitle
@@ -1347,6 +1343,10 @@ msgstr ""
 
 #: content/forest.json:crafting.categories[3] content/forest.json:items.herb.category content/forest.json:items.spirit_bloom.category content/forest.json:items.tonic.category
 msgid "Vials"
+msgstr ""
+
+#: content/story_mode.json:scenes.party_defeated[1].text
+msgid "We can gather our strength and try again."
 msgstr ""
 
 #: content/story_mode.json:scenes.story_clue[3].text

@@ -469,6 +469,10 @@ msgstr "แรงกระตุ้นบ้าระห่ำ"
 msgid "Dark Thicket"
 msgstr "พงมืด"
 
+#: content/forest.json:ending.defeat.text
+msgid "Darkness closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
+msgstr "ความมืดปิดล้อมกลุ่มไว้ ที่ไกลออกไปแม่ยังคงรออยู่ รวบรวมกำลังแล้วลองใหม่"
+
 #: content/forest.json:items.firebomb.description
 msgid "Deals 18 fire damage to every enemy."
 msgstr "สร้างความเสียหายไฟ 18 แก่ศัตรูทุกตัว"
@@ -564,10 +568,6 @@ msgstr "พ่อบอกว่าอาชีพคือคำสัญญา
 #: content/story_mode.json:scenes.merchant_first[2].text
 msgid "Father traded for supplies before the Guardian. He knew the way would be hard."
 msgstr "พ่อแลกเสบียงก่อนถึงผู้พิทักษ์ เขารู้ว่าหนทางจะยากลำบาก"
-
-#: content/story_mode.json:scenes.party_defeated[1].text
-msgid "Father waited three winters. We can gather our strength and try again."
-msgstr "พ่อรอมาสามฤดูหนาว เรารวบรวมกำลังแล้วลองใหม่ได้"
 
 #: content/forest.json:story.clues.unsent_letter.text
 msgid "Father was ready to pay the Chalice's price himself: 'Never the children.'"
@@ -834,8 +834,8 @@ msgid "More direct damage per DoT type; stronger outgoing DoTs, but more incomin
 msgstr "ความเสียหายตรงเพิ่มขึ้นตามชนิดความเสียหายต่อเนื่อง; ความเสียหายต่อเนื่องที่ทำได้แรงขึ้น แต่รับความเสียหายต่อเนื่องมากขึ้น"
 
 #: content/story_mode.json:scenes.party_defeated[2].text
-msgid "Next time, we reach the Guardian in the cave together."
-msgstr "คราวหน้าเราจะไปถึงผู้พิทักษ์ในถ้ำด้วยกัน"
+msgid "Next time, we will be ready."
+msgstr "คราวหน้าเราจะพร้อม"
 
 #: content/forest.json:classes.classless.description
 msgid "No special training yet. Can Attack, Defend and use Items."
@@ -1109,10 +1109,6 @@ msgstr "ต้นไม้แรกเริ่ม"
 msgid "The Forest Falls Silent"
 msgstr "ป่ากลับคืนสู่ความเงียบ"
 
-#: content/forest.json:ending.defeat.text
-msgid "Darkness closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
-msgstr "ความมืดปิดล้อมกลุ่มไว้ ที่ไกลออกไปแม่ยังคงรออยู่ รวบรวมกำลังแล้วลองใหม่"
-
 #: content/story_mode.json:prologue[0].text
 msgid "The Forest has kept Father's trail for three long winters."
 msgstr "ป่าเก็บร่องรอยของพ่อไว้นานถึงสามฤดูหนาว"
@@ -1136,6 +1132,10 @@ msgstr "ต้นไม้กลวง"
 #: content/forest.json:story.events.old_campfire.title
 msgid "The Old Campfire"
 msgstr "กองไฟเก่า"
+
+#: content/story_mode.json:scenes.party_defeated[0].text
+msgid "The Party falls, their journey through the Forest unfinished."
+msgstr "กลุ่มล้มลง การเดินทางผ่านป่ายังไม่สิ้นสุด"
 
 #: content/forest.json:encounters.rest.text
 msgid "The Party makes camp. Wounds are bandaged; there is time to craft, change gear and train before moving on."
@@ -1164,10 +1164,6 @@ msgstr "ธอร์นวอร์เดนทรุดเข่าลงแล
 #: content/forest.json:story.clues.unsent_letter.title
 msgid "The Unsent Letter"
 msgstr "จดหมายที่ไม่ได้ส่ง"
-
-#: content/story_mode.json:scenes.party_defeated[0].text
-msgid "The cave beneath the Forest closes around the fallen Party."
-msgstr "ถ้ำใต้ป่าปิดล้อมกลุ่มที่ล้มลง"
 
 #: content/story_mode.json:chapters[4].subtitle
 msgid "The cave beneath the Forest will not yield its secrets freely."
@@ -1349,6 +1345,10 @@ msgstr "พรานชำนาญ"
 msgid "Vials"
 msgstr "ขวดยา"
 
+#: content/story_mode.json:scenes.party_defeated[1].text
+msgid "We can gather our strength and try again."
+msgstr "เรารวบรวมกำลังแล้วลองใหม่ได้"
+
 #: content/story_mode.json:scenes.story_clue[3].text
 msgid "We learn the price before anyone pays it. Keep moving."
 msgstr "เราจะรู้ราคาก่อนที่ใครจะจ่าย เดินหน้าต่อไป"
@@ -1424,3 +1424,12 @@ msgstr "จุดไฟขึ้นใหม่และพักในที่
 #: content/forest.json:party.members[3].role
 msgid "Youngest sibling"
 msgstr "ลูกคนสุดท้อง"
+
+#~ msgid "Father waited three winters. We can gather our strength and try again."
+#~ msgstr "พ่อรอมาสามฤดูหนาว เรารวบรวมกำลังแล้วลองใหม่ได้"
+
+#~ msgid "Next time, we reach the Guardian in the cave together."
+#~ msgstr "คราวหน้าเราจะไปถึงผู้พิทักษ์ในถ้ำด้วยกัน"
+
+#~ msgid "The cave beneath the Forest closes around the fallen Party."
+#~ msgstr "ถ้ำใต้ป่าปิดล้อมกลุ่มที่ล้มลง"

@@ -26,6 +26,7 @@ var _think_until := 0.0
 var _last_key := ""
 var _done_at := -1
 var _setup_only := false
+var _story_setup_only := false
 var _sprite_idle_after := 0.0
 var _used_focus := false
 var _used_item := false
@@ -49,6 +50,8 @@ func _initialize() -> void:
 			reduced = true
 		elif arg == "--setup-only":
 			_setup_only = true
+		elif arg == "--story-setup-only":
+			_story_setup_only = true
 		elif arg.begins_with("--class="):
 			only_class = arg.trim_prefix("--class=")
 		elif arg.begins_with("--resolution="):
@@ -78,13 +81,26 @@ func _process(delta: float) -> bool:
 		app.settings.seen_hints = []
 		app.apply_settings()
 	if frame == 15:
-		_shot("01_title")
+		if not _story_setup_only:
+			_shot("01_title")
+		else:
+			var title := app._current as TitleScreen
+			title._show_play()
+			title._show_story_setup()
+			return false
 		# Play now offers Story or Multiplayer; the preview drives the Multiplayer form.
 		app.use_connection(local)
 		local.start()
 		(app._current as TitleScreen)._show_multiplayer()
 		(app._current as TitleScreen)._create()
 		return false
+	if frame == 16 and _story_setup_only:
+		_shot("story_party_setup")
+		(app._current as TitleScreen)._open_story_picker(0)
+		return false
+	if frame == 17 and _story_setup_only:
+		_shot("story_party_picker")
+		return true
 	if frame == 25:
 		friend = harness.server.open_session()
 		harness.server.command(friend, {"type": "join_room", "code": _code(), "name": "Bob"})
