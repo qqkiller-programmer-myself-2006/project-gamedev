@@ -1285,7 +1285,7 @@
       "name": "Elder Thornwarden",
       "row": "front",
       "behavior": "boss",
-      "description": "The Guardian of the Forest: ancient bark and thorn. Watch for its warnings; its heaviest blows come one turn later.",
+      "description": "The Guardian beneath the Forest: ancient bark and thorn. Watch for its warnings; its heaviest blows come one turn later.",
       "stats": {
         "max_hp": 1350,
         "atk": 20,
@@ -2160,7 +2160,7 @@
   },
   "boss": {
     "name": "Elder Thornwarden",
-    "title": "Guardian of the Forest",
+    "title": "Guardian Beneath the Forest",
     "intro": "The trees part. A figure of bark and thorn rises, taller than the pines, eyes glowing green. \"Many have come seeking the sea. Few have passed. None have returned.\"",
     "enemies": [
       "elder_thornwarden"
@@ -2252,12 +2252,12 @@
   },
   "ending": {
     "victory": {
-      "title": "The Forest Falls Silent",
-      "text": "The Thornwarden sinks to its knees and becomes an old tree once more. In the roots lies a rusted compass with Father's initials, still pointing west, toward the sea. Wren holds it and, for a moment, remembers a voice: \"Keep going. Don't wait for me.\" The road beyond the Forest is open."
+      "title": "The Guardian Falls Silent",
+      "text": "The Thornwarden sinks to its knees and becomes an old tree once more. In the roots lies a rusted compass with Father's initials, still pointing west, toward the sea. Wren holds it and, for a moment, remembers a voice: \"Keep going. Don't wait for me.\" The road to the sea is open."
     },
     "defeat": {
-      "title": "Lost in the Forest",
-      "text": "The Forest closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
+      "title": "Lost in the Cave",
+      "text": "The Cave closes around the Party. Somewhere far away, Mother is still waiting. Gather your strength and try again."
     }
   },
   "crafting": {

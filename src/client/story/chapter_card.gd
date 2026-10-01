@@ -9,6 +9,7 @@ var _timer := 0.0
 var _title := Label.new()
 var _subtitle := Label.new()
 var _font: Font
+var _closing := false
 
 func _init(data: Dictionary = {}, reduced: bool = false) -> void:
 	chapter = data
@@ -60,18 +61,33 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), UiKit.BG, true)
 	draw_line(Vector2(150, size.y / 2 + 110), Vector2(size.x - 150, size.y / 2 + 110), Color(UiKit.GOLD, 0.45), 2)
 
+func _ready() -> void:
+	if not reduced_motion:
+		modulate.a = 0.0
+		create_tween().tween_property(self, "modulate:a", 1.0, 0.2)
+
 func _process(delta: float) -> void:
 	if reduced_motion:
 		return
 	_timer += delta
-	if _timer >= 2.5:
-		finished.emit()
-		queue_free()
+	if _timer >= 2.5 and not _closing:
+		_close()
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed:
 		return
 	if reduced_motion and not event.echo and event.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE, KEY_ESCAPE]:
-		finished.emit()
-		queue_free()
+		_close()
 	get_viewport().set_input_as_handled()
+
+func _close() -> void:
+	if _closing:
+		return
+	_closing = true
+	finished.emit()
+	if reduced_motion or not is_inside_tree():
+		queue_free()
+		return
+	var tween := create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, 0.18)
+	tween.tween_callback(queue_free)

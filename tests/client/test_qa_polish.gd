@@ -41,6 +41,39 @@ func test_nameplates_stay_inside_their_slot_at_every_text_size() -> void:
 		token.free()
 
 
+func test_battle_token_updates_keep_node_and_defer_hp_bar_change() -> void:
+	var token := BattleToken.new()
+	var data := {"id": "p0", "side": "party", "name": "Arin", "kind": "swordsman", "hp": 20,
+		"max_hp": 30, "energy": 3, "energy_max": 6, "statuses": []}
+	token.setup(data)
+	var instance_id := token.get_instance_id()
+	data["hp"] = 10
+	data["energy"] = 2
+	token.setup(data)
+	assert_eq(token.get_instance_id(), instance_id, "snapshot updates retain the existing stage token")
+	var bars := token.find_children("*", "ProgressBar", true, false)
+	assert_eq((bars[0] as ProgressBar).value, 20.0, "HP remains at the old value until the event animation")
+	assert_eq((bars[1] as ProgressBar).value, 3.0, "Energy remains at the old value until the update animation")
+	assert_eq(token._pending_bar_targets, [10.0, 2.0], "the new values are queued for the HP/Energy tween")
+	token.free()
+
+
+func test_battle_item_labels_use_content_names() -> void:
+	assert_eq(BattleView.item_display_name("herb"), "Healing Herb")
+	assert_eq(BattleView.item_display_name("tonic"), "Forest Tonic")
+
+
+func test_trainer_sprite_uses_hero_scale_and_down_tint_survives_flashes() -> void:
+	var trainer := BattleToken.new()
+	trainer.setup({"id": "e0", "side": "enemy", "name": "Trainer", "kind": "thief", "sprite": "thief",
+		"trainer": true, "hp": 10, "max_hp": 10})
+	assert_true(trainer.figure_height >= 92.0, "trainer sprites are raised to the hero display size")
+	trainer.setup({"id": "e0", "side": "enemy", "name": "Trainer", "kind": "thief", "sprite": "thief",
+		"trainer": true, "hp": 0, "max_hp": 10})
+	assert_eq(trainer.resting_modulate(), Color(0.55, 0.55, 0.55, 0.85), "down tint remains after a flash tween")
+	trainer.free()
+
+
 func test_gold_tips_do_not_say_shared() -> void:
 	for text in [UiText.HINTS["merchant"], UiText.TYPE_HELP["merchant"]]:
 		assert_true(not text.contains("shared Gold"), "Gold is personal: %s" % text)

@@ -303,7 +303,6 @@ func _act(key: String, view: Dictionary) -> void:
 	elif key == "05_class_offer":
 		_press(KEY_Y)
 	elif key == "08_merchant":
-		_press(KEY_1)
 		_press(KEY_R)
 	elif key == "10_rest":
 		_press(KEY_R)

@@ -53,6 +53,7 @@ var acting := false
 var class_id := ""
 var sprite_set: SpriteSet
 var enemy_sprite := false
+var trainer := false
 var animation := "idle"
 var animation_frames: Array[Texture2D] = []
 var animation_frame := 0
@@ -67,17 +68,45 @@ var target_number := 0
 
 var _badges: HBoxContainer
 var _plate: PanelContainer
+var _hovered := false
+var _pending_bar_targets: Array[float] = []
 
 
 ## `data`: {id, side, name, kind (class or enemy kind), hp, max_hp,
 ## energy, energy_max, statuses, acting, controller, you}
 func setup(data: Dictionary) -> void:
+	var updating := _badges != null
+	var previous_bar_values: Array[float] = []
+	var old_animation := animation
+	var old_frame := animation_frame
+	var old_elapsed := animation_elapsed
+	var old_bob := _bob_time
+	var old_down := down
+	if updating:
+		for bar_node in find_children("*", "ProgressBar", true, false):
+			previous_bar_values.append((bar_node as ProgressBar).value)
+		for connection in pressed.get_connections():
+			pressed.disconnect(connection.callable)
+		for child in get_children():
+			remove_child(child)
+			child.free()
+		_badges = null
+		_plate = null
+		target_number = 0
+	else:
+		mouse_entered.connect(func() -> void:
+			_hovered = true
+			queue_redraw())
+		mouse_exited.connect(func() -> void:
+			_hovered = false
+			queue_redraw())
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	unit_id = str(data["id"])
 	side = str(data.get("side", "party"))
 	var kind := str(data.get("kind", ""))
 	class_id = kind.to_lower()
 	enemy_sprite = side != "party" and not str(data.get("sprite", "")).is_empty()
+	trainer = bool(data.get("trainer", false))
 	sprite_set = SpriteSet.for_class(class_id) if side == "party" else SpriteSet.for_enemy(str(data.get("sprite", "")), str(data.get("sprite_variant", ""))) if enemy_sprite else null
 	reduced_motion = bool(data.get("reduced_motion", false))
 	enemy_kind = kind
@@ -95,7 +124,7 @@ func setup(data: Dictionary) -> void:
 	var width := 180.0 * text_factor if side == "boss" else minf(140.0 * text_factor, MAX_PLATE_WIDTH)
 	figure_height = 150.0 if side == "boss" else 110.0
 	if sprite_set != null and sprite_set.is_enemy:
-		figure_height = sprite_set.size_px() * 1.65
+		figure_height = maxf(sprite_set.size_px() * 1.65, 92.0 if trainer else 0.0)
 	custom_minimum_size = Vector2(width, badge_height + figure_height + plate_height)
 	size = custom_minimum_size
 	if side == "party":
@@ -155,7 +184,28 @@ func setup(data: Dictionary) -> void:
 	tooltip_text = str(data.get("tooltip", ""))
 	modulate = Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
 	_set_animation("dead" if down else "idle")
+	if updating and old_down == down and old_animation != "idle" and sprite_set != null:
+		_set_animation(old_animation)
+		if not animation_frames.is_empty():
+			animation_frame = mini(old_frame, animation_frames.size() - 1)
+			animation_elapsed = old_elapsed
+			_bob_time = old_bob
+	_pending_bar_targets.clear()
+	if updating and not reduced_motion and not down:
+		var updated_bars := find_children("*", "ProgressBar", true, false)
+		for i in mini(previous_bar_values.size(), updated_bars.size()):
+			var bar := updated_bars[i] as ProgressBar
+			var target_value := bar.value
+			_pending_bar_targets.append(target_value)
+			bar.value = clampf(previous_bar_values[i], bar.min_value, bar.max_value)
 	set_process(sprite_set != null)
+
+
+func animate_bars() -> void:
+	var bars := find_children("*", "ProgressBar", true, false)
+	for i in mini(_pending_bar_targets.size(), bars.size()):
+		create_tween().tween_property(bars[i], "value", _pending_bar_targets[i], 0.25)
+	_pending_bar_targets.clear()
 
 func play_animation(kind: String) -> void:
 	if sprite_set == null:
@@ -227,12 +277,18 @@ func _process(delta: float) -> void:
 
 ## Makes the token a clickable target with number `number` (0 = not a target).
 func set_target(number: int, callback: Callable) -> void:
+	for connection in pressed.get_connections():
+		pressed.disconnect(connection.callable)
 	target_number = number
 	disabled = number <= 0
 	focus_mode = Control.FOCUS_ALL if number > 0 else Control.FOCUS_NONE
 	if number > 0:
 		pressed.connect(callback)
 	queue_redraw()
+
+
+func resting_modulate() -> Color:
+	return Color(0.55, 0.55, 0.55, 0.85) if down else Color.WHITE
 
 
 func _draw() -> void:
@@ -244,6 +300,8 @@ func _draw() -> void:
 		ring_color = Color("#fff3b0")
 	if has_focus():
 		ring_color = UiKit.ACCENT
+	elif _hovered:
+		ring_color = UiKit.GOLD
 	var ground_color := Color(0, 0, 0, 0.45)
 	if side == "party":
 		ground_color = tint.darkened(0.25)
@@ -295,7 +353,7 @@ func _draw_figure(feet: Vector2) -> void:
 		var canvas: Vector2 = sprite_set.canvas(animation)
 		var target_height := 110.0
 		if sprite_set.is_enemy:
-			target_height = sprite_set.size_px() * 1.65
+			target_height = maxf(sprite_set.size_px() * 1.65, 92.0 if trainer else 0.0)
 		var scale := target_height / maxf(1.0, _body_height(animation))
 		var bob := 0.0 if reduced_motion or animation != "idle" else sin(_bob_time * TAU) * 2.0
 		var top_left := Vector2(roundf(feet.x - canvas.x * scale * 0.5),

@@ -12,6 +12,7 @@ var _recipes: Array = []
 var _ready := false
 var _deadline: Variant = null
 var _countdown: Label
+var _last_countdown_color := Color.TRANSPARENT
 var _region: Label
 var _backdrop: BattleBackdrop
 var _encounter_label: Label
@@ -30,6 +31,7 @@ var _left_mode := "craft"
 var _inventory_mode := "inventory"
 var _invest_panel: PanelContainer
 var _content: Dictionary = {}
+var _backdrop: BattleBackdrop
 const SLOTS := ["helmet", "chest", "legs", "boots", "weapon", "charm1", "charm2", "charm3"]
 const ATTRIBUTES := ["str", "dex", "con", "int", "fth", "cha", "lck"]
 const PERCENT_STATS := ["crit", "crit_damage", "block", "block_reduction", "dodge", "aggro", "lifesteal", "status_resist"]
@@ -76,15 +78,17 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	encounter_box.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	encounter_box.position = Vector2(112, 12)
 	add_child(encounter_box)
-	_workspace = Control.new()
+	_workspace = ScrollContainer.new()
 	_workspace.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_workspace.offset_left = 24
 	_workspace.offset_right = -24
 	_workspace.offset_top = 64
 	_workspace.offset_bottom = -66
+	(_workspace as ScrollContainer).horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	(_workspace as ScrollContainer).vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	add_child(_workspace)
 	_columns = UiKit.hbox(10)
-	_columns.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_columns.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_workspace.add_child(_columns)
 	_bottom = UiKit.hbox(12)
 	_bottom.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
@@ -115,6 +119,10 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 
 func build(view: Dictionary, encounter: Dictionary) -> void:
 	_encounter = encounter
+	var layer := str(view.get("layer", 1))
+	_backdrop.set_backdrop(str(_content.get("journey", {}).get("backdrops", {}).get(layer, "forest")))
+	var viewport_width := get_viewport_rect().size.x if is_inside_tree() else 1280.0
+	_columns.custom_minimum_size.x = maxf(0.0, viewport_width - 48.0) * maxf(1.0, _app.settings.text_scale)
 	if _inspect < 0: _inspect = maxi(0, _screen.your_slot())
 	# T34: build() tears down _columns/_bottom, so remember scroll positions
 	# and the focused control first and restore them after the rebuild.
@@ -632,7 +640,10 @@ func tick() -> void:
 		return
 	var left := _app.seconds_left(_deadline)
 	_countdown.text = "%ds" % ceili(left)
-	_countdown.add_theme_color_override("font_color", UiKit.WARN if left <= 5.0 else UiKit.TEXT)
+	var color := UiKit.WARN if left <= 5.0 else UiKit.TEXT
+	if color != _last_countdown_color:
+		_countdown.add_theme_color_override("font_color", color)
+		_last_countdown_color = color
 
 func handle_key(key: int) -> bool:
 	var viewport := get_viewport()
@@ -659,7 +670,11 @@ func handle_key(key: int) -> bool:
 		return true
 	var index := key - KEY_1
 	if str(_encounter.get("kind", "")) == "merchant" and index >= 0 and index < _stock.size():
-		_app.send({"type": "buy", "slot": _acting_slot(), "item": _stock[index].get("item", "")})
+		var stock_item: Dictionary = _stock[index]
+		var item_name := str(stock_item.get("name", stock_item.get("item", "Item")))
+		var price := int(stock_item.get("price", 0))
+		_app.confirm_custom("Confirm purchase?", "Spend %d Gold on %s?" % [price, item_name], "Buy %s" % item_name,
+			func() -> void: _app.send({"type": "buy", "slot": _acting_slot(), "item": stock_item.get("item", "")}))
 		return true
 	if str(_encounter.get("kind", "")) == "rest" and index >= 0 and index < mini(9, _recipes.size()):
 		_app.send({"type": "craft", "slot": _acting_slot(), "recipe": _recipes[index].get("recipe", "")})
