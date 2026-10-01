@@ -888,7 +888,22 @@ func _build_bottom(view: Dictionary) -> void:
 		squares.set_anchors_preset(Control.PRESET_FULL_RECT)
 		squares.alignment = BoxContainer.ALIGNMENT_END
 		add_child(_skill_marks)
+		# The label theme can increase each badge's minimum width after it enters
+		# the tree. Recompute the anchored row width once those sizes are known so
+		# the last skill badge stays inside the viewport at larger text scales.
+		call_deferred("_fit_skill_marks")
 	_bottom.add_child(row)
+
+
+func _fit_skill_marks() -> void:
+	if not is_instance_valid(_skill_marks) or _skill_marks.get_child_count() == 0:
+		return
+	var squares := _skill_marks.get_child(0) as HBoxContainer
+	if squares == null:
+		return
+	var row_width := squares.get_combined_minimum_size().x
+	_skill_marks.offset_left = -20.0 - row_width
+	_skill_marks.offset_right = -20.0
 
 
 ## Grid of cards for Skills (with Attack and Defend first, like the
