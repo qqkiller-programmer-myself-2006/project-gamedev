@@ -606,6 +606,17 @@ static func valid_story_save(data: Dictionary, forest: ForestContent) -> bool:
 		return false
 	if next_layer < 1 or next_layer > route.size() or route.size() != forest.get_int("journey.layers", 5):
 		return false
+	for layer_options in route:
+		if not (layer_options is Array) or layer_options.is_empty():
+			return false
+		for option in layer_options:
+			if not (option is Dictionary):
+				return false
+			for key in ["type", "site", "name", "hint"]:
+				if not option.has(key) or not (option[key] is String):
+					return false
+			if option["type"] == "class" and (not option.has("class_id") or not (option["class_id"] is String)):
+				return false
 	if not (data.get("rng") is Dictionary) or not (data.get("stash") is Dictionary) or not (data.get("clues") is Array):
 		return false
 	var gems_earned = data.get("gems_earned")
