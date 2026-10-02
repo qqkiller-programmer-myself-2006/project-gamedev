@@ -123,7 +123,19 @@ func test_forged_save_is_rejected() -> void:
 	restored.server.allow_story = true
 	var new_session := restored.server.open_session()
 	assert_ok(restored.server.command(new_session, {"type": "create_room", "name": "Story", "story": true}))
-	
+
+	# Invalid route layers and options are rejected before restoring the Match.
+	var empty_current_layer = JSON.parse_string(JSON.stringify(saved))
+	var current_layer := int(empty_current_layer["layer"]) - 1
+	empty_current_layer["route"][current_layer] = []
+	assert_rejected(restored.server.command(new_session, {"type": "restore_story", "save": empty_current_layer}), "invalid_save")
+	var wrong_type_layer = JSON.parse_string(JSON.stringify(saved))
+	wrong_type_layer["route"][current_layer] = "not an option array"
+	assert_rejected(restored.server.command(new_session, {"type": "restore_story", "save": wrong_type_layer}), "invalid_save")
+	var wrong_type_option = JSON.parse_string(JSON.stringify(saved))
+	wrong_type_option["route"][current_layer][0] = "not an option dictionary"
+	assert_rejected(restored.server.command(new_session, {"type": "restore_story", "save": wrong_type_option}), "invalid_save")
+
 	# Extra gold
 	var extra_gold = JSON.parse_string(JSON.stringify(saved))
 	extra_gold["gold"] = -5
