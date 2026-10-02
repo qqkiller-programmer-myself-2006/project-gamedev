@@ -13,7 +13,7 @@
 
 ## Run tests
 
-รันชุดทดสอบทั้งหมดก่อนเปิด PR:
+รันชุดทดสอบทั้งหมดก่อนเปิด PR (รวม layout smoke script ใน `tests/client/` ที่ไม่ขึ้นต้นด้วย `test_`):
 
 ```bash
 ./tools/run_tests.sh

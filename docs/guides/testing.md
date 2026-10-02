@@ -8,12 +8,15 @@
 ต้องมี Godot **4.7.2** (หรือ 4.5+) อยู่ใน `PATH` ชื่อ `godot` หรือกำหนด `GODOT`
 
 ```bash
-./tools/run_tests.sh                    # ทุก test
-./tools/run_tests.sh --filter=voting    # เฉพาะ test ที่ id มีคำว่า voting
+./tools/run_tests.sh                    # unit test ทั้งหมด + layout smoke script
+./tools/run_tests.sh --filter=voting    # เฉพาะ test ที่ id มีคำว่า voting (ข้าม smoke script)
 GODOT=/path/to/Godot_v4.7.2 ./tools/run_tests.sh
 ```
 
-- exit code `0` = ผ่านทั้งหมด, `1` = มี test fail หรือไม่พบ test
+- exit code `0` = ผ่านทั้งหมด, `1` = มี test fail, ไม่พบ test หรือมี smoke script fail
+- smoke script คือไฟล์ `tests/client/*.gd` ที่ **ไม่** ขึ้นต้นด้วย `test_` (เช่น `t35_layout_smoke.gd`)
+  เป็น script แบบ `extends SceneTree` ที่วัดขนาด control จริงที่ตัวอักษรใหญ่ แล้ว `quit(0)` เมื่อผ่าน หรือ `quit(1)` เมื่อไม่ผ่าน
+  `run_tests.sh` ค้นหาและรันให้เองทุกไฟล์ จึงเพิ่มไฟล์ใหม่ได้โดยไม่ต้องแก้ CI
 - CI (`.github/workflows/tests.yml`) รันคำสั่งเดียวกันทุก push ไป `main` และทุก PR
 
 ## เพิ่ม test ใหม่
