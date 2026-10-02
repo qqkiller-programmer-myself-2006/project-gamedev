@@ -56,7 +56,7 @@ static func portrait(class_id_value: String) -> Texture2D:
 	var set := for_class(class_id_value)
 	if set == null:
 		return null
-	return load(ROOT + set.class_id + "/portrait.png") as Texture2D
+	return _cached_texture(ROOT + set.class_id + "/portrait.png")
 
 func frames(animation: String) -> Array[Texture2D]:
 	animation = _key(animation)

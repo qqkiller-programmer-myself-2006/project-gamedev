@@ -2,7 +2,6 @@ class_name ChapterCard
 extends Control
 
 signal finished
-const FONT_PATH := "res://assets/fonts/PixelifySans.ttf"
 var chapter := {}
 var reduced_motion := false
 var _timer := 0.0
@@ -10,16 +9,17 @@ var _title := Label.new()
 var _subtitle := Label.new()
 var _hint: Label
 var _font: Font
+var _closing := false
 
 func _init(data: Dictionary = {}, reduced: bool = false) -> void:
 	chapter = data
 	reduced_motion = reduced
-	_font = load(FONT_PATH)
+	_font = UiKit.pixel_font()
 	if _font == null:
 		_font = ThemeDB.fallback_font
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_title.text = "%s\n%s" % [UiText.LABELS["chapter"] % int(chapter.get("number", 0)), chapter.get("title", "")]
-	_subtitle.text = str(chapter.get("subtitle", ""))
+	_title.text = "%s\n%s" % [Tr.t(UiText.LABELS["chapter"] % int(chapter.get("number", 0))), Tr.t(str(chapter.get("title", "")))]
+	_subtitle.text = Tr.t(str(chapter.get("subtitle", "")))
 	for label in [_title, _subtitle]:
 		label.add_theme_font_override("font", _font)
 		label.add_theme_color_override("font_outline_color", UiKit.BG)
@@ -59,9 +59,8 @@ func _process(delta: float) -> void:
 	if reduced_motion:
 		return
 	_timer += delta
-	if _timer >= 2.5:
-		finished.emit()
-		queue_free()
+	if _timer >= 2.5 and not _closing:
+		_close()
 
 
 func apply_settings(_scale: float, reduced: bool) -> void:
@@ -86,7 +85,7 @@ func _add_hint() -> void:
 	if is_instance_valid(_hint):
 		return
 	_hint = Label.new()
-	_hint.text = UiText.LABELS["continue"]
+	_hint.text = Tr.t(UiText.LABELS["continue"])
 	_hint.add_theme_font_override("font", _font)
 	_hint.add_theme_font_size_override("font_size", UiKit.SIZES["small"])
 	_hint.add_theme_color_override("font_color", UiKit.TEXT_DIM)
@@ -102,6 +101,17 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed:
 		return
 	if reduced_motion and not event.echo and event.keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE, KEY_ESCAPE]:
-		finished.emit()
-		queue_free()
+		_close()
 	get_viewport().set_input_as_handled()
+
+func _close() -> void:
+	if _closing:
+		return
+	_closing = true
+	finished.emit()
+	if reduced_motion or not is_inside_tree():
+		queue_free()
+		return
+	var tween := create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, 0.18)
+	tween.tween_callback(queue_free)

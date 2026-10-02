@@ -12,6 +12,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	Tr.setup("en")
 	root.size = Vector2i(1280, 720)
 	var app := ClientApp.new()
 	root.add_child(app)
@@ -58,75 +59,77 @@ func _run() -> void:
 	screen.setup(app)
 	app._current = screen
 	var viewport_rect := Rect2(Vector2.ZERO, root.get_viewport().get_visible_rect().size)
-	for text_scale in [1.0, 1.4]:
-		app.settings = ClientSettings.new()
-		app.settings.text_scale = text_scale
-		app.settings.reduced_motion = true
-		app.settings.seen_hints = []
-		app.apply_settings()
-		screen.combat_mode = "skills"
-		screen.refresh(app, true)
-		await process_frame
-		await process_frame
-		var battle := screen._battle as BattleView
-		var menu := battle._combat_grid as Control
-		var chips := battle._skill_marks as Control
-		var log := battle._log.get_parent() as Control
-		var menu_rect := menu.get_global_rect()
-		_assert(menu != null and menu.visible, "Skill menu visible at text scale %s" % text_scale)
-		_assert(chips != null and chips.visible, "Status chips visible at text scale %s" % text_scale)
-		_assert_inside(menu, viewport_rect, "Skill menu at %s" % text_scale)
-		_assert_inside(chips, viewport_rect, "Status chips at %s" % text_scale)
-		_assert_inside(log, viewport_rect, "Battle log at %s" % text_scale)
-		_assert_not_intersect(menu, chips, "Skill menu / status chips at %s" % text_scale)
-		_assert_not_intersect(menu, log, "Skill menu / battle log at %s" % text_scale)
-		_assert_not_intersect(chips, log, "Status chips / battle log at %s" % text_scale)
-		var scroll := menu as ScrollContainer
-		_assert(scroll != null and scroll.get_child_count() == 1, "Skill menu uses a scrollable grid")
-		if scroll != null and scroll.get_child_count() > 0:
-			var holder := scroll.get_child(0) as PanelContainer
-			var grid := holder.get_child(0) as GridContainer
-			_assert(grid.get_child_count() == 9 and battle._choices.size() == 9,
-				"Strike, Guard and skills remain reachable with keys 1-9")
-			if text_scale > 1.0:
-				_assert(grid.get_combined_minimum_size().y > scroll.size.y,
-					"Long skill grids scroll inside their viewport at 1.4x")
-			for card_value in grid.get_children():
-				var card := card_value as Button
-				_assert(card.focus_mode == Control.FOCUS_ALL and not card.tooltip_text.is_empty(),
-					"Skill card keeps focus and tooltip: %s" % card.name)
-				_assert(card.size.y >= card.get_child(0).get_combined_minimum_size().y,
-					"Skill card height contains its name and cost lines: %s" % card.name)
-			var boar_plate := battle._enemy_plates.get_child(0) as Control
-			var labels := _find_labels(boar_plate)
-			var name_label: Label = null
-			var level_label: Label = null
-			for label in labels:
-				if label.text == "Thornback Boar Lord":
-					name_label = label
-				elif label.text == "Lv 12":
-					level_label = label
-			_assert(name_label != null and name_label.text_overrun_behavior == TextServer.OVERRUN_TRIM_ELLIPSIS,
-				"Enemy name truncates with ellipsis at %s" % text_scale)
-			_assert(level_label != null and level_label.size.x > 0, "Enemy level remains visible at %s" % text_scale)
-			print("T46 scale=%s menu=%s chips=%s log=%s" % [text_scale,
-			menu.get_global_rect(), chips.get_global_rect(), log.get_global_rect()])
+	for language in ["en", "th"]:
+		for text_scale in [1.0, 1.4]:
+			app.settings = ClientSettings.new()
+			app.settings.text_scale = text_scale
+			app.settings.reduced_motion = true
+			app.settings.seen_hints = []
+			app.apply_settings()
+			Tr.setup(language)
+			screen.combat_mode = "skills"
+			screen.refresh(app, true)
+			await process_frame
+			await process_frame
+			var battle := screen._battle as BattleView
+			var menu := battle._combat_grid as Control
+			var chips := battle._skill_marks as Control
+			var log := battle._log.get_parent() as Control
+			var menu_rect := menu.get_global_rect()
+			_assert(menu != null and menu.visible, "Skill menu visible at %s scale %s" % [language, text_scale])
+			_assert(chips != null and chips.visible, "Status chips visible at %s scale %s" % [language, text_scale])
+			_assert_inside(menu, viewport_rect, "Skill menu at %s scale %s" % [language, text_scale])
+			_assert_inside(chips, viewport_rect, "Status chips at %s scale %s" % [language, text_scale])
+			_assert_inside(log, viewport_rect, "Battle log at %s scale %s" % [language, text_scale])
+			_assert_not_intersect(menu, chips, "Skill menu / status chips at %s scale %s" % [language, text_scale])
+			_assert_not_intersect(menu, log, "Skill menu / battle log at %s scale %s" % [language, text_scale])
+			_assert_not_intersect(chips, log, "Status chips / battle log at %s scale %s" % [language, text_scale])
+			var scroll := menu as ScrollContainer
+			_assert(scroll != null and scroll.get_child_count() == 1, "Skill menu uses a scrollable grid")
+			var boar_plate: Control = null
+			if scroll != null and scroll.get_child_count() > 0:
+				var holder := scroll.get_child(0) as PanelContainer
+				var grid := holder.get_child(0) as GridContainer
+				_assert(grid.get_child_count() == 9 and battle._choices.size() == 9,
+					"Strike, Guard and skills remain reachable with keys 1-9")
+				if text_scale > 1.0:
+					_assert(grid.get_combined_minimum_size().y > scroll.size.y,
+						"Long skill grids scroll inside their viewport at 1.4x")
+				for card_value in grid.get_children():
+					var card := card_value as Button
+					_assert(card.focus_mode == Control.FOCUS_ALL and not card.tooltip_text.is_empty(),
+						"Skill card keeps focus and tooltip: %s" % card.name)
+					_assert(card.size.y >= card.get_child(0).get_combined_minimum_size().y,
+						"Skill card height contains its name and cost lines: %s" % card.name)
+				boar_plate = battle._enemy_plates.get_child(0) as Control
+				var labels := _find_labels(boar_plate)
+				var name_label: Label = null
+				var level_label: Label = null
+				for label in labels:
+					if label.text == Tr.t("Thornback Boar Lord"):
+						name_label = label
+					elif label.text == Tr.t("Lv 12"):
+						level_label = label
+				_assert(name_label != null and name_label.text_overrun_behavior == TextServer.OVERRUN_TRIM_ELLIPSIS,
+					"Enemy name truncates with ellipsis at %s scale %s" % [language, text_scale])
+				_assert(level_label != null and level_label.size.x > 0,
+					"Enemy level remains visible at %s scale %s" % [language, text_scale])
+			print("T46 %s scale=%s menu=%s chips=%s log=%s" % [language, text_scale,
+				menu.get_global_rect(), chips.get_global_rect(), log.get_global_rect()])
 			screen.combat_mode = "attack"
 			battle.refresh_action_panel()
 			await process_frame
 			await process_frame
 			var prompt := battle.get_node_or_null("BattleTargetPrompt") as Control
 			chips = battle._skill_marks
-			_assert(prompt != null and prompt.visible, "Target prompt visible at text scale %s" % text_scale)
+			_assert(prompt != null and prompt.visible, "Target prompt visible at %s scale %s" % [language, text_scale])
 			if prompt != null:
-				_assert_inside(prompt, viewport_rect, "Target prompt at %s" % text_scale)
+				_assert_inside(prompt, viewport_rect, "Target prompt at %s scale %s" % [language, text_scale])
 				_assert(not prompt.get_global_rect().intersects(menu_rect),
-					"Target prompt / skill menu at %s" % text_scale)
-				_assert_not_intersect(prompt, log, "Target prompt / battle log at %s" % text_scale)
-				_assert_not_intersect(prompt, chips, "Target prompt / status chips at %s" % text_scale)
-				_assert_not_intersect(prompt, boar_plate, "Target prompt / enemy nameplate at %s" % text_scale)
-			print("T46 target prompt scale=%s prompt=%s chips=%s log=%s" % [text_scale,
-			prompt.get_global_rect() if prompt != null else "missing", chips.get_global_rect(), log.get_global_rect()])
+					"Target prompt / skill menu at %s scale %s" % [language, text_scale])
+				_assert_not_intersect(prompt, log, "Target prompt / battle log at %s scale %s" % [language, text_scale])
+				_assert_not_intersect(prompt, chips, "Target prompt / status chips at %s scale %s" % [language, text_scale])
+				_assert_not_intersect(prompt, boar_plate, "Target prompt / enemy nameplate at %s scale %s" % [language, text_scale])
 			screen.combat_mode = "items"
 			battle.refresh_action_panel()
 			await process_frame
@@ -137,9 +140,9 @@ func _run() -> void:
 			var item_labels := _find_labels(item_grid.get_child(0))
 			var item_name_found := false
 			for item_label in item_labels:
-				if item_label.text.ends_with("Healing Herb") and item_label.size.x > 0 and item_label.size.y > 0:
+				if item_label.text.ends_with(Tr.t("Healing Herb")) and item_label.size.x > 0 and item_label.size.y > 0:
 					item_name_found = true
-			_assert(item_name_found, "Item card keeps its name visible at %s" % text_scale)
+			_assert(item_name_found, "Item card keeps its name visible at %s scale %s" % [language, text_scale])
 	root.remove_child(screen)
 	screen.free()
 	root.remove_child(app)

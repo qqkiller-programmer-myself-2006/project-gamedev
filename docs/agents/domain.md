@@ -1,20 +1,17 @@
-# Domain Docs
+# เอกสารโดเมน
 
-How the engineering skills should consume this repository's domain
-documentation.
+วิธีที่ skill ด้านวิศวกรรมควรอ่านเอกสารโดเมนของรีโปนี้
 
-## Before exploring, read these
+## อ่านไฟล์เหล่านี้ก่อนสำรวจ
 
-- **`CONTEXT.md`** at the repository root.
-- **`docs/adr/`**: read ADRs that touch the area being explored.
+- **`CONTEXT.md`** ที่ root ของรีโป
+- **`docs/adr/`**: อ่าน ADR ที่เกี่ยวข้องกับส่วนที่กำลังสำรวจ
 
-If these files do not exist, proceed silently. Do not flag their absence or
-suggest creating them upfront. The `/domain-modeling` skill creates them
-lazily when terms or decisions are resolved.
+หากไม่มีไฟล์เหล่านี้ ให้ทำงานต่อโดยไม่ต้องแจ้งหรือเสนอให้สร้างไฟล์ล่วงหน้า skill `/domain-modeling` จะสร้างไฟล์เหล่านี้เมื่อมีการตกลงความหมายของคำหรือการตัดสินใจแล้ว
 
-## File structure
+## โครงสร้างไฟล์
 
-This is a single-context repository:
+รีโปนี้ใช้ single context:
 
 ```text
 /
@@ -25,13 +22,10 @@ This is a single-context repository:
 └── src/
 ```
 
-## Use the glossary's vocabulary
+## ใช้คำศัพท์จาก glossary
 
-When output names a domain concept in an issue title, refactor proposal,
-hypothesis, or test name, use the term as defined in `CONTEXT.md`. If the
-concept is not in the glossary, note the gap for `/domain-modeling`.
+เมื่อผลลัพธ์กล่าวถึงแนวคิดโดเมนในชื่อ issue, ข้อเสนอ refactor, สมมติฐาน หรือชื่อ test ให้ใช้คำตามที่กำหนดไว้ใน `CONTEXT.md` หากไม่มีแนวคิดนั้นใน glossary ให้แจ้งช่องว่างดังกล่าวแก่ `/domain-modeling`
 
-## Flag ADR conflicts
+## แจ้งเมื่อ ADR ขัดแย้งกัน
 
-If output contradicts an existing ADR, surface the conflict explicitly
-instead of silently overriding it.
+หากผลลัพธ์ขัดกับ ADR ที่มีอยู่ ให้ระบุข้อขัดแย้งอย่างชัดเจน แทนการเปลี่ยนข้อกำหนดเดิมโดยไม่แจ้ง

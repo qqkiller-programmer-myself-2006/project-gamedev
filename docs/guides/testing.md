@@ -1,9 +1,9 @@
-# Testing
+# การทดสอบ
 
 ทุก test รันแบบ headless จาก command line ด้วย runner ในรีโป
 (`tests/run_tests.gd`, เหตุผลใน [ADR-0004](../adr/0004-in-repo-headless-test-runner.md))
 
-## รัน test
+## เรียกใช้ test
 
 ต้องมี Godot **4.7.2** (หรือ 4.5+) อยู่ใน `PATH` ชื่อ `godot` หรือกำหนด `GODOT`
 

@@ -91,7 +91,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	scroll.add_child(_timeline)
 	left.add_child(scroll)
 	add_child(left)
-	var turn_label := UiKit.pixel_label("Turn 1", "body", UiKit.GOLD)
+	var turn_label := UiKit.pixel_label(Tr.t("Turn 1"), "body", UiKit.GOLD)
 	turn_label.add_theme_font_size_override("font_size", int(18 * _app.settings.text_scale))
 	_turn_banner = UiKit.panel(turn_label, "OrnamentPanel")
 	_turn_banner.add_theme_stylebox_override("panel", UiKit.flat_box(UiKit.HUD_BG, UiKit.GOLD, 2, 5))
@@ -297,14 +297,14 @@ func tick() -> void:
 	if _countdown == null or not is_instance_valid(_countdown):
 		return
 	if not _combat.get("your_turn", false):
-		_countdown.text = _waiting_text()
+		_countdown.text = Tr.t(_waiting_text())
 		_countdown.remove_theme_color_override("font_color")
 		return
 	if _deadline == null or float(_deadline) < 0.0:
 		_countdown.text = ""
 		return
 	var left := _app.seconds_left(_deadline)
-	_countdown.text = "%ds" % ceili(left)
+	_countdown.text = Tr.t("%ds" % ceili(left))
 	var next_color := UiKit.WARN if left <= 5.0 else UiKit.TEXT
 	if _countdown.get_theme_color("font_color") != next_color:
 		_countdown.add_theme_color_override("font_color", next_color)
@@ -364,13 +364,13 @@ func announce(text: String) -> void:
 	if not str(_combat.get("result", "")).is_empty():
 		return
 	if text == "Your turn!":
-		_turn_notice.text = text
+		_turn_notice.text = Tr.t(text)
 		_turn_notice.visible = true
 		var notice_tween := create_tween()
 		notice_tween.tween_interval(1.5 if _app.settings.reduced_motion else 1.2)
 		notice_tween.tween_callback(func() -> void: _turn_notice.visible = false)
 		return
-	_banner_label.text = text
+	_banner_label.text = Tr.t(text)
 	_banner.visible = true
 	_banner.rotation_degrees = -1.0
 	if _banner_tween != null:
@@ -463,7 +463,7 @@ func _build_region(view: Dictionary) -> void:
 	var phase := str(view.get("phase", ""))
 	var total := int(view.get("layers_total", 5))
 	var encounter = view.get("encounter")
-	_region.text = "%s (%d/%d)" % [UiText.region_of(view), int(view.get("layer", 0)), total]
+	_region.text = Tr.t("%s (%d/%d)" % [Tr.t(UiText.region_of(view)), int(view.get("layer", 0)), total])
 	var sub := "\"%s\"" % _encounter_title(view)
 	if _combat.get("trial", false):
 		sub = "Challenge  %d/%d" % [int(_combat.get("round", 1)), int(_combat.get("round_limit", 3))]
@@ -497,15 +497,14 @@ func _build_header(view: Dictionary) -> void:
 		_header.custom_minimum_size.x = 0
 		var boss: Dictionary = encounter["boss"]
 		var head := UiKit.vbox(2)
-		head.add_child(_centered(UiKit.pixel_label("Phase %d/%d" % [int(boss["phase"]), int(boss["phases_total"])], "small", UiKit.WARN)))
+		head.add_child(_centered(UiKit.pixel_label(Tr.t("Phase %d/%d" % [int(boss["phase"]), int(boss["phases_total"])]), "small", UiKit.WARN)))
 		_header.add_child(UiKit.panel(head, "HudPanel"))
 		var telegraph: Dictionary = boss.get("telegraph", {})
 		if not telegraph.is_empty():
 			var box := UiKit.vbox(2)
-			var target := "the whole Party" if telegraph["target"] == "all" else _screen.name_of(str(telegraph["target"]))
-			box.add_child(UiKit.para("WARNING: %s next turn, aimed at %s!" % [telegraph["name"], target], "small", UiKit.WARN))
-			var advice := "Guard to halve it"
-			advice += ", or raise Shield Wall." if telegraph["target"] == "all" else ", or have a Guardian Protect them."
+			var target := Tr.t("the whole Party") if telegraph["target"] == "all" else _screen.name_of(str(telegraph["target"]))
+			box.add_child(UiKit.para(Tr.t("WARNING: %s next turn, aimed at %s!" % [Tr.t(str(telegraph["name"])), target]), "small", UiKit.WARN))
+			var advice := Tr.t("Defend [D] to halve it, or raise Shield Wall.") if telegraph["target"] == "all" else Tr.t("Defend [D] to halve it, or have a Guardian Protect them.")
 			if _app.settings.text_scale >= 1.4:
 				# Large text: keep the banner short so it never covers the party; the advice moves to the tooltip.
 				box.tooltip_text = advice
@@ -533,7 +532,7 @@ func _build_timeline(view: Dictionary) -> void:
 	UiKit.clear(_timeline)
 	var remaining: Array = _combat.get("turn_order", [])
 	var actor := str(_combat.get("actor", ""))
-	_turn_banner.get_child(0).text = "Turn %d" % int(_combat.get("round", 1))
+	_turn_banner.get_child(0).text = Tr.t("Turn %d" % int(_combat.get("round", 1)))
 	for character in view.get("party", []):
 		var id := "p%d" % int(character.get("slot", 0))
 		var unit := _unit(view, str(id))
@@ -710,7 +709,7 @@ func _build_stage(view: Dictionary) -> void:
 				"acting": _combat.get("actor", "") == id,
 				"sprite": sprite_name, "sprite_variant": enemy.get("sprite_variant", ""), "show_plate": false,
 				"tooltip": "%s\n%s%s" % [_screen.name_of(id), enemy.get("description", ""),
-						("\nWeak to: " + ", ".join(weakness)) if not weakness.is_empty() else ""],
+				("\n" + Tr.t("Weak to: %s" % ", ".join(weakness))) if not weakness.is_empty() else ""],
 		}
 			if not enemy.has("energy"):
 				data.erase("energy")
@@ -846,11 +845,11 @@ func _build_bottom(view: Dictionary) -> void:
 		actions.custom_minimum_size = Vector2(0, 84)
 		var has_skills: bool = not choices.get("skills", {}).is_empty()
 		var fight := _action_button("Fight", "fight", func() -> void: _set_mode("skills"), mode == "skills" or mode == "attack" or mode.begins_with("skill:"))
-		fight.tooltip_text = "Fight [F]"
+		fight.tooltip_text = Tr.t("Fight [F]")
 		Icons.apply_to_button(fight, "fight", _app.settings.text_scale)
 		actions.add_child(fight)
 		var item := _action_button("Items", "items", func() -> void: _set_mode("items"), mode == "items" or mode.begins_with("item:"))
-		item.tooltip_text = "Items [I]"
+		item.tooltip_text = Tr.t("Items [I]")
 		Icons.apply_to_button(item, "items", _app.settings.text_scale)
 		UiKit.disable(item, choices.get("items", {}).is_empty(), UiText.WHY["no_items"])
 		actions.add_child(item)
@@ -895,7 +894,7 @@ func _build_bottom(view: Dictionary) -> void:
 			initial.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			mark.add_child(initial)
 			var affordable := bool(info_skill.get("affordable", true))
-			var state := "Ready"
+			var state := Tr.t("Ready")
 			var state_color := UiKit.GOOD
 			if left > 0:
 				state = str(left)
@@ -1072,22 +1071,22 @@ func _build_result() -> void:
 		_banner.visible = false
 	match outcome:
 		"victory":
-			_center_text.text = "Challenge won!" if _combat.get("trial", false) else "Victory!"
+			_center_text.text = Tr.t("Challenge won!") if _combat.get("trial", false) else Tr.t("Victory!")
 			_center_text.add_theme_color_override("font_color", UiKit.GOOD)
 			var rewards: Dictionary = _combat.get("rewards", {})
 			if not _combat.get("trial", false) and not rewards.is_empty():
 				for item in rewards.get("items", {}):
 					_rewards.add_child(_reward_line("%s%s" % [UiText.item_name(str(item)),
 							" x%d" % int(rewards["items"][item]) if int(rewards["items"][item]) > 1 else ""], UiKit.TEXT))
-				_rewards.add_child(_reward_line("+%d Gold for you" % _screen.personal_gold_share(int(rewards.get("gold", 0))), UiKit.ACCENT))
+				_rewards.add_child(_reward_line(Tr.t("+%d Gold for you" % _screen.personal_gold_share(int(rewards.get("gold", 0)))), UiKit.ACCENT))
 				_rewards.add_child(_reward_line("%d EXP" % int(rewards.get("exp", 0)), UiKit.TEXT))
 				if rewards.has("clue"):
-					_rewards.add_child(_reward_line("Clue: %s" % rewards["clue"]["title"], UiKit.ALLY))
+					_rewards.add_child(_reward_line(Tr.t("Clue: %s" % Tr.t(str(rewards["clue"]["title"]))), UiKit.ALLY))
 		"timeout":
-			_center_text.text = "Time is up!"
+			_center_text.text = Tr.t("Time is up!")
 			_center_text.add_theme_color_override("font_color", UiKit.WARN)
 		"defeat":
-			_center_text.text = "The Party has fallen..."
+			_center_text.text = Tr.t("The Party has fallen...")
 			_center_text.add_theme_color_override("font_color", UiKit.ENEMY)
 
 
@@ -1102,15 +1101,15 @@ func _reward_line(text: String, color: Color) -> Label:
 
 func _waiting_text() -> String:
 	if not str(_combat.get("result", "")).is_empty():
-		return "The fight is over."
+		return Tr.t("The fight is over.")
 	var actor := str(_combat.get("actor", ""))
 	match str(_combat.get("actor_controller", "")):
 		"human":
-			return "Waiting for %s to act..." % _screen.name_of(actor)
+			return Tr.t("Waiting for %s to act..." % _screen.name_of(actor))
 		"ai":
-			return "%s (AI) is acting..." % _screen.name_of(actor)
+			return Tr.t("%s (AI) is acting..." % _screen.name_of(actor))
 		"enemy":
-			return "%s is acting..." % _screen.name_of(actor)
+			return Tr.t("%s is acting..." % _screen.name_of(actor))
 	return ""
 
 
@@ -1190,7 +1189,7 @@ func _item_description(item_id: String) -> String:
 
 func _action_button(text: String, id: String, callback: Callable, active: bool) -> Button:
 	var button := Button.new()
-	button.text = text
+	button.text = Tr.t(text)
 	button.theme_type_variation = "HudButton"
 	button.focus_mode = Control.FOCUS_ALL
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL

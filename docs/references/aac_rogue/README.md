@@ -1,151 +1,151 @@
-# AAC (An Average Campaign) — Rogue Build & System Reference
+# AAC (An Average Campaign) — ข้อมูลอ้างอิงชุดตัวละคร Rogue และระบบเกม
 
-> **Reference Source**: [AAC - เล่น Rogue พื้นฐานยังไง??](https://www.youtube.com/watch?v=6BFlpdljkA8)  
-> **Channel**: Satoshi Sensei Ch  
-> **Platform / Engine Reference**: Roblox (An Average Campaign - Turn-Based Co-op Roguelite RPG)  
-> **Project Context**: Reference for *BEYOND THE WORLD'S END* combat loop, class/boon build synergy, DoT architecture, crafting/camp UI, and co-op resource management.
-
----
-
-## 1. Executive Summary & Relevance to BEYOND THE WORLD'S END
-
-*An Average Campaign (AAC)* serves as a key direct reference for turn-based party RPGs with roguelite run structures. This video breaks down the **Rogue (Assassin DoT)** build, demonstrating how character progression, boon/trait synergies, turn energy flow, crafting, and party inventory operate seamlessly in co-op.
-
-### Key Takeaways for BEYOND THE WORLD'S END:
-1. **DoT Stacking Synergy**: Multiple distinct DoT debuffs (Bleed, Poison, Toxin) stack simultaneously, scaling damage multiplicatively via traits like *Enervation* (+5% damage per unique DoT, up to 1.4x).
-2. **Action Energy & Cooldown Economy**: Skills cost Energy (1–2) and have cooldowns (3–6 turns). Turn 1 focuses on weapon buffs (*Prep Time*), Turn 2 on free basic attacks (*Strike*), and Turn 3 on high-impact combos (*Poke Up* / *Inject Venom*).
-3. **Campfire / Rest UI Architecture**: A clean 3-column layout during rest nodes: [Crafting / Recipes] | [Party Inventory / Stash] | [Equipment & Full Stat Sheet].
-4. **Co-op Resource Transfer**: Direct player-to-player item and gold transfers during camp, alongside a "Ready (x/4)" synchronization check.
+> **แหล่งอ้างอิง**: [AAC - เล่น Rogue พื้นฐานยังไง??](https://www.youtube.com/watch?v=6BFlpdljkA8)
+> **ช่อง**: Satoshi Sensei Ch
+> **แพลตฟอร์ม / เอนจินในภาพอ้างอิง**: Roblox (An Average Campaign - เกมสวมบทบาทร่วมมือแบบผลัดตาเดินและโร้กไลต์)
+> **บริบทของโครงการ**: ข้อมูลอ้างอิงสำหรับวงจรการต่อสู้ *BEYOND THE WORLD'S END*, การเสริมกันของอาชีพและพร, โครงสร้างความเสียหายต่อเนื่อง, การคราฟต์และ UI ค่ายพัก และการจัดการทรัพยากรแบบร่วมมือกัน
 
 ---
 
-## 2. Visual Reference Breakdown & UI Anatomy
+## 1. สรุปและความเกี่ยวข้องกับ BEYOND THE WORLD'S END
 
-### 2.1 Class Selection & Skill Tree
-![Class Selection and Skill Tree](01_class_selection_and_skill_tree.png)
-- **Role Definition**: Rogue is designated as a melee fighter utilizing Daggers and specialized "Vials" to trigger Damage-over-Time (DoT). Recommended stats: `DEX` / `LCK`.
-- **Pre-run Progression**:
-  - Skill Tree with node levels (e.g., `Stat Points Level 5/5` granting +1 starting stat per point).
-  - Prestige system (`Prestige: 25 (MAX)`) and skill reset currency.
+*An Average Campaign (AAC)* ทำหน้าที่เป็นภาพอ้างอิงสำคัญสำหรับเกมสวมบทบาทกลุ่มแบบผลัดตาเดินที่เล่นเป็นรอบแบบโร้กไลต์ วิดีโอนี้แจกแจงรายละเอียดชุดความสามารถ **Rogue (นักฆ่าสายความเสียหายต่อเนื่อง)** ซึ่งแสดงให้เห็นว่าความก้าวหน้าของตัวละคร การเสริมกันของพรและความสามารถติดตัว การใช้พลังงานในแต่ละเทิร์น การคราฟต์และคลังของกลุ่มทำงานร่วมกันในการเล่นหลายคนอย่างไร
 
----
-
-### 2.2 Race Selection & Passive Traits
-![Race Selection and Traits](02_race_selection_dwarf_traits.png)
-- **Races**: Elf, Dwarf, Kobold, Lunaeia, Withered, Robloxian.
-- **Example Passives (Dwarf)**:
-  - *Dwarven Resilience*: +10% Max HP and +10% Status Resistance.
-  - *Masterwork*: Crafted item positive effects scale +0.75% per current level.
-- **Synergy Note**: Dwarf's extra HP and status resistance compensates for Rogue's inherent squishiness.
+### ประเด็นสำคัญสำหรับ BEYOND THE WORLD'S END:
+1. **การเสริมกันของสถานะความเสียหายต่อเนื่อง**: สถานะความเสียหายต่อเนื่องต่างชนิด (เลือดไหล, พิษ, พิษร้าย) จะซ้อนกันพร้อมกัน โดยจะขยายความเสียหายแบบทวีคูณผ่านลักษณะเช่น *อ่อนแรง* (ความเสียหาย +5% ต่อสถานะความเสียหายต่อเนื่องต่างชนิด สูงสุด 1.4 เท่า)
+2. **การจัดการพลังงานและคูลดาวน์**: ทักษะต้องใช้ พลังงาน (1–2) และมีคูลดาวน์ (3–6 เทิร์น) เทิร์นที่ 1 มุ่งเน้นไปที่บัฟอาวุธ (*เตรียมพิษ*), เทิร์นที่ 2 สำหรับการโจมตีพื้นฐานฟรี (*โจมตี*) และเทิร์นที่ 3 สำหรับคอมโบที่มีพลังโจมตีสูง (*แทงซ้ำ* / *ฉีดพิษ*)
+3. **รูปแบบ UI ของค่ายพัก**: เค้าโครง 3 คอลัมน์ที่สะอาดตาระหว่างจุดพัก: [คราฟต์ / สูตร] | [ไอเทมของกลุ่ม / คลัง] | [อุปกรณ์และค่าสถานะทั้งหมด]
+4. **การโอนทรัพยากรแบบร่วมมือกัน**: การโอนไอเท็มระหว่างผู้เล่นโดยตรงและการโอนทองระหว่างแคมป์ ควบคู่ไปกับการยืนยันความพร้อมร่วมกัน "Ready (x/4)"
 
 ---
 
-### 2.3 Boon / Perk Slotting System
-![Boons and Perks Setup](03_boons_and_perks_setup.png)
-- **Mechanic**: Capacity system (Total 5 Slots). Each Boon has an associated slot cost:
-  - **Energy Conserver** (2 Slots): 15% chance to gain +1 additional Energy at turn start.
-  - **Enervation** (2 Slots): +5% multiplicative damage per unique DoT on target (up to 1.4x), +15% DoT damage dealt, but take 1.15x more debuff damage.
-  - **Alert** (1 Slot): +3 Initiative bonus; first 2 turns of combat gain +5% Block and Dodge chance.
-  - **Total**: 2 + 2 + 1 = 5/5 slots.
+## 2. รายละเอียดภาพอ้างอิงและส่วนประกอบ UI
+
+### 2.1 การเลือกอาชีพและผังทักษะ
+![อาชีพ การเลือกและแผนผังทักษะ](01_class_selection_and_skill_tree.png)
+- **บทบาท**: Rogue ถูกกำหนดให้เป็นนักสู้ระยะประชิดที่ใช้มีดสั้นและ "ขวดยา" พิเศษเพื่อกระตุ้นความเสียหายต่อเนื่อง (DoT) สถิติที่แนะนำ: `DEX` / `LCK`
+- **ความก้าวหน้าก่อนเริ่มรอบ**:
+  - ผังทักษะที่มีระดับโหนด (เช่น `Stat Points Level 5/5` มอบสถิติเริ่มต้น +1 ต่อจุด)
+  - ระบบเกียรติยศ (`Prestige: 25 (MAX)`) และสกุลเงินรีเซ็ตทักษะ
 
 ---
 
-### 2.4 Combat Layout & Initiative Timeline
-![Combat Layout and Turn Order](04_combat_layout_turn_order.png)
-- **Region & Layer Tracker**: Top-right corner displays current node (e.g., `Forest (6/8)` with modifiers like `"Jumpscare" All`).
-- **Initiative Order (Left Side)**:
-  - Displays turn sequence from top to bottom (e.g., `popk1k789 (10)`, `oKenKeno (7)`, `Exzelidus (6)`, `Spider (6)`, `Bandit (6)`, `Luffy (5)`, `Bee (4)`).
-  - Every combatant tile displays current HP (red) and Energy (blue).
-- **Player HUD (Bottom)**:
-  - Character status: `Rogue Lvl 6 (33/78 EXP)`.
-  - Turn Action Timer: `30s` (in *BEYOND THE WORLD'S END*, specified as 15s Action Window).
-  - Currency: `116 Gold`.
-  - Resource Bars: HP `50/50`, Energy segmented bar `1/6`.
-  - Main Action Buttons: `[ Fight ]`, `[ Items ]`, `[ Focus ]`.
+### 2.2 การเลือกเผ่าพันธุ์และความสามารถติดตัว
+![เผ่าพันธุ์ การเลือกและลักษณะ](02_race_selection_dwarf_traits.png)
+- **เผ่าพันธุ์**: เอลฟ์, คนแคระ, โคโบลด์, ลูนาเอีย, ผู้เหี่ยวเฉา, Robloxian
+- **ตัวอย่างความสามารถติดตัว (คนแคระ)**:
+  - *ความทรหดของคนแคระ*: +10% HP สูงสุด และต้านทานสถานะ +10%
+  - *งานฝีมือชั้นเยี่ยม*: สเกลเอฟเฟกต์ด้านบวกของไอเทมที่สร้างขึ้น +0.75% ต่อระดับปัจจุบัน
+- **หมายเหตุการทำงานร่วมกัน**: HP พิเศษและความต้านทานสถานะของ คนแคระ จะชดเชยความเปราะบางของ Rogue
 
 ---
 
-### 2.5 Action Selection & Cooldown Management
-![Combat Skill Selection](05_combat_skill_selection.png)
-- **Skill Menu Structure**:
-  - `Strike`: Cost 0 Energy | Cooldown 0 (Standard basic attack).
-  - `Guard`: Cost 0 Energy | Cooldown 0 (Defend action).
-  - `Stab`: Cost 1 Energy | Cooldown 4.
-  - `Prep Time`: Cost 1 Energy | Cooldown 6 (Buffs weapon with toxin/poison).
-  - `Poke Up`: Cost 2 Energy | Cooldown 3 (High DoT application combo).
-  - `Inject Venom`: Cost 2 Energy | Cooldown 6.
+### 2.3 ระบบช่องพร
+![การตั้งค่าโบนัสและสิทธิพิเศษ](03_boons_and_perks_setup.png)
+- **กติกา**: ระบบความจุ (รวม 5 ช่อง) พร แต่ละอันมีค่าใช้จ่ายสล็อตที่เกี่ยวข้อง:
+  - **ผู้ประหยัดพลังงาน** (2 ช่อง): โอกาส 15% ที่จะได้รับ พลังงาน เพิ่มเติม +1 เมื่อเริ่มเทิร์น
+  - **อ่อนแรง** (2 ช่อง): +5% ความเสียหายแบบทวีคูณต่อสถานะความเสียหายต่อเนื่องต่างชนิดบนเป้าหมาย (สูงสุด 1.4x), +15% ความเสียหาย DoT ที่ทำได้ แต่ได้รับความเสียหายดีบัฟเพิ่มขึ้น 1.15 เท่า
+  - **ตื่นตัว** (1 ช่อง): โบนัส +3 ชิงจังหวะ; การต่อสู้ 2 เทิร์นแรกได้รับโอกาส ปัดป้อง และ หลบหลีก +5%
+  - **ทั้งหมด**: 2 + 2 + 1 = 5/5 ช่อง
 
 ---
 
-### 2.6 Skill Execution Feedback
-![Skill Cast Action Banner](06_skill_cast_action_banner.png)
-- When an ability is used, a prominent banner (`Prep Time`) animates across the bottom screen.
-- Energy is consumed immediately, and cooldown timers display directly over the skill buttons.
+### 2.4 หน้าต่อสู้และลำดับชิงจังหวะ
+![เค้าโครง การต่อสู้ และลำดับเทิร์น](04_combat_layout_turn_order.png)
+- **ตัวติดตามภูมิภาคและ ชั้น**: มุมขวาบนแสดงโหนดปัจจุบัน (เช่น `Forest (6/8)` พร้อมตัวปรับแต่ง เช่น `"Jumpscare" All`)
+- **คำสั่ง ชิงจังหวะ (ด้านซ้าย)**:
+  - แสดงลำดับเทิร์นจากบนลงล่าง (เช่น `popk1k789 (10)`, `oKenKeno (7)`, `Exzelidus (6)`, `Spider (6)`, `Bandit (6)`, `Luffy (5)`, `Bee (4)`)
+  - ช่องนักสู้ทุกช่องจะแสดง HP ปัจจุบัน (สีแดง) และ พลังงาน (สีน้ำเงิน)
+- **HUD ผู้เล่น (ด้านล่าง)**:
+  - สถานะตัวละคร: `Rogue Lvl 6 (33/78 EXP)`
+  - ตัวจับเวลากรอบเวลาแอ็กชัน: `30s` (ใน *BEYOND THE WORLD'S END* ระบุเป็นหน้าต่างการดำเนินการ 15 วินาที)
+  - สกุลเงิน: `116 Gold`.
+  - แถบทรัพยากร: HP `50/50`, พลังงาน แถบแบ่งส่วน `1/6`
+  - ปุ่มการทำงานหลัก: `[ Fight ]`, `[ Items ]`, `[ Focus ]`
 
 ---
 
-### 2.7 DoT Debuff Stacking & Tick Phase
-![DoT Status Stacking](07_dot_status_stacking.png)
-- **Multi-DoT Display**: Floating status icons above target health bar indicate active debuffs (Red = Bleed, Green = Poison, Purple = Toxin, Blue = Frost/Slow).
-- **Damage Numbers**: Distinct color-coded floating text on tick (e.g., green `-4.5` for poison ticks, red `-3.5` for bleed).
-- **Synergy Loop**: Enervation multiplies attack damage as the target accumulates distinct DoT types.
+### 2.5 การเลือกคำสั่งและจัดการคูลดาวน์
+![การต่อสู้ การเลือกทักษะ](05_combat_skill_selection.png)
+- **โครงสร้างเมนูทักษะ**:
+  - `Strike`: ใช้พลังงาน 0 | คูลดาวน์ 0 (การโจมตีพื้นฐานมาตรฐาน)
+  - `Guard`: ใช้พลังงาน 0 | คูลดาวน์ 0 (ป้องกันการกระทำ)
+  - `Stab`: ใช้พลังงาน 1 | คูลดาวน์4.
+  - `Prep Time`: ใช้พลังงาน 1 | คูลดาวน์ 6 (บัฟอาวุธด้วยสารพิษ/พิษ)
+  - `Poke Up`: ใช้พลังงาน 2 | คูลดาวน์ 3 (คอมโบแอปพลิเคชัน ความเสียหายต่อเนื่องสูง)
+  - `Inject Venom`: ใช้พลังงาน 2 | คูลดาวน์ 6.
 
 ---
 
-### 2.8 Campfire / Rest / Preparation Screen
-![Camp Crafting and Inventory](08_camp_crafting_and_inventory.png)
-- **3-Column Workspace**:
-  1. **Crafting (Left)**: Filterable recipe list (Boots, Robes, Charms/Vials, Quivers). Hovering reveals ingredient requirements (e.g., *Vial of Fey Toxin*: 2 Red Flower, 3 Leaves, 2 Pixie Dust, 1 Glass Vial).
-  2. **Inventory (Middle)**: Shared/Personal item storage (Monster drops like Rat Eye, Metal Scrap, Pixie Dust, Honey, Logs). Buttons for `[ Transfer ]` and `[ Inspect ]`. Bottom bar includes `[ Transfer Gold ]`.
-  3. **Equipment & Stats (Right)**: Visual slot grid and live stat sheet with `[ Invest Points ]`.
-- **Co-op Flow**: Bottom center `[ Ready (1/4) ]` syncs all party members before advancing to the next Layer.
+### 2.6 การแจ้งผลเมื่อใช้ทักษะ
+![แบนเนอร์แอคชั่นการร่ายสกิล](06_skill_cast_action_banner.png)
+- เมื่อใช้ความสามารถ แบนเนอร์ที่โดดเด่น (`Prep Time`) จะเคลื่อนไหวทั่วทั้งหน้าจอด้านล่าง
+- พลังงาน จะถูกใช้งานทันที และเวลาคูลดาวน์จะแสดงเหนือปุ่มทักษะโดยตรง
 
 ---
 
-### 2.9 Equipment Grid & Character Attributes
-![Equipment Grid and Stats](09_equipment_grid_and_stats.png)
-![Detailed Stats Breakdown](10_detailed_stats_breakdown.png)
-
-#### Equipment Slots:
-- **Armor (4 Slots)**: Helmet (`Drifter's Hat`), Chestpiece (`Red Dragon Hide Vest`), Leggings (`Red Dragon Hide Chaps`), Boots (`Cowboy Boots`).
-- **Weapon (1 Slot)**: Main weapon (`Draconic Dagger`).
-- **Charms / Vials (3 Slots)**: Accessory slots (`Biggun Buster Vial`, `Necrosis in a Bottle`, `Hivekin Toxin Vial`).
-- **Consumable (1 Slot)**: In-combat usable item.
-
-#### Stat Architecture:
-- **Primary Attributes**:
-  - `STR`: Strength (Physical power)
-  - `DEX`: Dexterity (Rogue damage, initiative, dodge)
-  - `CON`: Constitution (Max HP, survivability)
-  - `INT`: Intelligence (Magic power, spell scaling)
-  - `FTH`: Faith (Support/healing scaling)
-  - `CHA`: Charisma (Barter, shop prices, party utility)
-  - `LCK`: Luck (Crit rate, loot drops)
-- **Derived Combat Stats**:
-  - Initiative (e.g. `15 - 18`)
-  - Crit Chance (`50.6%`) & Crit Damage (`171.4%`)
-  - Block Chance (`1.5%`) & Block Damage Reduction (`55.5%`)
-  - Dodge Chance
-  - Aggro Modifier (`85%`)
-  - Lifesteal (`0%`)
-  - Energy Regen
+### 2.7 การสะสมสถานะความเสียหายต่อเนื่องและจังหวะหักพลังชีวิต
+![สถานะ DoT Stacking](07_dot_status_stacking.png)
+- **การแสดงหลายสถานะพร้อมกัน**: ไอคอนสถานะลอยอยู่เหนือแถบพลังชีวิตเป้าหมายบ่งบอกถึงดีบัฟที่ใช้งานอยู่ (แดง = เลือดออก, สีเขียว = พิษ, สีม่วง = สารพิษ, สีน้ำเงิน = เย็นจัด/ช้าลง)
+- **หมายเลขความเสียหาย**: ตัวเลขความเสียหายลอยแยกสีเมื่อสถานะออกผล (เช่น สีเขียว `-4.5` สำหรับพิษ สีแดง `-3.5` สำหรับเลือดออก)
+- **วงจรการเสริมกัน**: อ่อนแรง เพิ่มความเสียหายจากการโจมตีเมื่อเป้าหมายสะสมประเภท DoT ที่แตกต่างกัน
 
 ---
 
-### 2.10 Layer Progression & Combat Rewards
-![Dungeon Encounter and Rewards](11_dungeon_encounter_and_rewards.png)
-- Top right shows region layer: `Dungeon (8/12)`.
-- Bottom left reward banner shows immediate post-combat drops: Material items (`Imbued Cloth`), Gold (`+10 Gold`), and Character EXP (`10 EXP`).
+### 2.8 หน้าค่ายพักและเตรียมตัว
+![การสร้างค่ายและคลังไอเทม](08_camp_crafting_and_inventory.png)
+- **พื้นที่ทำงาน 3 คอลัมน์**:
+  1. **การคราฟต์ (ซ้าย)**: รายการสูตรอาหารที่กรองได้ (รองเท้าบูท เสื้อคลุม เครื่องราง/ขวดยา กระบอกธนู) การวางเมาส์เหนือจะแสดงข้อกำหนดส่วนผสม (เช่น *ขวด Fey Toxin*: ดอกไม้สีแดง 2 ดอก, ใบไม้ 3 ใบ, ฝุ่น Pixie 2 ชิ้น, ขวดแก้ว 1 ขวด)
+  2. **คลังไอเทม (กลาง)**: พื้นที่จัดเก็บสิ่งของที่ใช้ร่วมกัน/ส่วนตัว (ดรอปมอนสเตอร์ เช่น ตาหนู เศษโลหะ ฝุ่น Pixie น้ำผึ้ง ท่อนไม้) ปุ่มสำหรับ `[ Transfer ]` และ `[ Inspect ]` แถบด้านล่างประกอบด้วย `[ Transfer Gold ]`
+  3. **อุปกรณ์และสถิติ (ขวา)**: ตารางตารางช่องสวมใส่และค่าสถานะปัจจุบันพร้อม `[ Invest Points ]`
+- **ขั้นตอนความร่วมมือ**: `[ Ready (1/4) ]` ตรงกลางด้านล่างจะซิงค์สมาชิกปาร์ตี้ทั้งหมดก่อนที่จะก้าวไปสู่ ​​ชั้น ถัดไป
 
 ---
 
-## 3. Practical Recommendations for BEYOND THE WORLD'S END
+### 2.9 ช่องอุปกรณ์และคุณลักษณะตัวละคร
+![ตารางอุปกรณ์และสถิติ](09_equipment_grid_and_stats.png)
+![รายละเอียดสถิติพังทลาย](10_detailed_stats_breakdown.png)
 
-| AAC Feature | BEYOND THE WORLD'S END Specification | Adaptation / Implementation Guidance |
+#### ช่องอุปกรณ์:
+- **เกราะ (4 ช่อง)**: หมวกกันน็อค (`Drifter's Hat`), หน้าอก (`Red Dragon Hide Vest`), กางเกงรัดรูป (`Red Dragon Hide Chaps`), รองเท้าบูท (`Cowboy Boots`)
+- **อาวุธ (1 ช่อง)**: อาวุธหลัก (`Draconic Dagger`)
+- **เครื่องราง / ขวด (3 ช่อง)**: ช่องใส่อุปกรณ์เสริม (`Biggun Buster Vial`, `Necrosis in a Bottle`, `Hivekin Toxin Vial`)
+- **ไอเทมใช้ครั้งเดียว (1 ช่อง)**: ไอเทมที่ใช้งานได้ระหว่างการต่อสู้
+
+#### โครงสร้างค่าสถานะ:
+- **คุณสมบัติหลัก**:
+  - `STR`: ความแข็งแกร่ง (พลังกาย)
+  - `DEX`: ความคล่องแคล่ว (ความเสียหายของ Rogue, ความคิดริเริ่ม, หลบหลีก)
+  - `CON`: Constitution (Max HP, ความอยู่รอด)
+  - `INT`: Intelligence (พลังเวทย์, สเกลคาถา)
+  - `FTH`: ศรัทธา (สเกลสนับสนุน/การรักษา)
+  - `CHA`: Charisma (การแลกเปลี่ยน, ราคาร้านค้า, ยูทิลิตี้ปาร์ตี้)
+  - `LCK`: โชค (อัตราคริติคอล, ดรอปไอเทม)
+- **สถิติ การต่อสู้ ที่ได้รับ**:
+  - ชิงจังหวะ (เช่น `15 - 18`)
+  - โอกาสคริติคอล (`50.6%`) และความเสียหายคริติคอล (`171.4%`)
+  - โอกาส ปัดป้อง (`1.5%`) & การลดความเสียหายของ ปัดป้อง (`55.5%`)
+  - โอกาส หลบหลีก
+  - ตัวดัดแปลง Aggro (`85%`)
+  - ดูดพลังชีวิต (`0%`)
+  - การฟื้นพลังงาน
+
+---
+
+### 2.10 ความก้าวหน้าแต่ละชั้นและรางวัลต่อสู้
+![การเผชิญหน้าดันเจี้ยนและรางวัล](11_dungeon_encounter_and_rewards.png)
+- ด้านบนขวาแสดงเลเยอร์ขอบเขต: `Dungeon (8/12)`
+- แบนเนอร์รางวัลด้านล่างซ้ายจะแสดงการดรอปหลังการต่อสู้ทันที: รายการวัสดุ (`Imbued Cloth`), ทอง (`+10 Gold`) และ EXP ตัวละคร (`10 EXP`)
+
+---
+
+## 3. ข้อเสนอสำหรับ BEYOND THE WORLD'S END
+
+| คุณสมบัติ AAC | BEYOND THE WORLD'S END ข้อมูลจำเพาะ | แนวทางการปรับตัว / การนำไปปฏิบัติ |
 | :--- | :--- | :--- |
-| **Player Count** | 4 Players | **5 Character Party** (single-player or duo co-op with AI fill slots, see ADR-0002). Ensure UI supports 5 character slots cleanly. |
-| **Action Window** | 30s timer | **15s Action Window** (per CONTEXT.md). Auto-defend if timer expires. Keep action UI rapid and clear. |
-| **Class Progression** | Start with base class | **Classless start** → Tier 1 Class unlocked via Forest Class Encounters (Swordsman, Archer, Mage, Guardian, Rogue). |
-| **Turn Order HUD** | Vertical list on left | Keep the initiative timeline showing both HP and Energy bars for allies and enemies. |
-| **DoT System** | Bleed + Poison + Toxin + Vials | Adopt multi-DoT categorization with visual status badges over models. Implement multiplicative traits for high-risk builds. |
-| **Rest/Camp Screen** | 3-Column Craft/Inventory/Equip | Adopt this layout for Rest / Merchant Encounters. Include gold/item transfer and "Ready (x/5)" voting. |
+| **จำนวนผู้เล่น** | ผู้เล่น 4 คน | **กลุ่มตัวละคร 5 คน** (เล่นคนเดียวหรือเล่นคู่ร่วมกับช่องเติม AI ดู ADR-0002) ตรวจสอบให้แน่ใจว่า UI รองรับช่องอักขระ 5 ช่องอย่างสมบูรณ์ |
+| **หน้าต่างการดำเนินการ** | จับเวลา 30 วินาที | **หน้าต่างการดำเนินการ 15 วินาที** (ตาม CONTEXT.md) ป้องกันอัตโนมัติหากหมดเวลา ทำให้ Action UI รวดเร็วและชัดเจน |
+| **อาชีพ ความก้าวหน้า** | เริ่มต้นด้วยคลาสพื้นฐาน | **เริ่มแบบไร้อาชีพ** → อาชีพ ระดับ 1 ปลดล็อคผ่านการเผชิญหน้า อาชีพ ในป่า (นักดาบ, นักธนู, นักเวท, ผู้พิทักษ์, Rogue) |
+| **HUD ลำดับเทิร์น** | รายการแนวตั้งทางซ้าย | เก็บลำดับชิงจังหวะที่แสดงทั้งแถบ HP และ พลังงาน สำหรับพันธมิตรและศัตรู |
+| **ระบบดอท** | เลือดออก + พิษ + สารพิษ + ขวด | ใช้การจัดหมวดหมู่แบบ multi-DoT พร้อมป้ายสถานะแบบภาพเหนือโมเดล ใช้ลักษณะการคูณสำหรับบิลด์ที่มีความเสี่ยงสูง |
+| **พัก/หน้าจอค่าย** | หน้าคราฟต์/คลังไอเทม/อุปกรณ์สามคอลัมน์ | ใช้เค้าโครงนี้สำหรับการเผชิญหน้า พัก / พ่อค้า รวมการโอนทอง/ไอเท็ม และการโหวต "พร้อม (x/5)" |

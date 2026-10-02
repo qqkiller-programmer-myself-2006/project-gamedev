@@ -43,7 +43,7 @@ func tick(_screen: MatchScreen, app: ClientApp) -> void:
 	if not ClientApp.has_timer(_deadline):
 		_countdown.text = ""
 		return
-	_countdown.text = "Shop closes in %ds" % ceili(app.seconds_left(_deadline))
+	_countdown.text = Tr.t("Shop closes in %ds" % ceili(app.seconds_left(_deadline)))
 
 
 func handle_key(_screen: MatchScreen, app: ClientApp, key: int) -> bool:
@@ -68,7 +68,7 @@ func _row(app: ClientApp, index: int, entry: Dictionary) -> Control:
 	if int(entry["remaining"]) <= 0:
 		label = "Sold out"
 	elif not entry["affordable"]:
-		label = "Need %d Gold" % int(entry["price"])
+		label = Tr.t("Need %d Gold" % int(entry["price"]))
 	var buy := UiKit.button(label, func() -> void: _request_buy(app, entry))
 	Icons.apply_to_button(buy, "gold", app.settings.text_scale)
 	if int(entry["remaining"]) <= 0:

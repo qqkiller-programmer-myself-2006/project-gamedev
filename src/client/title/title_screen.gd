@@ -238,7 +238,7 @@ func _update_story_preview(row: int) -> void:
 	if is_instance_valid(_story_preview_name):
 		_story_preview_name.text = STORY_NAMES[index]
 	if is_instance_valid(_story_preview_class):
-		_story_preview_class.text = class_id.capitalize()
+		_story_preview_class.text = Tr.t(class_id.capitalize())
 	if is_instance_valid(_story_preview_portrait):
 		var path := _story_portrait_path(class_id)
 		if ResourceLoader.exists(path):
@@ -421,7 +421,7 @@ func _show_multiplayer() -> void:
 	body.custom_minimum_size = Vector2(520, 0)
 	body.add_child(UiKit.label("ENTER THE FOREST", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.label("Your name (shown to other players)", "dim"))
-	_name = _line_edit(_app.settings.player_name, "e.g. Arin", 16)
+	_name = _line_edit(_app.settings.player_name, Tr.t("e.g. Arin"), 16)
 	body.add_child(_name)
 	var create := UiKit.primary("Create a room", _create)
 	Icons.apply_to_button(create, "multiplayer", _app.settings.text_scale)
@@ -430,7 +430,7 @@ func _show_multiplayer() -> void:
 	body.add_child(HSeparator.new())
 	body.add_child(UiKit.label("Have a Room code? Letters and numbers, case does not matter.", "dim"))
 	var row := UiKit.hbox(8)
-	_code = _line_edit(str(_app.options.get("join", "")), "Room code", 12)
+	_code = _line_edit(str(_app.options.get("join", "")), Tr.t("Room code"), 12)
 	_code.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_code.text_submitted.connect(func(_t: String) -> void: _join())
 	row.add_child(_code)
@@ -441,7 +441,7 @@ func _show_multiplayer() -> void:
 	row.add_child(join)
 	body.add_child(row)
 	var advanced := CheckButton.new()
-	advanced.text = "Advanced connection options"
+	advanced.text = Tr.t("Advanced connection options")
 	advanced.toggled.connect(func(on: bool) -> void: _server.visible = on)
 	body.add_child(advanced)
 	_server = _line_edit(_app.server_url(), ClientApp.DEFAULT_URL, 200)

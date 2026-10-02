@@ -25,7 +25,7 @@ func setup(app: ClientApp) -> void:
 
 	box.add_child(UiKit.label("Text size", "heading"))
 	var sizes := UiKit.hbox(8)
-	var names := ["Small", "Normal", "Large", "Extra large"]
+	var names := [Tr.t("Small"), Tr.t("Normal"), Tr.t("Large"), Tr.t("Extra large")]
 	var first_button: Button = null
 	for i in ClientSettings.TEXT_SCALES.size():
 		var scale: float = ClientSettings.TEXT_SCALES[i]
@@ -45,7 +45,7 @@ func setup(app: ClientApp) -> void:
 
 	box.add_child(UiKit.label("Motion", "heading"))
 	var motion := CheckButton.new()
-	motion.text = "Reduce motion (no sliding, fading or floating numbers)"
+	motion.text = Tr.t("Reduce motion (no sliding, fading or floating numbers)")
 	motion.button_pressed = app.settings.reduced_motion
 	motion.toggled.connect(func(on: bool) -> void:
 		app.settings.reduced_motion = on

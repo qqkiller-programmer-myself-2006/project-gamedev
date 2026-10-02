@@ -229,6 +229,18 @@ func test_combat_log_dock_grows_right_at_large_scale() -> void:
 	app.free()
 
 
+func test_battle_timeline_starts_clear_of_corner_controls() -> void:
+	var battle := _battle()
+	var timeline := battle._timeline_scroll.get_parent() as Control
+	assert_true(timeline.offset_left >= 0.0 and timeline.custom_minimum_size.x >= 200.0,
+			"initiative list remains in its own left lane")
+	assert_true(timeline.offset_left + timeline.custom_minimum_size.x < 1280.0 - 96.0,
+			"initiative list ends before the top-right corner controls")
+	battle._combat = {"round": 2, "round_order": [], "turn_order": []}
+	battle._build_timeline({})
+	assert_eq((battle._turn_banner.get_child(0) as Label).text, Tr.t("Turn 2"),
+			"the turn title stays in its fixed banner outside the scrolling cards")
+
 func test_primary_battle_actions_are_keyboard_focusable() -> void:
 	var battle := _battle()
 	var view := {
@@ -256,12 +268,28 @@ func test_primary_battle_actions_are_keyboard_focusable() -> void:
 	assert_eq(found.get("action_fight", Control.FOCUS_NONE), Control.FOCUS_ALL, "Fight is keyboard focusable")
 	assert_eq(found.get("action_items", Control.FOCUS_NONE), Control.FOCUS_ALL, "Items is keyboard focusable")
 	assert_eq(found.get("action_focus", Control.FOCUS_NONE), Control.FOCUS_ALL, "Focus is keyboard focusable")
+	battle.theme = UiKit.make_theme(1.0)
+	var focus_button: Button = null
+	for button in _buttons(battle):
+		if str(button.get_meta("focus_id", "")) == "action_fight":
+			focus_button = button
+			break
+	assert_true(focus_button != null, "Battle Fight control exists for focus verification")
+	if focus_button != null:
+		assert_true(focus_button.get_theme_stylebox("focus") != null, "Battle focus has the visible gold theme style")
 	var screen: MatchScreen = battle._screen
 	var app: ClientApp = battle._app
 	battle.free()
 	screen.free()
 	app.free()
 
+
+func test_summary_keeps_one_outcome_heading_and_hides_timeline() -> void:
+	var battle := _battle()
+	battle._combat = {"result": "victory", "trial": false, "rewards": {}}
+	battle._build_result()
+	assert_eq(battle._center_text.text, "Victory!", "summary has one victory heading")
+	assert_false(battle._timeline.visible, "turn order is hidden in summary")
 
 func test_merchant_and_rest_primary_actions_are_keyboard_focusable() -> void:
 	_make_camp()
@@ -283,6 +311,15 @@ func test_merchant_and_rest_primary_actions_are_keyboard_focusable() -> void:
 		rest_ids[str(button.get_meta("focus_id", ""))] = button.focus_mode
 	assert_eq(rest_ids.get("craft_patch", Control.FOCUS_NONE), Control.FOCUS_ALL, "Craft is keyboard focusable")
 	assert_eq(rest_ids.get("ready", Control.FOCUS_NONE), Control.FOCUS_ALL, "Rest Ready is keyboard focusable")
+	_camp.theme = UiKit.make_theme(1.4)
+	var ready_button: Button = null
+	for button in _buttons(_camp):
+		if str(button.get_meta("focus_id", "")) == "ready":
+			ready_button = button
+			break
+	assert_true(ready_button != null, "camp Ready control exists for focus verification")
+	if ready_button != null:
+		assert_true(ready_button.get_theme_stylebox("focus") != null, "camp focus has the visible gold theme style")
 
 
 func test_reduced_motion_keeps_action_announcement_visible() -> void:
@@ -293,6 +330,65 @@ func test_reduced_motion_keeps_action_announcement_visible() -> void:
 	assert_eq(battle._banner_label.text, "Alice attacks Grey Wolf", "the action result stays readable")
 	var screen: MatchScreen = battle._screen
 	var app: ClientApp = battle._app
+	battle.free()
+	screen.free()
+	app.free()
+
+
+func test_reduced_motion_applies_hp_change_without_a_tween() -> void:
+	var token := BattleToken.new()
+	var data := {"id": "p0", "side": "party", "name": "Alice", "kind": "classless",
+		"hp": 20, "max_hp": 30, "energy": 3, "energy_max": 6, "statuses": [], "reduced_motion": true}
+	token.setup(data)
+	data["hp"] = 10
+	token.update_data(data)
+	assert_eq(token._hp_bar.value, 10.0, "reduced motion applies the HP update immediately without a tween")
+	token.free()
+
+
+func test_combat_ended_keeps_final_reduced_motion_hit_bars() -> void:
+	var battle := _battle()
+	var screen: MatchScreen = battle._screen
+	var app: ClientApp = battle._app
+	screen._battle = battle
+	screen._battle_mode = true
+	screen._log = RichTextLabel.new()
+	screen.add_child(screen._log)
+	var token := BattleToken.new()
+	var data := {"id": "p0", "side": "party", "name": "Alice", "kind": "classless",
+		"hp": 20, "max_hp": 30, "energy": 3, "energy_max": 6, "statuses": [], "reduced_motion": true}
+	token.setup(data)
+	data["hp"] = 10
+	data["energy"] = 2
+	token.update_data(data)
+	battle._tokens["p0"] = token
+	screen.show_events(app, [{"type": "combat_ended", "result": "victory", "rewards": {}}])
+	assert_eq([token._hp_bar.value, token._energy_bar.value], [10.0, 2.0],
+			"combat_ended keeps the final HP/Energy snapshot visible")
+	token.free()
+	battle.free()
+	screen.free()
+	app.free()
+
+
+func test_summary_clears_floating_combat_feedback() -> void:
+	var battle := _battle()
+	var screen: MatchScreen = battle._screen
+	var app: ClientApp = battle._app
+	var number := Label.new()
+	screen.add_child(number)
+	number.add_to_group("combat_floating_text")
+	screen._floating_numbers.append(number)
+	screen._float_busy_until["e0"] = Time.get_ticks_msec() + 1000
+	var generation_before := screen._float_generation
+	screen._clear_floating_numbers()
+	assert_true(number.is_queued_for_deletion(), "summary removes any number still over the party panel")
+	assert_eq(screen._float_busy_until, {}, "summary clears scheduled numbers so nothing appears afterward")
+	assert_eq(screen._float_generation, generation_before + 1, "summary invalidates floating calls already waiting on their queue")
+	battle._banner.visible = true
+	battle._combat = {"result": "victory", "trial": false, "rewards": {}}
+	battle._build_result()
+	assert_false(battle._banner.visible, "summary removes the action banner")
 	battle.free()
 	screen.free()
 	app.free()

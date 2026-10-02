@@ -1,42 +1,33 @@
-# Issue tracker: GitHub
+# ตัวติดตาม Issue: GitHub
 
-Issues and specs for this repo live as GitHub Issues in
-`qqkiller-programmer-myself-2006/project-gamedev`. Use the `gh` CLI for
-all operations.
+Issue และข้อกำหนดของรีโปนี้อยู่ใน GitHub Issues ของ
+`qqkiller-programmer-myself-2006/project-gamedev` ใช้ `gh` CLI สำหรับทุกการดำเนินการ
 
-## Conventions
+## ข้อตกลง
 
-- **Create an issue**: `gh issue create --title "..." --body "..."`.
-- **Read an issue**: `gh issue view <number> --comments`.
-- **List issues**: `gh issue list --state open --json number,title,body,labels,comments`.
-- **Comment on an issue**: `gh issue comment <number> --body "..."`.
-- **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`.
-- **Close**: `gh issue close <number> --comment "..."`.
+- **สร้าง issue**: `gh issue create --title "..." --body "..."`
+- **อ่าน issue**: `gh issue view <number> --comments`
+- **แสดงรายการ issue**: `gh issue list --state open --json number,title,body,labels,comments`
+- **แสดงความคิดเห็นใน issue**: `gh issue comment <number> --body "..."`
+- **เพิ่ม / ลบ label**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
+- **ปิด issue**: `gh issue close <number> --comment "..."`
 
-Infer the repository from `git remote -v`; `gh` does this automatically
-when run inside a clone.
+อนุมานรีโปจาก `git remote -v`; `gh` จะตรวจให้อัตโนมัติเมื่อเรียกใช้ภายใน clone
 
-## Pull requests as a triage surface
+## ใช้ Pull request เป็นช่องทางคัดแยก
 
-**PRs as a request surface: no.** External pull requests are not part of
-the issue triage queue unless this file is explicitly updated.
+**ใช้ PR เป็นช่องทางรับคำขอ: ไม่ใช้** Pull request จากภายนอกไม่ถือเป็นคิวคัดแยก issue เว้นแต่จะระบุไว้ในไฟล์นี้โดยตรง
 
-## When a skill says “publish to the issue tracker”
+## เมื่อ skill ระบุว่า “publish to the issue tracker”
 
-Create a GitHub issue.
+ให้สร้าง GitHub issue
 
-## When a skill says “fetch the relevant ticket”
+## เมื่อ skill ระบุว่า “fetch the relevant ticket”
 
-Run `gh issue view <number> --comments`.
+เรียก `gh issue view <number> --comments`
 
-## Wayfinding operations
+## การนำทางงาน
 
-The `/wayfinder` map is a single GitHub issue labelled `wayfinder:map`.
-Child work is represented by linked GitHub sub-issues when supported; if
-sub-issues are unavailable, add a task list to the map body and put
-`Part of #<map>` at the top of each child issue.
+แผนที่ `/wayfinder` คือ GitHub issue เดียวที่ติด label `wayfinder:map` งานย่อยแสดงเป็น sub-issue ที่เชื่อมโยงกันเมื่อระบบรองรับ หากไม่รองรับ ให้เพิ่ม task list ในเนื้อหาแผนที่ และใส่ `Part of #<map>` ไว้ด้านบนของ issue ย่อยแต่ละรายการ
 
-Use `wayfinder:<type>` labels for `research`, `prototype`, `grilling`,
-and `task`. Native GitHub issue dependencies are the canonical blocking
-representation. If dependencies are unavailable, use a `Blocked by: #<n>`
-line at the top of the child issue body.
+ใช้ label `wayfinder:<type>` สำหรับ `research`, `prototype`, `grilling` และ `task` การพึ่งพา issue แบบ native ของ GitHub เป็นตัวแทนการบล็อกอย่างเป็นทางการ หากใช้ไม่ได้ ให้ใส่บรรทัด `Blocked by: #<n>` ไว้ด้านบนของเนื้อหา issue ย่อย

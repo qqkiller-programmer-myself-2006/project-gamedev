@@ -27,9 +27,12 @@ var _last_key := ""
 var _done_at := -1
 var _setup_only := false
 var _story_setup_only := false
+var _language := "th"
 var _sprite_idle_after := 0.0
 var _used_focus := false
 var _used_item := false
+var _scan_latin := false
+var _latin_allowlist := ["Beyond", "World", "End", "Ann", "Bob", "HP", "ATK", "DEF", "MAG", "RES", "SPD", "EXP", "LVL", "STR", "DEX", "CON", "INT", "FTH", "CHA", "LCK", "F", "I", "O", "H", "R", "Esc", "F2"]
 
 
 func _initialize() -> void:
@@ -52,12 +55,16 @@ func _initialize() -> void:
 			_setup_only = true
 		elif arg == "--story-setup-only":
 			_story_setup_only = true
+		elif arg == "--scan-latin":
+			_scan_latin = true
 		elif arg.begins_with("--class="):
 			only_class = arg.trim_prefix("--class=")
 		elif arg.begins_with("--resolution="):
 			var parts := arg.trim_prefix("--resolution=").split("x")
 			if parts.size() == 2 and parts[0].is_valid_int() and parts[1].is_valid_int():
 				DisplayServer.window_set_size(Vector2i(int(parts[0]), int(parts[1])))
+		elif arg.begins_with("--lang="):
+			_language = arg.trim_prefix("--lang=")
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	var overrides := {}
 	if not only_class.is_empty():
@@ -66,7 +73,7 @@ func _initialize() -> void:
 				"rules": {"ai_class_cap": 5}}
 	harness = MatchHarness.new(seed_value, overrides)
 	app = ClientApp.new()
-	app.configure({"name": "Ann"})
+	app.configure({"name": "Ann", "lang": _language})
 	root.add_child(app)
 	set_meta("scale", scale)
 	set_meta("reduced", reduced)
@@ -105,36 +112,50 @@ func _process(delta: float) -> bool:
 		friend = harness.server.open_session()
 		harness.server.command(friend, {"type": "join_room", "code": _code(), "name": "Bob"})
 		friend_bot = MatchBot.new(harness, [friend])
-		friend_bot.choose_route = MatchBot.sensible_route
+		friend_bot.choose_route = _preview_route
 		return false
 	if frame == 40:
 		app._toast_until = 0.0
 		_shot("02_lobby")
 		(app._current as LobbyScreen)._open_setup()
 		return false
-	if frame == 45:
+	if frame >= 45 and not shots.has("02a_setup_class"):
+		var lobby := app._current as LobbyScreen
+		if lobby == null or not is_instance_valid(lobby._setup):
+			if lobby != null:
+				lobby._open_setup()
+			return false
 		_shot("02a_setup_class")
-		(app._current as LobbyScreen)._setup._cycle_class(-1)
-		(app._current as LobbyScreen)._setup._switch_tab("Races")
-		(app._current as LobbyScreen)._setup._race = "Dwarf"
-		(app._current as LobbyScreen)._setup._render()
+		lobby._setup._cycle_class(-1)
+		lobby._setup._switch_tab("Races")
+		lobby._setup._race = "Dwarf"
+		lobby._setup._render()
 		return false
-	if frame == 50:
+	if frame >= 50 and not shots.has("02b_setup_races"):
+		var lobby := app._current as LobbyScreen
+		if lobby == null or not is_instance_valid(lobby._setup):
+			return false
 		_shot("02b_setup_races")
-		(app._current as LobbyScreen)._setup._switch_tab("Boons")
+		lobby._setup._switch_tab("Boons")
 		return false
-	if frame == 55:
+	if frame >= 55 and not shots.has("02c_setup_boons"):
+		var lobby := app._current as LobbyScreen
+		if lobby == null or not is_instance_valid(lobby._setup):
+			return false
 		_shot("02c_setup_boons")
-		(app._current as LobbyScreen)._setup._select_boon("Alert")
+		lobby._setup._select_boon("Alert")
 		return false
-	if frame == 60:
+	if frame >= 60 and not shots.has("02d_setup_boons_equipped"):
+		var lobby := app._current as LobbyScreen
+		if lobby == null or not is_instance_valid(lobby._setup):
+			return false
 		_shot("02d_setup_boons_equipped")
-		var chosen: Dictionary = (app._current as LobbyScreen)._setup._own_loadout()
+		var chosen: Dictionary = lobby._setup._own_loadout()
 		if chosen.get("class", "") != "guardian" or not chosen.get("boons", []).has("Alert"):
 			printerr("ui_preview: Character setup did not reach the room snapshot")
 			quit(1)
 			return true
-		(app._current as LobbyScreen)._setup._finish.call()
+		lobby._setup._finish.call()
 		return false
 	if frame == 65:
 		_shot("02e_lobby_loadout")
@@ -195,7 +216,9 @@ func _drive() -> void:
 		return
 	if key != _last_key:
 		_last_key = key
-		_think_until = Time.get_ticks_msec() / 1000.0 + 0.6
+		# The preview clock advances at --speed, so the usual reaction pause can
+		# consume the entire vote timer at high speed and miss keyboard input.
+		_think_until = Time.get_ticks_msec() / 1000.0 + (0.1 if key == "03_vote" else 0.6)
 		return
 	if Time.get_ticks_msec() / 1000.0 < _think_until:
 		return
@@ -276,11 +299,12 @@ func _act(key: String, view: Dictionary) -> void:
 	elif key == "03_vote":
 		var options: Array = view["vote"]["options"]
 		var pick := MatchBot.sensible_route(options, 0, view)
-		# Visit one Rest camp after the first fight so it gets a screenshot.
-		if not shots.has("10_rest") and shots.has("04_combat_turn"):
+		# Visit a Rest camp once so accessibility evidence always includes it.
+		if not shots.has("10_rest"):
 			for option in options:
 				if option["type"] == "rest":
 					pick = option["index"]
+		print("ui_preview: vote options=", options, " selected=", pick)
 		_press(KEY_1 + pick)
 	elif key.ends_with("_turn"):
 		var encounter: Dictionary = view["encounter"]
@@ -319,7 +343,6 @@ func _act(key: String, view: Dictionary) -> void:
 	elif key == "05_class_offer":
 		_press(KEY_Y)
 	elif key == "08_merchant":
-		_press(KEY_1)
 		_press(KEY_R)
 	elif key == "10_rest":
 		_press(KEY_R)
@@ -329,6 +352,16 @@ func _act(key: String, view: Dictionary) -> void:
 		_press(KEY_ENTER)
 	if app.connection != null:
 		app.connection.poll()
+
+
+func _preview_route(options: Array, slot: int, view: Dictionary) -> int:
+	# Align the preview bot with the local player until Rest evidence is captured,
+	# so a tie cannot randomly send the run down another route.
+	if not shots.has("10_rest"):
+		for option in options:
+			if str(option.get("type", "")) == "rest":
+				return int(option["index"])
+	return MatchBot.sensible_route(options, slot, view)
 
 
 func _press(keycode: int) -> void:
@@ -342,6 +375,8 @@ func _press(keycode: int) -> void:
 
 func _shot(name: String) -> void:
 	shots[name] = true
+	if _scan_latin:
+		_scan_visible_latin(root, name)
 	var image := root.get_viewport().get_texture().get_image()
 	image.save_png(out_dir.path_join(name + ".png"))
 	print("screenshot ", name)
@@ -354,6 +389,35 @@ func _shot(name: String) -> void:
 				break
 		for enemy in battle._combat.get("enemies", []):
 			print("enemy energy ", enemy.get("id", "?"), "=", enemy.get("energy", "missing"))
+
+
+## Read the live Control tree at each captured screen; this is a text scan, not OCR.
+func _scan_visible_latin(node: Node, screen_name: String) -> void:
+	if node is Control and (node as Control).is_visible_in_tree():
+		var visible_text := ""
+		if node is Button:
+			visible_text = (node as Button).text
+		elif node is Label:
+			visible_text = (node as Label).text
+		elif node is RichTextLabel:
+			visible_text = (node as RichTextLabel).text
+		var room_code := _code()
+		if not room_code.is_empty():
+			visible_text = visible_text.replace(room_code, "")
+		var words := RegEx.new()
+		words.compile("[A-Za-z0-9]+")
+		var found: Array[String] = []
+		for match in words.search_all(visible_text):
+			var word := match.get_string()
+			var allowed_token := RegEx.new()
+			allowed_token.compile("^(?:[A-Z0-9]{6}|[PE]\\d+|[xX]?\\d+s?)$")
+			if word.length() > 1 and allowed_token.search(word) == null \
+					and not _latin_allowlist.has(word) and not found.has(word):
+				found.append(word)
+		if not found.is_empty():
+			print("ui_preview Latin (", screen_name, ") ", node.get_path(), ": ", ", ".join(found), " | ", visible_text.replace("\n", " / "))
+	for child in node.get_children():
+		_scan_visible_latin(child, screen_name)
 
 
 func _code() -> String:

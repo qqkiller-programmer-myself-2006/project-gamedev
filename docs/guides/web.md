@@ -1,8 +1,8 @@
-# Browser build
+# บิลด์สำหรับ browser
 
 browser client มาจาก codebase เดียวกับ PC client (ไม่มี logic แยก) ต่างกันแค่ export preset
 
-## Build
+## สร้างบิลด์
 
 ต้องมี export templates ของ Godot 4.7.2 (`Editor > Manage Export Templates` หรือแตกไฟล์
 `Godot_v4.7.2-stable_export_templates.tpz` ไปที่ `~/.local/share/godot/export_templates/4.7.2.stable/`)
@@ -15,7 +15,7 @@ godot --headless --path . --export-release "Linux Server" build/server/forest-se
 
 CI (`.github/workflows/builds.yml`) export ทั้งสามแบบให้ทุก PR และเก็บเป็น artifact ให้ผู้ทดสอบดาวน์โหลด
 
-## Serve
+## เปิดให้บริการ
 
 `build/web` เป็นไฟล์ static ธรรมดา ใช้ web server อะไรก็ได้ (ไม่ต้องตั้ง COOP/COEP header
 เพราะ preset ปิด thread support)
@@ -34,7 +34,7 @@ npx http-server build/web -p 8060          # หรือ python3 -m http.server
 | `join=K7PQ2M` | Room code ที่กรอกไว้ให้ |
 | `auto=1` | เข้าห้องทันที (หรือสร้างห้องถ้าไม่มี `join`) เมื่อมีชื่อแล้ว |
 
-## Cross-platform smoke test
+## ทดสอบ smoke test ข้ามแพลตฟอร์ม
 
 ```bash
 NODE_PATH=$(npm root -g) node tools/ci/web_smoke.mjs

@@ -5,6 +5,26 @@ msgstr ""
 "Language: th\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#: src/client/match/match_screen.gd:627
+msgid " (shielding %s)"
+msgstr " (มี %s คุ้มกัน)"
+
+#: src/client/match/match_screen.gd:629
+msgid " - down"
+msgstr " - ล้มลง"
+
+#: src/client/match/match_screen.gd:599
+msgid " and falls"
+msgstr " และล้มลง"
+
+#: src/client/match/match_screen.gd:623
+msgid " critical!"
+msgstr " ติดคริติคอล!"
+
+#: src/client/match/match_screen.gd:625
+msgid " weak spot!"
+msgstr " จุดอ่อน!"
+
 #: content/forest.json:story.events.ranger_hut.choices[0].outcome.text
 msgid "\"He asked about the Guardian of the Forest. Said he had to get past it, whatever it cost. I never saw him come back.\""
 msgstr "\"เขาถามถึงผู้พิทักษ์แห่งป่า บอกว่าต้องผ่านมันไปให้ได้ไม่ว่าต้องแลกด้วยอะไร แต่ข้าไม่เคยเห็นเขากลับมาอีก\""
@@ -21,9 +41,169 @@ msgstr "\"ช้าเกินไป ป่าไม่เคยรอใคร
 msgid "\"You were carrying his journal, lad, and shaking. You kept saying: it asks for a life. Then you slept for three days.\""
 msgstr "\"เจ้าหอบสมุดบันทึกของเขามา ตัวสั่นเทา พูดซ้ำอยู่ว่า มันเรียกร้องชีวิตหนึ่ง แล้วเจ้าก็หลับไปสามวัน\""
 
+#: src/client/ui/tr.gd:formatted_fallback src/client/ui/ui_text.gd:LABELS.gems
+msgid "%d Gems"
+msgstr "อัญมณี %d เม็ด"
+
+#: src/client/ui/ui_text.gd:LABELS.gold
+msgid "%d Gold"
+msgstr "ทอง %d หน่วย"
+
+#: src/client/match/camp/camp_view.gd:396
+msgid "%d Gold   (%d left)"
+msgstr "ทอง %d (%d ครั้ง)"
+
+#: src/client/match/vote_panel.gd:192
+msgid "%d of %d ready"
+msgstr "พร้อมแล้ว %d จาก %d"
+
+#: src/client/match/camp/camp_view.gd:484
+msgid "%d/%d %s %s"
+msgstr "%d/%d %s %s"
+
+#: src/client/match/battle/battle_view.gd:307
+msgid "%ds"
+msgstr "%d วินาที"
+
+#: src/client/match/battle/combat_panel.gd:49 src/client/ui/ui_text.gd:client_literal
+msgid "%ds left to act%s"
+msgstr "เหลือเวลา %d วินาที%s"
+
+#: src/client/match/match_screen.gd:401
+msgid "%s  (Layer %d, %s)"
+msgstr "%s (ชั้น %d, %s)"
+
+#: src/client/match/battle/battle_view.gd:560
+msgid "%s  Lv %d - %s"
+msgstr "%s  ระดับ %d - %s"
+
+#: src/client/match/match_screen.gd:573
+msgid "%s %s the %s Class."
+msgstr "%sเลือก%sอาชีพ%s"
+
+#: src/client/match/match_screen.gd:639
+msgid "%s %s."
+msgstr "%s %s."
+
+#: src/client/match/match_screen.gd:639
+msgid "%s %s: %s."
+msgstr "%s %s: %s."
+
+#: src/client/match/battle/battle_view.gd:466 src/client/match/camp/camp_view.gd:129
+msgid "%s (%d/%d)"
+msgstr "%s (%d/%d)"
+
+#: src/client/match/battle/battle_view.gd:1110 src/client/match/battle/combat_panel.gd:231
+msgid "%s (AI) is acting..."
+msgstr "%s (เอไอ) กำลังลงมือ..."
+
+#: src/client/match/battle/battle_view.gd:820
+msgid "%s - Lv %d"
+msgstr "%s - ระดับ %d"
+
+#: src/client/match/battle/combat_panel.gd:104
+msgid "%s - Round %d"
+msgstr "%s - รอบที่ %d"
+
+#: src/client/match/match_screen.gd:607
+msgid "%s Defends."
+msgstr "%sป้องกัน"
+
+#: src/client/match/camp/camp_view.gd:903
+msgid "%s Skills"
+msgstr "ทักษะของ %s"
+
+#: src/client/lobby/character_setup.gd:124
+msgid "%s [%d]"
+msgstr "%s [%d]"
+
+#: src/client/match/match_screen.gd:576
+msgid "%s bought %s for %d Gold."
+msgstr "%sซื้อ%sในราคา %d ทอง"
+
+#: src/client/match/match_screen.gd:596
+msgid "%s gains %s."
+msgstr "%sได้รับ%s"
+
+#: src/client/match/match_screen.gd:609
+msgid "%s gathers power for %s..."
+msgstr "%sรวบรวมพลังเพื่อใช้%s..."
+
+#: src/client/match/battle/battle_view.gd:1112
+msgid "%s is acting..."
+msgstr "%s กำลังลงมือ..."
+
+#: src/client/match/match_screen.gd:634
+msgid "%s is back on their feet"
+msgstr "%sลุกขึ้นมาแล้ว"
+
+#: src/client/lobby/lobby_screen.gd:35
+msgid "%s is now the Host."
+msgstr "%s เป็นเจ้าห้องแล้ว"
+
+#: src/client/match/match_screen.gd:636
+msgid "%s is protected"
+msgstr "%sได้รับการคุ้มครอง"
+
+#: src/client/lobby/lobby_screen.gd:30
+msgid "%s joined the room."
+msgstr "%s เข้าร่วมห้องแล้ว"
+
+#: src/client/lobby/lobby_screen.gd:33
+msgid "%s left. Their slot is AI controlled now."
+msgstr "%s ออกจากห้องแล้ว ช่องของเขาจะถูกเอไอควบคุม"
+
+#: src/client/match/match_screen.gd:607
+msgid "%s ran out of time and Defends."
+msgstr "%sหมดเวลาและป้องกัน"
+
+#: src/client/match/match_screen.gd:569
+msgid "%s reached level %d!"
+msgstr "%sเลื่อนเป็นระดับ %d แล้ว!"
+
+#: src/client/match/match_screen.gd:632
+msgid "%s recovers %d HP"
+msgstr "%sฟื้นพลังชีวิต %d หน่วย"
+
+#: src/client/match/info_panel.gd:18
+msgid "%s recovers %d HP (now %d)."
+msgstr "%s ฟื้นพลังชีวิต %d หน่วย (ขณะนี้ %d)"
+
+#: src/client/match/match_screen.gd:594
+msgid "%s suffers %s (x%d, %d turns)."
+msgstr "%sติด%s (สะสม %d ชั้น, %d เทิร์น)"
+
+#: src/client/match/match_screen.gd:598
+msgid "%s takes %d from %s%s."
+msgstr "%sได้รับความเสียหาย %d จาก%s%s"
+
+#: src/client/match/match_screen.gd:630
+msgid "%s takes %d%s"
+msgstr "%s ได้รับความเสียหาย %d%s"
+
+#: src/client/match/camp/camp_view.gd:595
+msgid "%s · Lv %d"
+msgstr "%s · ระดับ %d"
+
+#: src/client/match/match_screen.gd:584
+msgid "%s, %s, blocks the way!"
+msgstr "%s %s ขวางทางอยู่!"
+
+#: src/client/ui/ui_kit.gd:472
+msgid "%s: %s stack(s), %s turn(s) left"
+msgstr "%s: %s ชั้น เหลือ %s เทิร์น"
+
 #: content/forest.json:story.events.hollow_tree.outcome.text
 msgid "'If the Chalice asks a price, I will pay it. Not you. Not the children. Never the children.'"
 msgstr "'หากจอกศักดิ์สิทธิ์เรียกร้องราคา ฉันจะจ่ายเอง ไม่ใช่เธอ ไม่ใช่ลูก ๆ ไม่มีวันเป็นลูก ๆ'"
+
+#: src/client/match/battle/battle_view.gd:1081
+msgid "+%d Gold for you"
+msgstr "ได้รับทองส่วนตัว +%d เหรียญ"
+
+#: src/client/match/info_panel.gd:26
+msgid "+%d Gold for you."
+msgstr "ได้รับทองส่วนตัว +%d เหรียญ"
 
 #: content/forest.json:meta.class_tree.swiftness.text
 msgid "+1 Initiative per two levels."
@@ -113,6 +293,14 @@ msgstr "โอกาส 15% ที่จะได้พลังงานเพ�
 msgid "5% Lifesteal."
 msgstr "ดูดพลังชีวิต 5%"
 
+#: src/client/ui/ui_text.gd:LABELS.dialogue_hint
+msgid "> Next [Enter]     Skip [Esc]"
+msgstr "> ถัดไป [Enter]     ข้าม [Esc]"
+
+#: src/client/ui/ui_text.gd:TYPE_HELP.class
+msgid "A Challenge that can teach a new Class."
+msgstr "การประลองที่สอนอาชีพใหม่ได้."
+
 #: content/forest.json:story.clues.wolf_collar.text
 msgid "A brass token from the western port, found among the wolves' leavings. Father bought passage there once."
 msgstr "เหรียญทองเหลืองจากท่าเรือตะวันตก พบในซากที่หมาป่าทิ้งไว้ พ่อเคยซื้อตั๋วผ่านทางที่นั่น"
@@ -129,6 +317,10 @@ msgstr "เกวียนติดโคมไฟ ทองซื้อคว�
 msgid "A cavern spider that weakens its prey with venomous webs."
 msgstr "แมงมุมถ้ำที่ทำให้เหยื่ออ่อนแอด้วยใยพิษ"
 
+#: src/client/ui/ui_text.gd:TYPE_HELP.story
+msgid "A clue about Father's journey."
+msgstr "เบาะแสเกี่ยวกับการเดินทางของพ่อ."
+
 #: content/forest.json:items.boar_tusk.description
 msgid "A curved, heavy tusk. Crafting material."
 msgstr "เขี้ยวโค้งหนัก วัตถุดิบคราฟต์"
@@ -140,6 +332,10 @@ msgstr "ที่พักแห้งภายในต้นไม้ยัก
 #: content/forest.json:enemies.kobold.description
 msgid "A fast spear skirmisher that darts in before foes can react."
 msgstr "นักรบหอกว่องไวที่พุ่งเข้าหาศัตรูก่อนพวกมันจะทันตั้งตัว"
+
+#: src/client/ui/ui_text.gd:TYPE_HELP.combat
+msgid "A fight for EXP, Gold and maybe Items."
+msgstr "การต่อสู้เพื่อรับค่าประสบการณ์ ทอง และอาจได้ไอเทม."
 
 #: content/forest.json:skills.power_slash.description
 msgid "A heavy melee strike dealing 180% ATK damage to one enemy. Costs 2 Energy. Cooldown: 2 turns."
@@ -225,13 +421,57 @@ msgstr "พรานมากประสบการณ์ขึ้นสาย
 msgid "A wave, a lighthouse and an upside-down cup: the road leads past the last lighthouse, beyond the sea."
 msgstr "คลื่น ประภาคาร และถ้วยคว่ำ เส้นทางทอดผ่านประภาคารสุดท้ายออกไปไกลกว่าทะเล"
 
+#: src/client/match/battle/combat_panel.gd:126 src/client/match/match_screen.gd:945
+msgid "ACTING"
+msgstr "กำลังลงมือ"
+
+#: src/client/lobby/lobby_screen.gd:127 src/client/match/battle/battle_token.gd:136 src/client/match/match_screen.gd:923
+msgid "AI"
+msgstr "เอไอ"
+
+#: src/client/lobby/lobby_screen.gd:128
+msgid "AI controlled"
+msgstr "เอไอควบคุม"
+
+#: src/client/ui/ui_text.gd:ERRORS.ai_cannot_vote
+msgid "AI-controlled characters do not vote."
+msgstr "ตัวละครที่ควบคุมโดยระบบไม่โหวต."
+
 #: content/forest.json:journey.sites.treasure[0].name
 msgid "Abandoned Cabin"
 msgstr "กระท่อมร้าง"
 
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Abilities"
+msgstr "ความสามารถ"
+
+#: src/client/match/class_panel.gd:37
+msgid "Accept [Y]"
+msgstr "ยอมรับ [Y]"
+
+#: src/client/ui/ui_text.gd:HINTS.class_offer
+msgid "Accept [Y] to take this Class, or Decline [N] to stay Classless and wait for another. Several characters can share a Class."
+msgstr "กดรับ [Y] เพื่อเลือกอาชีพนี้ หรือปฏิเสธ [N] เพื่อคงสถานะไร้อาชีพและรออาชีพถัดไป ตัวละครหลายตัวเลือกอาชีพเดียวกันได้."
+
+#: src/client/ui/ui_text.gd:LABELS.action_window
+msgid "Action window"
+msgstr "ช่วงเวลาลงมือ"
+
 #: content/forest.json:meta.passives.adaptable.name
 msgid "Adaptable"
 msgstr "ปรับตัวเก่ง"
+
+#: src/client/title/title_screen.gd:444
+msgid "Advanced connection options"
+msgstr "ตัวเลือกการเชื่อมต่อขั้นสูง"
+
+#: src/client/match/camp/camp_view.gd:595
+msgid "Adventurer"
+msgstr "นักผจญภัย"
+
+#: src/client/match/camp/camp_view.gd:667
+msgid "Aggro"
+msgstr "ความเด่น"
 
 #: content/forest.json:skills.aimed_shot.name
 msgid "Aimed Shot"
@@ -277,13 +517,21 @@ msgstr "เรนไปกับเขาด้วย เรนกลับม�
 msgid "Another mark from Father. A wave, a lighthouse, and an upside-down cup."
 msgstr "รอยจากพ่ออีกแล้ว คลื่น ประภาคาร และถ้วยคว่ำ"
 
-#: content/forest.json:classes.archer.name
+#: content/forest.json:classes.archer.name src/client/ui/ui_text.gd:client_literal
 msgid "Archer"
 msgstr "นักธนู"
 
 #: content/forest.json:party.members[0].name
 msgid "Arin"
 msgstr "อาริน"
+
+#: src/client/match/match_screen.gd:554
+msgid "Arrived: %s."
+msgstr "มาถึงแล้ว: %s"
+
+#: src/client/ui/ui_text.gd:LABELS.story_picker_navigation_hint
+msgid "Arrows / Tab move focus · Enter confirms · gold marks the current choice"
+msgstr "ใช้ปุ่มลูกศรหรือ Tab เพื่อเลื่อนโฟกัส · Enter เพื่อยืนยัน · สีทองแสดงตัวเลือกปัจจุบัน"
 
 #: content/forest.json:journey.sites.combat[3].hint
 msgid "Arrows stuck in the trees. Someone guards this road."
@@ -297,13 +545,53 @@ msgstr "ถามเรื่องพ่อ"
 msgid "Ask about Wren"
 msgstr "ถามเรื่องเรน"
 
-#: content/forest.json:classes.assassin.name
+#: content/forest.json:classes.assassin.name src/client/ui/ui_text.gd:client_literal
 msgid "Assassin"
 msgstr "นักฆ่า"
+
+#: src/client/match/battle/combat_panel.gd:151 src/client/ui/ui_text.gd:client_literal
+msgid "Attack [A]"
+msgstr "โจมตี [A]"
+
+#: src/client/match/battle/combat_panel.gd:173
+msgid "Attack whom?"
+msgstr "จะโจมตีใคร?"
+
+#: src/client/title/title_screen.gd:471
+msgid "Audio: Kenney, Zane Little Music, Emma_MA, marcelofg55, JaggedStone, artisticdude and Brian MacIntosh (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md"
+msgstr "เสียง: Kenney, Zane Little Music, Emma_MA, marcelofg55, JaggedStone, artisticdude และ Brian MacIntosh (CC0); YannZ และ leohpaz (CC-BY 4.0) ดูเครดิตทั้งหมดที่ assets/audio/CREDITS.md"
+
+#: src/client/match/battle/combat_panel.gd:116
+msgid "BACK ROW"
+msgstr "แถวหลัง"
+
+#: src/client/title/title_screen.gd:44 src/client/title/title_screen.gd:468
+msgid "BEYOND THE WORLD'S END"
+msgstr "เบื้องพ้นสุดขอบโลก"
+
+#: src/client/ui/ui_text.gd:TYPE_TAGS.boss
+msgid "BOSS"
+msgstr "บอส"
+
+#: src/client/title/title_screen.gd:56
+msgid "BUILD 0.10  |  FOREST TO CAVE"
+msgstr "บิลด์ 0.10  |  จากป่าสู่ถ้ำ"
+
+#: src/client/match/battle/combat_panel.gd:218 src/client/title/title_screen.gd:119 src/client/title/title_screen.gd:221 src/client/title/title_screen.gd:454 src/client/title/title_screen.gd:472
+msgid "Back [Esc]"
+msgstr "กลับ [Esc]"
 
 #: content/forest.json:classes.swordsman.description
 msgid "Balanced and dependable. Strong melee strikes, solid health."
 msgstr "สมดุลและไว้ใจได้ การโจมตีระยะประชิดแข็งแกร่ง พลังชีวิตดี"
+
+#: src/client/match/battle/battle_view.gd:522
+msgid "Beat the trainer within %d rounds to learn the %s Class. Nobody can fall here."
+msgstr "เอาชนะครูฝึกภายใน %d รอบเพื่อเรียนรู้อาชีพ%s ที่นี่ไม่มีใครหมดสติได้"
+
+#: src/client/title/title_screen.gd:218
+msgid "Begin Story"
+msgstr "เริ่มเนื้อเรื่อง"
 
 #: content/forest.json:classes.classless.role
 msgid "Beginner"
@@ -312,6 +600,14 @@ msgstr "ผู้เริ่มต้น"
 #: content/forest.json:statuses.bleed.name
 msgid "Bleed"
 msgstr "เลือดไหล"
+
+#: src/client/match/camp/camp_view.gd:664
+msgid "Block Chance"
+msgstr "โอกาสป้องกัน"
+
+#: src/client/match/camp/camp_view.gd:665
+msgid "Block Damage Reduction"
+msgstr "ลดความเสียหายเมื่อป้องกัน"
 
 #: content/forest.json:journey.sites.class[2].hint
 msgid "Blue fire flickers between the broken pillars."
@@ -332,6 +628,14 @@ msgstr "ระเบิด"
 #: content/forest.json:journey.sites.combat[5].name
 msgid "Bone Pit"
 msgstr "หลุมกระดูก"
+
+#: src/client/match/camp/camp_view.gd:863
+msgid "Bonuses"
+msgstr "โบนัส"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Boons"
+msgstr "พร"
 
 #: content/forest.json:crafting.categories[0] content/forest.json:items.pelt_boots.category
 msgid "Boots"
@@ -369,6 +673,46 @@ msgstr "กิ่งไม้เสียดสีกันทั้งที่
 msgid "Bull Rush"
 msgstr "พุ่งชน"
 
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Buy"
+msgstr "ซื้อ"
+
+#: src/client/ui/ui_text.gd:CONFIRM.buy_item[0]
+msgid "Buy %s?"
+msgstr "ซื้อ %s หรือไม่?"
+
+#: src/client/ui/ui_text.gd:CONFIRM.buy_item[2]
+msgid "Buy Item"
+msgstr "ซื้อสินค้า"
+
+#: src/client/lobby/character_setup.gd:290
+msgid "Buy Prestige\n%s"
+msgstr "ซื้อเกียรติยศ\n%s"
+
+#: src/client/ui/ui_text.gd:TYPE_TAGS.choice
+msgid "CHOICE"
+msgstr "ตัวเลือก"
+
+#: src/client/title/title_screen.gd:97
+msgid "CHOOSE YOUR JOURNEY"
+msgstr "เลือกการเดินทางของคุณ"
+
+#: src/client/ui/ui_text.gd:TYPE_TAGS.class
+msgid "CLASS"
+msgstr "อาชีพ"
+
+#: src/client/match/match_screen.gd:704
+msgid "CRIT"
+msgstr "คริติคอล"
+
+#: src/client/ui/ui_text.gd:HINTS.rest
+msgid "Camp: craft from materials on the left, equip gear from the shared bag in the middle, and spend stat points on the right. Press [R] when you are done; the camp moves on when every player is Ready."
+msgstr "ค่ายพัก: คราฟต์จากวัตถุดิบทางซ้าย สวมอุปกรณ์จากคลังส่วนกลางตรงกลาง และใช้แต้มสถานะทางขวา กด [R] เมื่อเสร็จแล้ว ค่ายจะไปต่อเมื่อผู้เล่นทุกคนพร้อม."
+
+#: src/client/match/camp/camp_view.gd:951 src/client/match/camp/camp_view.gd:964 src/client/ui/confirm_dialog.gd:27
+msgid "Cancel [Esc]"
+msgstr "ยกเลิก [Esc]"
+
 #: content/forest.json:journey.sites.story[1].name
 msgid "Carved Stone"
 msgstr "หินแกะสลัก"
@@ -380,6 +724,34 @@ msgstr "ถ้ำ"
 #: content/forest.json:journey.sites.combat[4].name
 msgid "Cave Mouth"
 msgstr "ปากถ้ำ"
+
+#: src/client/match/battle/battle_view.gd:1074 src/client/match/battle/combat_panel.gd:242
+msgid "Challenge won!"
+msgstr "ชนะการประลองแล้ว!"
+
+#: src/client/match/battle/battle_view.gd:521
+msgid "Challenge: %s"
+msgstr "การประลอง: %s"
+
+#: src/client/match/class_panel.gd:19
+msgid "Challenge: beat %s within %d rounds (round %d of %d). Nobody can fall in a Challenge."
+msgstr "การประลอง: เอาชนะ%sภายใน %d รอบ (รอบที่ %d จาก %d) ไม่มีใครหมดสติระหว่างการประลอง"
+
+#: src/client/ui/ui_text.gd:LABELS.chapter
+msgid "Chapter %d"
+msgstr "บทที่ %d"
+
+#: src/client/match/camp/camp_view.gd:571
+msgid "Character"
+msgstr "ตัวละคร"
+
+#: src/client/lobby/lobby_screen.gd:78
+msgid "Character Setup"
+msgstr "ตั้งค่าตัวละคร"
+
+#: src/client/match/camp/camp_view.gd:817
+msgid "Charm"
+msgstr "เครื่องราง"
 
 #: content/forest.json:items.tusk_charm.description
 msgid "Charm gear: +2 ATK."
@@ -393,6 +765,10 @@ msgstr "อุปกรณ์เครื่องราง: +2 พลังเ�
 msgid "Charms"
 msgstr "เครื่องราง"
 
+#: src/client/match/camp/camp_view.gd:820
+msgid "Chest"
+msgstr "เกราะอก"
+
 #: content/forest.json:items.hide_jerkin.description
 msgid "Chest gear: +2 DEF, +8 Max HP."
 msgstr "อุปกรณ์เกราะอก: +2 พลังป้องกัน, +8 พลังชีวิตสูงสุด"
@@ -401,21 +777,109 @@ msgstr "อุปกรณ์เกราะอก: +2 พลังป้อง�
 msgid "Chest gear: +2 MAG, +2 RES."
 msgstr "อุปกรณ์เกราะอก: +2 พลังเวท, +2 ต้านเวท"
 
-#: content/forest.json:journey.type_labels.class
+#: src/client/ui/ui_text.gd:TYPE_LABELS.choice
+msgid "Choice"
+msgstr "ตัวเลือก"
+
+#: src/client/ui/ui_text.gd:LABELS.story_choose_class
+msgid "Choose a Class for %s"
+msgstr "เลือกอาชีพให้ %s"
+
+#: src/client/title/title_screen.gd:162
+msgid "Choose a Class for every traveller."
+msgstr "เลือกอาชีพให้ผู้เดินทางทุกคน"
+
+#: src/client/match/battle/battle_view.gd:790
+msgid "Choose a target on the field (1-%d), Esc to go back"
+msgstr "เลือกเป้าหมายบนสนาม (1-%d) กด Esc เพื่อย้อนกลับ"
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_class
+msgid "Choose one of the available Classes."
+msgstr "เลือกหนึ่งในอาชีพที่มีให้เลือก."
+
+#: src/client/match/vote_panel.gd:28
+msgid "Choose one path."
+msgstr "เลือกเส้นทางหนึ่งเส้น"
+
+#: src/client/match/vote_panel.gd:161
+msgid "Choose path [%d]"
+msgstr "เลือกเส้นทาง [%d]"
+
+#: src/client/match/vote_panel.gd:27
+msgid "Choose your path"
+msgstr "เลือกเส้นทางของคุณ"
+
+#: src/client/title/title_screen.gd:72
+msgid "Choose your path into the forest."
+msgstr "เลือกเส้นทางเข้าสู่ป่า"
+
+#: src/client/match/vote_panel.gd:161 src/client/ui/ui_text.gd:client_literal
+msgid "Chosen"
+msgstr "เลือกแล้ว"
+
+#: src/client/lobby/character_setup.gd:190
+msgid "Class"
+msgstr "อาชีพ"
+
+#: content/forest.json:journey.type_labels.class src/client/ui/ui_text.gd:TYPE_LABELS.class
 msgid "Class Encounter"
 msgstr "เหตุการณ์อาชีพ"
+
+#: src/client/match/class_panel.gd:15
+msgid "Class Encounter: %s"
+msgstr "เหตุการณ์อาชีพ: %s"
 
 #: content/forest.json:meta.class_tree.mastery.text
 msgid "Class Skill cooldown -1 at level 5."
 msgstr "คูลดาวน์ทักษะอาชีพ -1 ที่ระดับ 5"
 
-#: content/forest.json:classes.classless.name
+#: src/client/lobby/character_setup.gd:455
+msgid "Class: %s\nRace: %s\nBoons: %s"
+msgstr "อาชีพ: %s\nเผ่าพันธุ์: %s\nพร: %s"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Classes discovered"
+msgstr "อาชีพที่พบ"
+
+#: content/forest.json:classes.classless.name src/client/ui/ui_text.gd:client_literal
 msgid "Classless"
 msgstr "ไร้อาชีพ"
 
 #: content/forest.json:story.clues.guardian_mark.title
 msgid "Claw-Marked Shield"
 msgstr "โล่รอยกรงเล็บ"
+
+#: src/client/ui/ui_text.gd:LABELS.story_picker_choose_hint
+msgid "Click a card or press 1-5 to choose. Esc closes."
+msgstr "คลิกการ์ดหรือกด 1-5 เพื่อเลือก กด Esc เพื่อปิด"
+
+#: src/client/lobby/character_setup.gd:442
+msgid "Click to equip (%d/5 slots used)."
+msgstr "กดเพื่อสวมพร (%d/5 ช่องใช้แล้ว)."
+
+#: src/client/match/match_screen.gd:404
+msgid "Close [C]"
+msgstr "ปิด [C]"
+
+#: src/client/match/camp/camp_view.gd:869 src/client/match/camp/camp_view.gd:919 src/client/title/settings_panel.gd:92
+msgid "Close [Esc]"
+msgstr "ปิด [Esc]"
+
+#: src/client/match/summary_panel.gd:20
+msgid "Clue log [C]"
+msgstr "บันทึกเบาะแส [C]"
+
+#: src/client/match/battle/battle_view.gd:1084
+msgid "Clue: %s"
+msgstr "เบาะแส: %s"
+
+#: src/client/ui/ui_text.gd:LABELS.clues_tip
+msgid "Clues [C]"
+msgstr "เบาะแส [C]"
+
+#: src/client/match/match_screen.gd:844 src/client/match/match_screen.gd:865
+msgid "Clues: %d [C]"
+msgstr "เบาะแส: %d [C]"
 
 #: content/forest.json:skills.prep_time.description
 msgid "Coat your weapon with poison: your next 3 damaging actions also apply Poison. Costs 1 Energy. Cooldown: 6 turns."
@@ -429,17 +893,73 @@ msgstr "อากาศเย็นลอยขึ้นจากโพรงใ
 msgid "Cold ashes and a familiar knot in the rope. Was Father here?"
 msgstr "เถ้าถ่านเย็นกับเงื่อนเชือกที่คุ้นเคย พ่อเคยมาที่นี่หรือ"
 
-#: content/forest.json:journey.type_labels.combat
+#: content/forest.json:journey.type_labels.combat src/client/match/battle/combat_panel.gd:104 src/client/ui/ui_text.gd:TYPE_LABELS.combat
 msgid "Combat"
 msgstr "การต่อสู้"
+
+#: src/client/ui/ui_text.gd:LABELS.connecting
+msgid "Connecting to %s ..."
+msgstr "กำลังเชื่อมต่อกับ %s ..."
+
+#: src/client/match/camp/camp_view.gd:333
+msgid "Consumable\n"
+msgstr "ไอเทมใช้แล้วหมดไป\n"
+
+#: src/client/title/title_screen.gd:105
+msgid "Continue Story"
+msgstr "เล่นเนื้อเรื่องต่อ"
+
+#: src/client/match/story_panel.gd:60 src/client/ui/ui_text.gd:LABELS.continue
+msgid "Continue [Enter]"
+msgstr "เล่นต่อ [Enter]"
+
+#: src/client/lobby/lobby_screen.gd:60
+msgid "Copy code"
+msgstr "คัดลอกรหัส"
 
 #: content/forest.json:party.members[2].name
 msgid "Cora"
 msgstr "โครา"
 
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Cost: %s"
+msgstr "ค่าใช้จ่าย: %s"
+
+#: src/client/lobby/character_setup.gd:234
+msgid "Cost: %s\nStatus: Unlocked"
+msgstr "ค่าใช้จ่าย: %s\nสถานะ: ปลดล็อกแล้ว"
+
+#: src/client/ui/ui_text.gd:ERRORS.cannot_connect
+msgid "Could not reach the server. Check the address and try again."
+msgstr "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบที่อยู่แล้วลองอีกครั้ง."
+
+#: src/client/match/camp/camp_view.gd:461 src/client/ui/ui_text.gd:client_literal
+msgid "Craft"
+msgstr "คราฟต์"
+
 #: content/forest.json:meta.passives.masterwork.text
 msgid "Crafted gear gains +0.75% stats per current level."
 msgstr "อุปกรณ์ที่คราฟต์ได้จะได้ค่าสถานะเพิ่ม 0.75% ต่อระดับปัจจุบัน"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Crafting"
+msgstr "คราฟต์"
+
+#: src/client/title/title_screen.gd:426
+msgid "Create a room"
+msgstr "สร้างห้อง"
+
+#: src/client/title/title_screen.gd:81
+msgid "Credits"
+msgstr "เครดิต"
+
+#: src/client/match/camp/camp_view.gd:662
+msgid "Crit Chance"
+msgstr "โอกาสคริติคอล"
+
+#: src/client/match/camp/camp_view.gd:663
+msgid "Crit Damage"
+msgstr "ความเสียหายคริติคอล"
 
 #: content/forest.json:meta.boons["Critical%20Healing"]
 msgid "Critical Healing"
@@ -453,6 +973,26 @@ msgstr "การโจมตีคริติคอลฟื้นพลัง
 msgid "Crushing Root"
 msgstr "รากบดขยี้"
 
+#: src/client/match/summary_panel.gd:10
+msgid "DEFEAT"
+msgstr "พ่ายแพ้"
+
+#: src/client/match/battle/combat_panel.gd:121
+msgid "DEFEATED"
+msgstr "พ่ายแพ้"
+
+#: src/client/match/match_screen.gd:947
+msgid "DEFEND"
+msgstr "ป้องกัน"
+
+#: src/client/client_app.gd:714
+msgid "DEV PLAYTEST"
+msgstr "ทดสอบเกม"
+
+#: src/client/match/match_screen.gd:943
+msgid "DOWN"
+msgstr "ล้มลง"
+
 #: content/forest.json:classes.assassin.description
 msgid "Daggers and poison. Stacks Bleed, Poison and Toxin on one enemy, then finishes it with Inject Venom. Fast and deadly, but fragile."
 msgstr "มีดสั้นและพิษ สะสมเลือดไหล พิษ และพิษร้ายใส่ศัตรูหนึ่งตัว แล้วปิดฉากด้วยฉีดพิษ เร็วและอันตรายแต่เปราะบาง"
@@ -460,6 +1000,10 @@ msgstr "มีดสั้นและพิษ สะสมเลือดไ�
 #: content/forest.json:party.members[3].name
 msgid "Dain"
 msgstr "เดย์น"
+
+#: src/client/match/camp/camp_view.gd:886
+msgid "Damage: %d %s"
+msgstr "ความเสียหาย: %d %s"
 
 #: content/forest.json:meta.boons["Daredevil%20Impulse"]
 msgid "Daredevil Impulse"
@@ -477,9 +1021,65 @@ msgstr "ความมืดปิดล้อมกลุ่มไว้ ท�
 msgid "Deals 18 fire damage to every enemy."
 msgstr "สร้างความเสียหายไฟ 18 แก่ศัตรูทุกตัว"
 
+#: src/client/match/class_panel.gd:40
+msgid "Decline [N]"
+msgstr "ปฏิเสธ [N]"
+
+#: src/client/match/class_panel.gd:47
+msgid "Declining keeps you Classless; you can take a Class at a later Class Encounter."
+msgstr "หากปฏิเสธ คุณจะไร้อาชีพและเลือกอาชีพได้ในเหตุการณ์อาชีพครั้งถัดไป"
+
+#: src/client/match/class_panel.gd:45
+msgid "Declining keeps you Classless; you can take a Class at a later Class Encounter. Silence counts as declining."
+msgstr "หากปฏิเสธ คุณจะไร้อาชีพและเลือกอาชีพได้ในเหตุการณ์อาชีพครั้งถัดไป หากไม่ตอบจะนับว่าปฏิเสธ"
+
 #: content/forest.json:story.events.carved_stone.text
 msgid "Deep marks are cut into a standing stone: a wave, a lighthouse, and a cup drawn upside down. Beneath them, a single letter: E. Father's initial."
 msgstr "รอยลึกถูกสลักบนศิลาตั้งตรง: คลื่น ประภาคาร และถ้วยคว่ำ ใต้รอยเหล่านั้นมีอักษรตัวเดียว: E อักษรย่อชื่อของพ่อ"
+
+#: src/client/match/match_screen.gd:591
+msgid "Defeat. The %s wins this time."
+msgstr "พ่ายแพ้ %s เป็นฝ่ายชนะในครั้งนี้"
+
+#: src/client/match/battle/combat_panel.gd:158 src/client/ui/ui_text.gd:client_literal
+msgid "Defend [D]"
+msgstr "ป้องกัน [D]"
+
+#: src/client/match/battle/battle_view.gd:507 src/client/match/battle/combat_panel.gd:99
+msgid "Defend [D] to halve it, or have a Guardian Protect them."
+msgstr "ป้องกัน [D] เพื่อลดความเสียหายครึ่งหนึ่ง หรือให้ผู้พิทักษ์คุ้มครอง"
+
+#: src/client/match/battle/battle_view.gd:507 src/client/match/battle/combat_panel.gd:99
+msgid "Defend [D] to halve it, or raise Shield Wall."
+msgstr "ป้องกัน [D] เพื่อลดความเสียหายครึ่งหนึ่ง หรือใช้กำแพงโล่"
+
+#: src/client/match/battle/combat_panel.gd:163
+msgid "Defend halves damage until your next turn. Items use your personal Gold and consumable slot."
+msgstr "การป้องกันลดความเสียหายลงครึ่งหนึ่งจนถึงเทิร์นถัดไป ไอเทมใช้ทองส่วนตัวและช่องไอเทมใช้แล้วหมดไป"
+
+#: src/client/lobby/character_setup.gd:341
+msgid "Description"
+msgstr "คำอธิบาย"
+
+#: src/client/ui/ui_text.gd:ERRORS.dev_offline_only
+msgid "Developer shortcuts only work in the local Playtest."
+msgstr "ปุ่มลัดสำหรับนักพัฒนาใช้ได้เฉพาะการทดสอบในเครื่อง."
+
+#: src/client/ui/ui_text.gd:HINTS.dot
+msgid "DoTs (Bleed BLD, Poison PSN, Toxin TOX) hurt at the start of each holder's turn, ignoring armour. The badge shows the stack count; hover it to see the turns left."
+msgstr "DoT (เลือดออก BLD, พิษ PSN, สารพิษ TOX) สร้างความเสียหายตอนเริ่มเทิร์นของผู้ติดสถานะโดยไม่สนเกราะ ป้ายแสดงจำนวนสะสม ชี้เมาส์เพื่อดูจำนวนเทิร์นที่เหลือ"
+
+#: src/client/match/camp/camp_view.gd:666
+msgid "Dodge Chance"
+msgstr "โอกาสหลบ"
+
+#: src/client/match/camp/merchant_panel.gd:29
+msgid "Done shopping [R]"
+msgstr "ซื้อเสร็จแล้ว [R]"
+
+#: src/client/match/camp/merchant_panel.gd:27
+msgid "Done shopping: %s"
+msgstr "ซื้อของเสร็จแล้ว: %s"
 
 #: content/forest.json:enemies.masked_outlaw.special.name
 msgid "Double Strike"
@@ -497,6 +1097,14 @@ msgstr "คนแคระ"
 msgid "Dwarven Resilience"
 msgstr "ความทรหดของคนแคระ"
 
+#: src/client/title/title_screen.gd:422
+msgid "ENTER THE FOREST"
+msgstr "เข้าสู่ป่า"
+
+#: src/client/ui/ui_text.gd:HINTS.merchant
+msgid "Each character buys with their own Gold, and you can Transfer Gold to a friend. Press [R] when you are done; the shop closes when everyone is ready."
+msgstr "ตัวละครแต่ละตัวซื้อของด้วยทองของตนเอง และโอนทองให้เพื่อนได้ กด [R] เมื่อเสร็จแล้ว ร้านจะปิดเมื่อทุกคนพร้อม."
+
 #: content/forest.json:boss.name content/forest.json:enemies.elder_thornwarden.name
 msgid "Elder Thornwarden"
 msgstr "ธอร์นวอร์เดนผู้เฒ่า"
@@ -509,9 +1117,41 @@ msgstr "ลูกคนโต"
 msgid "Elf"
 msgstr "เอลฟ์"
 
+#: src/client/match/camp/camp_view.gd:621
+msgid "Empty"
+msgstr "ว่าง"
+
+#: src/client/match/match_screen.gd:556
+msgid "Enemies appear!"
+msgstr "ศัตรูปรากฏตัว!"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Enemies defeated"
+msgstr "ศัตรูที่ปราบได้"
+
+#: src/client/match/camp/camp_view.gd:650
+msgid "Energy"
+msgstr "พลังงาน"
+
+#: src/client/match/battle/combat_panel.gd:146
+msgid "Energy %d/%d - Skills spend Energy; you regain 1 each of your turns."
+msgstr "พลังงาน %d/%d - ทักษะใช้พลังงาน คุณฟื้นฟู 1 หน่วยเมื่อเริ่มเทิร์นของตัวเอง"
+
+#: src/client/ui/ui_text.gd:HINTS.energy
+msgid "Energy (the blue bar) pays for Skills: you start each Combat with 1 and regain 1 every later turn, up to 6. Strike, Guard, Focus and Items are free."
+msgstr "พลังงาน (แถบสีน้ำเงิน) ใช้ร่ายทักษะ: เริ่มการต่อสู้แต่ละครั้งที่ 1 และฟื้นฟู 1 ในทุกเทิร์นถัดไป สูงสุด 6 การโจมตี ป้องกัน ตั้งสมาธิ และใช้ไอเทมไม่เสียพลังงาน."
+
 #: content/forest.json:meta.boons["Energy%20Conserver"]
 msgid "Energy Conserver"
 msgstr "ผู้ประหยัดพลังงาน"
+
+#: src/client/match/camp/camp_view.gd:669
+msgid "Energy Regen"
+msgstr "ฟื้นฟูพลังงาน"
+
+#: src/client/match/camp/camp_view.gd:913
+msgid "Energy: %d | Cooldown: %d turn(s)"
+msgstr "พลังงาน: %d | คูลดาวน์: %d เทิร์น"
 
 #: content/forest.json:meta.boons.Enervation
 msgid "Enervation"
@@ -520,6 +1160,42 @@ msgstr "อ่อนแรง"
 #: content/forest.json:story.clues.tin_cup.text
 msgid "Engraved with Mother's name. He carried it the whole way."
 msgstr "สลักชื่อแม่ไว้ เขาถือมันไปตลอดทาง"
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_amount
+msgid "Enter an amount of at least 1."
+msgstr "ใส่จำนวนอย่างน้อย 1."
+
+#: src/client/match/camp/camp_view.gd:536
+msgid "Equip"
+msgstr "สวมใส่"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Equipment"
+msgstr "อุปกรณ์"
+
+#: src/client/ui/ui_text.gd:CONFIRM.reset_skills[1]
+msgid "Every Skill Tree level of the %s Class goes back to 0. This costs %d Gems."
+msgstr "ระดับในผังทักษะทั้งหมดของอาชีพ %s จะกลับเป็น 0 ใช้อัญมณี %d เม็ด."
+
+#: src/client/match/vote_panel.gd:28
+msgid "Every player has one vote; AI characters never vote. The most votes wins and a tie is broken at random."
+msgstr "ผู้เล่นแต่ละคนมีหนึ่งเสียง ตัวละครเอไอไม่โหวต ฝ่ายที่ได้คะแนนสูงสุดชนะ หากเสมอจะสุ่มผล"
+
+#: src/client/title/settings_panel.gd:90
+msgid "Every sound cue also appears on screen as a banner or log line."
+msgstr "เสียงทุกแบบจะแสดงเป็นแถบแจ้งเตือนหรือข้อความบันทึกบนหน้าจอด้วย"
+
+#: src/client/title/settings_panel.gd:28
+msgid "Extra large"
+msgstr "ใหญ่มาก"
+
+#: src/client/ui/ui_text.gd:TYPE_TAGS.combat
+msgid "FIGHT"
+msgstr "สู้"
+
+#: src/client/match/battle/combat_panel.gd:116
+msgid "FRONT"
+msgstr "แถวหน้า"
 
 #: content/story_mode.json:chapters[5].subtitle
 msgid "Face the Elder Thornwarden in the cave beneath the Forest."
@@ -581,6 +1257,22 @@ msgstr "ถ้วยดีบุกของพ่อ"
 msgid "Father's apprentice"
 msgstr "ศิษย์ของพ่อ"
 
+#: src/client/match/battle/battle_view.gd:847
+msgid "Fight"
+msgstr "สู้"
+
+#: src/client/match/battle/battle_view.gd:848 src/client/ui/ui_text.gd:client_literal
+msgid "Fight [F]"
+msgstr "ต่อสู้ [F]"
+
+#: src/client/match/info_panel.gd:58
+msgid "Final tally - %s."
+msgstr "ผลโหวตสุดท้าย - %s"
+
+#: src/client/lobby/character_setup.gd:133
+msgid "Finish [Esc]"
+msgstr "เสร็จสิ้น [Esc]"
+
 #: content/forest.json:skills.fireball.description
 msgid "Fire magic at 110% MAG that hits every enemy, front and back row. Burns enemies weak to fire harder. Costs 2 Energy. Cooldown: 2 turns."
 msgstr "เวทไฟพลังเวท 110% โจมตีศัตรูทุกตัวทั้งแถวหน้าและหลัง เผาศัตรูที่แพ้ไฟได้รุนแรงขึ้น ใช้พลังงาน 2 หน่วย คูลดาวน์ 2 เทิร์น"
@@ -593,9 +1285,25 @@ msgstr "ลูกไฟ"
 msgid "Firebomb"
 msgstr "ระเบิดเพลิง"
 
+#: src/client/match/battle/battle_view.gd:856
+msgid "Focus"
+msgstr "ตั้งสมาธิ"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Focus [O]"
+msgstr "ตั้งสมาธิ [O]"
+
+#: src/client/ui/ui_text.gd:WHY.focus_unavailable
+msgid "Focus is not available right now."
+msgstr "ตอนนี้ยังตั้งสมาธิไม่ได้."
+
 #: content/forest.json:journey.sites.combat[0].name
 msgid "Follow the Stream"
 msgstr "ตามลำธาร"
+
+#: src/client/title/title_screen.gd:470
+msgid "Font: Pixelify Sans, OFL\nCharacter art by the project owner."
+msgstr "แบบอักษร Pixelify Sans, OFL\nภาพตัวละครโดยเจ้าของโครงการ"
 
 #: content/forest.json:journey.regions["1"] content/forest.json:journey.regions["2"] content/forest.json:journey.regions["3"] content/forest.json:journey.regions["4"]
 msgid "Forest"
@@ -605,6 +1313,10 @@ msgstr "ป่า"
 msgid "Forest Tonic"
 msgstr "ยาบำรุงแห่งป่า"
 
+#: src/client/title/title_screen.gd:50
+msgid "Forest to Cave - a co-op journey"
+msgstr "จากป่าสู่ถ้ำ - การเดินทางแบบร่วมมือ"
+
 #: content/forest.json:classes.mage.description
 msgid "Fragile but devastating. Magic ignores armour and Fireball strikes every enemy at once."
 msgstr "เปราะบางแต่ทำลายล้าง เวทมนตร์ไม่สนเกราะ และลูกไฟโจมตีศัตรูทุกตัวพร้อมกัน"
@@ -612,6 +1324,10 @@ msgstr "เปราะบางแต่ทำลายล้าง เวท�
 #: content/forest.json:meta.passives.frail.name
 msgid "Frail"
 msgstr "เปราะบาง"
+
+#: src/client/ui/ui_text.gd:TYPE_HELP.treasure
+msgid "Free Gold or Items."
+msgstr "รับทองหรือไอเทมฟรี."
 
 #: content/forest.json:journey.sites.combat[0].hint
 msgid "Fresh tracks in the mud. Something hunts along the water."
@@ -621,6 +1337,18 @@ msgstr "รอยเท้าสดในโคลน มีบางสิ่�
 msgid "Frost Lance"
 msgstr "หอกน้ำแข็ง"
 
+#: src/client/match/match_screen.gd:949
+msgid "GUARDED"
+msgstr "มีเกราะป้องกัน"
+
+#: src/client/ui/ui_text.gd:WHY.focus_ready
+msgid "Gain Energy and Dodge this turn."
+msgstr "ฟื้นฟูพลังงานและหลบหลีกในเทิร์นนี้."
+
+#: src/client/lobby/character_setup.gd:454
+msgid "Gems: %d"
+msgstr "อัญมณี: %d"
+
 #: content/forest.json:enemies.giant_spider.name
 msgid "Giant Spider"
 msgstr "แมงมุมยักษ์"
@@ -628,6 +1356,14 @@ msgstr "แมงมุมยักษ์"
 #: content/forest.json:enemies.bramble_archer.name
 msgid "Goblin"
 msgstr "ก็อบลิน"
+
+#: src/client/match/vote_panel.gd:144
+msgid "Gold"
+msgstr "ทอง"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Gold amount"
+msgstr "จำนวนทอง"
 
 #: content/forest.json:enemies.stone_sentinel.name
 msgid "Golem"
@@ -637,6 +1373,10 @@ msgstr "โกเลม"
 msgid "Golem Watch"
 msgstr "ยามโกเลม"
 
+#: src/client/ui/ui_text.gd:LABELS.got_it
+msgid "Got it [H]"
+msgstr "เข้าใจแล้ว [H]"
+
 #: content/forest.json:meta.passives.grace.name
 msgid "Grace"
 msgstr "สง่างาม"
@@ -645,7 +1385,7 @@ msgstr "สง่างาม"
 msgid "Guard one ally until your next turn: attacks aimed at them hit you instead, with 30% less damage. Costs 1 Energy. No cooldown."
 msgstr "คุ้มกันพันธมิตรหนึ่งคนจนถึงเทิร์นถัดไปของตน: การโจมตีที่เล็งเป้าหมายนั้นจะมาโดนตัวเองแทน โดยเสียหายน้อยลง 30% ใช้พลังงาน 1 หน่วย ไม่มีคูลดาวน์"
 
-#: content/forest.json:classes.guardian.name
+#: content/forest.json:classes.guardian.name src/client/ui/ui_text.gd:client_literal
 msgid "Guardian"
 msgstr "ผู้พิทักษ์"
 
@@ -653,9 +1393,29 @@ msgstr "ผู้พิทักษ์"
 msgid "Guardian Beneath the Forest"
 msgstr "ผู้พิทักษ์ใต้ผืนป่า"
 
+#: src/client/ui/ui_text.gd:TYPE_LABELS.boss src/client/ui/ui_text.gd:client_literal
+msgid "Guardian Boss"
+msgstr "บอสผู้พิทักษ์"
+
+#: src/client/match/summary_panel.gd:46 src/client/ui/ui_text.gd:client_literal
+msgid "Guardian Boss defeated"
+msgstr "ปราบบอสผู้พิทักษ์แล้ว"
+
 #: content/forest.json:boss.title
 msgid "Guardian of the Forest"
 msgstr "ผู้พิทักษ์แห่งป่า"
+
+#: src/client/lobby/lobby_screen.gd:131
+msgid "HOST"
+msgstr "เจ้าห้อง"
+
+#: src/client/match/class_panel.gd:97
+msgid "HP %d  ATK %d  DEF %d  MAG %d  RES %d  SPD %d"
+msgstr "พลังชีวิต %d โจมตี %d ป้องกัน %d เวท %d ต้านเวท %d ความเร็ว %d"
+
+#: src/client/title/title_screen.gd:431
+msgid "Have a Room code? Letters and numbers, case does not matter."
+msgstr "มีรหัสห้องหรือไม่? ใช้ตัวอักษรและตัวเลข ตัวพิมพ์เล็กใหญ่ไม่มีผล"
 
 #: content/story_mode.json:scenes.story_clue[1].text
 msgid "He was pointing beyond the Forest. Past the last lighthouse."
@@ -669,6 +1429,10 @@ msgstr "เขาไปทางตะวันตกพร้อมแผนท
 msgid "Healing Herb"
 msgstr "สมุนไพรรักษา"
 
+#: src/client/match/camp/camp_view.gd:881
+msgid "Healing: %d HP"
+msgstr "ฟื้นพลังชีวิต: %d หน่วย"
+
 #: content/forest.json:boss.phases[2].name
 msgid "Heartwood Fury"
 msgstr "โทสะแก่นไม้"
@@ -677,13 +1441,25 @@ msgstr "โทสะแก่นไม้"
 msgid "Heavy Charge"
 msgstr "พุ่งชนหนัก"
 
+#: src/client/match/camp/camp_view.gd:819
+msgid "Helmet"
+msgstr "หมวกเกราะ"
+
 #: content/forest.json:journey.sites.merchant[1].hint
 msgid "Herbs and tonics traded for coin."
 msgstr "สมุนไพรและยาบำรุงแลกกับเหรียญ"
 
+#: src/client/match/camp/camp_view.gd:102 src/client/ui/ui_text.gd:client_literal
+msgid "Hide"
+msgstr "ซ่อน"
+
 #: content/forest.json:items.hide_jerkin.name
 msgid "Hide Jerkin"
 msgstr "เสื้อหนัง"
+
+#: src/client/match/camp/camp_view.gd:103 src/client/ui/ui_text.gd:client_literal
+msgid "Hide the camp to look at the field"
+msgstr "ซ่อนค่ายเพื่อดูสนามต่อสู้"
 
 #: content/forest.json:journey.sites.rest[1].name
 msgid "Hollow Oak"
@@ -721,6 +1497,14 @@ msgstr "ตอนนี้ฉันจำเสียงของเขาได
 msgid "I remember leaving with him. After that… only trees, thorns, and a voice asking for a life."
 msgstr "ฉันจำได้ว่าออกเดินทางกับเขา หลังจากนั้น… เหลือเพียงต้นไม้ หนาม และเสียงที่เรียกร้องชีวิตหนึ่ง"
 
+#: src/client/lobby/character_setup.gd:453
+msgid "ID: %s…"
+msgstr "รหัส: %s…"
+
+#: src/client/match/camp/camp_view.gd:661
+msgid "Initiative"
+msgstr "ความเร็วเริ่มต้น"
+
 #: content/forest.json:skills.inject_venom.name
 msgid "Inject Venom"
 msgstr "ฉีดพิษ"
@@ -729,9 +1513,45 @@ msgstr "ฉีดพิษ"
 msgid "Inside a lightning-split oak, wrapped in oilcloth, is a letter addressed to Mother in Father's hand. It was never sent."
 msgstr "ในต้นโอ๊กที่ถูกฟ้าผ่าแยกออก มีจดหมายห่อผ้าน้ำมันเขียนถึงแม่ด้วยลายมือพ่อ มันไม่เคยถูกส่ง"
 
+#: src/client/match/camp/camp_view.gd:414 src/client/match/camp/camp_view.gd:468 src/client/match/camp/camp_view.gd:539 src/client/match/camp/camp_view.gd:639 src/client/ui/ui_text.gd:client_literal
+msgid "Inspect"
+msgstr "ตรวจดู"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Inventory"
+msgstr "คลังไอเทม"
+
+#: src/client/match/camp/camp_view.gd:675 src/client/match/camp/camp_view.gd:957
+msgid "Invest Points (%d)"
+msgstr "ใช้แต้ม (%d)"
+
+#: src/client/ui/ui_text.gd:ERRORS.not_your_turn
+msgid "It is not your turn."
+msgstr "ยังไม่ถึงเทิร์นของคุณ."
+
+#: src/client/match/info_panel.gd:62
+msgid "It was a tie, so the path was chosen at random among the tied options."
+msgstr "คะแนนเสมอกัน จึงสุ่มเลือกเส้นทางจากตัวเลือกที่คะแนนเท่ากัน"
+
+#: src/client/match/battle/combat_panel.gd:159
+msgid "Item [I]"
+msgstr "ไอเทม [I]"
+
+#: src/client/match/battle/battle_view.gd:851
+msgid "Items"
+msgstr "ไอเทม"
+
+#: src/client/match/battle/battle_view.gd:852 src/client/ui/ui_text.gd:client_literal
+msgid "Items [I]"
+msgstr "ไอเทม [I]"
+
 #: content/forest.json:boss.phases[2].text
 msgid "Its glowing heart is laid bare. The Thornwarden fights with everything it has left!"
 msgstr "หัวใจเรืองแสงถูกเปิดเผย ธอร์นวอร์เดนต่อสู้ด้วยทุกสิ่งที่เหลืออยู่"
+
+#: src/client/title/title_screen.gd:437
+msgid "Join room"
+msgstr "เข้าร่วมห้อง"
 
 #: content/forest.json:meta.passives.keen_eyes.name
 msgid "Keen Eyes"
@@ -741,6 +1561,26 @@ msgstr "ดวงตาเฉียบคม"
 msgid "Kobold"
 msgstr "โคโบลด์"
 
+#: src/client/ui/ui_text.gd:TYPE_TAGS.treasure
+msgid "LOOT"
+msgstr "ของ"
+
+#: src/client/title/settings_panel.gd:28
+msgid "Large"
+msgstr "ใหญ่"
+
+#: src/client/match/summary_panel.gd:49
+msgid "Layer %d of %d"
+msgstr "ชั้น %d จาก %d"
+
+#: src/client/match/vote_panel.gd:27
+msgid "Layer %d of %d: choose the next path"
+msgstr "ชั้น %d จาก %d: เลือกเส้นทางถัดไป"
+
+#: src/client/match/match_screen.gd:545
+msgid "Layer %d: choose the next path."
+msgstr "ชั้น %d: เลือกเส้นทางถัดไป"
+
 #: content/forest.json:story.events.ranger_hut.choices[1].hint
 msgid "Learn what happened to Wren."
 msgstr "ฟังว่าเกิดอะไรขึ้นกับเรน"
@@ -748,6 +1588,46 @@ msgstr "ฟังว่าเกิดอะไรขึ้นกับเรน
 #: content/forest.json:story.events.ranger_hut.choices[0].hint
 msgid "Learn where he went."
 msgstr "ฟังว่าเขาไปทางไหน"
+
+#: src/client/ui/ui_text.gd:CONFIRM.leave_match[2]
+msgid "Leave Match"
+msgstr "ออกจากแมตช์"
+
+#: src/client/match/match_screen.gd:851
+msgid "Leave [Esc]"
+msgstr "ออก [Esc]"
+
+#: src/client/ui/ui_text.gd:CONFIRM.leave_room[2]
+msgid "Leave room"
+msgstr "ออกจากห้อง"
+
+#: src/client/lobby/lobby_screen.gd:95
+msgid "Leave room [Esc]"
+msgstr "ออกจากห้อง [Esc]"
+
+#: src/client/ui/ui_text.gd:CONFIRM.leave_match[0]
+msgid "Leave the Match?"
+msgstr "ออกจากแมตช์หรือไม่?"
+
+#: src/client/ui/ui_text.gd:CONFIRM.leave_room[0]
+msgid "Leave the room?"
+msgstr "ออกจากห้องหรือไม่?"
+
+#: src/client/match/camp/camp_view.gd:821
+msgid "Legs"
+msgstr "เกราะขา"
+
+#: src/client/match/camp/camp_view.gd:651
+msgid "Level"
+msgstr "ระดับ"
+
+#: src/client/lobby/character_setup.gd:232
+msgid "Level: %d/5"
+msgstr "ระดับ: %d/5"
+
+#: src/client/match/camp/camp_view.gd:668
+msgid "Lifesteal"
+msgstr "ดูดเลือด"
 
 #: content/story_mode.json:scenes.first_combat_won[1].text
 msgid "Look at those tracks. They point deeper in, toward the stream."
@@ -777,7 +1657,23 @@ msgstr "หลงทางในความมืด"
 msgid "Lunaeia"
 msgstr "ลูนาเอีย"
 
-#: content/forest.json:classes.mage.name
+#: src/client/match/battle/battle_view.gd:636
+msgid "Lv %d"
+msgstr "ระดับ %d"
+
+#: src/client/match/match_screen.gd:917
+msgid "Lv %d %s"
+msgstr "ระดับ %d %s"
+
+#: src/client/lobby/character_setup.gd:234
+msgid "MAX"
+msgstr "สูงสุด"
+
+#: src/client/title/title_screen.gd:469
+msgid "Made with Godot 4.7"
+msgstr "สร้างด้วย Godot 4.7"
+
+#: content/forest.json:classes.mage.name src/client/ui/ui_text.gd:client_literal
 msgid "Mage"
 msgstr "นักเวท"
 
@@ -801,6 +1697,10 @@ msgstr "ผลงานชั้นครู"
 msgid "Materials"
 msgstr "วัสดุ"
 
+#: src/client/match/camp/camp_view.gd:486
+msgid "Mats: %s"
+msgstr "วัตถุดิบ: %s"
+
 #: content/forest.json:classes.swordsman.role
 msgid "Melee DPS"
 msgstr "สายโจมตีประชิด"
@@ -817,9 +1717,17 @@ msgstr "รักษา"
 msgid "Mends wounded allies and hurls spirit fire when none need healing."
 msgstr "รักษาพันธมิตรที่บาดเจ็บ และขว้างไฟวิญญาณเมื่อไม่มีใครต้องรักษา"
 
-#: content/forest.json:journey.type_labels.merchant
+#: src/client/ui/ui_text.gd:LABELS.menu_tip
+msgid "Menu [Esc]"
+msgstr "เมนู [Esc]"
+
+#: content/forest.json:journey.type_labels.merchant src/client/ui/ui_text.gd:TYPE_LABELS.merchant
 msgid "Merchant"
 msgstr "พ่อค้า"
+
+#: src/client/match/camp/camp_view.gd:857
+msgid "Merchant stock: %d"
+msgstr "สินค้าพ่อค้า: %d"
 
 #: content/forest.json:enemies.minotaur.name
 msgid "Minotaur"
@@ -833,17 +1741,137 @@ msgstr "แสงจันทร์"
 msgid "More direct damage per DoT type; stronger outgoing DoTs, but more incoming DoT damage."
 msgstr "ความเสียหายตรงเพิ่มขึ้นตามชนิดความเสียหายต่อเนื่อง; ความเสียหายต่อเนื่องที่ทำได้แรงขึ้น แต่รับความเสียหายต่อเนื่องมากขึ้น"
 
+#: src/client/title/settings_panel.gd:46
+msgid "Motion"
+msgstr "การเคลื่อนไหว"
+
+#: src/client/title/title_screen.gd:115
+msgid "Multiplayer"
+msgstr "เล่นหลายคน"
+
+#: src/client/title/title_screen.gd:114
+msgid "Multiplayer · create or join a room"
+msgstr "เล่นหลายคน · สร้างหรือเข้าร่วมห้อง"
+
+#: src/client/title/settings_panel.gd:73
+msgid "Music volume"
+msgstr "ระดับเสียงดนตรี"
+
+#: src/client/match/camp/camp_view.gd:485
+msgid "NEED"
+msgstr "ขาด"
+
+#: src/client/match/camp/camp_view.gd:406 src/client/match/camp/merchant_panel.gd:71
+msgid "Need %d Gold"
+msgstr "ต้องใช้ทอง %d"
+
+#: src/client/title/title_screen.gd:109
+msgid "New Story"
+msgstr "เริ่มเนื้อเรื่องใหม่"
+
 #: content/story_mode.json:scenes.party_defeated[2].text
 msgid "Next time, we will be ready."
-msgstr "คราวหน้าเราจะพร้อม"
+msgstr "คราวหน้าเราจะพร้อมกว่านี้"
+
+#: src/client/match/info_panel.gd:50
+msgid "Next: %s (%s)"
+msgstr "ถัดไป: %s (%s)"
+
+#: src/client/ui/ui_text.gd:EMPTY.boons
+msgid "No Boons equipped. Pick one from the middle column."
+msgstr "ยังไม่ได้เลือกพร เลือกจากคอลัมน์ตรงกลาง."
+
+#: src/client/ui/ui_text.gd:ERRORS.nothing_to_reset
+msgid "No Skill Tree levels to reset for this Class."
+msgstr "ไม่มีระดับผังทักษะของอาชีพนี้ให้ล้าง."
+
+#: src/client/ui/ui_text.gd:ERRORS.skill_unavailable
+msgid "No Skill yet. Find a Class at a Class Encounter first."
+msgstr "ยังไม่มีทักษะ ไปเลือกอาชีพจากเหตุการณ์อาชีพก่อน."
+
+#: src/client/ui/ui_text.gd:EMPTY.clues
+msgid "No clues yet. Story Events (and some fights) reveal where Father went."
+msgstr "ยังไม่มีเบาะแส เหตุการณ์เนื้อเรื่องและการต่อสู้บางครั้งจะเผยว่าพ่อไปที่ใด."
+
+#: src/client/match/camp/camp_view.gd:479
+msgid "No materials needed"
+msgstr "ไม่ต้องใช้วัตถุดิบ"
+
+#: src/client/ui/ui_text.gd:EMPTY.recipes
+msgid "No recipes to craft right now. Gather materials in fights first."
+msgstr "ตอนนี้ยังไม่มีสูตรคราฟต์ รวบรวมวัตถุดิบจากการต่อสู้ก่อน."
+
+#: src/client/ui/ui_text.gd:EMPTY.records
+msgid "No records yet. Finish a Match to start your history."
+msgstr "ยังไม่มีประวัติ จบแมตช์เพื่อเริ่มบันทึกผลงาน."
+
+#: src/client/ui/ui_text.gd:ERRORS.room_not_found
+msgid "No room uses that code. Check it with your friend."
+msgstr "ไม่มีห้องที่ใช้รหัสนี้ ตรวจสอบรหัสกับเพื่อน."
+
+#: src/client/match/vote_panel.gd:38
+msgid "No routes available."
+msgstr "ไม่มีเส้นทางให้เลือก"
 
 #: content/forest.json:classes.classless.description
 msgid "No special training yet. Can Attack, Defend and use Items."
 msgstr "ยังไม่มีการฝึกพิเศษ โจมตี ป้องกัน และใช้ไอเทมได้"
 
+#: src/client/ui/ui_text.gd:ERRORS.no_points
+msgid "No stat points left to spend."
+msgstr "ไม่มีแต้มสถานะเหลือให้ใช้."
+
+#: src/client/ui/ui_text.gd:WHY.invest_none
+msgid "No stat points to spend. Level up to earn more."
+msgstr "ไม่มีแต้มสถานะให้ใช้ เพิ่มระดับเพื่อรับแต้ม."
+
 #: content/forest.json:journey.sites.treasure[0].hint
 msgid "Nobody has lived here for years. Maybe something was left behind."
 msgstr "ไม่มีใครอาศัยที่นี่มาหลายปีแล้ว บางทีอาจมีของถูกทิ้งไว้"
+
+#: src/client/match/info_panel.gd:60
+msgid "Nobody voted in time, so the path was chosen at random."
+msgstr "ไม่มีใครโหวตทันเวลา จึงสุ่มเลือกเส้นทาง"
+
+#: src/client/title/settings_panel.gd:28
+msgid "Normal"
+msgstr "ปกติ"
+
+#: src/client/lobby/character_setup.gd:398 src/client/lobby/character_setup.gd:439 src/client/lobby/character_setup.gd:469
+msgid "Not enough Boon slots: %d/5 used."
+msgstr "ช่องพรไม่พอ: ใช้แล้ว %d/5."
+
+#: src/client/ui/ui_text.gd:ERRORS.not_enough_energy
+msgid "Not enough Energy. Attack, Defend or wait a turn to regain it."
+msgstr "พลังงานไม่พอ โจมตี ป้องกัน หรือรอหนึ่งเทิร์นเพื่อฟื้นฟู."
+
+#: src/client/ui/tr.gd:formatted_fallback src/client/ui/ui_text.gd:WHY.need_gems
+msgid "Not enough Gems: this costs %d, you have %d."
+msgstr "อัญมณีไม่พอ: ต้องใช้ %d เม็ด คุณมี %d เม็ด."
+
+#: src/client/ui/ui_text.gd:WHY.need_gold
+msgid "Not enough Gold: this costs %d."
+msgstr "ทองไม่พอ: ต้องใช้ %d หน่วย."
+
+#: src/client/ui/ui_text.gd:EMPTY.stash
+msgid "Nothing in the stash yet. Items you find land here."
+msgstr "คลังยังว่าง ไอเทมที่พบจะมาอยู่ที่นี่."
+
+#: src/client/ui/ui_text.gd:ERRORS.nothing_equipped
+msgid "Nothing is worn there."
+msgstr "ไม่มีอุปกรณ์สวมอยู่ในช่องนั้น."
+
+#: src/client/ui/ui_text.gd:EMPTY.search
+msgid "Nothing matches \"%s\". Clear the search to see everything."
+msgstr "ไม่พบรายการที่ตรงกับ \"%s\" ล้างคำค้นเพื่อดูทั้งหมด."
+
+#: src/client/match/camp/camp_view.gd:485
+msgid "OK"
+msgstr "ครบ"
+
+#: src/client/match/class_panel.gd:67 src/client/ui/ui_text.gd:client_literal
+msgid "Offer closes in %ds"
+msgstr "ปิดข้อเสนอใน %d วินาที"
 
 #: content/forest.json:journey.sites.story[0].name
 msgid "Old Campfire"
@@ -869,9 +1897,37 @@ msgstr "หนึ่งครั้งต่อการต่อสู้ ร�
 msgid "One fight down. The Forest is testing us already."
 msgstr "ชนะการต่อสู้ไปหนึ่งครั้ง ป่ากำลังทดสอบเราแล้ว"
 
+#: src/client/ui/ui_text.gd:WHY.transfer_unavailable
+msgid "Only a character carrying Gold can transfer it."
+msgstr "โอนทองได้เฉพาะตัวละครที่มีทอง."
+
+#: src/client/ui/ui_text.gd:ERRORS.not_host
+msgid "Only the Host can start the Match."
+msgstr "เฉพาะเจ้าของห้องเท่านั้นที่เริ่มแมตช์ได้."
+
+#: src/client/match/vote_panel.gd:108
+msgid "Other path: %s"
+msgstr "เส้นทางอื่น: %s"
+
 #: content/forest.json:journey.sites.combat[3].name
 msgid "Overgrown Road"
 msgstr "ถนนรกชัฏ"
+
+#: src/client/match/battle/combat_panel.gd:91
+msgid "PHASE %d/%d: %s"
+msgstr "ช่วงที่ %d/%d: %s"
+
+#: src/client/lobby/lobby_screen.gd:121
+msgid "PLAYER"
+msgstr "ผู้เล่น"
+
+#: src/client/lobby/lobby_screen.gd:72
+msgid "Party - always 5 characters. Empty slots are played by AI."
+msgstr "กลุ่มมีตัวละคร 5 คนเสมอ ช่องว่างจะถูกควบคุมโดยเอไอ"
+
+#: src/client/match/class_panel.gd:24
+msgid "Pass to be offered: %s (%s) with %s."
+msgstr "เมื่อผ่าน จะได้รับข้อเสนออาชีพ %s (%s) พร้อมทักษะ %s"
 
 #: content/story_mode.json:chapters[3].title
 msgid "Past the Last Light"
@@ -880,6 +1936,34 @@ msgstr "เลยแสงสุดท้าย"
 #: content/forest.json:items.pelt_boots.name
 msgid "Pelt Boots"
 msgstr "รองเท้าหนังสัตว์"
+
+#: src/client/match/match_screen.gd:588
+msgid "Phase %d - %s: %s"
+msgstr "ช่วงที่ %d - %s: %s"
+
+#: src/client/match/battle/battle_view.gd:500
+msgid "Phase %d/%d"
+msgstr "ระยะที่ %d/%d"
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_target
+msgid "Pick one of the highlighted targets."
+msgstr "เลือกหนึ่งในเป้าหมายที่ไฮไลต์."
+
+#: src/client/title/title_screen.gd:73
+msgid "Play"
+msgstr "เล่น"
+
+#: src/client/lobby/character_setup.gd:452
+msgid "Player: %s"
+msgstr "ผู้เล่น: %s"
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_name
+msgid "Please enter a display name."
+msgstr "กรุณาใส่ชื่อที่ใช้แสดง."
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_stat
+msgid "Points cannot go into that stat."
+msgstr "ใช้แต้มกับสถานะนี้ไม่ได้."
 
 #: content/forest.json:statuses.poison.name
 msgid "Poison"
@@ -901,9 +1985,37 @@ msgstr "ฟันทรงพลัง"
 msgid "Prep Time"
 msgstr "เตรียมพิษ"
 
+#: src/client/lobby/character_setup.gd:248
+msgid "Prestige: %d"
+msgstr "เกียรติยศ: %d"
+
+#: src/client/lobby/character_setup.gd:248
+msgid "Prestige: %d (MAX)"
+msgstr "เกียรติยศ: %d (สูงสุด)"
+
+#: src/client/match/camp/camp_view.gd:855
+msgid "Price: %d Gold"
+msgstr "ราคา: ทอง %d"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Profile"
+msgstr "โปรไฟล์"
+
 #: content/forest.json:skills.protect.name
 msgid "Protect"
 msgstr "คุ้มครอง"
+
+#: src/client/lobby/character_setup.gd:353
+msgid "Purchase  %s"
+msgstr "ซื้อ  %s"
+
+#: src/client/ui/ui_text.gd:ERRORS.race_not_owned
+msgid "Purchase this Race before selecting it."
+msgstr "ซื้อเผ่าพันธุ์นี้ก่อนเลือกใช้งาน."
+
+#: src/client/match/camp/camp_view.gd:853
+msgid "Quantity: %d"
+msgstr "จำนวน: %d"
 
 #: content/forest.json:journey.sites.rest[0].name
 msgid "Quiet Glade"
@@ -913,9 +2025,33 @@ msgstr "ลานป่าเงียบสงบ"
 msgid "Quiet and stubborn. Carries Father's old map."
 msgstr "เงียบขรึมและดื้อรั้น ถือแผนที่เก่าของพ่อ"
 
+#: src/client/title/title_screen.gd:86
+msgid "Quit"
+msgstr "ออกจากเกม"
+
 #: content/forest.json:crafting.categories[4] content/forest.json:items.bramble_quiver.category
 msgid "Quivers"
 msgstr "กระบอกธนู"
+
+#: src/client/match/match_screen.gd:923 src/client/ui/ui_text.gd:client_literal
+msgid "READY"
+msgstr "พร้อม"
+
+#: src/client/ui/ui_text.gd:TYPE_TAGS.rest
+msgid "REST"
+msgstr "พัก"
+
+#: src/client/lobby/lobby_screen.gd:55
+msgid "ROOM CODE"
+msgstr "รหัสห้อง"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Races"
+msgstr "เผ่าพันธุ์"
+
+#: src/client/ui/ui_text.gd:WHY.prestige_locked
+msgid "Raise every Skill Tree node to 5/5 first."
+msgstr "เพิ่มทุกช่องในผังทักษะให้ถึง 5/5 ก่อน."
 
 #: content/forest.json:skills.shield_wall.description
 msgid "Raise your shield for everyone: the whole Party takes 40% less damage until your next turn. Costs 2 Energy. Cooldown: 3 turns."
@@ -929,15 +2065,71 @@ msgstr "สายโจมตีไกล"
 msgid "Ranger's Hut"
 msgstr "กระท่อมพราน"
 
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Reached"
+msgstr "ไปถึง"
+
 #: content/forest.json:party.members[2].bio
 msgid "Reads every page of Father's journal twice."
 msgstr "อ่านทุกหน้าของสมุดบันทึกพ่อซ้ำสองครั้ง"
+
+#: src/client/match/battle/battle_view.gd:897
+msgid "Ready"
+msgstr "พร้อม"
+
+#: src/client/match/vote_panel.gd:228 src/client/ui/ui_text.gd:client_literal
+msgid "Ready %d of %d."
+msgstr "พร้อมแล้ว %d จาก %d"
+
+#: src/client/match/camp/camp_view.gd:704
+msgid "Ready (%d/%d) [R]"
+msgstr "พร้อมแล้ว %d/%d [R]"
+
+#: src/client/match/camp/camp_view.gd:704 src/client/ui/ui_text.gd:client_literal
+msgid "Ready [R]"
+msgstr "พร้อม [R]"
+
+#: src/client/match/vote_panel.gd:130
+msgid "Recommended"
+msgstr "แนะนำ"
+
+#: src/client/lobby/character_setup.gd:226
+msgid "Recommended Stats: %s"
+msgstr "ค่าสถานะที่แนะนำ: %s"
+
+#: src/client/match/vote_panel.gd:179
+msgid "Recommended route"
+msgstr "เส้นทางแนะนำ"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Records"
+msgstr "สถิติ"
+
+#: src/client/ui/ui_text.gd:TYPE_HELP.rest
+msgid "Recover HP, craft gear and spend stat points."
+msgstr "ฟื้นฟูพลังชีวิต คราฟต์อุปกรณ์ และใช้แต้มสถานะ."
+
+#: src/client/title/settings_panel.gd:48
+msgid "Reduce motion (no sliding, fading or floating numbers)"
+msgstr "ลดการเคลื่อนไหว (ไม่มีการเลื่อน จาง หรือแสดงตัวเลขลอย)"
 
 #: content/forest.json:enemies.grey_wolf.special.name
 msgid "Rend"
 msgstr "ฉีกกระชาก"
 
-#: content/forest.json:journey.type_labels.rest
+#: src/client/ui/ui_text.gd:CONFIRM.reset_skills[2] src/client/ui/ui_text.gd:client_literal
+msgid "Reset Skills"
+msgstr "ล้างทักษะ"
+
+#: src/client/lobby/character_setup.gd:301
+msgid "Reset Skills\n%s"
+msgstr "ล้างทักษะ\n%s"
+
+#: src/client/ui/ui_text.gd:CONFIRM.reset_skills[0]
+msgid "Reset Skills?"
+msgstr "ล้างทักษะหรือไม่?"
+
+#: content/forest.json:journey.type_labels.rest src/client/ui/ui_text.gd:TYPE_LABELS.rest
 msgid "Rest"
 msgstr "พัก"
 
@@ -957,6 +2149,10 @@ msgstr "ฟื้นพลังชีวิต 30 ให้พันธมิ�
 msgid "Restores 70 HP to one ally."
 msgstr "ฟื้นพลังชีวิต 70 ให้พันธมิตรหนึ่งคน"
 
+#: src/client/match/camp/camp_view.gd:883
+msgid "Revive HP: %s"
+msgstr "ฟื้นพลังชีวิต: %s"
+
 #: content/forest.json:items.spirit_bloom.description
 msgid "Revives a fallen ally with 40% HP."
 msgstr "ชุบชีวิตพันธมิตรที่ล้มด้วยพลังชีวิต 40%"
@@ -964,6 +2160,18 @@ msgstr "ชุบชีวิตพันธมิตรที่ล้มด้
 #: content/forest.json:crafting.categories[1] content/forest.json:items.hide_jerkin.category content/forest.json:items.wisp_robe.category
 msgid "Robes"
 msgstr "เสื้อคลุม"
+
+#: src/client/title/title_screen.gd:433
+msgid "Room code"
+msgstr "รหัสห้อง"
+
+#: src/client/lobby/lobby_screen.gd:62 src/client/ui/ui_text.gd:client_literal
+msgid "Room code copied."
+msgstr "คัดลอกรหัสห้องแล้ว"
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_code
+msgid "Room codes are 6 letters or numbers, like K7PQ2M."
+msgstr "รหัสห้องมี 6 ตัวอักษรหรือตัวเลข เช่น K7PQ2M."
 
 #: content/forest.json:boss.phases[0].name
 msgid "Rooted Sentinel"
@@ -977,6 +2185,18 @@ msgstr "รากไม้เลื้อยอยู่ใต้ {target} ม�
 msgid "Ruined Shrine"
 msgstr "ศาลเจ้าพัง"
 
+#: src/client/ui/ui_text.gd:TYPE_TAGS.merchant
+msgid "SHOP"
+msgstr "ร้านค้า"
+
+#: src/client/ui/ui_text.gd:TYPE_TAGS.story
+msgid "STORY"
+msgstr "เรื่องราว"
+
+#: src/client/title/title_screen.gd:161
+msgid "STORY PARTY"
+msgstr "กลุ่มในเนื้อเรื่อง"
+
 #: content/forest.json:story.clues.journal_page.title
 msgid "Scorched Journal Page"
 msgstr "หน้าสมุดบันทึกไหม้เกรียม"
@@ -989,9 +2209,29 @@ msgstr "ใจสู้"
 msgid "Search the ashes"
 msgstr "ค้นหาในกองเถ้า"
 
+#: src/client/lobby/character_setup.gd:401 src/client/match/camp/camp_view.gd:357 src/client/ui/ui_text.gd:client_literal
+msgid "Search..."
+msgstr "ค้นหา..."
+
 #: content/forest.json:party.members[1].role
 msgid "Second sibling"
 msgstr "ลูกคนรอง"
+
+#: src/client/lobby/character_setup.gd:353
+msgid "Select"
+msgstr "เลือก"
+
+#: src/client/title/settings_panel.gd:24
+msgid "Settings"
+msgstr "ตั้งค่า"
+
+#: src/client/lobby/lobby_screen.gd:100 src/client/match/match_screen.gd:850 src/client/title/title_screen.gd:77
+msgid "Settings [F2]"
+msgstr "ตั้งค่า [F2]"
+
+#: src/client/lobby/lobby_screen.gd:66
+msgid "Share the code with friends. Anyone on PC or in a browser can join until the Host starts."
+msgstr "แชร์รหัสให้เพื่อน ผู้เล่นบนคอมพิวเตอร์หรือเบราว์เซอร์เข้าร่วมได้จนกว่าเจ้าห้องจะเริ่ม"
 
 #: content/forest.json:classes.archer.challenge.pass
 msgid "She lowers her bow with a grin. \"Fast hands. Take this bow, it has waited for someone like you.\""
@@ -1009,6 +2249,18 @@ msgstr "กำแพงโล่"
 msgid "Shoots from the back row; melee cannot reach it while the front row stands."
 msgstr "ยิงจากแถวหลัง; การโจมตีระยะประชิดเอื้อมไม่ถึงตราบใดที่แถวหน้ายังยืนอยู่"
 
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Shop"
+msgstr "ร้านค้า"
+
+#: src/client/match/camp/merchant_panel.gd:46
+msgid "Shop closes in %ds"
+msgstr "ร้านค้าจะปิดใน %d วินาที"
+
+#: src/client/match/camp/camp_view.gd:993
+msgid "Show camp [Esc]"
+msgstr "แสดงค่าย [Esc]"
+
 #: content/forest.json:enemies.shrine_spirit.name
 msgid "Shrine Spirit"
 msgstr "วิญญาณศาลเจ้า"
@@ -1021,13 +2273,53 @@ msgstr "เส้นใยไหมสั่นไหวข้ามทางผ
 msgid "Skeleton"
 msgstr "โครงกระดูก"
 
+#: src/client/match/class_panel.gd:101
+msgid "Skill - %s: %s"
+msgstr "ทักษะ - %s: %s"
+
+#: src/client/lobby/character_setup.gd:227
+msgid "Skill Tree"
+msgstr "ผังทักษะ"
+
+#: src/client/match/battle/combat_panel.gd:152
+msgid "Skill [S]"
+msgstr "ทักษะ [S]"
+
+#: src/client/match/battle/combat_panel.gd:155 src/client/ui/ui_text.gd:client_literal
+msgid "Skill [S] - needs a Class"
+msgstr "ทักษะ [S] - ต้องมีอาชีพก่อน"
+
+#: src/client/ui/ui_text.gd:LABELS.story_skill
+msgid "Skill: %s"
+msgstr "ทักษะ: %s"
+
+#: src/client/ui/ui_text.gd:LABELS.story_skill_energy
+msgid "Skill: %s · %d Energy"
+msgstr "ทักษะ: %s · พลังงาน %d"
+
 #: content/forest.json:enemies.forest_wisp.name
 msgid "Slime"
 msgstr "สไลม์"
 
+#: src/client/match/camp/camp_view.gd:860
+msgid "Slot: %s"
+msgstr "ช่อง: %s"
+
+#: src/client/lobby/character_setup.gd:380 src/client/lobby/character_setup.gd:428
+msgid "Slots: %d"
+msgstr "ช่อง: %d"
+
+#: src/client/lobby/character_setup.gd:410
+msgid "Slots: %d/5"
+msgstr "ใช้ช่องแล้ว %d/5"
+
 #: content/forest.json:enemies.thornback_boar.description
 msgid "Slow and armoured. Charges whoever looks the strongest. Fears fire."
 msgstr "เชื่องช้าและหุ้มเกราะ พุ่งใส่ผู้ที่ดูแข็งแกร่งที่สุด หวาดกลัวไฟ"
+
+#: src/client/title/settings_panel.gd:28
+msgid "Small"
+msgstr "เล็ก"
 
 #: content/forest.json:meta.passives.small_target.name
 msgid "Small Target"
@@ -1037,6 +2329,10 @@ msgstr "เป้าหมายเล็ก"
 msgid "Soft moss and clean water. A place to recover."
 msgstr "มอสนุ่มกับน้ำสะอาด ที่สำหรับฟื้นกำลัง"
 
+#: src/client/ui/ui_text.gd:ERRORS.out_of_stock src/client/ui/ui_text.gd:WHY.sold_out
+msgid "Sold out."
+msgstr "ขายหมดแล้ว."
+
 #: content/forest.json:journey.sites.story[2].hint
 msgid "Someone who remembers travellers lives here."
 msgstr "คนที่จำเหล่านักเดินทางได้อาศัยอยู่ที่นี่"
@@ -1045,13 +2341,29 @@ msgstr "คนที่จำเหล่านักเดินทางได
 msgid "Something is tucked deep inside a lightning-split tree."
 msgstr "มีบางสิ่งซ่อนอยู่ลึกในต้นไม้ที่ถูกฟ้าผ่าแยก"
 
+#: src/client/ui/tr.gd:formatted_fallback src/client/ui/ui_text.gd:ERRORS.fallback
+msgid "Something went wrong (%s)."
+msgstr "เกิดข้อผิดพลาด (%s)."
+
 #: content/forest.json:enemies.kobold.special.name
 msgid "Spear Rush"
 msgstr "พุ่งหอก"
 
+#: src/client/ui/ui_text.gd:CONFIRM.buy_item[1]
+msgid "Spend %d Gold on this Item?"
+msgstr "ใช้ %d Gold ซื้อไอเท็มนี้หรือไม่?"
+
+#: src/client/ui/ui_text.gd:WHY.invest_merchant
+msgid "Spend stat points at a Rest camp."
+msgstr "ใช้แต้มสถานะได้ที่ค่ายพัก."
+
 #: content/story_mode.json:scenes.merchant_first[1].text
 msgid "Spend the Party's Gold carefully. We may not see another stall."
 msgstr "ใช้ทองของกลุ่มอย่างระมัดระวัง เราอาจไม่เจอแผงค้าอีก"
+
+#: src/client/ui/ui_text.gd:TYPE_HELP.merchant
+msgid "Spend your own Gold on Items; each character buys with their own."
+msgstr "ใช้ทองส่วนตัวซื้อไอเทม ตัวละครแต่ละตัวจ่ายด้วยทองของตนเอง."
 
 #: content/forest.json:journey.sites.combat[6].name
 msgid "Spider Hollow"
@@ -1069,25 +2381,173 @@ msgstr "ไม้หนามยืดหยุ่น วัตถุดิบ�
 msgid "Stab"
 msgstr "แทง"
 
-#: content/forest.json:journey.type_labels.story
+#: src/client/match/summary_panel.gd:15
+msgid "Start a new Match"
+msgstr "เริ่มแมตช์ใหม่"
+
+#: src/client/lobby/lobby_screen.gd:84
+msgid "Start the Match"
+msgstr "เริ่มแมตช์"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Stash"
+msgstr "คลังส่วนกลาง"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Stat Points"
+msgstr "แต้มสถานะ"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Status: Unlocked"
+msgstr "สถานะ: ปลดล็อกแล้ว"
+
+#: src/client/match/story_panel.gd:48
+msgid "Story Clue found - %s: %s"
+msgstr "พบเบาะแสเรื่องราว - %s: %s"
+
+#: src/client/match/battle/combat_panel.gd:251
+msgid "Story Clue found: %s - %s"
+msgstr "พบเบาะแสเรื่องราว: %s - %s"
+
+#: src/client/match/match_screen.gd:582
+msgid "Story Clue found: %s."
+msgstr "พบบันทึกเบาะแสเรื่องราว: %s."
+
+#: src/client/match/match_screen.gd:754
+msgid "Story Clue: %s"
+msgstr "เบาะแสเรื่องราว: %s"
+
+#: src/client/match/match_screen.gd:395
+msgid "Story Clues"
+msgstr "เบาะแสเรื่องราว"
+
+#: src/client/match/summary_panel.gd:34 src/client/ui/ui_text.gd:client_literal
+msgid "Story Clues found"
+msgstr "เบาะแสเรื่องราวที่พบ"
+
+#: content/forest.json:journey.type_labels.story src/client/ui/ui_text.gd:TYPE_LABELS.story
 msgid "Story Event"
 msgstr "เหตุการณ์เนื้อเรื่อง"
 
-#: content/forest.json:classes.swordsman.name
+#: src/client/ui/ui_text.gd:ERRORS.story_offline_only
+msgid "Story mode is an offline journey. Play alone or over Local Network."
+msgstr "เนื้อเรื่องเป็นการเดินทางออฟไลน์ เล่นคนเดียวหรือผ่านเครือข่ายท้องถิ่น."
+
+#: src/client/title/title_screen.gd:99
+msgid "Story uses an isolated profile: Human only, with no online Races, Boons, or class-tree bonuses."
+msgstr "เนื้อเรื่องใช้โปรไฟล์แยก: เลือกได้เฉพาะเผ่ามนุษย์ ไม่มีเผ่าพันธุ์ พร หรือโบนัสผังอาชีพออนไลน์"
+
+#: src/client/title/title_screen.gd:98
+msgid "Story · offline, control all five"
+msgstr "เนื้อเรื่อง · ออฟไลน์ ควบคุมทั้งห้าตัวละคร"
+
+#: content/forest.json:classes.swordsman.name src/client/ui/ui_text.gd:client_literal
 msgid "Swordsman"
 msgstr "นักดาบ"
+
+#: src/client/match/battle/combat_panel.gd:129
+msgid "TARGET [%d]"
+msgstr "เป้าหมาย [%d]"
 
 #: content/forest.json:story.events.old_campfire.choices[1].hint
 msgid "Take a moment to recover here."
 msgstr "ใช้เวลาฟื้นกำลังสักครู่"
 
+#: src/client/match/class_panel.gd:36
+msgid "Take the %s Class?"
+msgstr "รับอาชีพ%sหรือไม่?"
+
 #: content/forest.json:classes.guardian.role
 msgid "Tank / Defense"
 msgstr "แทงก์ / ป้องกัน"
 
+#: src/client/match/battle/combat_panel.gd:215
+msgid "Target for %s?"
+msgstr "เลือกเป้าหมายให้%s?"
+
+#: src/client/match/camp/camp_view.gd:879
+msgid "Target: %s"
+msgstr "เป้าหมาย: %s"
+
+#: src/client/title/settings_panel.gd:26
+msgid "Text size"
+msgstr "ขนาดข้อความ"
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_boon
+msgid "That Boon is unavailable."
+msgstr "พรนี้ใช้ไม่ได้."
+
+#: src/client/ui/ui_text.gd:ERRORS.not_consumable
+msgid "That Item cannot be used."
+msgstr "ใช้ไอเทมนี้ไม่ได้."
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_jump
+msgid "That Playtest jump does not exist."
+msgstr "ไม่มีจุดกระโดดทดสอบนี้."
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_race
+msgid "That Race is unavailable."
+msgstr "เผ่าพันธุ์นี้ใช้ไม่ได้."
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_loadout
+msgid "That Race, Class or Boon choice is not allowed."
+msgstr "เลือกเผ่าพันธุ์ อาชีพ หรือพรแบบนี้ไม่ได้."
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_node
+msgid "That Skill Tree node is unavailable."
+msgstr "ช่องผังทักษะนี้ใช้ไม่ได้."
+
+#: src/client/ui/ui_text.gd:ERRORS.skill_on_cooldown
+msgid "That Skill is still cooling down."
+msgstr "ทักษะนี้ยังอยู่ในคูลดาวน์."
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_action
+msgid "That action is not available."
+msgstr "ใช้คำสั่งนี้ไม่ได้."
+
+#: src/client/ui/ui_text.gd:ERRORS.wrong_phase
+msgid "That can't be done right now."
+msgstr "ตอนนี้ทำเช่นนั้นไม่ได้."
+
+#: src/client/ui/ui_text.gd:ERRORS.not_your_slot
+msgid "That character is not yours."
+msgstr "ตัวละครนั้นไม่ใช่ของคุณ."
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_slot
+msgid "That character slot does not exist."
+msgstr "ไม่มีช่องตัวละครนี้."
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_option
+msgid "That choice does not exist."
+msgstr "ไม่มีตัวเลือกนี้."
+
+#: src/client/ui/ui_text.gd:ERRORS.wrong_gear_slot
+msgid "That gear does not go in that slot."
+msgstr "อุปกรณ์ชิ้นนี้ใส่ในช่องนั้นไม่ได้."
+
+#: src/client/ui/ui_text.gd:ERRORS.not_gear
+msgid "That is not gear."
+msgstr "สิ่งนี้ไม่ใช่อุปกรณ์."
+
+#: src/client/ui/ui_text.gd:ERRORS.item_unusable
+msgid "That is not something you can use in a fight."
+msgstr "ใช้สิ่งนี้ในการต่อสู้ไม่ได้."
+
 #: content/story_mode.json:scenes.class_gained[0].text
 msgid "That power answered you. It is yours now."
 msgstr "พลังนั้นตอบรับเธอแล้ว ตอนนี้มันเป็นของเธอ"
+
+#: src/client/ui/ui_text.gd:ERRORS.room_closed
+msgid "That room has closed."
+msgstr "ห้องนั้นปิดแล้ว."
+
+#: src/client/ui/ui_text.gd:ERRORS.room_full
+msgid "That room is full: all 5 slots have players."
+msgstr "ห้องนั้นเต็มแล้ว มีผู้เล่นครบทั้ง 5 ช่อง."
+
+#: src/client/ui/ui_text.gd:ERRORS.match_in_progress
+msgid "That room is in the middle of a Match. Try again when it ends."
+msgstr "ห้องนั้นกำลังเล่นแมตช์อยู่ ลองอีกครั้งเมื่อจบแล้ว."
 
 #: content/forest.json:story.clues.carved_map.title content/forest.json:story.events.carved_stone.title
 msgid "The Carved Stone"
@@ -1129,17 +2589,41 @@ msgstr "ประตูของผู้พิทักษ์"
 msgid "The Hollow Tree"
 msgstr "ต้นไม้กลวง"
 
+#: src/client/ui/ui_text.gd:EMPTY.shop
+msgid "The Merchant has nothing left to sell."
+msgstr "พ่อค้าไม่มีของเหลือให้ขาย."
+
 #: content/forest.json:story.events.old_campfire.title
 msgid "The Old Campfire"
 msgstr "กองไฟเก่า"
 
 #: content/story_mode.json:scenes.party_defeated[0].text
 msgid "The Party falls, their journey through the Forest unfinished."
-msgstr "กลุ่มล้มลง การเดินทางผ่านป่ายังไม่สิ้นสุด"
+msgstr "กลุ่มพ่ายแพ้ การเดินทางผ่านป่ายังไม่สิ้นสุด"
+
+#: src/client/match/battle/battle_view.gd:1089 src/client/match/battle/combat_panel.gd:255 src/client/match/match_screen.gd:567
+msgid "The Party has fallen..."
+msgstr "กลุ่มพ่ายแพ้แล้ว..."
+
+#: src/client/ui/ui_text.gd:ERRORS.item_unavailable
+msgid "The Party has none of that Item left."
+msgstr "กลุ่มไม่มีไอเทมชิ้นนั้นเหลือ."
+
+#: src/client/match/match_screen.gd:552
+msgid "The Party heads for %s (%s).%s"
+msgstr "กลุ่มมุ่งหน้าไปยัง %s (%s).%s"
 
 #: content/forest.json:encounters.rest.text
 msgid "The Party makes camp. Wounds are bandaged; there is time to craft, change gear and train before moving on."
 msgstr "กลุ่มตั้งค่าย บาดแผลได้รับการพันไว้ มีเวลาคราฟต์ เปลี่ยนอุปกรณ์ และฝึกฝนก่อนเดินทางต่อ"
+
+#: src/client/match/match_screen.gd:578
+msgid "The Party rests and recovers."
+msgstr "กลุ่มพักและฟื้นกำลัง"
+
+#: src/client/match/info_panel.gd:45
+msgid "The Party sets off..."
+msgstr "กลุ่มออกเดินทาง..."
 
 #: content/forest.json:classes.guardian.description
 msgid "The Party's shield. The most HP and Defense of any Class; protects allies and blunts incoming damage."
@@ -1169,6 +2653,10 @@ msgstr "จดหมายที่ไม่ได้ส่ง"
 msgid "The cave beneath the Forest will not yield its secrets freely."
 msgstr "ถ้ำใต้ป่าจะไม่ยอมเปิดเผยความลับโดยง่าย"
 
+#: src/client/ui/ui_text.gd:ERRORS.connection_lost
+msgid "The connection to the server was lost."
+msgstr "ขาดการเชื่อมต่อกับเซิร์ฟเวอร์."
+
 #: content/story_mode.json:scenes.story_clue[2].text
 msgid "The cup… I remember him saying the Chalice asks a price."
 msgstr "ถ้วยนั่น… ฉันจำได้ว่าเขาพูดว่าจอกศักดิ์สิทธิ์เรียกร้องราคา"
@@ -1177,9 +2665,17 @@ msgstr "ถ้วยนั่น… ฉันจำได้ว่าเขา�
 msgid "The eldest. Promised Mother she would bring everyone home."
 msgstr "ลูกคนโต ให้สัญญากับแม่ว่าจะพาทุกคนกลับบ้าน"
 
+#: src/client/match/match_screen.gd:563
+msgid "The enemy falls!"
+msgstr "ศัตรูล้มลง!"
+
 #: content/forest.json:classes.archer.description
 msgid "The fastest of the Party. Shoots any enemy, even in the back row, and often lands critical hits."
 msgstr "สมาชิกที่เร็วที่สุดของกลุ่ม ยิงศัตรูตัวใดก็ได้แม้อยู่แถวหลัง และมักติดคริติคอล"
+
+#: src/client/match/battle/battle_view.gd:1104
+msgid "The fight is over."
+msgstr "การต่อสู้จบลงแล้ว"
 
 #: content/forest.json:classes.mage.challenge.fail
 msgid "The fire gutters out. \"Your mind wanders. Return when it is still.\""
@@ -1188,6 +2684,26 @@ msgstr "ไฟมอดดับ \"จิตใจเจ้าวอกแวก
 #: content/forest.json:classes.mage.challenge.pass
 msgid "The flames bow low. \"The old words are yours now. Use them gently.\""
 msgstr "เปลวไฟก้มต่ำ \"ถ้อยคำโบราณเป็นของเจ้าแล้ว จงใช้มันอย่างอ่อนโยน\""
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "The journey continues in %ds"
+msgstr "การเดินทางดำเนินต่อใน %d วินาที"
+
+#: src/client/match/info_panel.gd:39 src/client/ui/ui_text.gd:client_literal
+msgid "The journey continues in %ds."
+msgstr "การเดินทางดำเนินต่อใน %d วินาที"
+
+#: src/client/match/info_panel.gd:45
+msgid "The journey continues..."
+msgstr "การเดินทางดำเนินต่อ..."
+
+#: src/client/match/match_screen.gd:543
+msgid "The journey into the Forest begins."
+msgstr "การเดินทางเข้าสู่ป่าเริ่มต้นแล้ว"
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_item
+msgid "The merchant does not sell that."
+msgstr "พ่อค้าไม่ได้ขายสิ่งนั้น."
 
 #: content/forest.json:classes.swordsman.challenge.pass
 msgid "The old man laughs and bows. \"You have the spirit of the blade.\""
@@ -1209,6 +2725,10 @@ msgstr "โจรหายเข้าไปในเฟิร์น \"ช้า
 msgid "The roots part, revealing a cave blackened by old fire."
 msgstr "รากไม้แยกออก เผยให้เห็นถ้ำที่ดำไหม้ด้วยไฟเก่า"
 
+#: src/client/ui/ui_text.gd:ERRORS.unsupported_encounter
+msgid "The route led somewhere the game does not know. The Match was stopped."
+msgstr "เส้นทางนำไปยังที่ที่เกมไม่รู้จัก จึงหยุดแมตช์."
+
 #: content/forest.json:classes.guardian.challenge.fail
 msgid "The sentinel does not move. \"You are not yet a wall. Return when you are.\""
 msgstr "อัศวินหินไม่ขยับ \"เจ้ายังไม่ใช่กำแพง กลับมาเมื่อเจ้าเป็นได้แล้ว\""
@@ -1216,6 +2736,34 @@ msgstr "อัศวินหินไม่ขยับ \"เจ้ายัง
 #: content/forest.json:classes.guardian.challenge.pass
 msgid "The sentinel kneels and offers its shield. \"Stand before those you love. That is the Guardian's oath.\""
 msgstr "อัศวินหินคุกเข่าและยื่นโล่ให้ \"จงยืนหยัดปกป้องผู้ที่เจ้ารัก นั่นคือคำสาบานของผู้พิทักษ์\""
+
+#: src/client/ui/ui_text.gd:ERRORS.connect_timeout src/client/ui/ui_text.gd:ERRORS.handshake_timeout
+msgid "The server did not answer in time. Check the address and try again."
+msgstr "เซิร์ฟเวอร์ไม่ตอบกลับทันเวลา ตรวจสอบที่อยู่แล้วลองอีกครั้ง."
+
+#: src/client/ui/ui_text.gd:ERRORS.bad_message src/client/ui/ui_text.gd:ERRORS.unknown_command
+msgid "The server did not understand that."
+msgstr "เซิร์ฟเวอร์ไม่เข้าใจคำสั่งนั้น."
+
+#: src/client/ui/ui_text.gd:ERRORS.server_stopping
+msgid "The server is shutting down."
+msgstr "เซิร์ฟเวอร์กำลังปิดตัว."
+
+#: src/client/ui/ui_text.gd:ERRORS.missing_materials
+msgid "The shared bag does not hold enough materials for that."
+msgstr "ถุงส่วนกลางมีวัตถุดิบไม่พอ."
+
+#: src/client/ui/ui_text.gd:ERRORS.not_in_stash
+msgid "The shared bag does not hold that Item."
+msgstr "ถุงส่วนกลางไม่มีไอเทมชิ้นนั้น."
+
+#: src/client/ui/ui_text.gd:WHY.no_items
+msgid "The shared bag has no Item you can use now."
+msgstr "ถุงส่วนกลางไม่มีไอเทมที่ใช้ได้ในตอนนี้."
+
+#: src/client/ui/ui_text.gd:EMPTY.inventory
+msgid "The shared bag is empty. Win fights, open Treasure or buy from a Merchant to fill it."
+msgstr "ถุงส่วนกลางว่าง ชนะการต่อสู้ เปิดสมบัติ หรือซื้อของจากพ่อค้าเพื่อเก็บไอเทม."
 
 #: content/forest.json:classes.guardian.challenge.intro
 msgid "The stone knight raises its shield. \"None pass who cannot stand firm. Strike me, and endure my answer.\""
@@ -1241,6 +2789,10 @@ msgstr "ถ้าอย่างนั้นเราตามมันไปด
 msgid "Then we search every Layer until the Forest gives us an answer."
 msgstr "ถ้าอย่างนั้นเราจะค้นหาทุกชั้น จนกว่าป่าจะให้คำตอบ"
 
+#: src/client/ui/ui_text.gd:ERRORS.invalid_recipe
+msgid "There is no such recipe."
+msgstr "ไม่มีสูตรนี้."
+
 #: content/story_mode.json:scenes.boss_won[1].text
 msgid "There—in the roots. A compass, still pointing west."
 msgstr "ตรงนั้น—ในรากไม้ มีเข็มทิศที่ยังชี้ไปทางตะวันตก"
@@ -1257,9 +2809,33 @@ msgstr "ที่ซ่อนโจร"
 msgid "Third sibling"
 msgstr "ลูกคนที่สาม"
 
+#: src/client/ui/ui_text.gd:ERRORS.max_prestige src/client/ui/ui_text.gd:WHY.prestige_max
+msgid "This Class has reached maximum Prestige."
+msgstr "อาชีพนี้มีเกียรติยศถึงระดับสูงสุดแล้ว."
+
+#: src/client/match/camp/camp_view.gd:907
+msgid "This character has no Class Skills."
+msgstr "ตัวละครนี้ไม่มีทักษะอาชีพ"
+
+#: src/client/ui/ui_text.gd:ERRORS.locked
+msgid "This choice is still locked."
+msgstr "ตัวเลือกนี้ยังถูกล็อก."
+
 #: content/story_mode.json:scenes.rest_first[1].text
 msgid "This feels familiar. Two bedrolls beneath a pine… and Father's knot in the rope."
 msgstr "ที่นี่คุ้นเคยเหลือเกิน ที่นอนสองผืนใต้ต้นสน… และเงื่อนเชือกของพ่อ"
+
+#: src/client/ui/ui_text.gd:ERRORS.max_level src/client/ui/ui_text.gd:WHY.max_level
+msgid "This node is already at level 5."
+msgstr "ช่องนี้อยู่ที่ระดับ 5 แล้ว."
+
+#: src/client/ui/ui_text.gd:ERRORS.old_save
+msgid "This save is from an older build."
+msgstr "ไฟล์บันทึกนี้มาจากเวอร์ชันเก่า."
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_save
+msgid "This story save file is broken or from a different version."
+msgstr "ไฟล์บันทึกเนื้อเรื่องเสียหายหรือมาจากเวอร์ชันอื่น."
 
 #: content/forest.json:boss.moves.thorn_storm.name
 msgid "Thorn Storm"
@@ -1273,6 +2849,10 @@ msgstr "หมูป่าหนามหลัง"
 msgid "Thorns rise around the whole Party. Brace yourselves before its next turn!"
 msgstr "หนามผุดขึ้นรอบกลุ่ม จงเตรียมรับมือก่อนเทิร์นถัดไปของมัน!"
 
+#: src/client/ui/ui_text.gd:ERRORS.over_capacity
+msgid "Those Boons use more than five slots."
+msgstr "พรเหล่านั้นใช้ช่องเกินห้าช่อง."
+
 #: content/forest.json:skills.poke_up.description
 msgid "Three quick stabs at 55% ATK each on one enemy; every stab causes Bleed. Costs 2 Energy. Cooldown: 3 turns."
 msgstr "แทงเร็วสามครั้งที่พลังโจมตี 55% ต่อครั้งใส่ศัตรูหนึ่งตัว ทุกครั้งทำให้เลือดไหล ใช้พลังงาน 2 หน่วย คูลดาวน์ 3 เทิร์น"
@@ -1281,9 +2861,37 @@ msgstr "แทงเร็วสามครั้งที่พลังโจ
 msgid "Tidal"
 msgstr "กระแสน้ำ"
 
+#: src/client/match/battle/combat_panel.gd:253
+msgid "Time is up - the Challenge is over."
+msgstr "หมดเวลา - การประลองสิ้นสุดแล้ว"
+
+#: src/client/match/match_screen.gd:566
+msgid "Time is up for the Challenge."
+msgstr "หมดเวลาการท้าทายแล้ว"
+
+#: src/client/match/battle/battle_view.gd:1086
+msgid "Time is up!"
+msgstr "หมดเวลาแล้ว!"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Time played"
+msgstr "เวลาเล่น"
+
+#: src/client/client_app.gd:480 src/client/ui/ui_text.gd:client_literal
+msgid "Tip"
+msgstr "เคล็ดลับ"
+
+#: src/client/match/camp/camp_view.gd:938
+msgid "To:"
+msgstr "ถึง:"
+
 #: content/story_mode.json:prologue[6].text
 msgid "Together, the Party steps beneath the ancient boughs."
 msgstr "กลุ่มก้าวเข้าใต้กิ่งไม้โบราณไปพร้อมกัน"
+
+#: src/client/ui/ui_text.gd:ERRORS.action_window_closed
+msgid "Too late: your turn ran out and you Defended."
+msgstr "สายเกินไป: เทิร์นของคุณหมดเวลาและตัวละครป้องกันไปแล้ว."
 
 #: content/forest.json:party.members[3].bio
 msgid "Too young to remember Father's face, old enough to follow his road."
@@ -1296,6 +2904,18 @@ msgstr "เสื้อคลุมสีเทาขาดวิ่น"
 #: content/forest.json:statuses.toxin.name
 msgid "Toxin"
 msgstr "พิษร้าย"
+
+#: src/client/match/camp/camp_view.gd:532
+msgid "Transfer"
+msgstr "โอน"
+
+#: src/client/match/camp/camp_view.gd:507
+msgid "Transfer Gold"
+msgstr "โอนทอง"
+
+#: src/client/match/camp/camp_view.gd:932
+msgid "Transfer from %s"
+msgstr "โอนจาก%s"
 
 #: content/forest.json:journey.sites.merchant[1].name
 msgid "Trapper's Stall"
@@ -1313,9 +2933,25 @@ msgstr "เหรียญนักเดินทาง"
 msgid "Travelling Merchant"
 msgstr "พ่อค้าเร่"
 
-#: content/forest.json:journey.type_labels.treasure
+#: content/forest.json:journey.type_labels.treasure src/client/ui/ui_text.gd:TYPE_LABELS.treasure
 msgid "Treasure"
 msgstr "สมบัติ"
+
+#: src/client/match/match_screen.gd:580
+msgid "Treasure! +%d Gold for you."
+msgstr "พบสมบัติ! คุณได้รับทองส่วนตัว +%d เหรียญ"
+
+#: src/client/match/battle/battle_view.gd:885
+msgid "Turn"
+msgstr "เทิร์น"
+
+#: src/client/match/battle/battle_view.gd:535
+msgid "Turn %d"
+msgstr "เทิร์น %d"
+
+#: src/client/match/battle/battle_view.gd:94
+msgid "Turn 1"
+msgstr "เทิร์น 1"
 
 #: content/forest.json:items.tusk_charm.name
 msgid "Tusk Charm"
@@ -1328,6 +2964,30 @@ msgstr "ใต้เถ้าถ่านมีหน้าสมุดบัน
 #: content/forest.json:meta.passives.undying.name
 msgid "Undying"
 msgstr "อมตะ"
+
+#: src/client/lobby/character_setup.gd:236
+msgid "Upgrade"
+msgstr "อัปเกรด"
+
+#: src/client/match/camp/camp_view.gd:877
+msgid "Use"
+msgstr "ใช้"
+
+#: src/client/ui/ui_text.gd:HINTS.vote
+msgid "Use keys 1-3."
+msgstr "ใช้ปุ่ม 1-3"
+
+#: src/client/match/battle/combat_panel.gd:200
+msgid "Use which Item?"
+msgstr "จะใช้ไอเทมชิ้นไหน?"
+
+#: src/client/match/battle/combat_panel.gd:176
+msgid "Use which Skill?"
+msgstr "จะใช้ทักษะใด?"
+
+#: src/client/match/summary_panel.gd:10
+msgid "VICTORY"
+msgstr "ชนะ"
 
 #: content/forest.json:enemies.giant_spider.special.name
 msgid "Venom Web"
@@ -1345,6 +3005,90 @@ msgstr "พรานชำนาญ"
 msgid "Vials"
 msgstr "ขวดยา"
 
+#: src/client/match/battle/battle_view.gd:1074 src/client/match/battle/combat_panel.gd:244
+msgid "Victory!"
+msgstr "ชนะแล้ว!"
+
+#: src/client/match/match_screen.gd:564
+msgid "Victory! +%d EXP each, +%d Gold for you."
+msgstr "ชนะ! สมาชิกแต่ละคนได้รับ EXP +%d และคุณได้รับทองส่วนตัว +%d เหรียญ"
+
+#: src/client/match/match_screen.gd:591
+msgid "Victory! The %s is behind you."
+msgstr "ชนะแล้ว! %s อยู่เบื้องหลังคุณ"
+
+#: src/client/title/settings_panel.gd:55
+msgid "Volume"
+msgstr "ระดับเสียง"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Vote"
+msgstr "โหวต"
+
+#: src/client/match/vote_panel.gd:73 src/client/ui/ui_text.gd:client_literal
+msgid "Vote closes in %ds"
+msgstr "ปิดโหวตใน %d วินาที"
+
+#: src/client/match/vote_panel.gd:162
+msgid "Vote for this path [%d]"
+msgstr "โหวตเส้นทางนี้ [%d]"
+
+#: src/client/match/story_panel.gd:41
+msgid "Voted so far: %d"
+msgstr "โหวตแล้ว: %d"
+
+#: src/client/match/vote_panel.gd:152
+msgid "Votes: %d"
+msgstr "คะแนนโหวต: %d"
+
+#: src/client/match/vote_panel.gd:113
+msgid "Votes: %d%s"
+msgstr "คะแนนโหวต: %d%s"
+
+#: src/client/match/match_screen.gd:923
+msgid "WAITING"
+msgstr "กำลังรอ"
+
+#: src/client/match/match_screen.gd:951
+msgid "WALL"
+msgstr "กำแพง"
+
+#: src/client/match/match_screen.gd:586
+msgid "WARNING: %s"
+msgstr "คำเตือน: %s"
+
+#: src/client/match/battle/battle_view.gd:506 src/client/match/battle/combat_panel.gd:97
+msgid "WARNING: %s next turn, aimed at %s!"
+msgstr "คำเตือน: %s จะโจมตีในเทิร์นหน้า เล็งไปที่ %s!"
+
+#: src/client/title/title_screen.gd:71
+msgid "WELCOME, TRAVELLER"
+msgstr "ยินดีต้อนรับ นักเดินทาง"
+
+#: src/client/lobby/lobby_screen.gd:94
+msgid "Waiting for %s (Host) to start the Match..."
+msgstr "กำลังรอให้%s (เจ้าห้อง) เริ่มแมตช์..."
+
+#: src/client/match/battle/battle_view.gd:1108 src/client/match/battle/combat_panel.gd:227
+msgid "Waiting for %s to act..."
+msgstr "กำลังรอให้%sลงมือ..."
+
+#: src/client/match/summary_panel.gd:19
+msgid "Waiting for the Host to start a new Match..."
+msgstr "กำลังรอเจ้าห้องเริ่มแมตช์ใหม่..."
+
+#: src/client/match/camp/merchant_panel.gd:29 src/client/match/story_panel.gd:60
+msgid "Waiting for the others..."
+msgstr "กำลังรอผู้เล่นคนอื่น..."
+
+#: src/client/match/vote_panel.gd:230
+msgid "Waiting: %s."
+msgstr "กำลังรอ: %s"
+
+#: src/client/ui/ui_text.gd:HINTS.boss
+msgid "Watch the warnings: the Guardian announces its heaviest blows a turn early. Defend, Protect or raise Shield Wall before they land."
+msgstr "สังเกตคำเตือน: ผู้พิทักษ์จะบอกล่วงหน้าหนึ่งเทิร์นก่อนโจมตีหนัก ป้องกัน ใช้คุ้มครอง หรือตั้งกำแพงโล่ก่อนการโจมตีมาถึง."
+
 #: content/story_mode.json:scenes.party_defeated[1].text
 msgid "We can gather our strength and try again."
 msgstr "เรารวบรวมกำลังแล้วลองใหม่ได้"
@@ -1357,6 +3101,14 @@ msgstr "เราจะรู้ราคาก่อนที่ใครจะ
 msgid "We will find him. The road beyond the Forest is open."
 msgstr "เราจะตามหาเขาให้พบ เส้นทางเลยป่าเปิดอยู่"
 
+#: src/client/match/battle/battle_view.gd:712 src/client/match/battle/combat_panel.gd:124
+msgid "Weak to: %s"
+msgstr "แพ้ทาง: %s"
+
+#: src/client/match/camp/camp_view.gd:822
+msgid "Weapon"
+msgstr "อาวุธ"
+
 #: content/forest.json:statuses.venom_coat.description
 msgid "Weapon coated: the next 3 damaging actions also apply Poison."
 msgstr "เคลือบอาวุธแล้ว: การกระทำที่สร้างความเสียหาย 3 ครั้งถัดไปจะทำให้ติดพิษด้วย"
@@ -1364,6 +3116,14 @@ msgstr "เคลือบอาวุธแล้ว: การกระทำ�
 #: content/forest.json:items.bramble_quiver.description
 msgid "Weapon gear: +1 SPD, +5% Crit."
 msgstr "อุปกรณ์อาวุธ: +1 ความเร็ว, +5% คริติคอล"
+
+#: src/client/match/story_panel.gd:26
+msgid "What do you do?"
+msgstr "คุณจะทำอย่างไร?"
+
+#: src/client/match/story_panel.gd:26
+msgid "What does the Party do? (one vote each; ties are broken at random)"
+msgstr "กลุ่มจะทำอย่างไร? ทุกคนโหวตได้คนละหนึ่งครั้ง หากเสมอจะสุ่มเลือก"
 
 #: content/forest.json:meta.boons["Will%20of%20Thiacdemo"]
 msgid "Will of Thiacdemo"
@@ -1417,6 +3177,74 @@ msgstr "การกลับมาของเรน"
 msgid "Wren's missing memories begin to stir."
 msgstr "ความทรงจำที่หายไปของเรนเริ่มฟื้นคืน"
 
+#: src/client/lobby/lobby_screen.gd:133 src/client/match/match_screen.gd:920
+msgid "YOU"
+msgstr "คุณ"
+
+#: src/client/match/battle/combat_panel.gd:141
+msgid "YOUR TURN - %s"
+msgstr "เทิร์นของคุณ - %s"
+
+#: src/client/ui/ui_text.gd:ERRORS.already_decided
+msgid "You already answered."
+msgstr "คุณตอบไปแล้ว."
+
+#: src/client/ui/ui_text.gd:ERRORS.already_owned
+msgid "You already own this Race."
+msgstr "คุณเป็นเจ้าของเผ่าพันธุ์นี้แล้ว."
+
+#: src/client/ui/ui_text.gd:ERRORS.already_voted
+msgid "You already voted."
+msgstr "คุณโหวตไปแล้ว."
+
+#: src/client/ui/ui_text.gd:WHY.voted
+msgid "You already voted. Waiting for the others."
+msgstr "คุณโหวตไปแล้ว กำลังรอคนอื่น."
+
+#: src/client/ui/ui_text.gd:ERRORS.already_in_room
+msgid "You are already in a room."
+msgstr "คุณอยู่ในห้องแล้ว."
+
+#: src/client/ui/ui_text.gd:ERRORS.already_ready
+msgid "You are already marked as ready."
+msgstr "คุณถูกทำเครื่องหมายว่าพร้อมแล้ว."
+
+#: src/client/ui/ui_text.gd:ERRORS.not_in_room
+msgid "You are not in a room."
+msgstr "คุณไม่ได้อยู่ในห้อง."
+
+#: src/client/ui/ui_text.gd:WHY.ready
+msgid "You are ready. Waiting for the other players."
+msgstr "คุณพร้อมแล้ว กำลังรอผู้เล่นคนอื่น."
+
+#: src/client/ui/ui_text.gd:WHY.equip_not_yours
+msgid "You can only change your own character's gear."
+msgstr "คุณเปลี่ยนอุปกรณ์ของตัวละครตนเองได้เท่านั้น."
+
+#: src/client/ui/ui_text.gd:WHY.invest_not_yours
+msgid "You can only spend your own character's points."
+msgstr "คุณใช้แต้มของตัวละครตนเองได้เท่านั้น."
+
+#: src/client/ui/ui_text.gd:ERRORS.not_enough_gems
+msgid "You do not have enough Gems."
+msgstr "คุณมีอัญมณีไม่พอ."
+
+#: src/client/ui/ui_text.gd:ERRORS.not_enough_gold
+msgid "You do not have enough Gold."
+msgstr "คุณมีทองไม่เพียงพอ"
+
+#: src/client/ui/ui_text.gd:CONFIRM.leave_match[1]
+msgid "You go back to the title screen and your character is played by AI for the rest of this Match."
+msgstr "คุณจะกลับไปหน้าแรก และตัวละครของคุณจะถูกควบคุมโดยระบบจนจบแมตช์นี้."
+
+#: src/client/ui/ui_text.gd:CONFIRM.leave_room[1]
+msgid "You go back to the title screen. Your slot is played by AI until someone takes it."
+msgstr "คุณจะกลับไปหน้าแรก ช่องของคุณจะถูกควบคุมโดยระบบจนกว่าจะมีคนมาแทน."
+
+#: src/client/ui/ui_text.gd:HINTS.skill
+msgid "You have a Class now. Fight [F] opens your Skills; each Skill costs Energy and has a cooldown counted in your own turns."
+msgstr "ตอนนี้คุณมีอาชีพแล้ว กดต่อสู้ [F] เพื่อเปิดทักษะ แต่ละทักษะใช้พลังงานและมีคูลดาวน์นับตามเทิร์นของคุณ."
+
 #: content/forest.json:story.events.old_campfire.choices[1].outcome.text
 msgid "You rekindle the fire and rest where Father once rested. Tucked under a stone you find his tin cup, engraved with Mother's name."
 msgstr "จุดไฟขึ้นใหม่และพักในที่ที่พ่อเคยพัก ใต้ก้อนหินมีถ้วยดีบุกของเขาซ่อนอยู่ สลักชื่อแม่ไว้"
@@ -1425,11 +3253,141 @@ msgstr "จุดไฟขึ้นใหม่และพักในที่
 msgid "Youngest sibling"
 msgstr "ลูกคนสุดท้อง"
 
+#: src/client/match/camp/merchant_panel.gd:20 src/client/match/match_screen.gd:843
+msgid "Your Gold: %d"
+msgstr "ทองของคุณ: %d"
+
+#: src/client/match/class_panel.gd:50
+msgid "Your character already has a Class."
+msgstr "ตัวละครของคุณมีอาชีพแล้ว"
+
+#: src/client/ui/ui_text.gd:ERRORS.not_eligible
+msgid "Your character cannot take this Class."
+msgstr "ตัวละครของคุณเลือกอาชีพนี้ไม่ได้."
+
+#: src/client/title/title_screen.gd:423
+msgid "Your name (shown to other players)"
+msgstr "ชื่อของคุณ (ผู้เล่นคนอื่นจะเห็นชื่อนี้)"
+
+#: src/client/ui/ui_text.gd:ERRORS.profile_changed_elsewhere
+msgid "Your profile changed in another session. This session's latest progress was not saved. Rejoin to refresh it."
+msgstr "โปรไฟล์ของคุณเปลี่ยนในเซสชันอื่น ความคืบหน้าล่าสุดในเซสชันนี้ไม่ได้บันทึก เข้าร่วมอีกครั้งเพื่อโหลดข้อมูลใหม่."
+
+#: src/client/ui/ui_text.gd:ERRORS.profile_unavailable
+msgid "Your profile could not be loaded. Progress will not be saved this session."
+msgstr "โหลดโปรไฟล์ของคุณไม่ได้ ความคืบหน้าจะไม่ถูกบันทึกในเซสชันนี้."
+
+#: src/client/ui/ui_text.gd:ERRORS.profile_save_failed
+msgid "Your profile could not be saved. Rejoin and check your progress before continuing."
+msgstr "บันทึกโปรไฟล์ของคุณไม่ได้ เข้าร่วมอีกครั้งและตรวจสอบความคืบหน้าก่อนเล่นต่อ."
+
+#: src/client/ui/ui_text.gd:ERRORS.invalid_token
+msgid "Your profile could not be verified. Restart the game and try again."
+msgstr "ยืนยันโปรไฟล์ของคุณไม่ได้ เริ่มเกมใหม่แล้วลองอีกครั้ง."
+
+#: src/client/ui/ui_text.gd:ERRORS.unknown_session
+msgid "Your session expired. Please reconnect."
+msgstr "เซสชันของคุณหมดอายุ กรุณาเชื่อมต่อใหม่."
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "Your turn!"
+msgstr "ถึงเทิร์นของคุณ!"
+
+#: src/client/ui/ui_text.gd:HINTS.combat
+msgid "Your turn! Fight [F] opens your attacks, Items [I] uses your personal Gold and consumable slot, and Focus [O] restores Energy when available. In timed Combats you have 15 seconds; if time runs out you Defend."
+msgstr "ถึงเทิร์นของคุณแล้ว! กดต่อสู้ [F] เพื่อเปิดการโจมตี ไอเทม [I] ใช้ทองส่วนตัวและช่องไอเทมใช้แล้วหมดไป ส่วนตั้งสมาธิ [O] ฟื้นฟูพลังงานเมื่อใช้ได้ การต่อสู้แบบจับเวลามีเวลา 15 วินาที หากหมดเวลาตัวละครจะป้องกัน."
+
+#: src/client/ui/ui_text.gd:HINTS.combat_story
+msgid "Your turn! Fight [F] opens your attacks, Items [I] uses your personal Gold and consumable slot, and Focus [O] restores Energy when available. Story turns have no countdown."
+msgstr "ถึงเทิร์นของคุณแล้ว! กดต่อสู้ [F] เพื่อเปิดการโจมตี ไอเทม [I] ใช้ทองส่วนตัวและช่องไอเทมใช้แล้วหมดไป ส่วนตั้งสมาธิ [O] ฟื้นฟูพลังงานเมื่อใช้ได้ เทิร์นในเนื้อเรื่องไม่มีเวลานับถอยหลัง."
+
+#: src/client/match/vote_panel.gd:162
+msgid "Your vote"
+msgstr "โหวตของคุณ"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "[%d] Choose this path"
+msgstr "[%d] เลือกเส้นทางนี้"
+
+#: src/client/match/story_panel.gd:35
+msgid "[%d] Vote"
+msgstr "[%d] โหวต"
+
+#: src/client/ui/ui_text.gd:client_literal
+msgid "[%d] Vote for this path"
+msgstr "[%d] โหวตเส้นทางนี้"
+
+#: src/client/match/match_screen.gd:610
+msgid "attacks"
+msgstr "โจมตี"
+
+#: src/client/match/match_screen.gd:574
+msgid "declines"
+msgstr "ปฏิเสธ"
+
+#: src/client/title/title_screen.gd:424
+msgid "e.g. Arin"
+msgstr "เช่น อาริน"
+
+#: src/client/match/summary_panel.gd:33 src/client/ui/ui_text.gd:client_literal
+msgid "none"
+msgstr "ไม่มี"
+
+#: src/client/match/match_screen.gd:574
+msgid "takes"
+msgstr "รับ"
+
+#: src/client/match/match_screen.gd:638
+msgid "the Party raises its guard"
+msgstr "กลุ่มตั้งการป้องกัน"
+
+#: src/client/match/battle/battle_view.gd:505 src/client/match/battle/combat_panel.gd:96
+msgid "the whole Party"
+msgstr "ทั้งกลุ่ม"
+
+#: src/client/match/match_screen.gd:612 src/client/match/match_screen.gd:614 src/client/match/match_screen.gd:616
+msgid "uses %s"
+msgstr "ใช้ %s"
+
+#: src/client/match/battle/battle_token.gd:134
+msgid "you"
+msgstr "คุณ"
+
+#~ msgid "%s   Lv %d"
+#~ msgstr "%s   ระดับ %d"
+
+#~ msgid "%s  Lv %d"
+#~ msgstr "%s  ระดับ %d"
+
+#~ msgid "+%d Gold for the Party."
+#~ msgstr "กลุ่มได้รับทอง %d"
+
+#~ msgid "Audio: Kenney, Zane Little Music, MintoDog, Emma_MA, marcelofg55, JaggedStone, artisticdude and Brian MacIntosh (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md"
+#~ msgstr "เสียง: Kenney, Zane Little Music, MintoDog, Emma_MA, marcelofg55, JaggedStone, artisticdude และ Brian MacIntosh (CC0); YannZ และ leohpaz (CC-BY 4.0) เครดิตทั้งหมด: assets/audio/CREDITS.md"
+
+#~ msgid "Audio: Kenney, Zane Little Music, MintoDog, marcelofg55, JaggedStone, artisticdude and Brian MacIntosh (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md"
+#~ msgstr "เสียง: Kenney, Zane Little Music, MintoDog, marcelofg55, JaggedStone, artisticdude และ Brian MacIntosh (CC0); YannZ และ leohpaz (CC-BY 4.0) ดูเครดิตทั้งหมดที่ assets/audio/CREDITS.md"
+
+#~ msgid "DoTs (Bleed BLD, Poison PSN, Toxin TOX) hurt at the start of each of their holder's turns, ignoring armour. The badge shows stacks (x) and turns left (t)."
+#~ msgstr "สถานะเลือดไหล พิษ และพิษร้ายสร้างความเสียหายเมื่อเริ่มเทิร์นของผู้ติดสถานะ โดยไม่สนพลังป้องกัน ป้ายแสดงจำนวนชั้นและเทิร์นที่เหลือ."
+
 #~ msgid "Father waited three winters. We can gather our strength and try again."
 #~ msgstr "พ่อรอมาสามฤดูหนาว เรารวบรวมกำลังแล้วลองใหม่ได้"
+
+#~ msgid "Gold: %d"
+#~ msgstr "ทอง: %d"
 
 #~ msgid "Next time, we reach the Guardian in the cave together."
 #~ msgstr "คราวหน้าเราจะไปถึงผู้พิทักษ์ในถ้ำด้วยกัน"
 
+#~ msgid "Party Gold: %d"
+#~ msgstr "ทองของกลุ่ม: %d"
+
 #~ msgid "The cave beneath the Forest closes around the fallen Party."
 #~ msgstr "ถ้ำใต้ป่าปิดล้อมกลุ่มที่ล้มลง"
+
+#~ msgid "Treasure! +%d Gold."
+#~ msgstr "พบสมบัติ! ได้รับทอง %d"
+
+#~ msgid "Victory! +%d EXP each, +%d Gold."
+#~ msgstr "ชนะ! ทุกคนได้รับค่าประสบการณ์ %d และทอง %d"

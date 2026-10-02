@@ -1,53 +1,53 @@
-# BEYOND THE WORLD'S END — Forest vertical slice
+# BEYOND THE WORLD'S END — ตัวอย่างเกม Forest ที่เล่นจบได้
 
-เกม co-op fantasy turn-based RPG เขียนด้วย **GDScript** บน **Godot 4.7**
-ขอบเขตปัจจุบันคือ Forest vertical slice ที่เล่นจบได้: Party 5 ตัว
-(Arin, Bram, Cora, Dain, Wren) เดินทางผ่าน **5 Layers** ไปจนถึง Guardian Boss
-Encounter ประกอบด้วย Combat, Merchant, Rest, Treasure, Story Event
-และ Class Encounter กติกาผ่าน `MatchServer` ที่เป็น authoritative ฝั่งเดียว
+เกม RPG แฟนตาซีแบบผลัดกันเล่นร่วมกัน เขียนด้วย **GDScript** บน **Godot 4.7**
+ขอบเขตปัจจุบันเป็นเกม Forest ฉบับย่อที่เล่นจบได้: Party 5 ตัว
+(Arin, Bram, Cora, Dain, Wren) เดินทางผ่าน **5 ชั้น** ไปจนถึง Guardian Boss
+มีการต่อสู้ พ่อค้า จุดพัก สมบัติ เหตุการณ์เนื้อเรื่อง และการพบผู้ฝึกสอนอาชีพ
+กติกาทั้งหมดตัดสินโดย `MatchServer` เพียงจุดเดียว
 
 ## โหมดการเล่น
 
-- **ออนไลน์ co-op ผ่านเซิร์ฟเวอร์กลาง:** สร้างห้องด้วย Room code 6 ตัวอักษร
-  ห้องหนึ่งมี 5 Player slot, มี Host เริ่ม Match ได้คนเดียว
-  slot ว่างใช้ AI เล่นแทน เปิดเซิร์ฟเวอร์ headless ตัวเดียวแล้วต่อ client
-  หลายหน้าต่างหรือหลายเครื่องก็ได้
-- **Story แบบออฟไลน์ (เล่นคนเดียว):** ไม่ต้องต่อเซิร์ฟเวอร์
-  รัน `MatchServer` ในตัว client ผ่าน local transport
-  ผู้เล่นคนเดียวคุมทั้ง 5 ตัว ไม่มี Action window timeout
-  มีฉากเปิดเรื่อง บทสนทนาตาม trigger และการ์ดบททุก Layer
-  ข้อมูลอยู่ใน `content/story_mode.json` เซฟอัตโนมัติต้นทุก Layer ที่
-  `user://story_save.json` มีปุ่ม Continue/New บนหน้าแรก
+- **เล่นออนไลน์ร่วมกันผ่านเซิร์ฟเวอร์กลาง:** สร้างห้องด้วยรหัส 6 ตัวอักษร
+  ห้องหนึ่งมีช่องผู้เล่น 5 ช่อง และมีเพียง Host ที่เริ่ม Match ได้
+  AI จะเล่นแทนช่องที่ว่าง เปิดเซิร์ฟเวอร์แบบ headless หนึ่งตัว แล้วเชื่อมต่อ
+  client จากหลายหน้าต่างหรือหลายเครื่องได้
+- **โหมดเนื้อเรื่องออฟไลน์ (เล่นคนเดียว):** ไม่ต้องเชื่อมต่อเซิร์ฟเวอร์
+  client เรียก `MatchServer` ผ่าน local transport
+  ผู้เล่นคนเดียวควบคุมตัวละครทั้ง 5 ตัว และไม่มีเวลาจำกัดในช่วงลงมือ
+  มีฉากเปิดเรื่อง บทสนทนาตามเงื่อนไข และการ์ดเนื้อเรื่องในทุกชั้น
+  ข้อมูลอยู่ใน `content/story_mode.json` และบันทึกอัตโนมัติตอนเริ่มแต่ละชั้นไว้ที่
+  `user://story_save.json` หน้าแรกมีปุ่ม Continue/New
 
 ## ความต้องการ
 
-- Godot **4.7.2** (หรือ 4.5+) อยู่ใน `PATH` ชื่อ `godot`
+- ติดตั้ง Godot **4.7.2** (หรือ 4.5 ขึ้นไป) และเพิ่ม `godot` ไว้ใน `PATH`
   หรือกำหนด `GODOT=/path/to/godot`
-- ไฟล์หลักของโปรเจกต์: `project.godot` (entry: `src/app/main.tscn`)
+- ไฟล์หลักของโปรเจกต์คือ `project.godot` (ฉากเริ่มต้น: `src/app/main.tscn`)
 
 ## เริ่มเล่นด่วน
 
-เทอร์มินัลที่ 1 — เซิร์ฟเวอร์กลาง:
+เทอร์มินัลที่ 1 — เปิดเซิร์ฟเวอร์กลาง:
 
 ```bash
 godot --headless --path . -- --server --port=8910
 ```
 
-เทอร์มินัลที่ 2 — client (เปิดสองหน้าต่างเพื่อลอง co-op):
+เทอร์มินัลที่ 2 — เปิด client (เปิดสองหน้าต่างเพื่อลองเล่นร่วมกัน):
 
 ```bash
 godot --path . -- --url=ws://127.0.0.1:8910 --name=Ann
 ```
 
-คนหนึ่งกด **Create a room** อีกคนใส่ Room code แล้วกด **Join room**
-วิธีเล่นละเอียด ปุ่มลัด และโหมด dev playtest ดูที่
+ผู้เล่นคนหนึ่งกด **Create a room** ส่วนอีกคนกรอกรหัสห้องแล้วกด **Join room**
+วิธีเล่นอย่างละเอียด ปุ่มลัด และโหมดทดสอบสำหรับนักพัฒนา ดูที่
 [`docs/guides/running.md`](docs/guides/running.md)
 
 ## เบราว์เซอร์
 
-client เบราว์เซอร์มาจากโค้ดชุดเดียวกับ PC ต่างกันแค่ export preset
+client บนเบราว์เซอร์ใช้โค้ดชุดเดียวกับ PC ต่างกันที่ชุดตั้งค่าส่งออก
 (`Web`, `Windows`, `Linux Server` ใน `export_presets.cfg`)
-วิธี build/serve เต็ม ๆ ดูที่ [`docs/guides/web.md`](docs/guides/web.md):
+วิธีสร้างและเปิดเว็บฉบับเต็มดูที่ [`docs/guides/web.md`](docs/guides/web.md):
 
 ```bash
 godot --headless --path . --export-release "Web" build/web/index.html
@@ -61,68 +61,67 @@ python3 -m http.server -d build/web 8060
 ./tools/run_tests.sh
 ```
 
-กติกาเทสต์ (ผ่าน Match interface เท่านั้น) และวิธีเพิ่มเทสต์ ดูที่
+กติกาการทดสอบ (ทดสอบผ่าน Match interface เท่านั้น) และวิธีเพิ่มการทดสอบ ดูที่
 [`docs/guides/testing.md`](docs/guides/testing.md)
 
 ## เอกสาร
 
 - คำศัพท์กลาง: [`CONTEXT.md`](CONTEXT.md)
 - ข้อกำหนดผลิตภัณฑ์: [`docs/design/prd.md`](docs/design/prd.md)
-- สมดุลและ pacing: [`docs/design/balance.md`](docs/design/balance.md)
+- สมดุลและจังหวะการเล่น: [`docs/design/balance.md`](docs/design/balance.md)
 - สไตล์ UI: [`docs/design/ui-style.md`](docs/design/ui-style.md)
 - การเข้าถึง: [`docs/design/accessibility.md`](docs/design/accessibility.md)
 - การรันเกม: [`docs/guides/running.md`](docs/guides/running.md)
 - เบราว์เซอร์: [`docs/guides/web.md`](docs/guides/web.md)
-- Staging/QA: [`docs/guides/staging.md`](docs/guides/staging.md)
+- ระบบทดสอบก่อนเผยแพร่และ QA: [`docs/guides/staging.md`](docs/guides/staging.md)
 - การตัดสินใจสถาปัตยกรรม: [`docs/adr/`](docs/adr/) (Story mode: `0014-offline-story-mode.md`)
 
-## โครงสร้างโปรเจกต์
+## โครงสร้างรีโป
 
 ```text
-.ai/                         task specs, checkpoint และ agent runner
-.claude/agents/              agent definitions
-.github/                     CI workflows และ PR/issue templates
-art_source/                  raw art sheets ที่ไม่ถูก import โดย Godot
-assets/                      runtime art, fonts และเสียงที่เกมโหลด
-content/                     Forest rules และ Story mode JSON
-deploy/                      staging, proxy, compose และ profile-worker
-docs/adr/                    architecture decision records
-docs/agents/                 issue, triage และ domain rules
-docs/design/                 requirements, balance, UI และ accessibility
-docs/guides/                 วิธีรัน, test, export และ deploy
-docs/history/                milestone และ project records
-docs/plans/                  แผนงานและผล audit โครงสร้าง
-docs/references/             source material และ UI references
-docs/research/               ข้อมูลค้นคว้าจากแหล่งภายนอก
-docs/review/                 QA reports, code reviews และ screenshots
-docs/screenshots/            ภาพจากเกมและ UI preview
-i18n/                        gettext template และคำแปล
-src/app/                     entry scene และ launch options
-src/client/                  title, lobby, match, story และ shared UI
-src/match/                   MatchServer, rules, AI และ encounters
-src/net/                     protocol และ WebSocket transport
-src/profile/                 profile stores และ HTTP sender
-src/server/                  headless game server
-src/shared/                  RNG, clocks และ content loader
-tests/                       tests แบ่งตามระบบ พร้อม runner และ support
-tools/art/                   เครื่องมือเตรียมและ slice art
-tools/dev/                   simulator, previews และ smoke client
-tools/i18n/                  extract และตรวจ translation catalog
-tools/ci/                    browser smoke test
-tools/run_tests.sh           รัน test suite แบบ headless
-project.godot                Godot project และ entry configuration
-export_presets.cfg           preset Web / Windows / Linux Server
+content/            ข้อมูล Forest (forest.json) และ Story (story_mode.json)
+src/app/            entry scene และ launch options
+src/shared/         RNG, clock, ตัวโหลด content
+src/profile/        profile store และ sender
+src/match/          Match server, room, AI, encounter, กติกา
+src/net/            โปรโตคอลและ WebSocket transport
+src/server/        โหนดเซิร์ฟเวอร์ headless
+src/client/         title, lobby, match (battle/camp), story, ui ร่วม
+tests/              เทสต์แยกตาม src พร้อม runner และ support
+tools/dev/          จำลอง, preview, smoke client
+tools/ci/           smoke test เบราว์เซอร์
+tools/run_tests.sh  รันเทสต์แบบ headless
+deploy/             staging, proxy, compose, profile-worker
+docs/design/        prd, balance, ui-style, accessibility
+docs/guides/       running, testing, web, staging
+docs/adr/           บันทึกการตัดสินใจสถาปัตยกรรม
+export_presets.cfg  preset Web / Windows / Linux Server
 ```
 
-## Contributing
-
-ดู [CONTRIBUTING.md](CONTRIBUTING.md) สำหรับ branch naming, commit style, การรัน tests และ PR checklist. การตั้งค่า GitHub ที่เจ้าของรีโปต้องทำอยู่ใน [docs/guides/github-setup.md](docs/guides/github-setup.md).
+โฟลเดอร์อื่นที่ใช้งานบ่อย: `.ai/` เก็บ task spec และ runner, `.github/` เก็บ workflow กับ template,
+`art_source/` เก็บภาพต้นฉบับ, `i18n/` เก็บ catalog ภาษา, `docs/plans/` เก็บแผนงาน,
+`docs/references/` และ `docs/research/` เก็บแหล่งอ้างอิง, `docs/review/` เก็บ QA และผลรีวิว,
+`tools/art/` เตรียมภาพ และ `tools/i18n/` สร้าง/ตรวจ catalog
 
 ## ประวัติและสารบัญเพิ่มเติม
 
+## Project tree — สารบัญโฟลเดอร์
+
+- `.ai/` — task spec และ agent runner; `.github/` — workflow และ template
+- `art_source/` — ภาพต้นฉบับ; `assets/` — ภาพ ฟอนต์ และเสียงที่เกมใช้
+- `content/` — ข้อมูล Forest/Story; `deploy/` — staging และ profile worker
+- `docs/adr/`, `docs/design/`, `docs/guides/` — decisions, design และวิธีใช้งาน
+- `docs/history/`, `docs/plans/`, `docs/references/`, `docs/research/`, `docs/review/` — บันทึก แผน และข้อมูลอ้างอิง
+- `i18n/` — gettext catalog; `src/` — app, client, match, net, profile, server และ shared code
+- `tests/` — test suite; `tools/art/`, `tools/dev/`, `tools/i18n/`, `tools/ci/` — เครื่องมือพัฒนา
+
+## Contributing
+
+ดู [CONTRIBUTING.md](CONTRIBUTING.md) สำหรับแนวทางตั้งชื่อ branch รูปแบบ commit การรัน test และรายการตรวจ PR ส่วนการตั้งค่า GitHub ที่เจ้าของรีโปต้องทำ ดูที่ [docs/guides/github-setup.md](docs/guides/github-setup.md)
+
 - [docs/README.md](docs/README.md) — สารบัญเอกสารทั้งหมด
-- [docs/history/](docs/history/) — log งานเก่า (ย้ายออกจาก README เดิมที่ยาว 451 บรรทัด)
-- [.ai/tasks/README.md](.ai/tasks/README.md) — สารบัญ task spec ของ AI executor
+- [docs/history/](docs/history/) — บันทึกงานเก่า (ย้ายจาก README เดิมที่ยาว 451 บรรทัด)
+- [.ai/tasks/README.md](.ai/tasks/README.md) — สารบัญข้อกำหนดงานของ AI executor
 - [docs/review/README.md](docs/review/README.md) — สารบัญรีวิวและ QA
 
 ## แกลเลอรี UI (ภาพจาก preview จริง)

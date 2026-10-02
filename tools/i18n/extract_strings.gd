@@ -2,6 +2,25 @@ extends SceneTree
 ## Extract player-facing content strings into a gettext POT and Thai PO catalog.
 
 const INPUTS := ["content/forest.json", "content/story_mode.json"]
+const UI_TEXT_PATH := "res://src/client/ui/ui_text.gd"
+const UI_TEXT_GROUPS := ["ERRORS", "TYPE_LABELS", "TYPE_TAGS", "TYPE_HELP", "HINTS", "CONFIRM", "LABELS", "EMPTY", "WHY"]
+const FORMATTED_FALLBACKS := [
+	"%d Gems",
+	"Not enough Gems: this costs %d, you have %d.",
+	"Something went wrong (%s).",
+]
+const UI_LITERAL_LABELS := [
+	"Shop", "Crafting", "Inventory", "Equipment", "Stash", "Craft", "Abilities",
+	"Time played", "Reached", "Enemies defeated", "Classes discovered",
+	"Search...", "Hide", "Hide the camp to look at the field", "Buy", "Inspect", "Ready [R]",
+	"Fight [F]", "Items [I]", "Focus [O]", "Attack [A]", "Defend [D]", "Skill [S] - needs a Class",
+	"Vote closes in %ds", "The journey continues in %ds", "%ds left to act%s", "Offer closes in %ds",
+	"The journey continues in %ds.", "Gold amount", "Tip", "Vote", "Ready %d of %d.",
+	"Guardian Boss", "Guardian", "Swordsman", "Archer", "Mage", "Assassin", "Classless",
+	"[%d] Vote for this path", "[%d] Choose this path", "Chosen", "Profile", "Races", "Boons", "Records",
+	"Your turn!", "Stat Points", "Reset Skills", "Status: Unlocked", "Cost: %s", "READY",
+	"none", "Guardian Boss defeated", "Story Clues found", "Room code copied.",
+]
 const POT_PATH := "i18n/messages.pot"
 const PO_PATH := "i18n/th.po"
 
@@ -23,11 +42,110 @@ func _init() -> void:
 			quit(1)
 			return
 		_walk(parsed, input_path, "")
+	var ui_text = load(UI_TEXT_PATH)
+	for group in UI_TEXT_GROUPS:
+		_add_ui_value(ui_text.get_script_constant_map()[group], group)
+	for message in FORMATTED_FALLBACKS:
+		_add_message(message, "src/client/ui/tr.gd:formatted_fallback")
+	for message in UI_LITERAL_LABELS:
+		_add_message(message, "src/client/ui/ui_text.gd:client_literal")
+	_scan_client_translations("res://src/client", "src/client")
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://i18n"))
 	_write_pot()
 	_write_po()
 	print("Extracted %d msgids" % _messages.size())
 	quit(0)
+
+
+func _scan_client_translations(directory: String, reference_root: String) -> void:
+	var dir := DirAccess.open(directory)
+	if dir == null:
+		push_error("Could not open %s" % directory)
+		return
+	dir.list_dir_begin()
+	var name := dir.get_next()
+	while not name.is_empty():
+		var path := directory.path_join(name)
+		if dir.current_is_dir():
+			if not name.begins_with("."):
+				_scan_client_translations(path, reference_root.path_join(name))
+		elif name.ends_with(".gd"):
+			_scan_translation_calls(path, reference_root.path_join(name))
+			_scan_ui_literals(path, reference_root.path_join(name))
+		name = dir.get_next()
+	dir.list_dir_end()
+
+
+func _scan_translation_calls(path: String, reference: String) -> void:
+	var source := FileAccess.get_file_as_string(path)
+	var regex := RegEx.new()
+	regex.compile("Tr\\.t\\(\\s*\"((?:\\\\.|[^\"\\\\])*)\"")
+	for found in regex.search_all(source):
+		var parsed = JSON.parse_string("\"%s\"" % found.get_string(1))
+		if parsed is String:
+			_add_message(parsed, "%s:%d" % [reference, source.substr(0, found.get_start()).count("\n") + 1])
+
+
+func _scan_ui_literals(path: String, reference: String) -> void:
+	var source := FileAccess.get_file_as_string(path)
+	var call_regex := RegEx.new()
+	call_regex.compile("(?:UiKit\\.(?:label|para|button|primary|badge|pixel_label)|_(?:text|button|center)|Icons\\.with_text)\\(\\s*")
+	var literal_regex := RegEx.new()
+	literal_regex.compile("\"((?:\\\\.|[^\"\\\\])*)\"")
+	for call in call_regex.search_all(source):
+		var start := call.get_end()
+		var end := _first_argument_end(source, start)
+		if end <= start:
+			continue
+		var arguments: Array[String] = [source.substr(start, end - start)]
+		if source.substr(call.get_start(), call.get_end() - call.get_start()).contains("Icons.with_text"):
+			var second_start := end + 1
+			while second_start < source.length() and source.substr(second_start, 1).strip_edges().is_empty():
+				second_start += 1
+			var second_end := _first_argument_end(source, second_start)
+			arguments.append(source.substr(second_start, second_end - second_start))
+		for argument_text in arguments:
+			for found in literal_regex.search_all(argument_text):
+				var parsed = JSON.parse_string("\"%s\"" % found.get_string(1))
+				if parsed is String and parsed.strip_edges().length() > 1 and parsed.to_lower() != parsed:
+					_add_message(parsed, "%s:%d" % [reference, source.substr(0, start + found.get_start()).count("\n") + 1])
+
+
+func _first_argument_end(source: String, start: int) -> int:
+	var depth := 0
+	var in_string := false
+	var escaped := false
+	for index in range(start, source.length()):
+		var character := source.substr(index, 1)
+		if in_string:
+			if escaped:
+				escaped = false
+			elif character == "\\":
+				escaped = true
+			elif character == "\"":
+				in_string = false
+		elif character == "\"":
+			in_string = true
+		elif character == "(" or character == "[" or character == "{":
+			depth += 1
+		elif character == ")" or character == "]" or character == "}":
+			if depth == 0:
+				return index
+			depth -= 1
+		elif character == "," and depth == 0:
+			return index
+	return source.length()
+
+
+func _add_ui_value(value: Variant, path: String) -> void:
+	if value is Dictionary:
+		for key in value:
+			_add_ui_value(value[key], "%s.%s" % [path, str(key)])
+	elif value is Array:
+		for index in value.size():
+			_add_ui_value(value[index], "%s[%d]" % [path, index])
+	elif value is String:
+		_add_message(value, "src/client/ui/ui_text.gd:%s" % path)
 
 
 func _walk(value: Variant, source: String, path: String) -> void:

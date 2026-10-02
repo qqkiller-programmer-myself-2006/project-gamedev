@@ -12,6 +12,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	Tr.setup("en")
 	root.size = Vector2i(1280, 720)
 	var app := ClientApp.new()
 	root.add_child(app)

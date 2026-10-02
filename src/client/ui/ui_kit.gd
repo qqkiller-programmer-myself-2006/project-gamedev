@@ -54,11 +54,21 @@ const SIZES := {"tiny": 11, "small": 14, "body": 17, "heading": 21, "title": 29,
 ## Numeric labels use the Godot body font: its digits are deliberately easier
 ## to distinguish at a glance than Pixelify's 5/S and 7/1.
 const PIXEL_FONT_PATH := "res://assets/fonts/PixelifySans.ttf"
+const THAI_FONT_PATH := "res://assets/fonts/NotoSansThai-Regular.ttf"
 const NO_LIGATURES := {"liga": 0, "clig": 0, "dlig": 0}
 ## Story files load the TTF directly; `.import` is not tracked, so apply overrides here.
 
 static var _pixel_font: Font = null
 static var _number_font: Font = null
+static var _thai_font: FontFile = null
+
+
+static func thai_font() -> FontFile:
+	if _thai_font == null:
+		_thai_font = load(THAI_FONT_PATH) as FontFile
+	return _thai_font
+
+
 static var _sound_bank: SoundBank = null
 
 
@@ -80,6 +90,7 @@ static func pixel_font() -> Font:
 	if _pixel_font == null:
 		var file: FontFile = load(PIXEL_FONT_PATH)
 		file.opentype_feature_overrides = NO_LIGATURES
+		file.fallbacks = [thai_font()]
 		var variation := FontVariation.new()
 		variation.base_font = file
 		variation.opentype_features = NO_LIGATURES
@@ -98,7 +109,12 @@ static func number_font() -> Font:
 static func make_theme(scale: float) -> Theme:
 	var theme := Theme.new()
 	var pixel := pixel_font()
+	var body_font := number_font()
+	body_font.fallbacks = [thai_font()]
+	theme.default_font = body_font
 	theme.default_font_size = int(SIZES["body"] * scale)
+	theme.set_constant("line_spacing", "Label", int(5 * scale))
+	theme.set_constant("line_spacing", "Button", int(5 * scale))
 	for style in SIZES:
 		var variation: String = style.capitalize() + "Label"
 		theme.set_type_variation(variation, "Label")
@@ -349,7 +365,7 @@ class DiamondBox extends StyleBox:
 ## This is the central routing point so para(), badge() and every caller share
 ## the same rule.
 static func pixel_label(text: String, style: String = "body", color: Color = Color(0, 0, 0, 0)) -> Label:
-	var node := label(text, style, color)
+	var node := label(Tr.t(text), style, color)
 	node.theme_type_variation = "Pixel" + style.capitalize() + "Label"
 	return node
 
@@ -364,6 +380,14 @@ static func _has_digit(text: String) -> bool:
 	for i in text.length():
 		var code := text.unicode_at(i)
 		if code >= 48 and code <= 57:
+			return true
+	return false
+
+
+static func _has_thai(text: String) -> bool:
+	for i in text.length():
+		var code := text.unicode_at(i)
+		if code >= 0x0E00 and code <= 0x0E7F:
 			return true
 	return false
 
@@ -445,16 +469,19 @@ static func status_badge(entry: Dictionary, compact: bool = false) -> PanelConta
 	style.content_margin_top = 0
 	style.content_margin_bottom = 0
 	badge_panel.add_theme_stylebox_override("panel", style)
-	badge_panel.tooltip_text = "%s: %s stack(s), %s turn(s) left" % [entry.get("name", status),
-			entry.get("stacks", 1), entry.get("turns", 0)]
+	badge_panel.tooltip_text = Tr.t("%s: %s stack(s), %s turn(s) left" % [Tr.t(str(entry.get("name", status))),
+			entry.get("stacks", 1), entry.get("turns", 0)])
 	return badge_panel
 
 
 ## A single-line label (does not wrap; keep it short).
 static func label(text: String, style: String = "body", color: Color = Color(0, 0, 0, 0)) -> Label:
 	var node := Label.new()
-	node.text = text
+	var display_text := Tr.t(text)
+	node.text = display_text
 	node.theme_type_variation = "DimLabel" if style == "dim" else style.capitalize() + "Label"
+	if _has_thai(display_text):
+		node.add_theme_font_override("font", number_font())
 	if _has_digit(text):
 		node.add_theme_font_override("font", number_font())
 	if color.a > 0.0:
@@ -476,7 +503,8 @@ static func para(text: String, style: String = "body", color: Color = Color(0, 0
 ## "danger" (destructive, ask first) or "small" (dense rows).
 static func button(text: String, callback: Callable, big: bool = false, kind: String = "secondary", sound_cue: String = "") -> Button:
 	var node := Button.new()
-	node.text = text
+	var display_text := Tr.t(text)
+	node.text = display_text
 	node.focus_mode = Control.FOCUS_ALL
 	node.theme_type_variation = button_variation(kind, big)
 	if _has_digit(text):
@@ -484,6 +512,8 @@ static func button(text: String, callback: Callable, big: bool = false, kind: St
 	node.mouse_entered.connect(_on_button_mouse_entered.bind(node))
 	if not sound_cue.is_empty():
 		node.pressed.connect(play_sound.bind(sound_cue))
+	if _has_thai(display_text):
+		node.add_theme_font_override("font", number_font())
 	node.pressed.connect(callback)
 	return node
 
@@ -509,7 +539,7 @@ static func primary(text: String, callback: Callable, big: bool = true, sound_cu
 static func disable(control: BaseButton, off: bool, reason: String) -> void:
 	control.disabled = off
 	if off:
-		control.tooltip_text = reason
+		control.tooltip_text = Tr.t(reason)
 
 
 static func vbox(separation: int = 8) -> VBoxContainer:

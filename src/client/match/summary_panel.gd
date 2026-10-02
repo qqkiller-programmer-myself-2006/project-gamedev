@@ -25,25 +25,25 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	stats.add_theme_constant_override("h_separation", 24)
 	var classes: Array[String] = []
 	for id in summary.get("classes_discovered", []):
-		classes.append(str(id).capitalize())
+		classes.append(Tr.t(str(id).capitalize()))
 	var rows := [
 		["Time played", UiText.clock(float(summary.get("elapsed", 0.0)))],
 		["Reached", _reached(summary, won)],
 		["Enemies defeated", str(int(summary.get("enemies_defeated", 0)))],
-		["Classes discovered", ", ".join(classes) if not classes.is_empty() else "none"],
-		["Story Clues found", str(int(summary.get("clues_found", 0)))],
+		["Classes discovered", ", ".join(classes) if not classes.is_empty() else Tr.t("none")],
+		[Tr.t("Story Clues found"), str(int(summary.get("clues_found", 0)))],
 	]
 	for row in rows:
 		stats.add_child(UiKit.label(row[0], "dim"))
 		stats.add_child(UiKit.label(row[1], "heading"))
 	add_child(UiKit.panel(stats, "CardPanel"))
 	for clue in summary.get("clues", []):
-		add_child(UiKit.para("- %s: %s" % [clue["title"], clue["text"]], "dim"))
+		add_child(UiKit.para("- %s: %s" % [Tr.t(str(clue["title"])), Tr.t(str(clue["text"]))], "dim"))
 
 
 static func _reached(summary: Dictionary, won: bool) -> String:
 	if won:
-		return "Guardian Boss defeated"
+		return Tr.t("Guardian Boss defeated")
 	if summary.get("reached_boss", false):
 		return "Guardian Boss"
-	return "Layer %d of %d" % [int(summary.get("layer", 0)), int(summary.get("layers_total", 5))]
+	return Tr.t("Layer %d of %d" % [int(summary.get("layer", 0)), int(summary.get("layers_total", 5))])

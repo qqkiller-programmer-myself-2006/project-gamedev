@@ -50,6 +50,7 @@ func configure(launch_options: Dictionary) -> void:
 
 
 func _ready() -> void:
+	Tr.setup(str(options.get("lang", "th")))
 	settings = ClientSettings.load_saved()
 	player_token = _load_player_token()
 	if options.has("name"):
@@ -410,7 +411,7 @@ func toast(message: String, seconds: float = 4.0) -> void:
 		_toast.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, 12)
 	else:
 		_toast.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT, Control.PRESET_MODE_MINSIZE, 16)
-	_toast_label.text = message
+	_toast_label.text = Tr.t(message)
 	_toast_until = _local_now() + seconds
 	_toast.visible = true
 
@@ -424,7 +425,7 @@ func toast_error(message: String, seconds: float = 4.0) -> void:
 
 ## A big announcement across the screen (the visual twin of sound cues).
 func banner(message: String, seconds: float = 2.5, cue: String = "") -> void:
-	_banner_label.text = message
+	_banner_label.text = Tr.t(message)
 	_banner_until = _local_now() + seconds
 	_banner.visible = true
 	if not cue.is_empty():
@@ -462,7 +463,7 @@ func flash(node: CanvasItem, color: Color) -> void:
 		return
 	var tween := create_tween()
 	tween.tween_property(node, "modulate", color, 0.08)
-	var resting := Color(0.55, 0.55, 0.55, 0.85) if node is BattleToken and (node as BattleToken).down else Color.WHITE
+	var resting: Color = node.call("resting_modulate") if node.has_method("resting_modulate") else Color.WHITE
 	tween.tween_property(node, "modulate", resting, 0.25)
 
 
@@ -564,14 +565,9 @@ func open_settings() -> void:
 ## Asks before a destructive action (`key` in UiText.CONFIRM; `args` fill
 ## the text's %s / %d).
 func confirm(key: String, on_confirm: Callable, args: Array = []) -> void:
-	for child in _overlay_holder.get_children():
-		if child is ConfirmDialog:
-			return
 	var texts: Array = UiText.CONFIRM[key]
-	var dialog := ConfirmDialog.new()
-	_overlay_holder.add_child(dialog)
-	var title := str(texts[0])
-	var body := str(texts[1])
+	var title := Tr.t(str(texts[0]))
+	var body := Tr.t(str(texts[1]))
 	if key == "buy_item" and args.size() >= 2:
 		title = title % str(args[0])
 		body = body % int(args[1])
@@ -579,7 +575,16 @@ func confirm(key: String, on_confirm: Callable, args: Array = []) -> void:
 		if title.contains("%"):
 			title = title % args[0]
 		body = body % args
-	dialog.setup(title, body, str(texts[2]), on_confirm)
+	confirm_custom(title, body, Tr.t(str(texts[2])), on_confirm)
+
+
+func confirm_custom(title: String, text: String, confirm_label: String, on_confirm: Callable) -> void:
+	for child in _overlay_holder.get_children():
+		if child is ConfirmDialog:
+			return
+	var dialog := ConfirmDialog.new()
+	_overlay_holder.add_child(dialog)
+	dialog.setup(Tr.t(title), text, Tr.t(confirm_label), on_confirm)
 
 
 ## Leaves the room or Match after asking.

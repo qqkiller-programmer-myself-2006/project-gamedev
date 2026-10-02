@@ -1,47 +1,47 @@
-# Design alignment plan — 2026-09-30
+# แผนจัดแนวเอกสารการออกแบบ — 2026-09-30
 
-## Goal
+## เป้าหมาย
 
-Make the repository's product description, domain glossary, accepted ADRs, review notes, and GitHub Project point to one current design. Keep this first pass documentation-only; do not change gameplay until any open product choice is recorded in an accepted ADR.
+ทำให้คำอธิบายผลิตภัณฑ์ อภิธานศัพท์โดเมน ADR ที่ยอมรับแล้ว บันทึกรีวิว และ GitHub Project อ้างอิงการออกแบบปัจจุบันชุดเดียวกัน รอบแรกให้แก้เฉพาะเอกสาร; อย่าเปลี่ยนรูปแบบการเล่นจนกว่าจะบันทึกการตัดสินใจด้านผลิตภัณฑ์ที่ยังเปิดอยู่ใน ADR ที่ยอมรับแล้ว
 
-## Current source of truth
+## แหล่งอ้างอิงปัจจุบัน
 
-Use the latest accepted ADR and explicit owner decisions as the implementation contract. ADR-0013 replaces the old Classless-first direction for matches with a pre-match Class/Race/Boon loadout; Classless remains a compatibility path when no loadout is supplied. ADR-0014 currently defines offline Story mode as using an isolated in-memory profile with Human and no Boons or class-tree meta. The implementation in `src/client/story/story_launcher.gd` and `src/match/room.gd` follows that Story rule.
+ให้ใช้ ADR ฉบับล่าสุดที่ยอมรับแล้วและการตัดสินใจชัดเจนของเจ้าของงานเป็นข้อกำหนดในการพัฒนา ADR-0013 เปลี่ยนแนวทางเริ่มแมตช์แบบ Classless เป็นการเลือก Class/Race/Boon loadout ก่อนเริ่ม; ยังคงเส้นทางรองรับ Classless เมื่อไม่ได้ส่ง loadout ADR-0014 ระบุปัจจุบันว่า Story mode ออฟไลน์ใช้โปรไฟล์ในหน่วยความจำที่แยกออกมา โดยเป็น Human และไม่มี Boons หรือ meta ของ class tree ส่วนการทำงานใน `src/client/story/story_launcher.gd` และ `src/match/room.gd` เป็นไปตามกติกานี้
 
-The open question is whether Story should continue to have no online profile meta or inherit the lead player's Race/Boons. The accepted ADR and current implementation say no; an older final-review follow-up suggests yes. Preserve the accepted behavior unless the owner records a new decision. If changed, revise ADR-0014 and define save validation, profile source, and tests before code changes.
+คำถามที่ยังเปิดอยู่คือ Story ควรไม่มี meta จากโปรไฟล์ออนไลน์ต่อไป หรือรับ Race/Boons ของตัวละครหลักมาใช้ ADR ที่ยอมรับแล้วและการทำงานปัจจุบันระบุว่าไม่ใช้; บันทึกติดตามจาก final review ฉบับเก่าเสนอให้ใช้ ให้คงพฤติกรรมที่ยอมรับแล้วไว้จนกว่าเจ้าของงานจะบันทึกการตัดสินใจใหม่ หากเปลี่ยน ให้แก้ ADR-0014 และกำหนดการตรวจสอบ save แหล่งโปรไฟล์ และ test ก่อนแก้โค้ด
 
-## Findings
+## ข้อค้นพบ
 
-1. **PRD conflicts with ADR-0013.** `docs/design/prd.md` says the player begins Classless and discovers Classes during travel. ADR-0013 says the normal match starts with a pre-match loadout and only missing-loadout compatibility starts Classless.
-2. **The domain glossary contradicts itself.** `CONTEXT.md` says Enervation is a Boon in its introduction, but its Assassin and Enervation entries still describe an Assassin passive and say the slice has no Boons. ADR-0013 explicitly supersedes that rule.
-3. **ADR naming/supersession drift.** ADR-0010's rename/supersession note was placed before its YAML front matter, and its accepted body still describes Rogue's Enervation passive. ADR-0013 also still names the Tier 1 Class Rogue after #74 renamed it Assassin. Preserve ADR-0010 as history, but make its supersession easy to parse and find; use Assassin in ADR-0013's current requirements.
-4. **Review follow-up #76 mixes a decision with a defect.** Story's no-meta behavior matches ADR-0014 today, while the review recommends wiring the profile Race/Boons. Resolve it as a product decision before treating it as implementation work.
-5. **GitHub Project #8 has stale statuses.** Issues #46, #82, #84, and #86 are closed, but their Project items remain `In Progress`. The Project should be reconciled from issue state; #47 remains active, while #54 and #55 still need human sign-off/deployment.
-6. **Checkpoint was behind main.** `.ai/checkpoint.md` ended at the 0cc1 worktree/#90 handoff, while this checkout is detached at `main` HEAD `7dd5d8b` (PR #97 merged) and PR #98 is open. The current audit entry now records that newer state.
+1. **PRD ขัดกับ ADR-0013** `docs/design/prd.md` ระบุว่าผู้เล่นเริ่มแบบ Classless แล้วค้นพบอาชีพระหว่างเดินทาง ส่วน ADR-0013 ระบุว่าแมตช์ปกติเริ่มด้วย loadout ก่อนเริ่ม และรองรับการเริ่มแบบ Classless เฉพาะกรณีไม่มี loadout
+2. **อภิธานศัพท์โดเมนขัดแย้งกันเอง** คำนำของ `CONTEXT.md` ระบุว่า Enervation เป็น Boon แต่รายการ Assassin และ Enervation ยังอธิบายว่าเป็น passive ของ Assassin และระบุว่า slice ไม่มี Boon ซึ่ง ADR-0013 ยกเลิกกติกานั้นอย่างชัดเจน
+3. **ชื่อและการแทนที่ ADR ไม่สอดคล้องกัน** หมายเหตุเปลี่ยนชื่อ/แทนที่ของ ADR-0010 อยู่ก่อนส่วน YAML front matter และเนื้อหาที่รับรองแล้วยังอธิบาย passive Enervation ของ Rogue ส่วน ADR-0013 ยังเรียก Tier 1 Class ว่า Rogue หลัง #74 เปลี่ยนชื่อเป็น Assassin ให้เก็บ ADR-0010 ไว้เป็นประวัติ แต่จัดตำแหน่งหมายเหตุการแทนที่ให้อ่านและค้นพบง่าย; ใช้ Assassin ในข้อกำหนดปัจจุบันของ ADR-0013
+4. **บันทึกติดตาม #76 ปะปนการตัดสินใจกับข้อบกพร่อง** พฤติกรรม Story ที่ไม่มี meta ตรงกับ ADR-0014 ในปัจจุบัน แต่รีวิวเสนอให้เชื่อม Race/Boons จากโปรไฟล์ ให้ตัดสินใจด้านผลิตภัณฑ์ก่อนนับเรื่องนี้เป็นงานพัฒนา
+5. **สถานะ GitHub Project #8 ล้าสมัย** issue #46, #82, #84 และ #86 ปิดแล้ว แต่รายการใน Project ยังเป็น `In Progress` ควรปรับ Project ให้ตรงกับสถานะ issue; #47 ยังดำเนินอยู่ ส่วน #54 และ #55 ยังต้องให้มนุษย์ตรวจรับ/ดำเนินการ deploy
+6. **Checkpoint ล้าหลัง main** `.ai/checkpoint.md` จบที่การส่งต่องานจาก worktree 0cc1/#90 ขณะที่ checkout นี้ detached อยู่ที่ `main` HEAD `7dd5d8b` (merge PR #97 แล้ว) และ PR #98 ยังเปิดอยู่ รายการ audit ปัจจุบันได้บันทึกสถานะใหม่นี้แล้ว
 
-## Work sequence
+## ลำดับงาน
 
-### A. Documentation-only alignment — completed in this audit
+### A. ปรับเอกสารให้ตรงกันเท่านั้น — เสร็จใน audit นี้
 
-- Updated `docs/design/prd.md` to describe the current pre-match loadout and Classless compatibility path. Broader narrative goals remain intact.
-- Fixed the conflicting Assassin and Enervation entries in `CONTEXT.md`; Enervation is now a Boon, not an Assassin passive.
-- Repaired ADR-0010 front matter and marked its Enervation decision superseded by ADR-0013. The historical rule text remains intact.
-- Updated ADR-0013's current Class and Boon wording to use Assassin after rename #74.
-- Added a post-review disposition in `docs/review/2026-09-30-final-review.md`: F4's proposed Story profile behavior is not a defect under the accepted ADR-0014 policy. Keep historical findings visible as a dated review snapshot.
-- Updated the checkpoint's current entry with the latest `main` commit (`0779ef1`, including merged PR #98) while keeping historical log entries intact.
+ - ปรับ `docs/design/prd.md` ให้อธิบาย loadout ก่อนเริ่มและเส้นทางรองรับ Classless ในปัจจุบัน โดยคงเป้าหมายด้านเนื้อเรื่องส่วนอื่นไว้
+ - แก้รายการ Assassin และ Enervation ที่ขัดแย้งกันใน `CONTEXT.md`; ปัจจุบัน Enervation เป็น Boon ไม่ใช่ passive ของ Assassin
+ - ซ่อม front matter ของ ADR-0010 และระบุว่าการตัดสินใจเรื่อง Enervation ถูก ADR-0013 แทนที่ โดยคงข้อความกติกาในอดีตไว้
+ - ปรับถ้อยคำ Class และ Boon ปัจจุบันใน ADR-0013 ให้ใช้ Assassin หลังเปลี่ยนชื่อใน #74
+ - เพิ่มข้อสรุปหลังรีวิวใน `docs/review/2026-09-30-final-review.md`: พฤติกรรมโปรไฟล์ Story ที่เสนอใน F4 ไม่ใช่ข้อบกพร่องภายใต้นโยบาย ADR-0014 ที่ยอมรับแล้ว ให้คงข้อค้นพบในอดีตไว้เป็นภาพรีวิวที่ระบุวันที่
+ - ปรับรายการปัจจุบันใน checkpoint ให้ใช้ commit `main` ล่าสุด (`0779ef1` ซึ่งรวม PR #98 ที่ merge แล้ว) โดยคงบันทึกประวัติเดิมไว้
 
-### B. Resolve tracking drift
+### B. แก้สถานะติดตามงานที่คลาดเคลื่อน
 
-- Set Project #8 items #46, #82, #84, and #86 to `Done` to match their closed GitHub issues.
-- Keep #47 `In Progress`; check #54 and #55 with the owner because their remaining work is human QA/sign-off and Worker deployment.
-- Update the current checkpoint/work queue to mention PR #98 as open and avoid treating old #90 handoff notes as today's active branch state.
+ - ตั้งรายการ #46, #82, #84 และ #86 ใน Project #8 เป็น `Done` ให้ตรงกับ GitHub issue ที่ปิดแล้ว
+ - คง #47 เป็น `In Progress`; ตรวจสอบ #54 และ #55 กับเจ้าของงาน เพราะงานที่เหลือต้องให้มนุษย์ทำ QA/ลงนามรับรองและ deploy Worker
+ - ปรับ checkpoint/คิวงานปัจจุบันให้ระบุว่า PR #98 ยังเปิดอยู่ และอย่าใช้บันทึกส่งต่องาน #90 เก่าเป็นสถานะ branch ปัจจุบัน
 
-### C. Story profile decision and follow-up
+### C. ตัดสินใจเรื่องโปรไฟล์ Story และงานติดตาม
 
-- Default: keep Story on Human/no Boons/no class-tree meta as specified by accepted ADR-0014.
-- If the owner wants shared progression in Story, write a new ADR decision first. Then define whether the profile is read-only, which slot inherits it, how online gems stay isolated, how save validation handles tree bonuses, and how Continue preserves the loadout. Track implementation in a separate issue.
+- ค่าเริ่มต้น: คง Story ให้ใช้ Human/ไม่มี Boons/ไม่มี meta ของ class tree ตาม ADR-0014 ที่ยอมรับแล้ว
+- หากเจ้าของงานต้องการให้ Story ใช้ความก้าวหน้าร่วม ให้เขียน ADR การตัดสินใจใหม่ก่อน จากนั้นกำหนดว่าโปรไฟล์เป็นแบบอ่านอย่างเดียวหรือไม่ slot ใดใช้ข้อมูลนี้ วิธีแยก Gems ออนไลน์ วิธีตรวจ save เมื่อมีโบนัสจาก tree และวิธีให้ Continue เก็บ loadout ไว้ ติดตามการพัฒนาใน issue แยกต่างหาก
 
-## Acceptance checks
+## เกณฑ์ตรวจรับ
 
 - Current requirements in PRD, `CONTEXT.md`, ADR-0013, and ADR-0014 do not contradict each other; historical ADR-0010 differences are explicitly marked superseded.
 - Search results for current-design text contain no active statement that Enervation is an Assassin passive or that standard matches begin Classless.
@@ -49,8 +49,8 @@ The open question is whether Story should continue to have no online profile met
 - Project #8 status matches closed/open GitHub issue state for the listed items.
 - Run `bash tools/run_tests.sh` once no other Godot process is running; expected result is exit code 0 and 0 failed. If docs-only changes do not touch runtime, the test suite is still a baseline regression check rather than behavior verification.
 
-## Risks / limits
+## ความเสี่ยงและข้อจำกัด
 
-- PRD is much larger than the ADR set; revise only mechanics contradicted by accepted ADRs and retain narrative/product goals.
-- Do not mutate Project #8 or rewrite closed issues until the owner approves the proposed Story policy and tracking cleanup.
-- Full tests were not run during this audit because a Godot editor process is open on another checkout; the repository checkpoint warns that concurrent Godot runs can fail silently.
+- PRD มีขนาดใหญ่กว่าชุด ADR มาก ให้ปรับเฉพาะกติกาที่ขัดกับ ADR ที่ยอมรับแล้ว และคงเป้าหมายด้านเนื้อเรื่อง/ผลิตภัณฑ์ไว้
+- อย่าเปลี่ยน Project #8 หรือเขียน issue ที่ปิดแล้วใหม่ จนกว่าเจ้าของงานจะอนุมัตินโยบาย Story และการปรับข้อมูลติดตามงาน
+- ไม่ได้รัน test ทั้งชุดระหว่าง audit นี้ เพราะมี process Godot editor เปิดอยู่ใน checkout อื่น checkpoint ของรีโปเตือนว่าการรัน Godot พร้อมกันอาจล้มเหลวโดยไม่แสดงข้อผิดพลาด

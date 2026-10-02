@@ -12,10 +12,11 @@ var _recipes: Array = []
 var _ready := false
 var _deadline: Variant = null
 var _countdown: Label
+var _last_countdown_color := Color.TRANSPARENT
 var _region: Label
 var _encounter_label: Label
 var _encounter_icon: TextureRect
-var _columns: HBoxContainer
+var _columns: Control
 var _bottom: HBoxContainer
 var _workspace: Control
 var _hide_button: Button
@@ -80,7 +81,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	encounter_box.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	encounter_box.position = Vector2(112, 12)
 	add_child(encounter_box)
-	_workspace = Control.new()
+	_workspace = ScrollContainer.new()
 	_workspace.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var edge := 10.0 if _app.settings.text_scale >= 1.4 else 24.0
 	_workspace.offset_left = edge
@@ -98,8 +99,8 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_bottom.offset_bottom = -10
 	_bottom.alignment = BoxContainer.ALIGNMENT_CENTER
 	add_child(_bottom)
-	_hide_button = _button("Hide", func() -> void: _toggle_hidden())
-	_hide_button.tooltip_text = "Hide the camp to look at the field"
+	_hide_button = _button(Tr.t("Hide"), func() -> void: _toggle_hidden())
+	_hide_button.tooltip_text = Tr.t("Hide the camp to look at the field")
 	_hide_button.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	_hide_button.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	_hide_button.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -118,16 +119,19 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 
 func build(view: Dictionary, encounter: Dictionary) -> void:
 	_encounter = encounter
+	var layer := str(view.get("layer", 1))
+	var viewport_width := get_viewport_rect().size.x if is_inside_tree() else 1280.0
+	_columns.custom_minimum_size.x = maxf(0.0, viewport_width - 48.0)
 	if _inspect < 0: _inspect = maxi(0, _screen.your_slot())
 	# T34: build() tears down _columns/_bottom, so remember scroll positions
 	# and the focused control first and restore them after the rebuild.
 	var camp_state := _snapshot_camp_state()
-	_region.text = "%s (%d/%d)" % [UiText.region_of(view), int(view.get("layer", 0)), int(view.get("layers_total", 5))]
+	_region.text = Tr.t("%s (%d/%d)" % [Tr.t(UiText.region_of(view)), int(view.get("layer", 0)), int(view.get("layers_total", 5))])
 	var backdrop_name := backdrop_for_layer(_content, int(view.get("layer", 1)))
 	_backdrop.set_backdrop(backdrop_name)
 	var merchant := str(encounter.get("kind", "")) == "merchant"
 	_encounter_icon.texture = Icons.texture("merchant") if merchant else Icons.texture("rest")
-	_encounter_label.text = "\"%s\"" % str(encounter.get("name", "Merchant" if merchant else "Rest")).replace("\"", "")
+	_encounter_label.text = "\"%s\"" % Tr.t(str(encounter.get("name", "Merchant" if merchant else "Rest")).replace("\"", ""))
 	_stock = encounter.get("stock", []) if merchant else []
 	_ready = bool(encounter.get("you_are_ready", false))
 	_deadline = encounter.get("deadline", encounter.get("ends_at"))
@@ -341,13 +345,16 @@ func _scroll_body(body: Control) -> ScrollContainer:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.follow_focus = true
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	# Keep list panels from collapsing when their parent is a nested VBox inside
+	# the horizontally scrolling three-column workspace.
+	scroll.custom_minimum_size.y = 96.0
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(body)
 	return scroll
 
 func _search_box(text: String, on_change: Callable, focus_id: String) -> LineEdit:
 	var search := LineEdit.new()
-	search.placeholder_text = "Search..."
+	search.placeholder_text = Tr.t("Search...")
 	search.text = text
 	search.clear_button_enabled = true
 	search.set_meta("focus_id", focus_id)
@@ -396,7 +403,7 @@ func _build_shop(view: Dictionary, body: VBoxContainer) -> void:
 		if int(entry.get("remaining", 0)) <= 0:
 			buy_label = "Sold out"
 		elif not affordable:
-			buy_label = "Need %d Gold" % int(entry.get("price", 0))
+			buy_label = Tr.t("Need %d Gold" % int(entry.get("price", 0)))
 		var buy := _button(buy_label, func() -> void: _app.send({"type": "buy", "slot": _acting_slot(), "item": entry.get("item", "")}))
 		if int(entry.get("remaining", 0)) <= 0:
 			UiKit.disable(buy, true, UiText.WHY["sold_out"])
@@ -469,14 +476,14 @@ func _recipe_row(recipe: Dictionary, index: int) -> Control:
 func _materials_text(recipe: Dictionary) -> String:
 	var materials: Array = recipe.get("materials", [])
 	if materials.is_empty():
-		return "No materials needed"
+		return Tr.t("No materials needed")
 	var parts: Array[String] = []
 	for material in materials:
 		var need := int(material.get("need", 0))
 		var have := int(material.get("have", 0))
-		parts.append("%d/%d %s %s" % [have, need, str(material.get("name", material.get("item", ""))),
-				"OK" if have >= need else "NEED"])
-	return "Mats: " + ", ".join(parts)
+		parts.append(Tr.t("%d/%d %s %s" % [have, need, Tr.t(str(material.get("name", material.get("item", "")))),
+				Tr.t("OK") if have >= need else Tr.t("NEED")]))
+	return Tr.t("Mats: %s" % ", ".join(parts))
 
 func _build_stash(view: Dictionary, body: VBoxContainer) -> void:
 	for entry in view.get("inventory", []):
@@ -629,7 +636,7 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 			UiKit.disable(off, not _can_manage_inspected(), UiText.WHY["equip_not_yours"])
 			controls.add_child(off)
 			var info := _button("?", func() -> void: _show_info(worn))
-			info.tooltip_text = "Inspect"
+			info.tooltip_text = Tr.t("Inspect")
 			controls.add_child(info)
 		cell.add_child(controls)
 		var cell_panel := UiKit.panel(cell, "HudCard")
@@ -640,8 +647,8 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	var attrs: Dictionary = character.get("attributes", {})
 	var derived: Dictionary = character.get("derived", {})
 	stats.add_child(_stat("HP", "%d/%d" % [int(character.get("hp", 0)), int(character.get("max_hp", 0))], "hp"))
-	stats.add_child(_stat("Energy", str(character.get("energy", 0)), "energy"))
-	stats.add_child(_stat("Level", str(int(character.get("level", 1))), "level"))
+	stats.add_child(_stat(Tr.t("Energy"), str(character.get("energy", 0)), "energy"))
+	stats.add_child(_stat(Tr.t("Level"), str(int(character.get("level", 1))), "level"))
 	stats.add_child(_stat("EXP", "%d/%d" % [int(character.get("exp", 0)), int(character.get("exp_next", 0))], "exp"))
 	var separator_one := Control.new()
 	separator_one.custom_minimum_size = Vector2(0, 8)
@@ -651,15 +658,15 @@ func _equipment_panel(view: Dictionary, merchant: bool) -> Control:
 	var separator_two := Control.new()
 	separator_two.custom_minimum_size = Vector2(0, 8)
 	stats.add_child(separator_two)
-	stats.add_child(_stat("Initiative", str(int(derived["initiative"])) if derived.has("initiative") else "\u2014"))
-	stats.add_child(_stat("Crit Chance", _percent(derived.get("crit", character.get("crit"))), "crit"))
-	stats.add_child(_stat("Crit Damage", _percent(derived.get("crit_damage"))))
-	stats.add_child(_stat("Block Chance", _percent(derived.get("block"))))
-	stats.add_child(_stat("Block Damage Reduction", _percent(derived.get("block_reduction"))))
-	stats.add_child(_stat("Dodge Chance", _percent(derived.get("dodge")), "dodge"))
-	stats.add_child(_stat("Aggro", _percent(derived.get("aggro"))))
-	stats.add_child(_stat("Lifesteal", _percent(derived.get("lifesteal"))))
-	stats.add_child(_stat("Energy Regen", str(int(derived["energy_regen"])) if derived.has("energy_regen") else "\u2014"))
+	stats.add_child(_stat(Tr.t("Initiative"), str(int(derived["initiative"])) if derived.has("initiative") else "\u2014"))
+	stats.add_child(_stat(Tr.t("Crit Chance"), _percent(derived.get("crit", character.get("crit"))), "crit"))
+	stats.add_child(_stat(Tr.t("Crit Damage"), _percent(derived.get("crit_damage"))))
+	stats.add_child(_stat(Tr.t("Block Chance"), _percent(derived.get("block"))))
+	stats.add_child(_stat(Tr.t("Block Damage Reduction"), _percent(derived.get("block_reduction"))))
+	stats.add_child(_stat(Tr.t("Dodge Chance"), _percent(derived.get("dodge")), "dodge"))
+	stats.add_child(_stat(Tr.t("Aggro"), _percent(derived.get("aggro"))))
+	stats.add_child(_stat(Tr.t("Lifesteal"), _percent(derived.get("lifesteal"))))
+	stats.add_child(_stat(Tr.t("Energy Regen"), str(int(derived["energy_regen"])) if derived.has("energy_regen") else "\u2014"))
 	var stat_scroll := _scroll_body(stats)
 	var stat_panel := UiKit.panel(stat_scroll, "HudCard")
 	stat_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -694,7 +701,7 @@ func _stat(label: String, value: String, icon_name: String = "") -> Control:
 func _build_bottom() -> void:
 	UiKit.clear(_bottom)
 	var story := ClientApp.is_story_view(_screen.room_view())
-	var ready_text := "Ready [R]" if story else "Ready (%d/%d) [R]" % [int(_encounter.get("ready", []).size()), maxi(1, int(_encounter.get("humans", 1)))]
+	var ready_text := Tr.t("Ready [R]") if story else Tr.t("Ready (%d/%d) [R]" % [int(_encounter.get("ready", []).size()), maxi(1, int(_encounter.get("humans", 1)))])
 	var ready := UiKit.primary(ready_text, func() -> void: _app.send({"type": "ready"}), false)
 	Icons.apply_to_button(ready, "ready", _app.settings.text_scale)
 	UiKit.disable(ready, _ready, UiText.WHY["ready"])
@@ -715,7 +722,10 @@ func tick() -> void:
 		return
 	var left := _app.seconds_left(_deadline)
 	_countdown.text = "%ds" % ceili(left)
-	_countdown.add_theme_color_override("font_color", UiKit.WARN if left <= 5.0 else UiKit.TEXT)
+	var color := UiKit.WARN if left <= 5.0 else UiKit.TEXT
+	if color != _last_countdown_color:
+		_countdown.add_theme_color_override("font_color", color)
+		_last_countdown_color = color
 
 func handle_key(key: int) -> bool:
 	var viewport := get_viewport()
@@ -745,7 +755,11 @@ func handle_key(key: int) -> bool:
 		return true
 	var index := key - KEY_1
 	if str(_encounter.get("kind", "")) == "merchant" and index >= 0 and index < _stock.size():
-		_app.send({"type": "buy", "slot": _acting_slot(), "item": _stock[index].get("item", "")})
+		var stock_item: Dictionary = _stock[index]
+		var item_name := str(stock_item.get("name", stock_item.get("item", "Item")))
+		var price := int(stock_item.get("price", 0))
+		_app.confirm_custom("Confirm purchase?", "Spend %d Gold on %s?" % [price, item_name], "Buy %s" % item_name,
+			func() -> void: _app.send({"type": "buy", "slot": _acting_slot(), "item": stock_item.get("item", "")}))
 		return true
 	if str(_encounter.get("kind", "")) == "rest" and index >= 0 and index < mini(9, _recipes.size()):
 		_app.send({"type": "craft", "slot": _acting_slot(), "recipe": _recipes[index].get("recipe", "")})
@@ -800,8 +814,13 @@ func _move_inspect(delta: int, party: Array) -> void:
 	_screen.refresh(_app, true)
 
 func _slot_name(slot: String) -> String:
-	if slot.begins_with("charm"): return "Charm " + slot.trim_prefix("charm")
-	return slot.capitalize()
+	if slot.begins_with("charm"): return Tr.t("Charm") + " " + slot.trim_prefix("charm")
+	match slot:
+		"helmet": return Tr.t("Helmet")
+		"chest": return Tr.t("Chest")
+		"legs": return Tr.t("Legs")
+		"weapon": return Tr.t("Weapon")
+	return Tr.t(slot.capitalize())
 
 
 func _slot_icon(slot: String) -> String:

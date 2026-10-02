@@ -72,7 +72,7 @@ func tick(_screen: MatchScreen, app: ClientApp) -> void:
 		_countdown.text = ""  # no timer (Story mode)
 		return
 	var left := ceili(app.seconds_left(_deadline))
-	_countdown.text = ("Vote closes in %ds" if _stage == "choosing" else "The journey continues in %ds") % left
+	_countdown.text = Tr.t(("Vote closes in %ds" if _stage == "choosing" else "The journey continues in %ds") % left)
 
 
 func handle_key(_screen: MatchScreen, app: ClientApp, key: int) -> bool:

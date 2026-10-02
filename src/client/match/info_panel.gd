@@ -36,7 +36,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 
 func tick(_screen: MatchScreen, app: ClientApp) -> void:
 	if _until != null:
-		_countdown.text = "The journey continues in %ds." % ceili(app.seconds_left(_until))
+		_countdown.text = Tr.t("The journey continues in %ds." % ceili(app.seconds_left(_until)))
 
 
 func _build_travel(view: Dictionary) -> void:

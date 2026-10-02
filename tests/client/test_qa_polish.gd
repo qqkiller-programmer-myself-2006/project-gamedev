@@ -48,14 +48,25 @@ func test_camp_uses_the_content_backdrop_for_each_region() -> void:
 	assert_eq(CampView.backdrop_for_layer(content, 5), "cave")
 
 
-func test_floating_damage_numbers_stack_with_readable_spacing() -> void:
+func test_floating_damage_numbers_queue_without_overlap() -> void:
 	var screen := MatchScreen.new()
-	var anchor := Control.new()
-	anchor.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	screen.anchors["e0"] = anchor
-	screen.add_child(anchor)
+	var first: int = screen._queue_float_start("e0", 1000)
+	var second: int = screen._queue_float_start("e0", 1000)
+	assert_eq(first, 1000, "the first floating number starts immediately")
+	assert_eq(second, 1720, "the next number for the same card waits for the first")
+	screen.free()
+
+
+func test_large_camp_layout_uses_vertical_scroll_and_keeps_equipment_column() -> void:
 	var app := ClientApp.new()
 	app.settings = ClientSettings.new()
+	app.settings.text_scale = 1.45
+	app.settings.seen_hints.append("merchant")
+	app.sounds = SoundBank.new()
+	app._overlay_holder = Control.new()
+	app.add_child(app._overlay_holder)
+	app.snapshot = {"room": {"your_slot": 0, "story": false, "slots": []}, "match": {"story": false}}
+	var screen := MatchScreen.new()
 	screen.app = app
 	# The lane stride stays larger than the rendered title text height, and the
 	# stack lifetime covers the full damage-number animation.
@@ -141,6 +152,52 @@ func test_nameplates_stay_inside_their_slot_at_every_text_size() -> void:
 				"energy": 1, "energy_max": 6, "statuses": [], "you": true})
 		assert_true(token.size.x <= 156.0, "plate width %s <= 156 at text %s" % [token.size.x, scale])
 		token.free()
+
+
+func test_battle_token_updates_keep_node_and_apply_reduced_motion_bars() -> void:
+	var token := BattleToken.new()
+	var data := {"id": "p0", "side": "party", "name": "Arin", "kind": "swordsman", "hp": 20,
+		"max_hp": 30, "energy": 3, "energy_max": 6, "statuses": [], "reduced_motion": true}
+	token.setup(data)
+	var instance_id := token.get_instance_id()
+	data["hp"] = 10
+	data["energy"] = 2
+	token.update_data(data)
+	assert_eq(token.get_instance_id(), instance_id, "snapshot updates retain the existing stage token")
+	assert_eq(token._hp_bar.value, 10.0, "reduced motion applies the new HP immediately")
+	assert_eq(token._energy_bar.value, 2.0, "reduced motion applies the new Energy immediately")
+	token.free()
+
+
+func test_battle_item_labels_use_content_names() -> void:
+	assert_eq(UiText.item_name("herb"), "Healing Herb")
+	assert_eq(UiText.item_name("tonic"), "Forest Tonic")
+
+
+func test_battle_event_log_translates_names_and_combat_pattern() -> void:
+	Tr.setup("th")
+	var screen := MatchScreen.new()
+	screen.names = {"p0": "Arin", "e0": "Goblin"}
+	var line := screen._describe_action({
+		"actor": "p0", "action": "attack", "results": [{"target": "e0", "damage": 15, "crit": true}],
+	})
+	assert_true(line.contains("อาริน") and line.contains("โจมตี"), "event log translates actor and action")
+	assert_true(line.contains("ก็อบลิน") and line.contains("ได้รับความเสียหาย 15"), "event log translates target and hit")
+	assert_false(line.contains("attacks") or line.contains("takes"), "event log does not leak English combat verbs")
+	screen.free()
+	Tr.setup("en")
+
+
+func test_trainer_sprite_uses_hero_scale_and_down_tint_survives_flashes() -> void:
+	var trainer := BattleToken.new()
+	trainer.setup({"id": "e0", "side": "enemy", "name": "Trainer", "kind": "thief", "sprite": "thief",
+		"trainer": true, "hp": 10, "max_hp": 10})
+	assert_true(trainer.figure_height >= 92.0, "trainer sprites are raised to the hero display size")
+	trainer.setup({"id": "e0", "side": "enemy", "name": "Trainer", "kind": "thief", "sprite": "thief",
+		"trainer": true, "hp": 0, "max_hp": 10})
+	trainer.play_animation("dead")
+	assert_eq(trainer.modulate, Color(0.55, 0.55, 0.55, 0.85), "down tint remains on the defeated trainer")
+	trainer.free()
 
 
 func test_gold_tips_do_not_say_shared() -> void:
