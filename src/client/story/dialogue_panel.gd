@@ -20,6 +20,10 @@ var _name_label := Label.new()
 var _text_label := Label.new()
 var _hint_label := Label.new()
 var _box: StyleBox = UiKit.navy_box()
+var _safe_log_top_y := 0.0
+var _safe_header_bottom_y := 0.0
+var _has_safe_bounds := false
+var _is_layouting := false
 
 var class_map: Dictionary = {}
 
@@ -145,7 +149,17 @@ func apply_settings(scale: float, reduced: bool) -> void:
 	queue_redraw()
 
 
+func set_safe_bounds(log_top_y: float, header_bottom_y: float) -> void:
+	_safe_log_top_y = log_top_y
+	_safe_header_bottom_y = header_bottom_y
+	_has_safe_bounds = true
+	_layout()
+
+
 func _layout() -> void:
+	if _is_layouting:
+		return
+	_is_layouting = true
 	var left := clampf(280.0 * text_scale, 280.0, 360.0) + 32.0
 	var available_width := maxf(300.0, size.x - 24.0)
 	var font_size := float(int(UiKit.SIZES["heading"] * text_scale))
@@ -154,10 +168,20 @@ func _layout() -> void:
 	for paragraph in _full_text.split("\n"):
 		line_count += maxi(0, ceili(float(paragraph.length()) / float(chars_per_line)) - 1)
 	var viewport_height := get_viewport_rect().size.y if is_inside_tree() else 720.0
-	var height := clampf(110.0 + line_count * font_size * 1.3, 190.0, maxf(190.0, viewport_height - 28.0))
+	var content_height := 110.0 + line_count * font_size * 1.3
+	var height := clampf(content_height, 190.0, maxf(190.0, viewport_height - 28.0))
 	offset_left = left
 	offset_top = -height
-	offset_bottom = -14.0
+	if _has_safe_bounds:
+		var safe_bottom := _safe_log_top_y - 14.0
+		var safe_top := _safe_header_bottom_y + 14.0
+		var max_height := maxf(1.0, safe_bottom - safe_top)
+		height = clampf(content_height, minf(190.0, max_height), max_height)
+		offset_bottom = safe_bottom - viewport_height
+		offset_top = offset_bottom - height
+	else:
+		offset_top = -height
+		offset_bottom = -14.0
 	var text_width := maxf(80.0, available_width - 210.0)
 	_name_label.position = Vector2(210, 18)
 	_name_label.size = Vector2(text_width, font_size + 12.0)
@@ -165,6 +189,7 @@ func _layout() -> void:
 	_text_label.size = Vector2(text_width, maxf(40.0, height - 100.0))
 	_hint_label.position = Vector2(maxf(210.0, available_width - 360.0), height - 34.0)
 	_hint_label.size = Vector2(minf(340.0, text_width), 24.0)
+	_is_layouting = false
 
 
 func _is_narrator() -> bool:
