@@ -73,6 +73,7 @@ func test_large_camp_layout_uses_vertical_scroll_and_keeps_equipment_column() ->
 	assert_true(screen.get_script().source_code.contains("-56.0 * lane"), "stacked damage numbers use a full text-line stride")
 	assert_true(screen.get_script().source_code.contains("now - t < 1200"), "stack lanes last until their labels fade")
 	screen.free()
+	app.sounds.free()
 	app.free()
 
 

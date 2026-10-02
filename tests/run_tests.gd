@@ -71,8 +71,14 @@ func _init() -> void:
 	if passed + failed == 0:
 		print("No tests matched.")
 		failed = 1
+	call_deferred("_finish_and_quit", 0 if failed == 0 else 1)
+
+
+func _finish_and_quit(exit_code: int) -> void:
+	# Let queue_free() calls made by fixtures drain before SceneTree shutdown.
+	await process_frame
 	OS.remove_logger(_capture)
-	quit(0 if failed == 0 else 1)
+	quit(exit_code)
 
 
 func _run_one(script: Script, method: String) -> Array[String]:
@@ -88,6 +94,7 @@ func _run_one(script: Script, method: String) -> Array[String]:
 	failures.append_array(instance._failures)
 	for error in _capture.take():
 		failures.append("engine error: %s" % error)
+	instance = null
 	return failures
 
 

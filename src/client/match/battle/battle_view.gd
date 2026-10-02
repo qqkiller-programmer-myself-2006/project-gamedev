@@ -633,9 +633,7 @@ func _build_enemy_plates(view: Dictionary) -> void:
 		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		var path := "res://assets/enemies/%s/portrait.png" % str(enemy.get("sprite", ""))
-		if ResourceLoader.exists(path):
-			portrait.texture = load(path)
+		portrait.texture = SpriteSet.enemy_portrait(str(enemy.get("sprite", "")))
 		row.add_child(portrait)
 		var info := UiKit.vbox(2)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL

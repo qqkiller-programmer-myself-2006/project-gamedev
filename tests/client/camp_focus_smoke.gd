@@ -138,4 +138,5 @@ func _run() -> void:
 	root.remove_child(camp)
 	camp.free()
 	screen.free()
+	app.sounds.free()
 	app.free()
