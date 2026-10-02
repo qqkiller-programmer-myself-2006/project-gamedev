@@ -14,8 +14,8 @@ You drive the OpenAI Codex CLI as the hands-on executor for this repo. You do no
 
 ## Steps
 
-1. If the worktree does not exist yet, create it from the integration branch:
-   `git worktree add -b ai/<short-name> "<worktree>" claude/github-project-issue-learning-20567b`.
+1. If the worktree does not exist yet, create it from `origin/main` (run `git fetch origin` first):
+   `git worktree add -b ai/<short-name> "<worktree>" origin/main`.
    Copy the task file into the worktree's `.ai/tasks/` if it is not committed there.
 2. Run, from the integration worktree root:
    `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .ai/run-agent.ps1 -Agent codex -Worktree "<worktree>" -TaskFile ".ai/tasks/<file>.md" -TimeoutMin <n> [-Images "<a>","<b>"] [-Network]`

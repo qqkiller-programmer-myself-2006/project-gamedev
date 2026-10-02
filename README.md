@@ -98,7 +98,26 @@ docs/adr/           บันทึกการตัดสินใจสถา
 export_presets.cfg  preset Web / Windows / Linux Server
 ```
 
+โฟลเดอร์อื่นที่ใช้งานบ่อย: `.ai/` เก็บ task spec และ runner, `.github/` เก็บ workflow กับ template,
+`art_source/` เก็บภาพต้นฉบับ, `i18n/` เก็บ catalog ภาษา, `docs/plans/` เก็บแผนงาน,
+`docs/references/` และ `docs/research/` เก็บแหล่งอ้างอิง, `docs/review/` เก็บ QA และผลรีวิว,
+`tools/art/` เตรียมภาพ และ `tools/i18n/` สร้าง/ตรวจ catalog
+
 ## ประวัติและสารบัญเพิ่มเติม
+
+## Project tree — สารบัญโฟลเดอร์
+
+- `.ai/` — task spec และ agent runner; `.github/` — workflow และ template
+- `art_source/` — ภาพต้นฉบับ; `assets/` — ภาพ ฟอนต์ และเสียงที่เกมใช้
+- `content/` — ข้อมูล Forest/Story; `deploy/` — staging และ profile worker
+- `docs/adr/`, `docs/design/`, `docs/guides/` — decisions, design และวิธีใช้งาน
+- `docs/history/`, `docs/plans/`, `docs/references/`, `docs/research/`, `docs/review/` — บันทึก แผน และข้อมูลอ้างอิง
+- `i18n/` — gettext catalog; `src/` — app, client, match, net, profile, server และ shared code
+- `tests/` — test suite; `tools/art/`, `tools/dev/`, `tools/i18n/`, `tools/ci/` — เครื่องมือพัฒนา
+
+## Contributing
+
+ดู [CONTRIBUTING.md](CONTRIBUTING.md) สำหรับแนวทางตั้งชื่อ branch รูปแบบ commit การรัน test และรายการตรวจ PR ส่วนการตั้งค่า GitHub ที่เจ้าของรีโปต้องทำ ดูที่ [docs/guides/github-setup.md](docs/guides/github-setup.md)
 
 - [docs/README.md](docs/README.md) — สารบัญเอกสารทั้งหมด
 - [docs/history/](docs/history/) — บันทึกงานเก่า (ย้ายจาก README เดิมที่ยาว 451 บรรทัด)

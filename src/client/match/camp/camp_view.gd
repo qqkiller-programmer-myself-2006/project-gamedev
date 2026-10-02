@@ -345,6 +345,9 @@ func _scroll_body(body: Control) -> ScrollContainer:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.follow_focus = true
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	# Keep list panels from collapsing when their parent is a nested VBox inside
+	# the horizontally scrolling three-column workspace.
+	scroll.custom_minimum_size.y = 96.0
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(body)
 	return scroll

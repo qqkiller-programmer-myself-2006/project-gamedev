@@ -48,7 +48,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 			add_child(UiKit.para("Story Clue found - %s: %s" % [clue["title"], clue["text"]], "body", UiKit.ACCENT))
 		var extras: Array[String] = []
 		if int(outcome.get("gold", 0)) > 0:
-			extras.append("+%d Gold" % int(outcome["gold"]))
+			extras.append("+%d Gold for you" % screen.personal_gold_share(int(outcome["gold"])))
 		for item in outcome.get("items", {}):
 			extras.append("+%d %s" % [int(outcome["items"][item]), UiText.item_name(str(item))])
 		if int(outcome.get("exp", 0)) > 0:

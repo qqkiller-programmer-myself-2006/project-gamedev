@@ -112,7 +112,8 @@ func _full_preview() -> void:
 		return
 	app.send({"type": "vote", "option": combat_option})
 	var battle_ready := false
-	for _i in 900:
+	var combat_wait_started_msec := Time.get_ticks_msec()
+	while Time.get_ticks_msec() - combat_wait_started_msec < 30000:
 		await process_frame
 		var match_view: Dictionary = app.snapshot.get("match", {})
 		var encounter = match_view.get("encounter", {})

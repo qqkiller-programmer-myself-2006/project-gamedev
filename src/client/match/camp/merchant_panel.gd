@@ -17,7 +17,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 	_ready = encounter["you_are_ready"]
 	add_child(Icons.with_text("merchant", str(encounter["name"]), "title", app.settings.text_scale))
 	add_child(UiKit.para(str(encounter["greeting"])))
-	add_child(Icons.with_text("gold", "Party Gold: %d" % int(view["gold"]), "heading", app.settings.text_scale, UiKit.ACCENT))
+	add_child(Icons.with_text("gold", "Your Gold: %d" % screen._personal_gold(screen.match_view()), "heading", app.settings.text_scale, UiKit.ACCENT))
 	for i in _stock.size():
 		add_child(_row(app, i, _stock[i]))
 	var slots: Array = screen.room_view().get("slots", [])

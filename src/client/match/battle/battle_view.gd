@@ -1002,7 +1002,10 @@ func _card(title: String, sub: String, icon_name: String, energy_cost: int, usab
 	var number := _choices.size() + 1
 	var button := Button.new()
 	button.theme_type_variation = "HudButton"
-	var card_height := (108.0 if wrap_sub else 84.0) * _app.settings.text_scale
+	# At large text two rows of the old 84 px cards no longer fit above the action bar and the
+	# last Skill was cut off, so single-line cards use a tighter height there.
+	var compact := _app.settings.text_scale >= 1.4 and not wrap_sub
+	var card_height := (108.0 if wrap_sub else (66.0 if compact else 84.0)) * _app.settings.text_scale
 	button.custom_minimum_size = Vector2(232, card_height)
 	button.focus_mode = Control.FOCUS_ALL
 	button.disabled = not usable
@@ -1028,7 +1031,7 @@ func _card(title: String, sub: String, icon_name: String, energy_cost: int, usab
 	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var name_label := UiKit.pixel_label("[%d] %s" % [number, title], "small" if wrap_sub else "body",
 			UiKit.TEXT if usable else UiKit.TEXT_DIM)
-	name_label.custom_minimum_size.y = 26.0 * _app.settings.text_scale
+	name_label.custom_minimum_size.y = (24.0 if compact else 26.0) * _app.settings.text_scale
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if wrap_sub else TextServer.AUTOWRAP_OFF
 	name_label.clip_text = not wrap_sub
 	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -1041,7 +1044,7 @@ func _card(title: String, sub: String, icon_name: String, energy_cost: int, usab
 		sub_row.add_child(Icons.rect("energy", Icons.size_for_scale(_app.settings.text_scale)))
 	var sub_label := UiKit.pixel_label(sub, "tiny", UiKit.TEXT_DIM)
 	sub_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	sub_label.custom_minimum_size.y = (54.0 if wrap_sub else 48.0) * _app.settings.text_scale
+	sub_label.custom_minimum_size.y = (54.0 if wrap_sub else (28.0 if compact else 48.0)) * _app.settings.text_scale
 	if wrap_sub:
 		sub_label.custom_minimum_size.x = 150
 	sub_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if wrap_sub else TextServer.AUTOWRAP_OFF
@@ -1075,7 +1078,7 @@ func _build_result() -> void:
 				for item in rewards.get("items", {}):
 					_rewards.add_child(_reward_line("%s%s" % [UiText.item_name(str(item)),
 							" x%d" % int(rewards["items"][item]) if int(rewards["items"][item]) > 1 else ""], UiKit.TEXT))
-				_rewards.add_child(_reward_line("+%d Gold" % int(rewards.get("gold", 0)), UiKit.ACCENT))
+				_rewards.add_child(_reward_line(Tr.t("+%d Gold for you" % _screen.personal_gold_share(int(rewards.get("gold", 0)))), UiKit.ACCENT))
 				_rewards.add_child(_reward_line("%d EXP" % int(rewards.get("exp", 0)), UiKit.TEXT))
 				if rewards.has("clue"):
 					_rewards.add_child(_reward_line(Tr.t("Clue: %s" % Tr.t(str(rewards["clue"]["title"]))), UiKit.ALLY))

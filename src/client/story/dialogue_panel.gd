@@ -19,6 +19,10 @@ var _name_label := Label.new()
 var _text_label := Label.new()
 var _hint_label := Label.new()
 var _box: StyleBox = UiKit.navy_box()
+var _safe_log_top_y := 0.0
+var _safe_header_bottom_y := 0.0
+var _has_safe_bounds := false
+var _is_layouting := false
 
 var class_map: Dictionary = {}
 
@@ -61,18 +65,33 @@ func _init(dialogue: Array = [], scale: float = 1.0, reduced: bool = false, clas
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	offset_top = -210.0
-	offset_bottom = -14.0
+	_layout()
 	if not reduced_motion:
 		modulate.a = 0.0
 		create_tween().tween_property(self, "modulate:a", 1.0, 0.22)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_RESIZED:
+		_layout()
+
 
 func _draw() -> void:
 	draw_style_box(_box, Rect2(Vector2.ZERO, size))
 	draw_rect(Rect2(24, 20, 150, 150), UiKit.NAVY_RAISED, true)
 	draw_rect(Rect2(24, 20, 150, 150), UiKit.BORDER, false, 2.0)
-	if _portrait != null:
-		draw_texture_rect(_portrait, Rect2(32, 25, 134, 140), false)
+	if _portrait != null and not _is_narrator():
+		var texture_size := _portrait.get_size()
+		var fit := minf(124.0 / texture_size.x, 130.0 / texture_size.y)
+		var draw_size := texture_size * fit
+		draw_texture_rect(_portrait, Rect2(Vector2(99, 95) - draw_size * 0.5, draw_size), false)
+	elif _is_narrator():
+		var center := Vector2(99, 95)
+		draw_line(center + Vector2(-38, 18), center + Vector2(0, 30), UiKit.GOLD, 4)
+		draw_line(center + Vector2(38, 18), center + Vector2(0, 30), UiKit.GOLD, 4)
+		draw_line(center + Vector2(-38, 18), center + Vector2(-38, -22), UiKit.GOLD, 4)
+		draw_line(center + Vector2(38, 18), center + Vector2(38, -22), UiKit.GOLD, 4)
+		draw_line(center + Vector2(0, 30), center + Vector2(0, -18), UiKit.GOLD, 3)
 	else:
 		draw_circle(Vector2(99, 75), 30, UiKit.SLATE_HOVER)
 		draw_rect(Rect2(72, 105, 54, 44), UiKit.SLATE_HOVER, true)
@@ -119,6 +138,8 @@ func _close() -> void:
 func _show_line() -> void:
 	var line: Dictionary = lines[line_index]
 	_speaker = str(line.get("speaker", "narrator")).capitalize()
+	if _is_narrator():
+		_speaker = "NARRATOR"
 	_full_text = Tr.t(str(line.get("text", "")))
 	_shown = _full_text.length() if reduced_motion else 0
 	_elapsed = 0.0
@@ -126,7 +147,68 @@ func _show_line() -> void:
 	_text_label.text = _full_text
 	_text_label.visible_characters = -1 if reduced_motion else 0
 	_portrait = _find_portrait(str(line.get("speaker", "")))
+	_layout()
 	queue_redraw()
+
+
+func apply_settings(scale: float, reduced: bool) -> void:
+	text_scale = scale
+	reduced_motion = reduced
+	_name_label.add_theme_font_size_override("font_size", int(UiKit.SIZES["heading"] * text_scale))
+	_text_label.add_theme_font_size_override("font_size", int(UiKit.SIZES["heading"] * text_scale))
+	_hint_label.add_theme_font_size_override("font_size", int(UiKit.SIZES["small"] * text_scale))
+	if reduced_motion:
+		_shown = _full_text.length()
+		_text_label.visible_characters = -1
+	_layout()
+	queue_redraw()
+
+
+func set_safe_bounds(log_top_y: float, header_bottom_y: float) -> void:
+	_safe_log_top_y = log_top_y
+	_safe_header_bottom_y = header_bottom_y
+	_has_safe_bounds = true
+	_layout()
+
+
+func _layout() -> void:
+	if _is_layouting:
+		return
+	_is_layouting = true
+	var left := clampf(280.0 * text_scale, 280.0, 360.0) + 32.0
+	var available_width := maxf(300.0, size.x - 24.0)
+	var font_size := float(int(UiKit.SIZES["heading"] * text_scale))
+	var chars_per_line := maxi(12, int((available_width - 210.0) / maxf(1.0, font_size * 0.52)))
+	var line_count := 1
+	for paragraph in _full_text.split("\n"):
+		line_count += maxi(0, ceili(float(paragraph.length()) / float(chars_per_line)) - 1)
+	var viewport_height := get_viewport_rect().size.y if is_inside_tree() else 720.0
+	var content_height := 110.0 + line_count * font_size * 1.3
+	var height := clampf(content_height, 190.0, maxf(190.0, viewport_height - 28.0))
+	offset_left = left
+	offset_top = -height
+	if _has_safe_bounds:
+		var safe_bottom := _safe_log_top_y - 14.0
+		var safe_top := _safe_header_bottom_y + 14.0
+		var max_height := maxf(1.0, safe_bottom - safe_top)
+		height = clampf(content_height, minf(190.0, max_height), max_height)
+		offset_bottom = safe_bottom - viewport_height
+		offset_top = offset_bottom - height
+	else:
+		offset_top = -height
+		offset_bottom = -14.0
+	var text_width := maxf(80.0, available_width - 210.0)
+	_name_label.position = Vector2(210, 18)
+	_name_label.size = Vector2(text_width, font_size + 12.0)
+	_text_label.position = Vector2(210, 58)
+	_text_label.size = Vector2(text_width, maxf(40.0, height - 100.0))
+	_hint_label.position = Vector2(maxf(210.0, available_width - 360.0), height - 34.0)
+	_hint_label.size = Vector2(minf(340.0, text_width), 24.0)
+	_is_layouting = false
+
+
+func _is_narrator() -> bool:
+	return _speaker.to_lower() == "narrator"
 
 func _find_portrait(speaker: String) -> Texture2D:
 	var lower := speaker.to_lower()

@@ -8,7 +8,14 @@ var _code: LineEdit
 var _status: Label
 var _content: Control
 var _view := "menu"
-var _story_picks: Array[OptionButton] = []
+var _story_picks: Array[Button] = []
+var _story_classes: Array[String] = []
+var _story_class_info: Dictionary = {}
+var _story_skill_info: Dictionary = {}
+var _story_picker: PanelContainer
+var _story_cards: Array[Button] = []
+var _story_picker_index := -1
+var _story_card_index := 0
 var _story_preview_portrait: TextureRect
 var _story_preview_name: Label
 var _story_preview_class: Label
@@ -119,6 +126,10 @@ func _show_story_setup() -> void:
 	_view = "story_setup"
 	_clear_content()
 	_story_picks.clear()
+	_story_classes.clear()
+	var forest := ForestContent.load_default()
+	_story_class_info = forest.get_dict("classes")
+	_story_skill_info = forest.get_dict("skills")
 	_story_preview_portrait = null
 	_story_preview_name = null
 	_story_preview_class = null
@@ -137,7 +148,7 @@ func _show_story_setup() -> void:
 	panel.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	panel.anchor_bottom = 1.0
 	var margin := 88.0
-	var vw := get_viewport_rect().size.x
+	var vw := _viewport_size().x
 	if vw > 0.0:
 		margin = maxf(24.0, minf(88.0, (vw - 1020.0) / 2.0))
 	panel.offset_left = margin
@@ -149,6 +160,8 @@ func _show_story_setup() -> void:
 	_content = panel
 	body.add_child(UiKit.label("STORY PARTY", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.para("Choose a Class for every traveller.", "dim"))
+	for class_id in STORY_CLASSES:
+		_story_classes.append(class_id)
 	var columns := UiKit.flow(12)
 	columns.set_meta("story_columns", true)
 	body.add_child(columns)
@@ -161,19 +174,22 @@ func _show_story_setup() -> void:
 		var name_label := UiKit.label(STORY_NAMES[i], "body")
 		name_label.custom_minimum_size.x = 100
 		row.add_child(name_label)
-		var pick := OptionButton.new()
+		var pick := Button.new()
+		pick.focus_mode = Control.FOCUS_ALL
+		pick.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		pick.custom_minimum_size.y = 44
 		pick.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		for class_id in STORY_CLASSES:
-			pick.add_item(Tr.t(class_id.capitalize()))
-		pick.select(i)
+		pick.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		pick.theme_type_variation = "HudButton"
+		pick.pressed.connect(_open_story_picker.bind(i))
+		pick.focus_entered.connect(_update_story_preview.bind(i))
+		pick.mouse_entered.connect(_update_story_preview.bind(i))
+		_update_story_pick_button(pick, _story_classes[i])
+		pick.tooltip_text = UiText.LABELS["story_choose_class"] % STORY_NAMES[i]
 		pick.set_meta("story_index", i)
 		_story_picks.append(pick)
 		row.add_child(pick)
 		roster.add_child(row)
-		var row_index := i
-		pick.item_selected.connect(_on_story_pick_changed.bind(row_index))
-		pick.focus_entered.connect(_on_story_pick_focused.bind(row_index))
-		pick.mouse_entered.connect(_on_story_pick_focused.bind(row_index))
 	var preview_body := UiKit.vbox(8)
 	preview_body.custom_minimum_size = Vector2(260, 0)
 	preview_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -211,12 +227,6 @@ func _show_story_setup() -> void:
 static func _story_portrait_path(class_id: String) -> String:
 	return "res://assets/heroes/%s/portrait.png" % class_id
 
-func _on_story_pick_changed(_selected: int, row: int) -> void:
-	_update_story_preview(row)
-
-func _on_story_pick_focused(row: int) -> void:
-	_update_story_preview(row)
-
 func _update_story_preview(row: int) -> void:
 	if _story_picks.is_empty():
 		return
@@ -224,7 +234,7 @@ func _update_story_preview(row: int) -> void:
 	var pick := _story_picks[index]
 	if not is_instance_valid(pick):
 		return
-	var class_id: String = STORY_CLASSES[clampi(pick.selected, 0, STORY_CLASSES.size() - 1)]
+	var class_id: String = _story_classes[index]
 	if is_instance_valid(_story_preview_name):
 		_story_preview_name.text = STORY_NAMES[index]
 	if is_instance_valid(_story_preview_class):
@@ -237,10 +247,172 @@ func _update_story_preview(row: int) -> void:
 			_story_preview_portrait.texture = null
 
 func _begin_story() -> void:
-	var classes := []
-	for pick in _story_picks:
-		classes.append(STORY_CLASSES[pick.selected])
-	_app.start_story(classes)
+	_app.start_story(_story_classes.duplicate())
+
+
+func _open_story_picker(traveller_index: int) -> void:
+	if traveller_index < 0 or traveller_index >= _story_classes.size():
+		return
+	_close_story_picker(false)
+	_story_picker_index = traveller_index
+	_story_card_index = maxi(0, STORY_CLASSES.find(_story_classes[traveller_index]))
+	var content := UiKit.vbox(8)
+	var scroll := ScrollContainer.new()
+	scroll.name = "StoryClassPickerScroll"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.add_child(content)
+	var picker := UiKit.panel(scroll)
+	picker.name = "StoryClassPicker"
+	picker.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	picker.anchor_bottom = 1.0
+	picker.offset_left = _story_picker_left()
+	picker.offset_right = -24.0
+	picker.offset_top = _top(175)
+	picker.offset_bottom = -24.0
+	picker.mouse_filter = Control.MOUSE_FILTER_STOP
+	_story_picker = picker
+	add_child(picker)
+	content.add_child(UiKit.label(UiText.LABELS["story_choose_class"] % STORY_NAMES[traveller_index], "heading", UiKit.ACCENT))
+	content.add_child(UiKit.para(UiText.LABELS["story_picker_choose_hint"], "dim"))
+	var cards := GridContainer.new()
+	cards.name = "StoryClassCards"
+	cards.columns = STORY_CLASSES.size()
+	cards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	cards.add_theme_constant_override("h_separation", 6)
+	cards.add_theme_constant_override("v_separation", 6)
+	content.add_child(cards)
+	_story_cards.clear()
+	for i in STORY_CLASSES.size():
+		var card := _story_class_card(STORY_CLASSES[i], STORY_CLASSES[i] == _story_classes[traveller_index], i)
+		_story_cards.append(card)
+		cards.add_child(card)
+	for i in _story_cards.size():
+		var card := _story_cards[i]
+		var previous := _story_cards[posmod(i - 1, _story_cards.size())]
+		var next := _story_cards[(i + 1) % _story_cards.size()]
+		card.focus_neighbor_left = card.get_path_to(previous)
+		card.focus_neighbor_top = card.get_path_to(previous)
+		card.focus_previous = card.get_path_to(previous)
+		card.focus_neighbor_right = card.get_path_to(next)
+		card.focus_neighbor_bottom = card.get_path_to(next)
+		card.focus_next = card.get_path_to(next)
+	var hint := UiKit.para(UiText.LABELS["story_picker_navigation_hint"], "small", UiKit.TEXT_DIM)
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	content.add_child(hint)
+	_story_cards[_story_card_index].grab_focus.call_deferred()
+
+
+func _story_class_card(class_id: String, selected: bool, card_index: int) -> Button:
+	var card := Button.new()
+	card.focus_mode = Control.FOCUS_ALL
+	card.custom_minimum_size = Vector2(96.0, 310.0 if _app.settings.text_scale >= 1.4 else 280.0)
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	card.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	card.tooltip_text = _story_class_description(class_id)
+	card.pressed.connect(_select_story_class.bind(card_index))
+	card.focus_entered.connect(func() -> void: _story_card_index = card_index)
+	card.theme_type_variation = "SelectedButton" if selected else "HudButton"
+	var content := UiKit.vbox(4)
+	content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 6)
+	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var portrait := TextureRect.new()
+	portrait.texture = SpriteSet.portrait(class_id)
+	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	portrait.custom_minimum_size = Vector2(0, 108)
+	portrait.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(portrait)
+	var name_label := UiKit.pixel_label(_story_class_name(class_id), "small" if _app.settings.text_scale <= 1.2 else "tiny", UiKit.ACCENT if selected else UiKit.TEXT)
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(name_label)
+	var role := UiKit.label(_story_class_role(class_id), "tiny", UiKit.TEXT_DIM)
+	role.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	role.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	role.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(role)
+	var skill := UiKit.label(_story_skill_hint(class_id), "tiny", UiKit.TEXT_DIM)
+	skill.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	skill.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	skill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(skill)
+	card.add_child(content)
+	return card
+
+
+func _update_story_pick_button(button: Button, class_id: String) -> void:
+	button.text = _story_class_name(class_id)
+	button.icon = SpriteSet.portrait(class_id)
+	button.expand_icon = true
+	button.add_theme_constant_override("icon_max_width", int(34.0 * _app.settings.text_scale))
+	button.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+
+func _select_story_class(class_index: int) -> void:
+	if _story_picker_index < 0 or class_index < 0 or class_index >= STORY_CLASSES.size():
+		return
+	var traveller_index := _story_picker_index
+	var class_id: String = STORY_CLASSES[class_index]
+	_story_classes[traveller_index] = class_id
+	_update_story_pick_button(_story_picks[traveller_index], class_id)
+	_update_story_preview(traveller_index)
+	_close_story_picker()
+
+
+func _close_story_picker(return_focus: bool = true) -> void:
+	var closed_index := _story_picker_index
+	if is_instance_valid(_story_picker):
+		_story_picker.queue_free()
+	_story_picker = null
+	_story_picker_index = -1
+	_story_cards.clear()
+	if return_focus and closed_index >= 0 and closed_index < _story_picks.size():
+		_story_picks[closed_index].grab_focus.call_deferred()
+
+
+func _story_class_name(class_id: String) -> String:
+	return UiText.class_display(_story_class_info, class_id)
+
+
+func _story_class_role(class_id: String) -> String:
+	var info = _story_class_info.get(class_id, {})
+	return str(info.get("role", "")) if info is Dictionary else ""
+
+
+func _story_skill_hint(class_id: String) -> String:
+	var info = _story_class_info.get(class_id, {})
+	if not info is Dictionary:
+		return ""
+	var skills: Array = info.get("skills", [])
+	if skills.is_empty():
+		return ""
+	var skill = _story_skill_info.get(str(skills[0]), {})
+	if not skill is Dictionary:
+		return ""
+	var skill_name := str(skill.get("name", str(skills[0]).capitalize()))
+	var energy := int(skill.get("energy", 0))
+	return UiText.LABELS["story_skill_energy"] % [skill_name, energy] if energy > 0 else UiText.LABELS["story_skill"] % skill_name
+
+
+func _story_class_description(class_id: String) -> String:
+	var info = _story_class_info.get(class_id, {})
+	return str(info.get("description", _story_class_role(class_id))) if info is Dictionary else _story_class_role(class_id)
+
+
+func _viewport_size() -> Vector2:
+	if is_inside_tree():
+		return get_viewport_rect().size
+	return size
+
+
+func _story_picker_left() -> float:
+	return maxf(24.0, minf(598.0, _viewport_size().x - 744.0))
 
 func _show_multiplayer() -> void:
 	_view = "multiplayer"
@@ -296,7 +468,7 @@ func _show_credits() -> void:
 	body.add_child(UiKit.label("BEYOND THE WORLD'S END", "title", UiKit.ACCENT))
 	body.add_child(UiKit.label("Made with Godot 4.7", "heading"))
 	body.add_child(UiKit.para("Font: Pixelify Sans, OFL\nCharacter art by the project owner.", "body"))
-	body.add_child(UiKit.para("Audio: Kenney, Zane Little Music, MintoDog, Emma_MA, marcelofg55, JaggedStone, artisticdude and Brian MacIntosh (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md", "dim"))
+	body.add_child(UiKit.para("Audio: Kenney, Zane Little Music, Emma_MA, marcelofg55, JaggedStone, artisticdude and Brian MacIntosh (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md", "dim"))
 	var back := UiKit.primary("Back [Esc]", _show_menu, false, "cancel")
 	Icons.apply_to_button(back, "back", _app.settings.text_scale)
 	body.add_child(back)
@@ -361,10 +533,14 @@ func _notification(what: int) -> void:
 			# (offset_bottom stays at -24); only move the top so text-scale
 			# changes keep it anchored without collapsing it.
 			_content.offset_top = top
+			if is_instance_valid(_story_picker):
+				_story_picker.offset_top = top
+				_story_picker.offset_left = _story_picker_left()
 		else:
 			_content.position.y = _top(float(_content.get_meta("base_y", 150.0)))
 
 func _clear_content() -> void:
+	_close_story_picker(false)
 	if is_instance_valid(_content):
 		_content.queue_free()
 	_content = null
@@ -403,6 +579,22 @@ func _remember() -> bool:
 	return true
 
 func handle_key(app: ClientApp, keycode: int) -> bool:
+	if is_instance_valid(_story_picker) and _story_picker.visible:
+		if keycode >= KEY_1 and keycode <= KEY_5:
+			_select_story_class(keycode - KEY_1)
+			return true
+		if keycode == KEY_ENTER or keycode == KEY_KP_ENTER:
+			_select_story_class(_story_card_index)
+			return true
+		if keycode in [KEY_LEFT, KEY_UP, KEY_RIGHT, KEY_DOWN, KEY_TAB]:
+			var delta := -1 if keycode in [KEY_LEFT, KEY_UP] or keycode == KEY_TAB and Input.is_key_pressed(KEY_SHIFT) else 1
+			_story_card_index = posmod(_story_card_index + delta, STORY_CLASSES.size())
+			if _story_cards[_story_card_index].is_inside_tree():
+				_story_cards[_story_card_index].grab_focus()
+			return true
+		if keycode == KEY_ESCAPE:
+			_close_story_picker()
+			return true
 	if keycode == KEY_ESCAPE:
 		# Esc does what the Back button of the current view does.
 		match _view:

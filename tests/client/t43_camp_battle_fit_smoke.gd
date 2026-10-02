@@ -3,7 +3,7 @@ extends SceneTree
 ## Checks real global control rects at 1.4 text scale with five party members.
 
 class LayoutMatch extends MatchScreen:
-	func build_corner_menu(_host: Control) -> PanelContainer:
+	func build_corner_menu(_host: Control, _with_corner: bool = true) -> PanelContainer:
 		return PanelContainer.new()
 
 

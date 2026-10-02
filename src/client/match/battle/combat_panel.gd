@@ -242,7 +242,8 @@ func _build_result(screen: MatchScreen) -> void:
 				add_child(UiKit.label("Challenge won!", "title", UiKit.GOOD))
 				return
 			add_child(UiKit.label("Victory!", "title", UiKit.GOOD))
-			var parts: Array[String] = ["+%d EXP for everyone" % int(rewards.get("exp", 0)), "+%d Gold" % int(rewards.get("gold", 0))]
+			var parts: Array[String] = ["+%d EXP for everyone" % int(rewards.get("exp", 0)),
+				"+%d Gold for you" % screen.personal_gold_share(int(rewards.get("gold", 0)))]
 			for item in rewards.get("items", {}):
 				parts.append("+%d %s" % [int(rewards["items"][item]), item.replace("_", " ").capitalize()])
 			add_child(UiKit.para(", ".join(parts), "heading", UiKit.ACCENT))

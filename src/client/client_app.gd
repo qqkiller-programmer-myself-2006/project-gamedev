@@ -599,6 +599,8 @@ func apply_settings() -> void:
 	theme = UiKit.make_theme(settings.text_scale)
 	SoundBank.set_volume(settings.volume)
 	SoundBank.set_music_volume(settings.music_volume)
+	if _current != null and _current.has_method("apply_settings"):
+		_current.apply_settings(self)
 	if _current != null and _current.has_method("refresh") and not snapshot.is_empty():
 		_current.refresh(self, true)
 
@@ -614,7 +616,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			if is_inside_tree():
 				get_viewport().set_input_as_handled()
 			return
-	for overlay in _overlay_holder.get_children():
+	for index in range(_overlay_holder.get_child_count() - 1, -1, -1):
+		var overlay := _overlay_holder.get_child(index)
 		if overlay.is_queued_for_deletion():
 			continue
 		if overlay is SettingsPanel:
@@ -630,9 +633,18 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 			return
 	if _banner.visible:
-		if is_inside_tree():
-			get_viewport().set_input_as_handled()
-		return
+		if event.keycode not in [KEY_ESCAPE, KEY_F2] and not (event.keycode == KEY_COMMA and event.ctrl_pressed):
+			if is_inside_tree():
+				get_viewport().set_input_as_handled()
+			return
+		if event.keycode == KEY_ESCAPE:
+			_banner.visible = false
+			_banner_until = 0.0
+		if event.keycode == KEY_F2 or (event.keycode == KEY_COMMA and event.ctrl_pressed):
+			open_settings()
+			if is_inside_tree():
+				get_viewport().set_input_as_handled()
+			return
 	if event.keycode == KEY_F2 or (event.keycode == KEY_COMMA and event.ctrl_pressed):
 		open_settings()
 		get_viewport().set_input_as_handled()

@@ -23,7 +23,7 @@ func build(screen: MatchScreen, app: ClientApp, view: Dictionary) -> void:
 		add_child(UiKit.para(str(encounter["text"])))
 		var found: Dictionary = encounter["found"]
 		if int(found["gold"]) > 0:
-			add_child(UiKit.label("+%d Gold for the Party." % int(found["gold"]), "heading", UiKit.ACCENT))
+			add_child(UiKit.label("+%d Gold for you." % screen.personal_gold_share(int(found["gold"])), "heading", UiKit.ACCENT))
 		for item in found["items"]:
 			add_child(UiKit.label("+%d %s added to the shared bag." % [int(found["items"][item]), item.replace("_", " ").capitalize()], "heading"))
 		_until = encounter["ends_at"]

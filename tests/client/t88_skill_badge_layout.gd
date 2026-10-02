@@ -2,7 +2,7 @@ extends SceneTree
 ## Regression check for the battle skill badges at the right screen edge.
 
 class FakeMatch extends MatchScreen:
-	func build_corner_menu(_host: Control) -> PanelContainer:
+	func build_corner_menu(_host: Control, _with_corner: bool = true) -> PanelContainer:
 		return PanelContainer.new()
 
 

@@ -22,6 +22,25 @@ var opening_presentation_pending := false
 var restoring := false
 var text_scale := 1.0
 var reduced_motion := false
+var _safe_log_top_y := 0.0
+var _safe_header_bottom_y := 0.0
+var _has_safe_bounds := false
+
+
+func apply_settings(scale: float, reduced: bool) -> void:
+	text_scale = scale
+	reduced_motion = reduced
+	if is_instance_valid(current) and current.has_method("apply_settings"):
+		current.apply_settings(scale, reduced)
+
+
+func set_safe_bounds(log_top_y: float, header_bottom_y: float) -> void:
+	_safe_log_top_y = log_top_y
+	_safe_header_bottom_y = header_bottom_y
+	_has_safe_bounds = true
+	if is_instance_valid(current) and current.has_method("set_safe_bounds"):
+		current.set_safe_bounds(log_top_y, header_bottom_y)
+
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -154,6 +173,8 @@ func _pump() -> void:
 		for member in match_view.get("party", []):
 			class_map[str(member.get("name", "")).to_lower()] = str(member.get("class", ""))
 		current = DialoguePanelScript.new(item.lines, text_scale, reduced_motion, class_map)
+		if _has_safe_bounds:
+			current.set_safe_bounds(_safe_log_top_y, _safe_header_bottom_y)
 	add_child(current)
 	current.finished.connect(_on_finished.bind(item))
 	presentation_started.emit(item)
