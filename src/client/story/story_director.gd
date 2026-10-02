@@ -20,6 +20,8 @@ var started := false
 var opening_presentation_pending := false
 ## Set by MatchScreen when the Match comes from a Story save (Continue); used once, for the first Match seen.
 var restoring := false
+## Presentation ids copied from the client-side Story save on Continue.
+var restored_presentations: Dictionary = {}
 var text_scale := 1.0
 var reduced_motion := false
 var _safe_log_top_y := 0.0
@@ -81,6 +83,17 @@ func observe(events: Array, snapshot: Dictionary) -> void:
 			for i in range(1, layer):
 				shown["chapter_%s" % i] = true
 				if i == 1: shown["first_combat_won"] = true
+			# Old saves lack presentation metadata. At Layer 3+, the first merchant/rest
+			# scenes belong to earlier progress and must not replay after Continue.
+			if layer > 1:
+				shown["merchant_first"] = true
+				shown["rest_first"] = true
+			for presentation_id in restored_presentations:
+				if restored_presentations[presentation_id] and _is_known_presentation(str(presentation_id)):
+					shown[str(presentation_id)] = true
+			# The save is taken at layer start, before its card is presented.
+			shown.erase("chapter_%s" % layer)
+			opening_presentation_pending = true
 		else:
 			queue.append({"kind":"scene", "id":"prologue", "lines":content.get("prologue", [])})
 			opening_presentation_pending = layer == 1
@@ -133,6 +146,14 @@ func _enqueue_card(chapter: Dictionary) -> void:
 	shown[key] = true
 	queue.append({"kind":"card", "id":key, "chapter":chapter})
 
+func _is_known_presentation(presentation_id: String) -> bool:
+	if presentation_id == "prologue" or content.get("scenes", {}).has(presentation_id):
+		return true
+	for chapter in content.get("chapters", []):
+		if presentation_id == "chapter_%s" % chapter.get("number", 0):
+			return true
+	return false
+
 func _is_decision_pending() -> bool:
 	var match_view: Dictionary = _latest_snapshot.get("match", {}) if _latest_snapshot.get("match", {}) is Dictionary else {}
 	if match_view.is_empty():
@@ -181,7 +202,8 @@ func _pump() -> void:
 
 func _on_finished(item: Dictionary) -> void:
 	current = null
-	if opening_presentation_pending and str(item.get("id", "")) == "chapter_1":
+	var layer := int((_latest_snapshot.get("match", {}) as Dictionary).get("layer", 0))
+	if opening_presentation_pending and str(item.get("id", "")) == "chapter_%s" % layer:
 		opening_presentation_pending = false
 	elif opening_presentation_pending and queue.is_empty():
 		# Content may omit chapter cards in a test or a future build.

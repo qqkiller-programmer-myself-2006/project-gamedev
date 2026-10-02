@@ -11,13 +11,15 @@ func after_each() -> void:
 	save.clear()
 
 func test_round_trip_and_clear() -> void:
-	var data := {"seed": 42, "layer": 3, "party": [{"name":"Arin"}], "gold": 15}
+	var data := {"seed": 42, "layer": 3, "party": [{"name":"Arin"}], "gold": 15,
+		"presentations": {"merchant_first": true, "rest_first": true}}
 	assert_true(save.save(data))
 	assert_true(save.has_save())
 	var loaded := save.load()
 	assert_eq(loaded.seed, 42)
 	assert_eq(loaded.layer, 3)
 	assert_eq(loaded.version, 1)
+	assert_eq(loaded.presentations, {"merchant_first": true, "rest_first": true})
 	save.clear()
 	assert_false(save.has_save())
 
