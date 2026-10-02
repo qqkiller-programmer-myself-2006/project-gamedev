@@ -96,4 +96,9 @@ These are historical executor task specs retained for reference.
 - [T41-r3-tests.md](T41-r3-tests.md) — Finish T41 by making the suite pass.
 
 ## Other
-
+## 3D vertical slice (Story mode offline) — แผน `docs/plans/2026-10-02-3d-vertical-slice.md`
+- [T3D-01-presentation-adapter.md](T3D-01-presentation-adapter.md) — Codex1: PresentationAdapter + flag --3d.
+- [T3D-02-home3d-skeleton.md](T3D-02-home3d-skeleton.md) — Claude2: Home3D เดิน WASD + สถานี.
+- [T3D-03-battle3d-arena.md](T3D-03-battle3d-arena.md) — Claude1: Battle3D เวที + กล้อง.
+- [T3D-04-asset-pipeline.md](T3D-04-asset-pipeline.md) — Agy1: asset/video pipeline + manifest.
+- [T3D-05-qa-baseline.md](T3D-05-qa-baseline.md) — Agy2: QA baseline + perf harness.
