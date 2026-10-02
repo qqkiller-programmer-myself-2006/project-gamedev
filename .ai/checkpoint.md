@@ -24,13 +24,13 @@
 ## วิธีรัน (สำคัญ)
 
 - Godot: `D:\dev-tools\godot\Godot_v4.7.2-stable_win64_console.exe` (ไม่อยู่ใน PATH ต้องตั้ง `GODOT`)
-- Test: `GODOT=... bash scripts/run_tests.sh` (baseline 248 passed, ~140 วินาที)
+- Test: `GODOT=/d/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe bash tools/run_tests.sh` (baseline 489 unit tests + smoke 8 ไฟล์ที่ค้นหาอัตโนมัติจาก tests/client/)
 - ภาพ QA: `"$GODOT" --path . -s tools/ui_preview.gd -- --out=build/ui --seed=11 --speed=10 --class=rogue` (+ `--scale=1.4`)
-- สั่ง AI: `powershell -File .ai/run-agent.ps1 -Agent codex|agy -Worktree <path> -TaskFile .ai/tasks/<file>.md -TimeoutMin 60 [-Images ...] [-Model ...]`
+- สั่ง AI: `powershell -NoProfile -ExecutionPolicy Bypass -File .ai/run-agent.ps1 -Agent codex|agy -Worktree <path> -TaskFile .ai/tasks/<file>.md -TimeoutMin 60 [-Images ...] [-Model ...]`
   สคริปต์ฆ่าทั้ง process tree เมื่อหมดเวลา และเขียน `.ai/logs/<task>-<agent>-<time>.status.json` (state: running / finished / timeout-killed)
 - เช็กว่ามีอะไรค้าง: ดูไฟล์ `*.status.json` ที่ state = running แล้ว `Get-Process -Id <pid>`
-- Integration branch: `claude/github-project-issue-learning-20567b` (worktree นี้) → PR เข้า `main`
-- Worktree ของ AI: `../ai-t<N>` branch `ai/t<N>-<ชื่อ>` แตกจาก integration branch
+- ตอนนี้ทำงานผ่าน PR เข้า `main` โดยตรง (main protected: ต้องผ่าน check "Headless GDScript tests", squash merge)
+- Worktree ของ AI: `../ai-t<N>` branch `ai/t<N>-<ชื่อ>` แตกจาก `origin/main` (`git fetch origin` ก่อน)
 
 ## สถานะงาน
 
@@ -134,3 +134,4 @@
 - 2026-09-30: การเปลี่ยนแปลงการจัดแนวการออกแบบที่ซิงค์กับ `origin/main` `0779ef1` หลังจากที่ PR #98 รวมเข้าด้วยกัน DA1 พร้อมที่จะคอมมิต/พุช การล้างข้อมูลสถานะโครงการ #8 ยังคงค้างอยู่
 - 2026-09-30: ผลักดันการออกแบบและการจัดแนวคอมมิต `e6b888d` ไปยัง GitHub `main` โดยตรง ตรวจสอบ `origin/main` ชี้ไปที่การคอมมิตนั้น การล้างข้อมูลสถานะโครงการ #8 ยังคงค้างอยู่
 - เผยแพร่เป็น `f4d01fe` โดยตรงกับ `main`; ปิด #83 และ #90 หลังจากกด #76 ยังคงเปิดอยู่สำหรับการโหลดโปรไฟล์แบบอะซิงโครนัสและขอบเขต P2 ที่เหลือ
+- 2026-10-03 (สถานะล่าสุด): `main` 977096c. merged PR #117 (ไทย+UI polish), #163–#167: ปิด #150 #151 #152 #154 #149, #153 แก้บางส่วน (leak notice ลดลงแต่ smoke layout ยังเหลือ). suite 489 + smoke 8 ผ่าน. ยังเปิด: #47 #54 (final build), #55, #39, #19, #2. ยังไม่ทำ: ภาพจริง #150/#154, ตรวจ license ของ asset (MIT ครอบคลุมโค้ดเท่านั้น), ทำความสะอาด `.codex/`
