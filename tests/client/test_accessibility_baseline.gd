@@ -33,6 +33,8 @@ func after_each() -> void:
 		_screen.free()
 	_screen = null
 	if _app != null and is_instance_valid(_app):
+		if _app.sounds != null and is_instance_valid(_app.sounds):
+			_app.sounds.free()
 		_app.free()
 	_app = null
 
@@ -184,6 +186,19 @@ func _battle(scale := 1.0) -> BattleView:
 	return battle
 
 
+func _free_battle(battle: BattleView, screen: MatchScreen, app: ClientApp) -> void:
+	# These headless fixtures keep token controls referenced from both the view
+	# and the screen's anchor map. Release them explicitly before their owners.
+	for child in battle.get_children():
+		child.free()
+	battle._tokens.clear()
+	screen.anchors.clear()
+	battle.free()
+	screen.free()
+	app.sounds.free()
+	app.free()
+
+
 func test_enemy_weakness_stays_available_in_token_tooltip() -> void:
 	var battle := _battle()
 	var view := {
@@ -210,9 +225,7 @@ func test_enemy_weakness_stays_available_in_token_tooltip() -> void:
 	assert_true(battle._tokens["e0"].tooltip_text.contains("Weak to: fire"), "enemy weakness remains in tooltip")
 	var screen: MatchScreen = battle._screen
 	var app: ClientApp = battle._app
-	battle.free()
-	screen.free()
-	app.free()
+	_free_battle(battle, screen, app)
 
 
 func test_combat_log_dock_grows_right_at_large_scale() -> void:
@@ -224,9 +237,7 @@ func test_combat_log_dock_grows_right_at_large_scale() -> void:
 	assert_true(dock.offset_left >= 0.0, "combat log dock stays inside the left edge")
 	var screen: MatchScreen = battle._screen
 	var app: ClientApp = battle._app
-	battle.free()
-	screen.free()
-	app.free()
+	_free_battle(battle, screen, app)
 
 
 func test_battle_timeline_starts_clear_of_corner_controls() -> void:
@@ -240,6 +251,9 @@ func test_battle_timeline_starts_clear_of_corner_controls() -> void:
 	battle._build_timeline({})
 	assert_eq((battle._turn_banner.get_child(0) as Label).text, Tr.t("Turn 2"),
 			"the turn title stays in its fixed banner outside the scrolling cards")
+	var screen: MatchScreen = battle._screen
+	var app: ClientApp = battle._app
+	_free_battle(battle, screen, app)
 
 func test_primary_battle_actions_are_keyboard_focusable() -> void:
 	var battle := _battle()
@@ -279,9 +293,7 @@ func test_primary_battle_actions_are_keyboard_focusable() -> void:
 		assert_true(focus_button.get_theme_stylebox("focus") != null, "Battle focus has the visible gold theme style")
 	var screen: MatchScreen = battle._screen
 	var app: ClientApp = battle._app
-	battle.free()
-	screen.free()
-	app.free()
+	_free_battle(battle, screen, app)
 
 
 func test_summary_keeps_one_outcome_heading_and_hides_timeline() -> void:
@@ -290,6 +302,9 @@ func test_summary_keeps_one_outcome_heading_and_hides_timeline() -> void:
 	battle._build_result()
 	assert_eq(battle._center_text.text, "Victory!", "summary has one victory heading")
 	assert_false(battle._timeline.visible, "turn order is hidden in summary")
+	var screen: MatchScreen = battle._screen
+	var app: ClientApp = battle._app
+	_free_battle(battle, screen, app)
 
 func test_merchant_and_rest_primary_actions_are_keyboard_focusable() -> void:
 	_make_camp()
@@ -330,9 +345,7 @@ func test_reduced_motion_keeps_action_announcement_visible() -> void:
 	assert_eq(battle._banner_label.text, "Alice attacks Grey Wolf", "the action result stays readable")
 	var screen: MatchScreen = battle._screen
 	var app: ClientApp = battle._app
-	battle.free()
-	screen.free()
-	app.free()
+	_free_battle(battle, screen, app)
 
 
 func test_reduced_motion_applies_hp_change_without_a_tween() -> void:
@@ -366,9 +379,7 @@ func test_combat_ended_keeps_final_reduced_motion_hit_bars() -> void:
 	assert_eq([token._hp_bar.value, token._energy_bar.value], [10.0, 2.0],
 			"combat_ended keeps the final HP/Energy snapshot visible")
 	token.free()
-	battle.free()
-	screen.free()
-	app.free()
+	_free_battle(battle, screen, app)
 
 
 func test_summary_clears_floating_combat_feedback() -> void:
@@ -389,6 +400,4 @@ func test_summary_clears_floating_combat_feedback() -> void:
 	battle._combat = {"result": "victory", "trial": false, "rewards": {}}
 	battle._build_result()
 	assert_false(battle._banner.visible, "summary removes the action banner")
-	battle.free()
-	screen.free()
-	app.free()
+	_free_battle(battle, screen, app)

@@ -58,6 +58,16 @@ static func portrait(class_id_value: String) -> Texture2D:
 		return null
 	return _cached_texture(ROOT + set.class_id + "/portrait.png")
 
+static func enemy_portrait(enemy_id_value: String) -> Texture2D:
+	var portrait_path := ENEMY_ROOT + enemy_id_value + "/portrait.png"
+	if ResourceLoader.exists(portrait_path):
+		return _cached_texture(portrait_path)
+	var set := for_enemy(enemy_id_value)
+	if set == null:
+		return null
+	var idle_frames := set.frames("idle")
+	return idle_frames[0] if not idle_frames.is_empty() else null
+
 func frames(animation: String) -> Array[Texture2D]:
 	animation = _key(animation)
 	if not is_enemy and class_id == "bram" and (animation == "hurt" or animation == "dead" or animation == "die"):

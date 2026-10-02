@@ -14,6 +14,31 @@ func test_enemy_manifest_loads_and_every_animation_resolves() -> void:
 				assert_true(frame != null, "%s/%s frame should load" % [enemy_id, animation])
 
 
+func test_every_forest_enemy_resolves_to_a_portrait_texture() -> void:
+	var file := FileAccess.open("res://content/forest.json", FileAccess.READ)
+	assert_true(file != null, "forest content should open")
+	if file == null:
+		return
+	var content = JSON.parse_string(file.get_as_text())
+	assert_true(content is Dictionary and content.get("enemies", {}) is Dictionary,
+			"forest content should define enemies")
+	if not content is Dictionary or not content.get("enemies", {}) is Dictionary:
+		return
+	for enemy_id in content["enemies"]:
+		var enemy: Dictionary = content["enemies"][enemy_id]
+		var sprite := str(enemy.get("sprite", enemy_id))
+		assert_true(SpriteSet.enemy_portrait(sprite) != null,
+				"%s (%s) should resolve to a portrait texture" % [enemy_id, sprite])
+
+
+func test_enemy_portrait_uses_first_idle_frame_when_portrait_is_missing() -> void:
+	var sprite_set := SpriteSet.for_enemy("thornback_boar")
+	assert_true(sprite_set != null)
+	var idle := sprite_set.frames("idle")
+	assert_false(idle.is_empty())
+	assert_eq(SpriteSet.enemy_portrait("thornback_boar"), idle[0])
+
+
 func test_unknown_enemy_sprite_returns_null_for_code_drawn_fallback() -> void:
 	assert_true(SpriteSet.for_enemy("unknown_enemy") == null)
 

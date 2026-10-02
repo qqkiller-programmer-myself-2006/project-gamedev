@@ -34,6 +34,8 @@ func after_each() -> void:
 		_screen.free()
 	_screen = null
 	if _app != null and is_instance_valid(_app):
+		if _app.sounds != null and is_instance_valid(_app.sounds):
+			_app.sounds.free()
 		_app.free()
 	_app = null
 	_stub = null
