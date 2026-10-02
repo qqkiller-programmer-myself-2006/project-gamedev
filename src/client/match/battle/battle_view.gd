@@ -43,8 +43,10 @@ var _enemy_plates: Control
 var _turn_banner: PanelContainer
 var _region: Label
 var _region_sub: Label
+var _region_frame: Control
 var _header: VBoxContainer
 var _boss_warning_panel: PanelContainer
+var _boss_header := false
 var _bottom: VBoxContainer
 var _rewards: VBoxContainer
 var _log: RichTextLabel
@@ -125,19 +127,19 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	sub_panel.visible = false
 	sub_panel.size_flags_horizontal = Control.SIZE_SHRINK_END
 	region_box.add_child(sub_panel)
-	var region_frame := UiKit.panel(region_box, "OrnamentPanel")
-	region_frame.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	region_frame.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	region_frame.offset_right = -14
-	region_frame.offset_top = 6
-	region_frame.custom_minimum_size = Vector2(188, 52)
-	add_child(region_frame)
+	_region_frame = UiKit.panel(region_box, "OrnamentPanel")
+	_region_frame.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_region_frame.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_region_frame.offset_right = -14
+	_region_frame.offset_top = 6
+	_region_frame.custom_minimum_size = Vector2(188, 52)
+	add_child(_region_frame)
 	tips = UiKit.vbox(6)
 	tips.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	tips.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	tips.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	tips.offset_right = -10
-	# Keep tips above the action HUD rather than behind or on top of its buttons.
+	# The tip rail is placed above the measured action HUD after layout settles.
 	tips.offset_bottom = -190 * _app.settings.text_scale
 	tips.custom_minimum_size = Vector2(220, 0)
 	tips.z_index = 50
@@ -163,11 +165,12 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_center_text.add_theme_constant_override("outline_size", 10)
 	add_child(_center_text)
 	_turn_notice = UiKit.number_label("", "body", UiKit.ACCENT)
-	_turn_notice.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_turn_notice.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_turn_notice.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_turn_notice.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_turn_notice.offset_top = -240
-	_turn_notice.offset_bottom = -200
+	_turn_notice.offset_left = -210
+	_turn_notice.offset_right = 210
+	_turn_notice.offset_top = 520
+	_turn_notice.offset_bottom = 560
 	_turn_notice.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_turn_notice.add_theme_color_override("font_outline_color", Color.BLACK)
 	_turn_notice.add_theme_constant_override("outline_size", 4)
@@ -220,11 +223,12 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 
 	_banner = PanelContainer.new()
 	_banner.theme_type_variation = "BannerPanel"
-	_banner.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	_banner.offset_left = 930
-	_banner.offset_right = 1170
-	_banner.offset_top = 200
-	_banner.offset_bottom = 222
+	_banner.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_banner.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_banner.offset_left = -210
+	_banner.offset_right = 210
+	_banner.offset_top = 110
+	_banner.offset_bottom = 174
 	_banner.resized.connect(func() -> void: _banner.pivot_offset = _banner.size * 0.5)
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_banner_label = UiKit.pixel_label("", "tiny")
@@ -232,6 +236,11 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_banner.add_child(_banner_label)
 	_banner.visible = false
 	add_child(_banner)
+	resized.connect(_layout_battle_overlays)
+	_bottom.resized.connect(_layout_battle_overlays)
+	tips.resized.connect(_layout_battle_overlays)
+	_header.resized.connect(_layout_battle_overlays)
+	call_deferred("_layout_battle_overlays")
 
 
 ## Rebuilds everything that depends on the snapshot.
@@ -483,17 +492,19 @@ func _encounter_title(view: Dictionary) -> String:
 func _build_header(view: Dictionary) -> void:
 	UiKit.clear(_header)
 	_boss_warning_panel = null
+	_boss_header = false
 	_header.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_header.offset_left = -260
 	_header.offset_right = 260
 	_header.custom_minimum_size.x = 520
 	var encounter: Dictionary = view.get("encounter", {}) if view.get("encounter") != null else {}
 	if encounter.get("kind") == "boss":
-		# Keep the expandable warning between the initiative list and boss plate.
-		# Its VBox grows downward, with enough width to keep the guidance readable.
-		_header.set_anchors_preset(Control.PRESET_TOP_LEFT)
-		_header.offset_left = 260
-		_header.offset_right = 744
+		_boss_header = true
+		# Keep the phase stack centered below the location badge, within a
+		# readable column that leaves the right rail open for Tips.
+		_header.set_anchors_preset(Control.PRESET_CENTER_TOP)
+		_header.offset_left = -260
+		_header.offset_right = 260
 		_header.custom_minimum_size.x = 0
 		var boss: Dictionary = encounter["boss"]
 		var head := UiKit.vbox(2)
@@ -522,6 +533,7 @@ func _build_header(view: Dictionary) -> void:
 		head.add_child(UiKit.para("Beat the trainer within %d rounds to learn the %s Class. Nobody can fall here." %
 				[int(_combat.get("round_limit", 3)), class_name_text], "small"))
 		_header.add_child(UiKit.panel(head, "HudPanel"))
+	call_deferred("_layout_battle_overlays")
 
 
 ## Initiative tracker: everyone in this round's turn order (Speed, highest
@@ -932,6 +944,65 @@ func _build_bottom(view: Dictionary) -> void:
 		# the last skill badge stays inside the viewport at larger text scales.
 		call_deferred("_fit_skill_marks")
 	_bottom.add_child(row)
+	call_deferred("_layout_battle_overlays")
+
+
+func _layout_battle_overlays() -> void:
+	if not is_instance_valid(_bottom) or _bottom.size.y <= 0.0:
+		return
+	var origin_y := get_global_rect().position.y
+	var hud_top := _bottom.get_global_rect().position.y - origin_y
+	var view_size := size
+	if _boss_header and is_instance_valid(_header) and is_instance_valid(_region_frame):
+		_header.offset_top = _region_frame.get_global_rect().end.y - origin_y + 12.0
+	if is_instance_valid(_combat_grid):
+		var grid_bottom := hud_top - 14.0
+		if is_instance_valid(_skill_marks) and _skill_marks.visible:
+			grid_bottom = minf(grid_bottom, _skill_marks.get_global_rect().position.y - origin_y - 14.0)
+		if is_instance_valid(_log) and _log.get_parent() is Control:
+			var log_panel := _log.get_parent() as Control
+			if log_panel.visible:
+				grid_bottom = minf(grid_bottom, log_panel.get_global_rect().position.y - origin_y - 14.0)
+		_combat_grid.offset_bottom = maxf(235.0, grid_bottom)
+	if is_instance_valid(_skill_marks):
+		_skill_marks.offset_bottom = hud_top - view_size.y - 18.0
+		_skill_marks.offset_top = _skill_marks.offset_bottom - _skill_marks.size.y
+	if is_instance_valid(tips):
+		var chips_top := _skill_marks.get_global_rect().position.y - origin_y if is_instance_valid(_skill_marks) else hud_top - 72.0
+		var header_bottom := _header.get_global_rect().end.y - origin_y if is_instance_valid(_header) else 0.0
+		var region_bottom := _region_frame.get_global_rect().end.y - origin_y if is_instance_valid(_region_frame) else 0.0
+		var safe_top := maxf(header_bottom, region_bottom) + 12.0
+		var tip_top := safe_top
+		var tip_bottom := tip_top + maxf(tips.get_combined_minimum_size().y, 1.0)
+		if tip_bottom > chips_top - 14.0:
+			tip_bottom = chips_top - 14.0
+			tip_top = tip_bottom - maxf(tips.get_combined_minimum_size().y, 1.0)
+		tips.offset_top = tip_top - view_size.y
+		tips.offset_bottom = tip_bottom - view_size.y
+		if is_instance_valid(_combat_grid):
+			_combat_grid.offset_top = maxf(235.0, tip_bottom + 14.0)
+	if is_instance_valid(_turn_notice):
+		var notice_height := maxf(40.0, _turn_notice.get_combined_minimum_size().y)
+		var grid_top := _combat_grid.get_global_rect().position.y - origin_y if is_instance_valid(_combat_grid) else 235.0
+		var header_bottom := _header.get_global_rect().end.y - origin_y if is_instance_valid(_header) else 0.0
+		var notice_bottom := minf(grid_top - 10.0, maxf(header_bottom, 58.0) + notice_height + 10.0)
+		_turn_notice.offset_top = notice_bottom - notice_height
+		_turn_notice.offset_bottom = notice_bottom
+	if is_instance_valid(_target_prompt):
+		var header_bottom := _header.get_global_rect().end.y - origin_y if is_instance_valid(_header) else 0.0
+		var tip_bottom := tips.get_global_rect().end.y - origin_y if is_instance_valid(tips) else 0.0
+		var region_bottom := _region_frame.get_global_rect().end.y - origin_y if is_instance_valid(_region_frame) else 0.0
+		var prompt_top := maxf(header_bottom, region_bottom) + 12.0
+		if _boss_header:
+			prompt_top = maxf(prompt_top, tip_bottom + 12.0)
+		_target_prompt.offset_top = prompt_top
+		_target_prompt.offset_bottom = prompt_top + maxf(30.0, _target_prompt.get_combined_minimum_size().y)
+	if is_instance_valid(_banner):
+		var header_bottom := _header.get_global_rect().end.y - origin_y if is_instance_valid(_header) else 0.0
+		var region_bottom := _region_frame.get_global_rect().end.y - origin_y if is_instance_valid(_region_frame) else 0.0
+		var banner_top := maxf(header_bottom, region_bottom) + 12.0
+		_banner.offset_top = banner_top
+		_banner.offset_bottom = banner_top + maxf(64.0, _banner.get_combined_minimum_size().y)
 
 
 func _fit_skill_marks() -> void:
@@ -949,7 +1020,7 @@ func _fit_skill_marks() -> void:
 ## reference's Strike and Guard) or Items (05).
 func _card_grid(mode: String, choices: Dictionary) -> Control:
 	var grid := GridContainer.new()
-	grid.columns = 3
+	grid.columns = 2 if size.x < 1200.0 else 3
 	var cost_text := "Cost: %d | Cooldown: %d" if _app.settings.text_scale < 1.4 else "Cost %d | CD %d"
 	grid.add_theme_constant_override("h_separation", 6)
 	grid.add_theme_constant_override("v_separation", 6)

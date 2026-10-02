@@ -16,6 +16,7 @@ var _last_countdown_color := Color.TRANSPARENT
 var _region: Label
 var _encounter_label: Label
 var _encounter_icon: TextureRect
+var _encounter_box: PanelContainer
 var _columns: Control
 var _bottom: HBoxContainer
 var _workspace: Control
@@ -76,11 +77,12 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_encounter_icon = Icons.rect("merchant", Icons.size_for_scale(_app.settings.text_scale))
 	encounter_row.add_child(_encounter_icon)
 	encounter_row.add_child(_encounter_label)
-	var encounter_box := UiKit.panel(encounter_row, "OrnamentPanel")
-	encounter_box.name = "EncounterBox"
-	encounter_box.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	encounter_box.position = Vector2(112, 12)
-	add_child(encounter_box)
+	_encounter_box = UiKit.panel(encounter_row, "OrnamentPanel")
+	_encounter_box.name = "EncounterBox"
+	_encounter_box.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_encounter_box.position = Vector2(112, 12)
+	add_child(_encounter_box)
+	_encounter_box.resized.connect(_layout_tips)
 	_workspace = ScrollContainer.new()
 	_workspace.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var edge := 10.0 if _app.settings.text_scale >= 1.4 else 24.0
@@ -115,7 +117,20 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	tips.offset_top = 48
 	tips.custom_minimum_size = Vector2(360, 0)
 	add_child(tips)
+	resized.connect(_layout_tips)
 	_menu_panel = screen.build_corner_menu(self)
+	call_deferred("_layout_tips")
+
+
+func _layout_tips() -> void:
+	if not is_instance_valid(tips) or not is_instance_valid(_encounter_box):
+		return
+	var viewport_width := size.x
+	var badge_right := _encounter_box.position.x + _encounter_box.size.x
+	var margin := 18.0
+	var available := maxf(0.0, viewport_width - badge_right - margin * 2.0)
+	tips.position = Vector2(badge_right + margin, 48)
+	tips.custom_minimum_size.x = minf(360.0 * maxf(1.0, _app.settings.text_scale), available)
 
 func build(view: Dictionary, encounter: Dictionary) -> void:
 	_encounter = encounter
@@ -139,6 +154,7 @@ func build(view: Dictionary, encounter: Dictionary) -> void:
 	_build_bottom()
 	_restore_camp_state(camp_state)
 	tick()
+	call_deferred("_layout_tips")
 	_app.hint("merchant" if merchant else "rest")
 
 
