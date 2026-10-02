@@ -1,0 +1,64 @@
+{
+  "assets": [
+    {
+      "id": "video_branch_test_red",
+      "kind": "video",
+      "path": "assets/video/placeholder_red.ogv",
+      "source": "placeholder",
+      "tool": "ffmpeg",
+      "prompt": "solid red color",
+      "seed": null,
+      "date": "2026-10-03",
+      "license_note": "Public Domain (generated)",
+      "used_by": "tests/ui/branch_test"
+    },
+    {
+      "id": "video_branch_test_blue",
+      "kind": "video",
+      "path": "assets/video/placeholder_blue.ogv",
+      "source": "placeholder",
+      "tool": "ffmpeg",
+      "prompt": "solid blue color",
+      "seed": null,
+      "date": "2026-10-03",
+      "license_note": "Public Domain (generated)",
+      "used_by": "tests/ui/branch_test"
+    },
+    {
+      "id": "video_branch_test_green",
+      "kind": "video",
+      "path": "assets/video/placeholder_green.ogv",
+      "source": "placeholder",
+      "tool": "ffmpeg",
+      "prompt": "solid green color",
+      "seed": null,
+      "date": "2026-10-03",
+      "license_note": "Public Domain (generated)",
+      "used_by": "tests/ui/branch_test"
+    },
+    {
+      "id": "ui_icon_placeholder",
+      "kind": "ui",
+      "path": "assets/ui/icon_placeholder.png",
+      "source": "placeholder",
+      "tool": "imagemagick",
+      "prompt": "white square",
+      "seed": null,
+      "date": "2026-10-03",
+      "license_note": "Public Domain (generated)",
+      "used_by": "ui/common"
+    },
+    {
+      "id": "tex_white_placeholder",
+      "kind": "texture",
+      "path": "assets/models/tex_white_placeholder.png",
+      "source": "placeholder",
+      "tool": "imagemagick",
+      "prompt": "white texture",
+      "seed": null,
+      "date": "2026-10-03",
+      "license_note": "Public Domain (generated)",
+      "used_by": "models/placeholder"
+    }
+  ]
+}
