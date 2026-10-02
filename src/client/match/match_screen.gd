@@ -120,7 +120,6 @@ func setup(client: ClientApp) -> void:
 		_story_director.presentation_finished.connect(_on_story_presentation_finished)
 		add_child(_story_director)
 	_list_menu = build_corner_menu(self, false)
-	_list_menu.position = Vector2(12, 72)
 
 
 ## Where one-time tips appear, next to the log so they never cover controls.
@@ -245,6 +244,7 @@ func handle_key(client: ClientApp, key: int) -> bool:
 	if key == KEY_ESCAPE:
 		if _list_menu != null:
 			_list_menu.visible = true
+			_position_list_menu()
 			UiKit.focus_first(_list_menu)
 		else:
 			client.confirm_leave()
@@ -252,6 +252,24 @@ func handle_key(client: ClientApp, key: int) -> bool:
 	if _panel != null and _panel.has_method("handle_key") and _panel.handle_key(self, client, key):
 		return true
 	return false
+
+
+func _position_list_menu() -> void:
+	if _list_menu == null or _party_scroll == null:
+		return
+	var viewport_rect := get_viewport().get_visible_rect()
+	var party_rect := _party_scroll.get_global_rect()
+	var menu_size := _list_menu.get_combined_minimum_size()
+	_list_menu.size = menu_size
+	var margin := 12.0
+	var desired := Vector2(party_rect.end.x + margin, party_rect.position.y)
+	var max_x := maxf(viewport_rect.position.x + margin, viewport_rect.end.x - menu_size.x - margin)
+	var max_y := maxf(viewport_rect.position.y + margin, viewport_rect.end.y - menu_size.y - margin)
+	var position := Vector2(
+		clampf(desired.x, viewport_rect.position.x + margin, max_x),
+		clampf(desired.y, viewport_rect.position.y + margin, max_y)
+	)
+	_list_menu.global_position = position
 
 
 func apply_settings(client: ClientApp) -> void:
