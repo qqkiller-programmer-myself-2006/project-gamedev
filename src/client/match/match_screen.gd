@@ -123,6 +123,9 @@ func setup(client: ClientApp) -> void:
 		_story_director.text_scale = app.settings.text_scale
 		_story_director.reduced_motion = app.settings.reduced_motion
 		_story_director.restoring = app.is_story_restore()
+		var restored_presentations = app._story_restore.get("presentations", {})
+		if restored_presentations is Dictionary:
+			_story_director.restored_presentations = restored_presentations.duplicate(true)
 		_story_director.presentation_finished.connect(_on_story_presentation_finished)
 		add_child(_story_director)
 		_refresh_story_safe_bounds.call_deferred()

@@ -115,3 +115,49 @@ func test_new_story_shows_prologue_before_first_path_panel() -> void:
 	d._on_finished({"id": "chapter_1"})
 	assert_eq(d.current, null, "first path remains after the opening cards")
 	d.free()
+
+
+func test_continue_layer_three_card_shows_before_restored_voting_choice() -> void:
+	var d = StoryDirector.new()
+	d.content = {"chapters": [{"number": 3, "title": "Third"}]}
+	d.restoring = true
+	var started: Array = []
+	d.presentation_started.connect(func(item): started.append(item))
+	d.observe([], {"match": {"number": 4, "layer": 3, "phase": "voting", "vote": {"you_can_vote": true}}})
+	assert_true(d._is_decision_pending(), "restored snapshot has a pending path vote")
+	assert_ne(d.current, null, "the current layer card must display ahead of its vote")
+	assert_eq(started[0].get("kind"), "card")
+	assert_eq(started[0].get("id"), "chapter_3")
+	d.free()
+
+
+func test_continue_restores_seen_first_time_scenes_from_presentation_state() -> void:
+	var d = StoryDirector.new()
+	d.content = {
+		"chapters": [{"number": 3, "title": "Third"}],
+		"scenes": {"merchant_first": [{"text": "Merchant"}], "rest_first": [{"text": "Rest"}]}
+	}
+	d.restoring = true
+	d.restored_presentations = {"merchant_first": true, "rest_first": true}
+	var events := [{"type": "merchant_opened"}, {"type": "rested"}]
+	var started: Array = []
+	d.presentation_started.connect(func(item): started.append(item))
+	d.observe(events, {"match": {"number": 4, "layer": 3, "phase": "voting", "vote": {"you_can_vote": true}}})
+	assert_true(d.shown.has("merchant_first"))
+	assert_true(d.shown.has("rest_first"))
+	for item in d.queue:
+		assert_false(str(item.get("id", "")) in ["merchant_first", "rest_first"], "seen first-time scenes must not requeue")
+	assert_ne(d.current, null, "the card remains the first visible presentation")
+	assert_eq(started[0].get("kind"), "card")
+	assert_eq(started[0].get("id"), "chapter_3")
+	d.free()
+
+
+func test_legacy_layer_three_continue_infers_merchant_and_rest_as_seen() -> void:
+	var d = StoryDirector.new()
+	d.content = {"chapters": [{"number": 3, "title": "Third"}], "scenes": {}}
+	d.restoring = true
+	d.observe([], {"match": {"number": 4, "layer": 3, "phase": "voting", "vote": {"you_can_vote": true}}})
+	assert_true(d.shown.has("merchant_first"), "legacy save progress infers earlier first-time scenes")
+	assert_true(d.shown.has("rest_first"), "legacy save progress infers earlier first-time scenes")
+	d.free()

@@ -312,7 +312,10 @@ func _on_update(events: Array, snap: Dictionary) -> void:
 	if story_launcher != null:
 		for event in events:
 			if event.get("type", "") == "story_layer_started":
-				story_save.save(story_launcher.server.export_story(int(snap.get("session", 0))))
+				var save_data := story_launcher.server.export_story(int(snap.get("session", 0)))
+				if _current is MatchScreen and _current._story_director != null:
+					save_data["presentations"] = _current._story_director.shown.duplicate(true)
+				story_save.save(save_data)
 			elif event.get("type", "") == "match_ended":
 				story_save.clear()
 	_publish_for_web(snap)
@@ -355,7 +358,9 @@ func _on_result(_id: int, _cmd: Dictionary, result: Dictionary) -> void:
 			toast_error(message)
 	elif story_launcher != null and str(_cmd.get("type", "")) == "create_room" and _cmd.get("story", false):
 		if not _story_restore.is_empty():
-			send({"type": "restore_story", "save": _story_restore})
+			var restore_payload := _story_restore.duplicate(true)
+			restore_payload.erase("presentations")
+			send({"type": "restore_story", "save": restore_payload})
 		else:
 			for i in _story_classes.size():
 				send({"type": "set_loadout", "slot": i, "class": str(_story_classes[i]), "race": "Human", "boons": []})
