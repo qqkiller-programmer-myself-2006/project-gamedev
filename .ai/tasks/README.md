@@ -102,3 +102,4 @@ These are historical executor task specs retained for reference.
 - [T3D-03-battle3d-arena.md](T3D-03-battle3d-arena.md) — Claude1: Battle3D เวที + กล้อง.
 - [T3D-04-asset-pipeline.md](T3D-04-asset-pipeline.md) — Agy1: asset/video pipeline + manifest.
 - [T3D-05-qa-baseline.md](T3D-05-qa-baseline.md) — Agy2: QA baseline + perf harness.
+- [T3D-06-entry-hooks.md](T3D-06-entry-hooks.md) — Codex1: hook Home3D เข้า title + Battle3D เข้า BattleView (--3d) + i18n.
