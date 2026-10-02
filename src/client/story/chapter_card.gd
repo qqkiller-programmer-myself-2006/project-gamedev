@@ -8,6 +8,7 @@ var reduced_motion := false
 var _timer := 0.0
 var _title := Label.new()
 var _subtitle := Label.new()
+var _hint: Label
 var _font: Font
 
 func _init(data: Dictionary = {}, reduced: bool = false) -> void:
@@ -42,18 +43,7 @@ func _init(data: Dictionary = {}, reduced: bool = false) -> void:
 	_subtitle.add_theme_color_override("font_color", UiKit.TEXT)
 	if reduced_motion:
 		# Without motion the card waits for a key: say which.
-		var hint := Label.new()
-		hint.text = UiText.LABELS["continue"]
-		hint.add_theme_font_override("font", _font)
-		hint.add_theme_font_size_override("font_size", UiKit.SIZES["small"])
-		hint.add_theme_color_override("font_color", UiKit.TEXT_DIM)
-		hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-		hint.offset_left = -450
-		hint.offset_right = 450
-		hint.offset_top = 150
-		hint.offset_bottom = 180
-		add_child(hint)
+		_add_hint()
 	queue_redraw()
 
 func _draw() -> void:
@@ -72,6 +62,41 @@ func _process(delta: float) -> void:
 	if _timer >= 2.5:
 		finished.emit()
 		queue_free()
+
+
+func apply_settings(_scale: float, reduced: bool) -> void:
+	if reduced_motion == reduced:
+		return
+	reduced_motion = reduced
+	if reduced_motion:
+		set_process(false)
+		modulate.a = 1.0
+		_add_hint()
+	else:
+		if is_instance_valid(_hint):
+			_hint.queue_free()
+		_hint = null
+		set_process(true)
+		_timer = 0.0
+		modulate.a = 0.0
+		create_tween().tween_property(self, "modulate:a", 1.0, 0.25)
+
+
+func _add_hint() -> void:
+	if is_instance_valid(_hint):
+		return
+	_hint = Label.new()
+	_hint.text = UiText.LABELS["continue"]
+	_hint.add_theme_font_override("font", _font)
+	_hint.add_theme_font_size_override("font_size", UiKit.SIZES["small"])
+	_hint.add_theme_color_override("font_color", UiKit.TEXT_DIM)
+	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_hint.offset_left = -450
+	_hint.offset_right = 450
+	_hint.offset_top = 150
+	_hint.offset_bottom = 180
+	add_child(_hint)
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not (event is InputEventKey) or not event.pressed:

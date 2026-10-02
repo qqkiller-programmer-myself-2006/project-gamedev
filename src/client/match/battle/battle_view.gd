@@ -1079,7 +1079,7 @@ func _build_result() -> void:
 				for item in rewards.get("items", {}):
 					_rewards.add_child(_reward_line("%s%s" % [UiText.item_name(str(item)),
 							" x%d" % int(rewards["items"][item]) if int(rewards["items"][item]) > 1 else ""], UiKit.TEXT))
-				_rewards.add_child(_reward_line("+%d Gold" % int(rewards.get("gold", 0)), UiKit.ACCENT))
+				_rewards.add_child(_reward_line("+%d Gold for you" % _screen.personal_gold_share(int(rewards.get("gold", 0))), UiKit.ACCENT))
 				_rewards.add_child(_reward_line("%d EXP" % int(rewards.get("exp", 0)), UiKit.TEXT))
 				if rewards.has("clue"):
 					_rewards.add_child(_reward_line("Clue: %s" % rewards["clue"]["title"], UiKit.ALLY))

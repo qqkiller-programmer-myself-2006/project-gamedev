@@ -44,41 +44,47 @@ func _init(dialogue: Array = [], scale: float = 1.0, reduced: bool = false, clas
 		add_child(label)
 	_name_label.add_theme_color_override("font_color", UiKit.GOLD)
 	_hint_label.add_theme_color_override("font_color", UiKit.TEXT_DIM)
-	_name_label.position = Vector2(210, 20)
-	_name_label.size = Vector2(900, 34)
 	_name_label.add_theme_font_size_override("font_size", int(UiKit.SIZES["heading"] * text_scale))
-	_text_label.position = Vector2(210, 60)
-	_text_label.size = Vector2(1010, 86)
 	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text_label.add_theme_font_size_override("font_size", int(UiKit.SIZES["heading"] * text_scale))
 	_hint_label.text = UiText.LABELS["dialogue_hint"]
-	_hint_label.position = Vector2(840, 157)
-	_hint_label.size = Vector2(350, 26)
 	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_hint_label.add_theme_font_size_override("font_size", int(UiKit.SIZES["small"] * text_scale))
 	if not lines.is_empty():
 		_show_line()
+	_layout()
 	queue_redraw()
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	offset_top = -210.0
-	offset_bottom = -14.0
+	_layout()
 	if not reduced_motion:
 		modulate.a = 0.0
 		create_tween().tween_property(self, "modulate:a", 1.0, 0.22)
 
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_RESIZED:
+		_layout()
+
+
 func _draw() -> void:
 	draw_style_box(_box, Rect2(Vector2.ZERO, size))
-	draw_rect(Rect2(24, 20, 150, 150), UiKit.NAVY_RAISED, true)
-	draw_rect(Rect2(24, 20, 150, 150), UiKit.BORDER, false, 2.0)
-	if _portrait != null:
-		draw_texture_rect(_portrait, Rect2(32, 25, 134, 140), false)
-	else:
-		draw_circle(Vector2(99, 75), 30, UiKit.SLATE_HOVER)
-		draw_rect(Rect2(72, 105, 54, 44), UiKit.SLATE_HOVER, true)
-		draw_string(_font, Vector2(92, 92), _speaker.substr(0, 1).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, UiKit.SIZES["heading"], UiKit.TEXT)
-
+	var portrait_rect := Rect2(24, 20, 150, maxf(80.0, size.y - 40.0))
+	draw_rect(portrait_rect, UiKit.NAVY_RAISED, true)
+	draw_rect(portrait_rect, UiKit.BORDER, false, 2.0)
+	if _portrait != null and not _is_narrator():
+		var texture_size := _portrait.get_size()
+		var fit := minf((portrait_rect.size.x - 10.0) / texture_size.x, (portrait_rect.size.y - 10.0) / texture_size.y)
+		var draw_size := texture_size * fit
+		draw_texture_rect(_portrait, Rect2(portrait_rect.position + (portrait_rect.size - draw_size) * 0.5, draw_size), false)
+	elif _is_narrator():
+		var center := portrait_rect.get_center()
+		draw_line(center + Vector2(-38, 18), center + Vector2(0, 30), UiKit.GOLD, 4)
+		draw_line(center + Vector2(38, 18), center + Vector2(0, 30), UiKit.GOLD, 4)
+		draw_line(center + Vector2(-38, 18), center + Vector2(-38, -22), UiKit.GOLD, 4)
+		draw_line(center + Vector2(38, 18), center + Vector2(38, -22), UiKit.GOLD, 4)
+		draw_line(center + Vector2(0, 30), center + Vector2(0, -18), UiKit.GOLD, 3)
 func _process(delta: float) -> void:
 	if _shown < _full_text.length() and not reduced_motion:
 		_elapsed += delta
@@ -113,6 +119,8 @@ func skip() -> void:
 func _show_line() -> void:
 	var line: Dictionary = lines[line_index]
 	_speaker = str(line.get("speaker", "narrator")).capitalize()
+	if _is_narrator():
+		_speaker = "NARRATOR"
 	_full_text = str(line.get("text", ""))
 	_shown = _full_text.length() if reduced_motion else 0
 	_elapsed = 0.0
@@ -120,7 +128,47 @@ func _show_line() -> void:
 	_text_label.text = _full_text
 	_text_label.visible_characters = -1 if reduced_motion else 0
 	_portrait = _find_portrait(str(line.get("speaker", "")))
+	_layout()
 	queue_redraw()
+
+
+func apply_settings(scale: float, reduced: bool) -> void:
+	text_scale = scale
+	reduced_motion = reduced
+	_name_label.add_theme_font_size_override("font_size", int(UiKit.SIZES["heading"] * text_scale))
+	_text_label.add_theme_font_size_override("font_size", int(UiKit.SIZES["heading"] * text_scale))
+	_hint_label.add_theme_font_size_override("font_size", int(UiKit.SIZES["small"] * text_scale))
+	if reduced_motion:
+		_shown = _full_text.length()
+		_text_label.visible_characters = -1
+	_layout()
+	queue_redraw()
+
+
+func _layout() -> void:
+	var left := clampf(280.0 * text_scale, 280.0, 360.0) + 32.0
+	var available_width := maxf(300.0, size.x - 24.0)
+	var font_size := float(int(UiKit.SIZES["heading"] * text_scale))
+	var chars_per_line := maxi(12, int((available_width - 210.0) / maxf(1.0, font_size * 0.52)))
+	var line_count := 1
+	for paragraph in _full_text.split("\n"):
+		line_count += maxi(0, ceili(float(paragraph.length()) / float(chars_per_line)) - 1)
+	var viewport_height := get_viewport_rect().size.y if is_inside_tree() else 720.0
+	var height := clampf(110.0 + line_count * font_size * 1.3, 190.0, maxf(190.0, viewport_height - 28.0))
+	offset_left = left
+	offset_top = -height
+	offset_bottom = -14.0
+	var text_width := maxf(80.0, available_width - 210.0)
+	_name_label.position = Vector2(210, 18)
+	_name_label.size = Vector2(text_width, font_size + 12.0)
+	_text_label.position = Vector2(210, 58)
+	_text_label.size = Vector2(text_width, maxf(40.0, height - 100.0))
+	_hint_label.position = Vector2(maxf(210.0, available_width - 360.0), height - 34.0)
+	_hint_label.size = Vector2(minf(340.0, text_width), 24.0)
+
+
+func _is_narrator() -> bool:
+	return _speaker.to_lower() == "narrator"
 
 func _find_portrait(speaker: String) -> Texture2D:
 	var lower := speaker.to_lower()

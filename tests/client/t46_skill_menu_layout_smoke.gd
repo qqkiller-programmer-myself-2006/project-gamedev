@@ -3,7 +3,7 @@ extends SceneTree
 ## Checks battle layout with real global rectangles at normal and 1.4x text.
 
 class LayoutMatch extends MatchScreen:
-	func build_corner_menu(_host: Control) -> PanelContainer:
+	func build_corner_menu(_host: Control, _with_corner: bool = true) -> PanelContainer:
 		return PanelContainer.new()
 
 

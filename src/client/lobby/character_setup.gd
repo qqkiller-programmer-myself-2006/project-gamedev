@@ -32,6 +32,19 @@ class ClassMark extends Control:
 			draw_line(center + Vector2(0, 34), center + Vector2(0, 58), pale, 11)
 			draw_circle(center + Vector2(0, 58), 7, shadow)
 
+
+class PagerDots extends Control:
+	var count := 0
+	var current := 0
+
+	func _draw() -> void:
+		var spacing := 16.0
+		for i in count:
+			var radius := 4.0 if i == current else 3.0
+			var color := UiKit.GOLD if i == current else UiKit.TEXT_DIM
+			var x := size.x * 0.5 + (i - (count - 1) * 0.5) * spacing
+			draw_circle(Vector2(x, size.y * 0.5), radius, color)
+
 const NAV := ["Profile", "Races", "Class", "Boons", "Records"]
 const NAV_ICONS := ["info", "multiplayer", "weapon", "shield", "story"]
 const CLASSES := ["swordsman", "archer", "mage", "guardian", "assassin"]
@@ -198,9 +211,12 @@ func _render_class() -> void:
 	var prev := _button("<", func() -> void: _cycle_class(-1))
 	prev.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	arrows.add_child(prev)
-	arrows.add_child(_center("O " if CLASSES.find(_class_id) == 0 else "o ", "small"))
-	for i in range(1, CLASSES.size()):
-		arrows.add_child(UiKit.pixel_label("O" if i == CLASSES.find(_class_id) else "o", "small"))
+	var dots := PagerDots.new()
+	dots.count = CLASSES.size()
+	dots.current = CLASSES.find(_class_id)
+	dots.custom_minimum_size = Vector2(CLASSES.size() * 16.0, 22)
+	dots.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	arrows.add_child(dots)
 	var next := _button(">", func() -> void: _cycle_class(1))
 	next.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	arrows.add_child(next)

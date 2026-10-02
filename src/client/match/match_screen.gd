@@ -21,6 +21,7 @@ var _header_status: Control
 var _header_actions: Control
 var _header_clues: Button
 var _party: VBoxContainer
+var _party_scroll: ScrollContainer
 var _center: MarginContainer
 var _center_scroll: ScrollContainer
 var _log: RichTextLabel
@@ -32,6 +33,7 @@ var _digest := ""
 var _clue_overlay: Control = null
 var _last_warned_deadline := -1.0
 var _list_root: Control
+var _list_menu: PanelContainer
 var _battle: BattleView
 var _battle_mode := false
 var _camp: CampView
@@ -60,14 +62,14 @@ func setup(client: ClientApp) -> void:
 	var middle := UiKit.hbox(12)
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(middle)
-	var party_scroll := ScrollContainer.new()
-	party_scroll.custom_minimum_size = Vector2(clampf(280.0 * client.settings.text_scale, 280.0, 360.0), 0)
-	party_scroll.follow_focus = true
-	party_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_party_scroll = ScrollContainer.new()
+	_party_scroll.custom_minimum_size = Vector2(clampf(280.0 * client.settings.text_scale, 280.0, 360.0), 0)
+	_party_scroll.follow_focus = true
+	_party_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_party = UiKit.vbox(6)
 	_party.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	party_scroll.add_child(_party)
-	middle.add_child(party_scroll)
+	_party_scroll.add_child(_party)
+	middle.add_child(_party_scroll)
 	var center_scroll := ScrollContainer.new()
 	_center_scroll = center_scroll
 	center_scroll.follow_focus = true
@@ -117,6 +119,8 @@ func setup(client: ClientApp) -> void:
 		_story_director.restoring = app.is_story_restore()
 		_story_director.presentation_finished.connect(_on_story_presentation_finished)
 		add_child(_story_director)
+	_list_menu = build_corner_menu(self, false)
+	_list_menu.position = Vector2(12, 72)
 
 
 ## Where one-time tips appear, next to the log so they never cover controls.
@@ -235,12 +239,26 @@ func handle_key(client: ClientApp, key: int) -> bool:
 		return _battle.handle_key(key)
 	if _camp_mode:
 		return _camp.handle_key(key)
-	if _panel != null and _panel.has_method("handle_key") and _panel.handle_key(self, client, key):
+	if key == KEY_ESCAPE and _list_menu != null and _list_menu.visible:
+		_list_menu.visible = false
 		return true
 	if key == KEY_ESCAPE:
-		client.confirm_leave()
+		if _list_menu != null:
+			_list_menu.visible = true
+			UiKit.focus_first(_list_menu)
+		else:
+			client.confirm_leave()
+		return true
+	if _panel != null and _panel.has_method("handle_key") and _panel.handle_key(self, client, key):
 		return true
 	return false
+
+
+func apply_settings(client: ClientApp) -> void:
+	if _party_scroll != null:
+		_party_scroll.custom_minimum_size.x = clampf(280.0 * client.settings.text_scale, 280.0, 360.0)
+	if _story_director != null:
+		_story_director.apply_settings(client.settings.text_scale, client.settings.reduced_motion)
 
 
 func show_events(client: ClientApp, events: Array) -> void:
@@ -300,6 +318,8 @@ func _set_fullscreen(mode: String) -> void:
 		return
 	_battle_mode = battle
 	_camp_mode = camp
+	if _list_menu != null:
+		_list_menu.visible = false
 	_battle.visible = battle
 	_camp.visible = camp
 	_list_root.visible = not (battle or camp)
@@ -365,7 +385,7 @@ func toggle_clues() -> void:
 
 ## The = and ? corner buttons of the battle and camp views, and the menu the
 ## = button opens (Clues, Settings, Leave). Returns the menu so Esc can toggle it.
-func build_corner_menu(host: Control) -> PanelContainer:
+func build_corner_menu(host: Control, with_corner: bool = true) -> PanelContainer:
 	var menu := UiKit.panel(UiKit.vbox(6), "HudPanel")
 	menu.position = Vector2(10, 58)
 	menu.custom_minimum_size = Vector2(180, 0)
@@ -381,6 +401,9 @@ func build_corner_menu(host: Control) -> PanelContainer:
 		item.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		item.set_meta("focus_id", "menu_" + str(entry[0]))
 		items.add_child(item)
+	host.add_child(menu)
+	if not with_corner:
+		return menu
 	var corner := UiKit.hbox(6)
 	if host is BattleView:
 		corner.set_anchors_preset(Control.PRESET_TOP_RIGHT)
@@ -404,7 +427,6 @@ func build_corner_menu(host: Control) -> PanelContainer:
 		button.pressed.connect(entry[2])
 		corner.add_child(button)
 	host.add_child(corner)
-	host.add_child(menu)
 	return menu
 
 
@@ -489,7 +511,7 @@ func describe(event: Dictionary) -> String:
 				var rewards: Dictionary = event.get("rewards", {})
 				if rewards.is_empty() or int(rewards.get("exp", 0)) + int(rewards.get("gold", 0)) == 0:
 					return "The enemy falls!"
-				return "Victory! +%d EXP each, +%d Gold." % [int(rewards.get("exp", 0)), int(rewards.get("gold", 0))]
+				return "Victory! +%d EXP each, +%d Gold for you." % [int(rewards.get("exp", 0)), personal_gold_share(int(rewards.get("gold", 0)))]
 			if event["result"] == "timeout":
 				return "Time is up for the Challenge."
 			return "The Party has fallen..."
@@ -505,7 +527,7 @@ func describe(event: Dictionary) -> String:
 		"rested":
 			return "The Party rests and recovers."
 		"treasure_found":
-			return "Treasure! +%d Gold." % int(event["gold"])
+			return "Treasure! +%d Gold for you." % personal_gold_share(int(event["gold"]))
 		"clue_found":
 			return "Story Clue found: %s." % event["clue"]["title"]
 		"boss_started":
@@ -669,7 +691,7 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 			_clear_floating_numbers()
 			var rewards: Dictionary = event.get("rewards", {})
 			if event["result"] == "victory" and int(rewards.get("exp", 0)) > 0:
-				_announce(client, "Victory! +%d EXP, +%d Gold" % [int(rewards["exp"]), int(rewards.get("gold", 0))], 2.5, "good")
+				_announce(client, "Victory! +%d EXP, +%d Gold for you" % [int(rewards["exp"]), personal_gold_share(int(rewards.get("gold", 0)))], 2.5, "good")
 		"player_joined":
 			if not ClientApp.is_story_view(room_view()):
 				client.toast("%s joined." % event["name"])
@@ -677,7 +699,7 @@ func _feedback(client: ClientApp, event: Dictionary) -> void:
 		"profile_unavailable":
 			client.toast_error(UiText.error("profile_unavailable"), 6.0)
 		"treasure_found":
-			client.banner("Treasure! +%d Gold" % int(event["gold"]), 2.0, "loot_pickup")
+			client.banner("Treasure! +%d Gold for you" % personal_gold_share(int(event["gold"])), 2.0, "loot_pickup")
 		"clue_found":
 			client.banner("Story Clue: %s" % event["clue"]["title"], 2.5, "good")
 		"level_up":
@@ -767,7 +789,7 @@ func _build_top(view: Dictionary) -> void:
 	_top.add_child(status)
 	var actions := UiKit.hbox(5)
 	actions.size_flags_horizontal = Control.SIZE_SHRINK_END
-	actions.add_child(Icons.with_text("gold", "Gold: %d" % int(view.get("gold", 0)), "body", app.settings.text_scale, UiKit.ACCENT))
+	actions.add_child(Icons.with_text("gold", "Your Gold: %d" % _personal_gold(view), "body", app.settings.text_scale, UiKit.ACCENT))
 	var clues := Icons.apply_to_button(UiKit.button("Clues: %d [C]" % view.get("clues", []).size(), toggle_clues), "info", app.settings.text_scale)
 	clues.set_meta("focus_id", "clues")
 	clues.set_meta("header_clues", true)
@@ -792,6 +814,26 @@ func _fit_header() -> void:
 	_header_clues.text = "" if compact else "Clues: %d [C]" % match_view().get("clues", []).size()
 	_header_clues.custom_minimum_size.x = 40.0 if compact else 0.0
 	_header_status.custom_minimum_size.x = 84.0
+
+
+func personal_gold_share(amount: int, view: Dictionary = {}) -> int:
+	var source := view if not view.is_empty() else match_view()
+	var party: Array = source.get("party", [])
+	var slot := your_slot()
+	if party.is_empty() or slot < 0 or slot >= party.size():
+		return amount
+	var share := amount / party.size() + (amount % party.size() if slot == 0 else 0)
+	if str(party[slot].get("race", "Human")) == "Kobold":
+		share += int(round(share * 0.1))
+	return share
+
+
+func _personal_gold(view: Dictionary) -> int:
+	var party: Array = view.get("party", [])
+	var slot := your_slot()
+	if slot >= 0 and slot < party.size():
+		return int(party[slot].get("gold", view.get("gold", 0)))
+	return int(view.get("gold", 0))
 
 
 func _build_party(view: Dictionary) -> void:
