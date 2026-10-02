@@ -26,6 +26,7 @@ static func state(view: Dictionary) -> Dictionary:
 			})
 
 	var enemies: Variant = encounter.get("enemies", [])
+	var is_boss := str(encounter.get("kind", "")) == "boss"
 	if enemies is Array:
 		for i in enemies.size():
 			var enemy_value: Variant = enemies[i]
@@ -33,7 +34,7 @@ static func state(view: Dictionary) -> Dictionary:
 				continue
 			var enemy: Dictionary = enemy_value
 			var enemy_slot := int(enemy.get("slot", i))
-			units.append({
+			var presented_enemy := {
 				"id": str(enemy.get("id", "e%d" % i)),
 				"side": "enemy",
 				"slot": enemy_slot,
@@ -43,7 +44,11 @@ static func state(view: Dictionary) -> Dictionary:
 				"max_hp": int(enemy.get("max_hp", 0)),
 				"energy": int(enemy.get("energy", 0)),
 				"alive": int(enemy.get("hp", 0)) > 0,
-			})
+				"boss": is_boss,
+			}
+			if enemy.has("row"):
+				presented_enemy["row"] = str(enemy["row"])
+			units.append(presented_enemy)
 
 	var mode := str(view.get("mode", encounter.get("mode", "")))
 	return {
