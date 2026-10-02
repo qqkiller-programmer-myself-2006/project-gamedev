@@ -21,3 +21,7 @@ static func parse() -> Dictionary:
 				var key := pair[0].uri_decode()
 				options["url" if key == "server" else key] = pair[1].uri_decode() if pair.size() > 1 else true
 	return options
+
+
+static func use_3d(options: Dictionary) -> bool:
+	return bool(options.get("3d", false))
