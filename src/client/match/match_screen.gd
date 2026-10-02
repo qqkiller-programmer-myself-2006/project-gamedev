@@ -44,6 +44,7 @@ var _combat_finished := false
 var _camp_mode := false
 var _scroll_to_top := false
 var _story_director: StoryDirector = null
+var _log_panel: PanelContainer
 
 
 func setup(client: ClientApp) -> void:
@@ -58,6 +59,7 @@ func setup(client: ClientApp) -> void:
 	_top = UiKit.hbox(8)
 	_top.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_top.resized.connect(_fit_header)
+	_top.resized.connect(_refresh_story_safe_bounds)
 	column.add_child(UiKit.panel(_top))
 	var middle := UiKit.hbox(12)
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -95,7 +97,9 @@ func setup(client: ClientApp) -> void:
 	# entire screen wider than a narrow viewport at large text sizes.
 	var bottom := UiKit.vbox(6)
 	var log_panel := UiKit.panel(_log)
+	_log_panel = log_panel
 	log_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	log_panel.resized.connect(_refresh_story_safe_bounds)
 	bottom.add_child(log_panel)
 	# Tips stay below the log in a separate row, away from phase controls.
 	_tips = UiKit.vbox(0)
@@ -119,7 +123,17 @@ func setup(client: ClientApp) -> void:
 		_story_director.restoring = app.is_story_restore()
 		_story_director.presentation_finished.connect(_on_story_presentation_finished)
 		add_child(_story_director)
+		_refresh_story_safe_bounds.call_deferred()
 	_list_menu = build_corner_menu(self, false)
+	resized.connect(_refresh_story_safe_bounds)
+
+
+func _refresh_story_safe_bounds() -> void:
+	if _story_director == null or not is_instance_valid(_log_panel) or _top == null:
+		return
+	var log_rect := _log_panel.get_global_rect()
+	var header_rect := _top.get_global_rect()
+	_story_director.set_safe_bounds(log_rect.position.y, header_rect.end.y)
 
 
 ## Where one-time tips appear, next to the log so they never cover controls.
