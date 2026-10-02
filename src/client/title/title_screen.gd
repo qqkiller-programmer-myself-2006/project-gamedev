@@ -19,6 +19,8 @@ var _story_card_index := 0
 var _story_preview_portrait: TextureRect
 var _story_preview_name: Label
 var _story_preview_class: Label
+var _home3d: Home3D
+var _home3d_back: Button
 const STORY_CLASSES := ["swordsman", "archer", "mage", "guardian", "assassin"]
 const STORY_NAMES := ["Arin", "Bram", "Cora", "Dain", "Wren"]
 
@@ -65,12 +67,17 @@ func _build_chrome() -> void:
 
 func _show_menu() -> void:
 	_view = "menu"
+	if is_instance_valid(_home3d):
+		_home3d.visible = false
+		_home3d.input_enabled = false
+	if is_instance_valid(_home3d_back):
+		_home3d_back.visible = false
 	_clear_content()
 	var body := UiKit.vbox(10)
 	body.custom_minimum_size = Vector2(340, 0)
 	body.add_child(UiKit.label("WELCOME, TRAVELLER", "heading", UiKit.ACCENT))
 	body.add_child(UiKit.para("Choose your path into the forest.", "dim"))
-	var play := UiKit.primary("Play", _show_play, true)
+	var play := UiKit.primary("Play", _open_play, true)
 	Icons.apply_to_button(play, "play", _app.settings.text_scale)
 	play.set_meta("focus_id", "play")
 	body.add_child(play)
@@ -91,6 +98,11 @@ func _show_menu() -> void:
 
 func _show_play() -> void:
 	_view = "play"
+	if is_instance_valid(_home3d):
+		_home3d.visible = false
+		_home3d.input_enabled = false
+	if is_instance_valid(_home3d_back):
+		_home3d_back.visible = false
 	_clear_content()
 	var body := UiKit.vbox(12)
 	body.custom_minimum_size = Vector2(420, 0)
@@ -116,11 +128,82 @@ func _show_play() -> void:
 	Icons.apply_to_button(multiplayer_button, "multiplayer", _app.settings.text_scale)
 	multiplayer_button.set_meta("focus_id", "multiplayer")
 	body.add_child(multiplayer_button)
-	var back := UiKit.button("Back [Esc]", _show_menu, false, "secondary", "cancel")
+	var back := UiKit.button("Back [Esc]", _back_from_play, false, "secondary", "cancel")
 	Icons.apply_to_button(back, "back", _app.settings.text_scale)
 	body.add_child(back)
 	_content = _attach_narrow_panel(body, 460, 175.0)
 	UiKit.focus_first(body)
+
+
+func _open_play() -> void:
+	if LaunchOptions.use_3d(_app.options):
+		_show_home3d()
+	else:
+		_show_play()
+
+
+func _back_from_play() -> void:
+	if LaunchOptions.use_3d(_app.options):
+		_show_home3d()
+	else:
+		_show_menu()
+
+
+func _show_home3d() -> void:
+	_view = "home3d"
+	_clear_content()
+	if is_instance_valid(_home3d):
+		_home3d.queue_free()
+	if is_instance_valid(_home3d_back):
+		_home3d_back.queue_free()
+	_home3d = Home3D.new()
+	_home3d.name = "Home3D"
+	_home3d.apply_settings(_app.settings)
+	_home3d.input_enabled = true
+	_home3d.visible = true
+	_translate_home_labels()
+	_home3d.station_activated.connect(_on_home_station_activated)
+	add_child(_home3d)
+	# Keep the existing title logo and build footer above the 3D viewport.
+	move_child(_home3d, 1)
+	_home3d_back = UiKit.button("Back to Menu [Esc]", _show_menu, false, "secondary", "cancel")
+	_home3d_back.text = Tr.t("Back to Menu [Esc]")
+	_home3d_back.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_home3d_back.offset_left = 18
+	_home3d_back.offset_top = -62
+	_home3d_back.offset_right = 250
+	_home3d_back.offset_bottom = -14
+	_home3d_back.z_index = 20
+	add_child(_home3d_back)
+
+
+func _translate_home_labels() -> void:
+	var labels := {
+		"story": Tr.t("Story"), "battle": Tr.t("Battle"), "party": Tr.t("Party"),
+		"class": Tr.t("Class"), "shop": Tr.t("Shop"), "settings": Tr.t("Settings"),
+	}
+	for id in labels:
+		var label := _home3d.get_node("Overlay/Name_%s" % id) as Label
+		label.text = str(labels[id])
+	_home3d.hint.text = Tr.t("WASD / Arrows  Move   E / Enter  Interact")
+
+
+func _on_home_station_activated(id: String) -> void:
+	match id:
+		"story":
+			_show_play()
+		"settings":
+			_app.open_settings()
+		"battle", "party", "class", "shop":
+			_home3d.set_stations_enabled(["story", "settings"])
+			_app.toast(Tr.t("Coming soon"))
+
+
+func apply_settings(app: ClientApp) -> void:
+	_app = app
+	if is_instance_valid(_home3d):
+		_home3d.apply_settings(app.settings)
+		_translate_home_labels()
 
 func _show_story_setup() -> void:
 	_view = "story_setup"
@@ -579,6 +662,9 @@ func _remember() -> bool:
 	return true
 
 func handle_key(app: ClientApp, keycode: int) -> bool:
+	if _view == "home3d" and keycode == KEY_ESCAPE:
+		_show_menu()
+		return true
 	if is_instance_valid(_story_picker) and _story_picker.visible:
 		if keycode >= KEY_1 and keycode <= KEY_5:
 			_select_story_class(keycode - KEY_1)

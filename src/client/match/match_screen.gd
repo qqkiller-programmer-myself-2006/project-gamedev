@@ -294,6 +294,8 @@ func _position_list_menu() -> void:
 func apply_settings(client: ClientApp) -> void:
 	if _party_scroll != null:
 		_party_scroll.custom_minimum_size.x = clampf(280.0 * client.settings.text_scale, 280.0, 360.0)
+	if _battle != null:
+		_battle.apply_settings(client.settings)
 	if _story_director != null:
 		_story_director.apply_settings(client.settings.text_scale, client.settings.reduced_motion)
 

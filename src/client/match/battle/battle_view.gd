@@ -34,6 +34,9 @@ var _choices: Array[Callable] = []
 var _spots: Dictionary = {}
 var _tokens: Dictionary = {}
 var _previous_tokens: Dictionary = {}
+var _use_3d := false
+var _battle3d: Battle3DStage
+var _projected_anchors: Dictionary = {}
 
 var _stage: Control
 var _backdrop: BattleBackdrop
@@ -66,15 +69,27 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_screen = screen
 	_app = app
 	_content = _load_forest_content()
+	_use_3d = LaunchOptions.use_3d(app.options)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	_backdrop = BattleBackdrop.new()
 	_backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_backdrop.visible = not _use_3d
 	add_child(_backdrop)
-	_stage = Control.new()
+	if _use_3d:
+		_battle3d = Battle3DStage.new()
+		_battle3d.name = "Battle3DStage"
+		_battle3d.set_reduced_motion(app.settings.reduced_motion)
+		_battle3d.set_quality(OS.has_feature("web"))
+		_battle3d.unit_clicked.connect(_on_3d_unit_clicked)
+		_stage = _battle3d
+	else:
+		_stage = Control.new()
+		_stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_stage.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_stage.resized.connect(_place_tokens)
+	if _use_3d:
+		_stage.resized.connect(_place_3d_overlays)
 	add_child(_stage)
 
 	var left := MarginContainer.new()
@@ -284,6 +299,11 @@ func build(view: Dictionary, combat: Dictionary) -> void:
 
 
 func refresh_action_panel() -> void:
+	if _use_3d:
+		_sync_3d_state()
+		_place_3d_overlays()
+		_build_bottom(_view)
+		return
 	_choices.clear()
 	for token_value in _tokens.values():
 		var token := token_value as BattleToken
@@ -303,6 +323,8 @@ func refresh_action_panel() -> void:
 		focus_default()
 
 func tick() -> void:
+	if _use_3d:
+		_place_3d_overlays()
 	if _countdown == null or not is_instance_valid(_countdown):
 		return
 	if not _combat.get("your_turn", false):
@@ -319,6 +341,13 @@ func tick() -> void:
 		_countdown.add_theme_color_override("font_color", next_color)
 	if _combat.get("your_turn", false):
 		_screen.warn_if_short(_deadline, left)
+
+
+func apply_settings(settings: ClientSettings) -> void:
+	if not _use_3d or not is_instance_valid(_battle3d):
+		return
+	_battle3d.set_reduced_motion(settings.reduced_motion)
+	_battle3d.set_quality(OS.has_feature("web"))
 
 
 func handle_key(key: int) -> bool:
@@ -445,6 +474,10 @@ func _token_center(token: BattleToken) -> Vector2:
 
 
 func handle_event(event: Dictionary) -> void:
+	if _use_3d:
+		for cue in BattlePresentation.cues(event):
+			_battle3d.play_cue(cue)
+		return
 	if str(event.get("type", "")) != "action_resolved":
 		return
 	var actor := str(event.get("actor", ""))
@@ -626,6 +659,20 @@ func _build_enemy_plates(view: Dictionary) -> void:
 	var left := 760.0 if is_boss else (1280.0 - total) * 0.5
 	for i in enemies.size():
 		var enemy: Dictionary = enemies[i]
+		if _use_3d:
+			var name_label := UiKit.pixel_label(_screen.name_of(str(enemy["id"])), "small", UiKit.TEXT)
+			name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			var hp := int(enemy.get("hp", 0))
+			var max_hp := int(enemy.get("max_hp", 1))
+			var contents := UiKit.vbox(2)
+			contents.add_child(name_label)
+			contents.add_child(UiKit.stat_bar(hp, max_hp, UiKit.BAR_HP, "%d/%d" % [hp, max_hp], 14, "tiny"))
+			var plate_3d := UiKit.panel(contents, "HudHighlightPanel" if str(enemy["id"]) in _current_targets() else "HudPanel")
+			plate_3d.custom_minimum_size = Vector2(176, 50)
+			plate_3d.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			plate_3d.set_meta("unit_id", str(enemy["id"]))
+			_enemy_plates.add_child(plate_3d)
+			continue
 		var row := UiKit.hbox(8)
 		row.custom_minimum_size = Vector2(width - 20, 58)
 		var portrait := TextureRect.new()
@@ -675,6 +722,13 @@ func _controller_tag(id: String, unit: Dictionary) -> Array:
 
 
 func _build_stage(view: Dictionary) -> void:
+	if _use_3d:
+		_tokens.clear()
+		_spots.clear()
+		_previous_tokens.clear()
+		_sync_3d_state()
+		_place_3d_overlays()
+		return
 	_previous_tokens = _tokens.duplicate()
 	_spots.clear()
 	var statuses: Dictionary = _combat.get("statuses", {})
@@ -1243,6 +1297,72 @@ func _set_mode(mode: String) -> void:
 		_banner.visible = false
 	_screen.combat_mode = mode
 	refresh_action_panel()
+
+
+func _sync_3d_state() -> void:
+	if not _use_3d or not is_instance_valid(_battle3d):
+		return
+	var presentation_view := _view.duplicate()
+	var encounter := _combat.duplicate()
+	var source_encounter: Dictionary = _view.get("encounter", {}) if _view.get("encounter") is Dictionary else {}
+	if str(source_encounter.get("kind", "")) == "boss":
+		encounter["kind"] = "boss"
+	presentation_view["encounter"] = encounter
+	presentation_view["mode"] = _screen.combat_mode
+	presentation_view["targets"] = _current_targets()
+	_battle3d.apply_state(BattlePresentation.state(presentation_view))
+	_sync_projected_anchors()
+
+
+func _sync_projected_anchors() -> void:
+	if not is_instance_valid(_battle3d):
+		return
+	var seen := {}
+	for id_value in _battle3d.unit_ids():
+		var id := str(id_value)
+		seen[id] = true
+		var anchor := _projected_anchors.get(id) as Control
+		if anchor == null or not is_instance_valid(anchor):
+			anchor = Control.new()
+			anchor.name = "ProjectedAnchor_%s" % id
+			anchor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			anchor.size = Vector2.ONE
+			anchor.modulate.a = 0.0
+			add_child(anchor)
+			_projected_anchors[id] = anchor
+		_screen.anchors[id] = anchor
+	for id in _projected_anchors.keys():
+		if seen.has(id):
+			continue
+		var stale := _projected_anchors[id] as Control
+		if is_instance_valid(stale):
+			stale.queue_free()
+		_projected_anchors.erase(id)
+		_screen.anchors.erase(id)
+
+
+func _place_3d_overlays() -> void:
+	if not _use_3d or not is_instance_valid(_battle3d):
+		return
+	var stage_offset := _battle3d.position
+	for id in _projected_anchors:
+		var anchor := _projected_anchors[id] as Control
+		if is_instance_valid(anchor):
+			anchor.position = stage_offset + _battle3d.unit_screen_position(str(id))
+	for plate in _enemy_plates.get_children():
+		var id := str(plate.get_meta("unit_id", ""))
+		var head := _battle3d.unit_head_screen_position(id)
+		if id.is_empty() or head.x < 0.0:
+			plate.visible = false
+			continue
+		plate.visible = true
+		plate.position = stage_offset + head - Vector2(plate.size.x * 0.5, plate.size.y + 8.0)
+
+
+func _on_3d_unit_clicked(id: String) -> void:
+	if not _current_targets().has(id):
+		return
+	_send(_target_command(id))
 
 
 func _send(cmd: Dictionary) -> void:

@@ -6,7 +6,7 @@
 
 `BattlePresentation.state(view: Dictionary) -> Dictionary` returns:
 
-- `units`: party entries from `view.party`, followed by enemy entries from `view.encounter.enemies`. Each unit contains `id`, `side` (`party` or `enemy`), `slot`, `class_key`, `name`, `hp`, `max_hp`, `energy`, and `alive`.
+- `units`: party entries from `view.party`, followed by enemy entries from `view.encounter.enemies`. Each unit contains `id`, `side` (`party` or `enemy`), `slot`, `class_key`, `name`, `hp`, `max_hp`, `energy`, and `alive`. Enemy entries also contain `boss` (true when the encounter kind is `boss`) and include `row` (`front` or `back`) when the view supplies it.
 - `current_actor`: the combat actor id from `view.encounter.actor`.
 - `mode`: optional client UI context from `view.mode` or `view.encounter.mode`; defaults to an empty string because menu mode is not part of the server snapshot.
 - `targets`: explicit `view.targets` when supplied, otherwise the targets for `mode` from the encounter choices (`attack`, `skill:<skill_id>`, or `item:<item_id>`). Defaults to an empty array.

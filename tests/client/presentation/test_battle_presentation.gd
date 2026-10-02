@@ -28,6 +28,19 @@ func test_state_keeps_all_party_and_enemy_units_including_fallen() -> void:
 	assert_eq(state["units"][6]["class_key"], "bear")
 	assert_eq(state["units"][6]["name"], "Old Bear")
 	assert_eq(state["units"][6]["energy"], 2)
+	assert_false(state["units"][6]["boss"])
+	assert_false(state["units"][6].has("row"))
+
+
+func test_state_marks_bosses_and_preserves_optional_enemy_rows() -> void:
+	var state := BattlePresentation.state({
+		"party": [],
+		"encounter": {"kind": "boss", "enemies": [
+			{"id": "e0", "kind": "guardian", "hp": 40, "max_hp": 40, "row": "back"},
+		]},
+	})
+	assert_eq(state["units"][0]["boss"], true)
+	assert_eq(state["units"][0]["row"], "back")
 
 
 func test_state_uses_optional_menu_mode_to_resolve_targets() -> void:
