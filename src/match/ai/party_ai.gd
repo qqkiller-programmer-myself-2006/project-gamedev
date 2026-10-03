@@ -22,6 +22,10 @@ extends RefCounted
 ##              weakest); Prep Time when the weapon is not coated; Inject
 ##              Venom once the focus carries 2+ DoT kinds; otherwise Poke Up,
 ##              then Stab, then attack the focus
+##   healer        heal the most injured ally (or the Party when two or more
+##              allies are hurt), cleanse harmful effects, otherwise Strike
+##   support       Rally an ally, Energize a teammate who lacks Energy for a
+##              ready expensive Skill, Weaken the most dangerous enemy, then Strike
 
 const LOW_HP := 0.35
 const CRITICAL_HP := 0.2
@@ -47,13 +51,17 @@ static func decide(run: MatchRun, combat: CombatEncounter, slot: int) -> Diction
 		if not reaction.is_empty():
 			return reaction
 
-	var cheapest := -1
-	for skill in combat.class_skills(run, id):
-		var cost = combat.skill_energy(run, skill)
-		if cheapest == -1 or cost < cheapest:
-			cheapest = cost
-	if cheapest > 0 and int(me.get("energy", run.content.get_int("rules.energy_start", 1))) < cheapest:
-		return {"actor": id, "action": "focus"}
+	# Support and Healer have useful non-damaging decisions even when they
+	# cannot yet afford a Skill. Let their role preset choose a basic Strike in
+	# that case instead of short-circuiting into Focus.
+	if preset not in ["support", "healer"]:
+		var cheapest := -1
+		for skill in combat.class_skills(run, id):
+			var cost = combat.skill_energy(run, skill)
+			if cheapest == -1 or cost < cheapest:
+				cheapest = cost
+		if cheapest > 0 and int(me.get("energy", run.content.get_int("rules.energy_start", 1))) < cheapest:
+			return {"actor": id, "action": "focus"}
 
 	match preset:
 		"swordsman":
@@ -78,7 +86,112 @@ static func decide(run: MatchRun, combat: CombatEncounter, slot: int) -> Diction
 			return _guard(run, combat, id)
 		"assassin":
 			return _assassin(run, combat, id)
+		"healer":
+			return _healer(run, combat, id)
+		"support":
+			return _support(run, combat, id)
 	return _basic_attack(run, combat, id)
+
+
+static func _healer(run: MatchRun, combat: CombatEncounter, id: String) -> Dictionary:
+	var hurt: Array[String] = []
+	var lowest := ""
+	var lowest_ratio := 0.6
+	for slot in run.party.size():
+		var ally: Dictionary = run.party[slot]
+		if int(ally["hp"]) <= 0:
+			continue
+		var ratio := float(ally["hp"]) / float(ally["max_hp"])
+		if ratio < 0.6:
+			hurt.append(_party_id(slot))
+			if lowest.is_empty() or ratio < lowest_ratio:
+				lowest = _party_id(slot)
+				lowest_ratio = ratio
+	if hurt.size() >= 2:
+		var wave := _ready_skill(run, combat, id, "renewing_wave")
+		if not wave.is_empty():
+			return {"actor": id, "action": "skill", "skill": "renewing_wave",
+					"profile": combat.skill_profile(run, "renewing_wave"), "targets": wave}
+	if not lowest.is_empty():
+		var mend := _ready_skill(run, combat, id, "mending_light")
+		if mend.has(lowest):
+			return _skill_on(run, combat, id, "mending_light", lowest)
+	var afflicted := _most_harmfully_afflicted(run, combat)
+	if not afflicted.is_empty() and _ready_skill(run, combat, id, "cleanse").has(afflicted):
+		return _skill_on(run, combat, id, "cleanse", afflicted)
+	return _attack_weakest(run, combat, id)
+
+
+static func _support(run: MatchRun, combat: CombatEncounter, id: String) -> Dictionary:
+	var rally := _ready_skill(run, combat, id, "rally")
+	for ally_id in rally:
+		if ally_id != id and not combat.status_book.has(ally_id, "rally"):
+			return _skill_on(run, combat, id, "rally", ally_id)
+	var energy_target := _ally_needing_energy(run, combat, id)
+	if not energy_target.is_empty() and _ready_skill(run, combat, id, "energize").has(energy_target):
+		return _skill_on(run, combat, id, "energize", energy_target)
+	var dangerous := _most_dangerous_enemy(run, combat, id)
+	if not dangerous.is_empty() and not combat.status_book.has(dangerous, "weakened") \
+			and _ready_skill(run, combat, id, "weaken").has(dangerous):
+		return _skill_on(run, combat, id, "weaken", dangerous)
+	return _attack_weakest(run, combat, id)
+
+
+static func _most_harmfully_afflicted(run: MatchRun, combat: CombatEncounter) -> String:
+	var best := ""
+	var best_score := 0
+	for slot in run.party.size():
+		var id := _party_id(slot)
+		if int(run.party[slot]["hp"]) <= 0:
+			continue
+		var score := 0
+		for status in combat.status_book.view(id):
+			var kind := str(run.content.get_value("statuses.%s.kind" % status["status"], "dot"))
+			var negative := bool(run.content.get_value("statuses.%s.negative" % status["status"], kind == "dot"))
+			if negative:
+				score += 2 if kind == "dot" else 1
+		if score > best_score:
+			best = id
+			best_score = score
+	return best
+
+
+static func _ally_needing_energy(run: MatchRun, combat: CombatEncounter, id: String) -> String:
+	var best := ""
+	var best_need := 0
+	for slot in run.party.size():
+		var ally_id := _party_id(slot)
+		if ally_id == id or int(run.party[slot]["hp"]) <= 0:
+			continue
+		var ally: Dictionary = run.party[slot]
+		var energy := int(ally.get("energy", 0))
+		var need := 0
+		for skill in combat.class_skills(run, ally_id):
+			var cost := combat.skill_energy(run, skill)
+			if cost < 2 or cost <= energy or combat.skill_cooldown(ally_id, skill) > 0:
+				continue
+			need = maxi(need, cost - energy)
+		if need > best_need:
+			best = ally_id
+			best_need = need
+	return best
+
+
+static func _most_dangerous_enemy(run: MatchRun, combat: CombatEncounter, id: String) -> String:
+	var candidates := combat.valid_targets(run, id, combat.skill_profile(run, "weaken"))
+	var best := ""
+	var best_power := -1
+	for enemy_id in candidates:
+		var enemy: Dictionary = combat._unit(run, enemy_id)
+		var power := int(enemy.get("atk", 0)) + int(enemy.get("mag", 0))
+		if power > best_power:
+			best = enemy_id
+			best_power = power
+	return best
+
+
+static func _party_id(slot: int) -> String:
+	return CombatEncounter._pid(slot)
 
 
 static func _assassin(run: MatchRun, combat: CombatEncounter, id: String) -> Dictionary:
