@@ -104,4 +104,7 @@ These are historical executor task specs retained for reference.
 - [T3D-05-qa-baseline.md](T3D-05-qa-baseline.md) — Agy2: QA baseline + perf harness.
 - [T3D-06-entry-hooks.md](T3D-06-entry-hooks.md) — Codex1: hook Home3D เข้า title + Battle3D เข้า BattleView (--3d) + i18n.
 - [T3D-07-battle-hud.md](T3D-07-battle-hud.md) — Codex1: HUD การต่อสู้ ดำ/แดง/ขาว แผงเฉียง คำสั่งพัดรอบตัวละคร (ยังไม่สั่งรัน).
-- [T4S-01-classes-support-healer.md](T4S-01-classes-support-healer.md) — Agy1: เพิ่ม Class Support/Healer (server+content+balance).
+- [T4S-01-classes-support-healer.md](T4S-01-classes-support-healer.md) — ภาพรวม Class Support/Healer; แบ่งทำเป็น 3 งานต่อกัน:
+  - [T4S-01a-support-healer-effects-classes.md](T4S-01a-support-healer-effects-classes.md) — Agy1: effect ใหม่ + class + skill + test.
+  - [T4S-01b-support-healer-ai-encounter-tree.md](T4S-01b-support-healer-ai-encounter-tree.md) — Agy1: AI preset + Class Encounter + skill tree (หลัง 01a).
+  - [T4S-01c-support-healer-balance.md](T4S-01c-support-healer-balance.md) — Agy1: simulate + ปรับ balance (หลัง 01b).
