@@ -389,6 +389,10 @@ msgstr "พรานช่ำชองกำลังทดสอบความ
 msgid "A shielded swordsman whose bones blunt physical blows."
 msgstr "นักดาบถือโล่ที่กระดูกช่วยลดทอนการโจมตีกายภาพ"
 
+#: content/forest.json:classes.healer.challenge.intro
+msgid "A shrine spirit gathers gentle light. \"Mend what is broken, and let no lingering harm take root.\""
+msgstr "วิญญาณศาลเจ้ารวบรวมแสงอันอ่อนโยน \"เยียวยาสิ่งที่แตกสลาย และอย่าปล่อยให้ความเจ็บปวดตกค้าง\""
+
 #: content/forest.json:items.wolf_pelt.description
 msgid "A thick grey pelt. Crafting material."
 msgstr "หนังสีเทาผืนหนา วัตถุดิบคราฟต์"
@@ -412,6 +416,10 @@ msgstr "โล่ของนักเดินทางมีรอยกรง
 #: content/story_mode.json:scenes.class_gained[2].text
 msgid "A useful promise. We still have a long road ahead."
 msgstr "คำสัญญาที่มีประโยชน์ เรายังมีเส้นทางอีกยาวไกล"
+
+#: content/forest.json:classes.support.challenge.intro
+msgid "A veteran hunter lowers her bow. \"Power is nothing without timing. Help your allies and hinder your foes.\""
+msgstr "พรานชำนาญลดคันธนูลง \"พลังไร้ความหมายหากใช้ผิดจังหวะ จงช่วยพันธมิตรและขัดขวางศัตรู\""
 
 #: content/forest.json:classes.archer.challenge.intro
 msgid "A veteran hunter strings her bow. \"Hunters strike first and never miss twice. Show me you can keep up.\""
@@ -589,7 +597,7 @@ msgstr "กลับเมนู [Esc]"
 msgid "Balanced and dependable. Strong melee strikes, solid health."
 msgstr "สมดุลและไว้ใจได้ การโจมตีระยะประชิดแข็งแกร่ง พลังชีวิตดี"
 
-#: src/client/title/title_screen.gd:182 src/client/home3d/home3d.gd:16
+#: src/client/title/title_screen.gd:182
 msgid "Battle"
 msgstr "ต่อสู้"
 
@@ -705,8 +713,8 @@ msgstr "ตัวเลือก"
 msgid "CHOOSE YOUR JOURNEY"
 msgstr "เลือกการเดินทางของคุณ"
 
-#: src/client/lobby/character_setup.gd:190 src/client/title/title_screen.gd:183 src/client/home3d/home3d.gd:17
-msgid "Class"
+#: src/client/ui/ui_text.gd:TYPE_TAGS.class
+msgid "CLASS"
 msgstr "อาชีพ"
 
 #: src/client/match/match_screen.gd:709
@@ -825,7 +833,7 @@ msgstr "เลือกเส้นทางเข้าสู่ป่า"
 msgid "Chosen"
 msgstr "เลือกแล้ว"
 
-#: src/client/lobby/character_setup.gd:190 src/client/title/title_screen.gd:183 src/client/home3d/home3d.gd:17
+#: src/client/lobby/character_setup.gd:190 src/client/title/title_screen.gd:183
 msgid "Class"
 msgstr "อาชีพ"
 
@@ -856,6 +864,10 @@ msgstr "ไร้อาชีพ"
 #: content/forest.json:story.clues.guardian_mark.title
 msgid "Claw-Marked Shield"
 msgstr "โล่รอยกรงเล็บ"
+
+#: content/forest.json:skills.cleanse.name
+msgid "Cleanse"
+msgstr "ชำระล้าง"
 
 #: src/client/ui/ui_text.gd:LABELS.story_picker_choose_hint
 msgid "Click a card or press 1-5 to choose. Esc closes."
@@ -1033,6 +1045,14 @@ msgstr "ความมืดปิดล้อมกลุ่มไว้ ท�
 msgid "Deals 18 fire damage to every enemy."
 msgstr "สร้างความเสียหายไฟ 18 แก่ศัตรูทุกตัว"
 
+#: content/forest.json:statuses.rally.description
+msgid "Deals 20% more direct damage for 3 turns."
+msgstr "ทำความเสียหายโดยตรงได้มากขึ้น 20% เป็นเวลา 3 เทิร์น"
+
+#: content/forest.json:statuses.weakened.description
+msgid "Deals 30% less direct damage for 2 turns."
+msgstr "ทำความเสียหายโดยตรงได้น้อยลง 30% เป็นเวลา 2 เทิร์น"
+
 #: src/client/match/class_panel.gd:40
 msgid "Decline [N]"
 msgstr "ปฏิเสธ [N]"
@@ -1140,6 +1160,10 @@ msgstr "ศัตรูปรากฏตัว!"
 #: src/client/ui/ui_text.gd:client_literal
 msgid "Enemies defeated"
 msgstr "ศัตรูที่ปราบได้"
+
+#: content/forest.json:skills.energize.name
+msgid "Energize"
+msgstr "เติมพลัง"
 
 #: src/client/match/camp/camp_view.gd:666
 msgid "Energy"
@@ -1365,6 +1389,10 @@ msgstr "อัญมณี: %d"
 msgid "Giant Spider"
 msgstr "แมงมุมยักษ์"
 
+#: content/forest.json:skills.energize.description
+msgid "Give 2 Energy to one other ally, up to their Energy cap. Costs 1 Energy. Cooldown: 2 turns."
+msgstr "เพิ่มพลังงาน 2 หน่วยให้พันธมิตรอีกหนึ่งคน โดยไม่เกินขีดจำกัด ใช้พลังงาน 1 หน่วย คูลดาวน์ 2 เทิร์น"
+
 #: content/forest.json:enemies.bramble_archer.name
 msgid "Goblin"
 msgstr "ก็อบลิน"
@@ -1436,6 +1464,14 @@ msgstr "เขากำลังชี้ไปยังนอกป่า เ�
 #: content/story_mode.json:prologue[2].text
 msgid "He went west with a map and a stubborn plan. That sounds like him."
 msgstr "เขาไปทางตะวันตกพร้อมแผนที่และแผนดื้อรั้น ฟังดูเป็นเขาจริง ๆ"
+
+#: content/forest.json:classes.healer.name
+msgid "Healer"
+msgstr "ฮีลเลอร์"
+
+#: content/forest.json:classes.healer.role
+msgid "Healing / Support"
+msgstr "สายรักษาและสนับสนุน"
 
 #: content/forest.json:items.herb.name
 msgid "Healing Herb"
@@ -1512,6 +1548,10 @@ msgstr "ฉันจำได้ว่าออกเดินทางกับ
 #: src/client/lobby/character_setup.gd:453
 msgid "ID: %s…"
 msgstr "รหัส: %s…"
+
+#: content/forest.json:skills.rally.description
+msgid "Increase one ally's damage dealt by 20% for 3 turns. Costs 2 Energy. Cooldown: 3 turns."
+msgstr "เพิ่มความเสียหายที่พันธมิตรหนึ่งคนทำได้ 20% เป็นเวลา 3 เทิร์น ใช้พลังงาน 2 หน่วย คูลดาวน์ 3 เทิร์น"
 
 #: src/client/match/camp/camp_view.gd:677
 msgid "Initiative"
@@ -1725,6 +1765,10 @@ msgstr "สายประชิด / ความเสียหายต่อ
 msgid "Mend"
 msgstr "รักษา"
 
+#: content/forest.json:skills.mending_light.name
+msgid "Mending Light"
+msgstr "แสงเยียวยา"
+
 #: content/forest.json:enemies.forest_wisp.description
 msgid "Mends wounded allies and hurls spirit fire when none need healing."
 msgstr "รักษาพันธมิตรที่บาดเจ็บ และขว้างไฟวิญญาณเมื่อไม่มีใครต้องรักษา"
@@ -1933,7 +1977,7 @@ msgstr "ช่วงที่ %d/%d: %s"
 msgid "PLAYER"
 msgstr "ผู้เล่น"
 
-#: src/client/title/title_screen.gd:182 src/client/home3d/home3d.gd:16
+#: src/client/title/title_screen.gd:182
 msgid "Party"
 msgstr "ปาร์ตี้"
 
@@ -2073,6 +2117,10 @@ msgstr "เพิ่มทุกช่องในผังทักษะให
 msgid "Raise your shield for everyone: the whole Party takes 40% less damage until your next turn. Costs 2 Energy. Cooldown: 3 turns."
 msgstr "ชูโล่ปกป้องทุกคน: ทั้งกลุ่มรับความเสียหายน้อยลง 40% จนถึงเทิร์นถัดไป ใช้พลังงาน 2 หน่วย คูลดาวน์ 3 เทิร์น"
 
+#: content/forest.json:skills.rally.name content/forest.json:statuses.rally.name
+msgid "Rally"
+msgstr "ปลุกใจ"
+
 #: content/forest.json:classes.archer.role
 msgid "Ranged DPS"
 msgstr "สายโจมตีไกล"
@@ -2129,9 +2177,21 @@ msgstr "ฟื้นฟูพลังชีวิต คราฟต์อุ�
 msgid "Reduce motion (no sliding, fading or floating numbers)"
 msgstr "ลดการเคลื่อนไหว (ไม่มีการเลื่อน จาง หรือแสดงตัวเลขลอย)"
 
+#: content/forest.json:skills.weaken.description
+msgid "Reduce one enemy's damage dealt by 30% for 2 turns. Costs 1 Energy. Cooldown: 3 turns."
+msgstr "ลดความเสียหายที่ศัตรูหนึ่งตัวทำได้ 30% เป็นเวลา 2 เทิร์น ใช้พลังงาน 1 หน่วย คูลดาวน์ 3 เทิร์น"
+
+#: content/forest.json:skills.cleanse.description
+msgid "Remove harmful Status effects from one ally. Costs 2 Energy. Cooldown: 3 turns."
+msgstr "ล้างสถานะด้านลบจากพันธมิตรหนึ่งคน ใช้พลังงาน 2 หน่วย คูลดาวน์ 3 เทิร์น"
+
 #: content/forest.json:enemies.grey_wolf.special.name
 msgid "Rend"
 msgstr "ฉีกกระชาก"
+
+#: content/forest.json:skills.renewing_wave.name
+msgid "Renewing Wave"
+msgstr "คลื่นฟื้นฟู"
 
 #: src/client/ui/ui_text.gd:CONFIRM.reset_skills[2] src/client/ui/ui_text.gd:client_literal
 msgid "Reset Skills"
@@ -2157,6 +2217,14 @@ msgstr "พักข้างกองไฟเก่า"
 msgid "Rest while we can. Tomorrow, the trail climbs."
 msgstr "พักเท่าที่ทำได้ พรุ่งนี้เส้นทางจะสูงชันขึ้น"
 
+#: content/forest.json:skills.renewing_wave.description
+msgid "Restore 12 HP to every living Party member. Costs 3 Energy. Cooldown: 4 turns."
+msgstr "ฟื้นฟูพลังชีวิต 12 หน่วยให้สมาชิกกลุ่มที่ยังมีชีวิตทุกคน ใช้พลังงาน 3 หน่วย คูลดาวน์ 4 เทิร์น"
+
+#: content/forest.json:skills.mending_light.description
+msgid "Restore 20 HP to one living ally. Costs 2 Energy. Cooldown: 2 turns."
+msgstr "ฟื้นฟูพลังชีวิต 20 หน่วยให้พันธมิตรที่ยังมีชีวิตหนึ่งคน ใช้พลังงาน 2 หน่วย คูลดาวน์ 2 เทิร์น"
+
 #: content/forest.json:items.herb.description
 msgid "Restores 30 HP to one ally."
 msgstr "ฟื้นพลังชีวิต 30 ให้พันธมิตรหนึ่งคน"
@@ -2164,6 +2232,10 @@ msgstr "ฟื้นพลังชีวิต 30 ให้พันธมิ�
 #: content/forest.json:items.tonic.description
 msgid "Restores 70 HP to one ally."
 msgstr "ฟื้นพลังชีวิต 70 ให้พันธมิตรหนึ่งคน"
+
+#: content/forest.json:classes.healer.description
+msgid "Restores one ally or the whole Party, and cleanses harmful Status effects."
+msgstr "ฟื้นฟูพลังชีวิตให้พันธมิตรหนึ่งคนหรือทั้งกลุ่ม และล้างสถานะด้านลบ"
 
 #: src/client/match/camp/camp_view.gd:899
 msgid "Revive HP: %s"
@@ -2201,13 +2273,13 @@ msgstr "รากไม้เลื้อยอยู่ใต้ {target} ม�
 msgid "Ruined Shrine"
 msgstr "ศาลเจ้าพัง"
 
-#: src/client/title/title_screen.gd:183 src/client/ui/ui_text.gd:client_literal src/client/home3d/home3d.gd:17
-msgid "Shop"
+#: src/client/ui/ui_text.gd:TYPE_TAGS.merchant
+msgid "SHOP"
 msgstr "ร้านค้า"
 
-#: src/client/title/title_screen.gd:182 src/client/home3d/home3d.gd:16
-msgid "Story"
-msgstr "เนื้อเรื่อง"
+#: src/client/ui/ui_text.gd:TYPE_TAGS.story
+msgid "STORY"
+msgstr "เรื่องราว"
 
 #: src/client/title/title_screen.gd:244
 msgid "STORY PARTY"
@@ -2237,7 +2309,7 @@ msgstr "ลูกคนรอง"
 msgid "Select"
 msgstr "เลือก"
 
-#: src/client/title/settings_panel.gd:24 src/client/title/title_screen.gd:183 src/client/home3d/home3d.gd:17
+#: src/client/title/settings_panel.gd:24 src/client/title/title_screen.gd:183
 msgid "Settings"
 msgstr "ตั้งค่า"
 
@@ -2253,6 +2325,14 @@ msgstr "แชร์รหัสให้เพื่อน ผู้เล่�
 msgid "She lowers her bow with a grin. \"Fast hands. Take this bow, it has waited for someone like you.\""
 msgstr "นางลดคันธนูลงพร้อมรอยยิ้ม \"มือไวดี รับธนูนี้ไป มันรอคนอย่างเจ้ามานานแล้ว\""
 
+#: content/forest.json:classes.support.challenge.pass
+msgid "She nods. \"A good ally can change the whole fight.\""
+msgstr "เธอพยักหน้า \"พันธมิตรที่ดีเปลี่ยนผลการต่อสู้ได้ทั้งสนาม\""
+
+#: content/forest.json:classes.support.challenge.fail
+msgid "She shakes her head. \"Watch the field, not just your target.\""
+msgstr "เธอส่ายหน้า \"มองภาพรวมของสนาม อย่าจับจ้องแต่เป้าหมาย\""
+
 #: content/forest.json:enemies.skeleton.special.name
 msgid "Shield Bash"
 msgstr "กระแทกโล่"
@@ -2265,7 +2345,7 @@ msgstr "กำแพงโล่"
 msgid "Shoots from the back row; melee cannot reach it while the front row stands."
 msgstr "ยิงจากแถวหลัง; การโจมตีระยะประชิดเอื้อมไม่ถึงตราบใดที่แถวหน้ายังยืนอยู่"
 
-#: src/client/title/title_screen.gd:183 src/client/ui/ui_text.gd:client_literal src/client/home3d/home3d.gd:17
+#: src/client/title/title_screen.gd:183 src/client/ui/ui_text.gd:client_literal
 msgid "Shop"
 msgstr "ร้านค้า"
 
@@ -2417,7 +2497,7 @@ msgstr "แต้มสถานะ"
 msgid "Status: Unlocked"
 msgstr "สถานะ: ปลดล็อกแล้ว"
 
-#: src/client/title/title_screen.gd:182 src/client/home3d/home3d.gd:16
+#: src/client/title/title_screen.gd:182
 msgid "Story"
 msgstr "เนื้อเรื่อง"
 
@@ -2461,6 +2541,14 @@ msgstr "เนื้อเรื่องใช้โปรไฟล์แยก
 msgid "Story · offline, control all five"
 msgstr "เนื้อเรื่อง · ออฟไลน์ ควบคุมทั้งห้าตัวละคร"
 
+#: content/forest.json:classes.support.description
+msgid "Strengthens allies, weakens enemies, and restores a companion's Energy."
+msgstr "เสริมพลังให้พันธมิตร ลดพลังศัตรู และฟื้นฟูพลังงานให้เพื่อนร่วมกลุ่ม"
+
+#: content/forest.json:classes.support.name
+msgid "Support"
+msgstr "ซัพพอร์ต"
+
 #: content/forest.json:classes.swordsman.name src/client/ui/ui_text.gd:client_literal
 msgid "Swordsman"
 msgstr "นักดาบ"
@@ -2468,6 +2556,10 @@ msgstr "นักดาบ"
 #: src/client/match/battle/combat_panel.gd:129
 msgid "TARGET [%d]"
 msgstr "เป้าหมาย [%d]"
+
+#: content/forest.json:classes.support.role
+msgid "Tactical Support"
+msgstr "สายสนับสนุนเชิงยุทธวิธี"
 
 #: content/forest.json:story.events.old_campfire.choices[1].hint
 msgid "Take a moment to recover here."
@@ -2721,6 +2813,10 @@ msgstr "การเดินทางดำเนินต่อ..."
 msgid "The journey into the Forest begins."
 msgstr "การเดินทางเข้าสู่ป่าเริ่มต้นแล้ว"
 
+#: content/forest.json:classes.healer.challenge.fail
+msgid "The light dims. \"Steady your hands, then try again.\""
+msgstr "แสงค่อย ๆ มอดลง \"ตั้งมือให้มั่น แล้วลองใหม่อีกครั้ง\""
+
 #: src/client/ui/ui_text.gd:ERRORS.invalid_item
 msgid "The merchant does not sell that."
 msgstr "พ่อค้าไม่ได้ขายสิ่งนั้น."
@@ -2784,6 +2880,10 @@ msgstr "ถุงส่วนกลางไม่มีไอเทมที่
 #: src/client/ui/ui_text.gd:EMPTY.inventory
 msgid "The shared bag is empty. Win fights, open Treasure or buy from a Merchant to fill it."
 msgstr "ถุงส่วนกลางว่าง ชนะการต่อสู้ เปิดสมบัติ หรือซื้อของจากพ่อค้าเพื่อเก็บไอเทม."
+
+#: content/forest.json:classes.healer.challenge.pass
+msgid "The spirit's glow warms the shrine. \"Carry this light to those who need it.\""
+msgstr "แสงของวิญญาณแผ่ความอบอุ่นทั่วศาลเจ้า \"จงนำแสงนี้ไปมอบให้ผู้ที่ต้องการ\""
 
 #: content/forest.json:classes.guardian.challenge.intro
 msgid "The stone knight raises its shield. \"None pass who cannot stand firm. Strike me, and endure my answer.\""
@@ -3129,6 +3229,14 @@ msgstr "เราจะตามหาเขาให้พบ เส้นท�
 msgid "Weak to: %s"
 msgstr "แพ้ทาง: %s"
 
+#: content/forest.json:skills.weaken.name
+msgid "Weaken"
+msgstr "ทำให้อ่อนแอ"
+
+#: content/forest.json:statuses.weakened.name
+msgid "Weakened"
+msgstr "อ่อนแอ"
+
 #: src/client/match/camp/camp_view.gd:838
 msgid "Weapon"
 msgstr "อาวุธ"
@@ -3390,6 +3498,12 @@ msgstr "คุณ"
 #~ msgid "+%d Gold for the Party."
 #~ msgstr "กลุ่มได้รับทอง %d"
 
+#~ msgid "A pale light shimmers over a clear pool."
+#~ msgstr "แสงซีดเรืองรองเหนือบ่อน้ำใส"
+
+#~ msgid "A traveller has marked the trail with signs of aid and warning."
+#~ msgstr "นักเดินทางทำเครื่องหมายบนเส้นทางไว้ ทั้งสัญญาณขอความช่วยเหลือและคำเตือน"
+
 #~ msgid "Audio: Kenney, Zane Little Music, MintoDog, Emma_MA, marcelofg55, JaggedStone, artisticdude and Brian MacIntosh (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md"
 #~ msgstr "เสียง: Kenney, Zane Little Music, MintoDog, Emma_MA, marcelofg55, JaggedStone, artisticdude และ Brian MacIntosh (CC0); YannZ และ leohpaz (CC-BY 4.0) เครดิตทั้งหมด: assets/audio/CREDITS.md"
 
@@ -3402,8 +3516,14 @@ msgstr "คุณ"
 #~ msgid "Father waited three winters. We can gather our strength and try again."
 #~ msgstr "พ่อรอมาสามฤดูหนาว เรารวบรวมกำลังแล้วลองใหม่ได้"
 
+#~ msgid "Field Ward"
+#~ msgstr "เขตคุ้มภัย"
+
 #~ msgid "Gold: %d"
 #~ msgstr "ทอง: %d"
+
+#~ msgid "Healing Spring"
+#~ msgstr "ธาราเยียวยา"
 
 #~ msgid "Next time, we reach the Guardian in the cave together."
 #~ msgstr "คราวหน้าเราจะไปถึงผู้พิทักษ์ในถ้ำด้วยกัน"
@@ -3417,22 +3537,8 @@ msgstr "คุณ"
 #~ msgid "Treasure! +%d Gold."
 #~ msgstr "พบสมบัติ! ได้รับทอง %d"
 
+#~ msgid "Unavailable"
+#~ msgstr "ยังไม่พร้อมใช้งาน"
+
 #~ msgid "Victory! +%d EXP each, +%d Gold."
 #~ msgstr "ชนะ! ทุกคนได้รับค่าประสบการณ์ %d และทอง %d"
-
-
-#: src/client/home3d/home3d.gd:20
-msgid "Unavailable"
-msgstr "ยังไม่พร้อมใช้งาน"
-
-#: src/client/ui/ui_text.gd:88
-msgid "CLASS"
-msgstr "อาชีพ"
-
-#: src/client/ui/ui_text.gd:88
-msgid "SHOP"
-msgstr "ร้านค้า"
-
-#: src/client/ui/ui_text.gd:88
-msgid "STORY"
-msgstr "เรื่องราว"

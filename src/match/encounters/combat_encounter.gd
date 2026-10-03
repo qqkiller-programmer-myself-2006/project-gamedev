@@ -681,6 +681,18 @@ func _apply_profile(run: MatchRun, source: String, profile: Dictionary, targets:
 			var before: int = unit["hp"]
 			unit["hp"] = mini(unit["max_hp"], unit["hp"] + heal_amount)
 			entry["heal"] = unit["hp"] - before
+		if bool(profile.get("cleanse", false)):
+			var removed := status_book.cleanse(target)
+			if not removed.is_empty():
+				entry["cleansed"] = removed
+				for status in removed:
+					_status_events.append({"type": "status_expired", "target": target, "status": status})
+		if profile.has("grant_energy") and target.begins_with(PARTY_PREFIX):
+			var energy_cap := int(unit.get("energy_max", run.content.get_int("rules.energy_max", 6)))
+			var energy_before := int(unit.get("energy", 0))
+			unit["energy"] = mini(energy_cap, energy_before + maxi(0, int(profile["grant_energy"])))
+			entry["energy_granted"] = int(unit["energy"]) - energy_before
+			entry["energy"] = int(unit["energy"])
 		if profile.has("revive_ratio") and unit["hp"] <= 0:
 			unit["hp"] = maxi(1, int(round(unit["max_hp"] * float(profile["revive_ratio"]))))
 			entry["revived"] = true
@@ -761,6 +773,8 @@ func _hit(run: MatchRun, source: String, target: Dictionary, damage: Dictionary,
 	if crit:
 		amount *= float(attacker.get("derived", {}).get("crit_damage", rules.get_float("rules.crit_multiplier", 1.5)))
 	amount *= float(attacker.get("damage_multiplier", 1.0))
+	amount *= status_book.damage_modifier(source, "damage_out")
+	amount *= status_book.damage_modifier(target_id, "damage_in")
 	var weak: bool = target.get("weakness", []).has(element)
 	if weak:
 		amount *= rules.get_float("rules.weakness_multiplier", 1.5)

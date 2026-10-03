@@ -92,8 +92,16 @@ _Avoid_: ability, spell (เมื่อหมายถึง action ในร�
 _Avoid_: mana, MP, SP, stamina
 
 **Tier 1 Class**:
-Class ระดับแรกของ Forest vertical slice ได้แก่ Swordsman, Archer, Mage, Guardian และ Assassin (ADR-0010)
+Class ระดับแรกของ Forest vertical slice มี 7 อาชีพ ได้แก่ Swordsman, Archer, Mage, Guardian, Assassin, Support และ Healer (ADR-0010; Support/Healer เพิ่มตาม ADR-0016)
 _Avoid_: starter class (เพราะผู้เล่นไม่ได้เริ่มเกมด้วย Class)
+
+**Support**:
+Tier 1 Class ที่ช่วยทีมด้วยบัฟเพื่อน ดีบัฟศัตรู และฟื้น Energy ให้เพื่อนหนึ่งคน
+_Avoid_: buffer
+
+**Healer**:
+Tier 1 Class ที่ฟื้น HP ให้เพื่อนหนึ่งคนหรือทั้ง Party และล้าง Status effect ฝั่งลบ
+_Avoid_: medic
 
 **Assassin**:
 Tier 1 Class สาย Melee DoT ที่ใช้มีดและยาพิษติด DoT หลายชนิดบนเป้าเดียว แล้วปิดด้วย Skill ที่แรงขึ้นตามจำนวนชนิด DoT บนเป้า; Enervation เป็น Boon ที่เลือกก่อนเริ่ม Match (ADR-0013; renamed from Rogue in #74)

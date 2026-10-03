@@ -137,7 +137,7 @@ func _node_has_text(node: Node, wanted: String) -> bool:
 
 func test_every_class_has_a_capitalised_display_name() -> void:
 	var classes := ForestContent.load_default().get_dict("classes")
-	assert_true(classes.size() >= 5, "the Classes are in content")
+	assert_true(classes.size() >= 7, "the seven Tier 1 Classes are in content")
 	for id in classes:
 		var shown := UiText.class_display(classes, str(id))
 		assert_eq(shown, str(id).capitalize(), "%s is shown as %s" % [id, str(id).capitalize()])
