@@ -1,13 +1,13 @@
 # Story slice — task ownership (2026-10-03)
 
 Follows `docs/plans/2026-10-02-3d-vertical-slice.md`, ADR-0015, ADR-0016 and `docs/art/3d-pipeline.md`.
-Lead (this session) writes specs, reviews, runs tests, merges into `claude/game-project-lead-9a9ecc`. Workers commit on their own branch only, never push.
+**Claude 1 is the lead** (owner's decision): it writes specs, reviews, runs tests and merges into `claude/game-project-lead-9a9ecc`, and also implements its own tasks (T4S-02, T4S-03) in the `Claude1` worktree. Lead duties come first; its own tasks pause while a review or merge is waiting. Other workers commit on their own branch only, never push.
 
 ## Workers
 
 | Worker | Engine | Worktree / branch | Strength used for |
 | --- | --- | --- | --- |
-| Claude 1 | Claude Code | `Project-GameDev-Agents/Claude1` / `ai/story-claude1` | Thai story writing, story content data |
+| Claude 1 (lead) | Claude Code | lead branch `claude/game-project-lead-9a9ecc`; own tasks in `Project-GameDev-Agents/Claude1` / `ai/story-claude1` | Lead: specs, review, merge. Own tasks: Thai story writing, story content data |
 | Claude 2 | Claude Code | `Project-GameDev-Agents/Claude2` / `ai/story-claude2` | MatchServer rules (route system) |
 | Agy 1 | agy | `Project-GameDev-Agents/Agy1` / `ai/3d-agy1` | Classes, content, balance |
 | Agy 2 | agy | `Project-GameDev-Agents/Agy2` / `ai/3d-agy2` | Client presentation (cutscene, 3D import) |
