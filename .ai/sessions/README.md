@@ -39,11 +39,11 @@ Shared rules for every session:
 
 ## Claude 2 (Claude Code)
 - Worktree: `Project-GameDev-Agents/Claude2`, branch `ai/3d-claude2`.
-- Tasks: T4S-04 (`choose_route`, route state + Story save, final encounter by route; starts after T4S-01a is merged), then T3D-08 (cutscene router + `.ogv` player; the spec says Agy 2 — Claude 2 owns it now, work in `Claude2`/`ai/3d-claude2`), then T3D-09 (VRM pipeline, after the owner's first VRoid model).
+- Tasks: T4S-04 (`choose_route`, route state + Story save, final encounter by route; starts after T4S-01a is merged), then T3D-08 (cutscene router + `.ogv` player; the spec says Agy 2 — Claude 2 owns it now, work in `Claude2`/`ai/3d-claude2`), then T25D-01 (2.5D sprite units in `Battle3DStage`, `.ai/tasks/T25D-01-sprite-units.md`; after T4S-04). T3D-09 (full 3D VRM) is on hold — owner chose 2.5D (`docs/art/2-5d-pipeline.md`).
 - Start prompt: "You are Claude 2. Read `.ai/sessions/README.md` and do the next Claude 2 task that has no handoff yet."
 
 ## Codex (executor, dispatched by Claude 1 through `.ai/run-agent.ps1`)
 - T4S-01 chain in `Project-GameDev-Agents/Agy1` / `ai/3d-agy1` (01a done, then 01b, 01c — the task files say Agy 1; Codex owns them now).
-- Then in `Project-GameDev-Agents/Codex1` / `ai/3d-codex1`: T4S-05 (Auto command), TART-01 (character sheets).
+- Then in `Project-GameDev-Agents/Codex1` / `ai/3d-codex1`: TART-01 (character sheets, dispatched 2026-10-03, runs in parallel with 01c — no Godot), T4S-05 (Auto command), TART-02 (battle sprites, after the owner locks sheets).
 - Codex can also be opened interactively by the owner; start prompt: "Read `.ai/sessions/README.md` and do the next Codex task that has no handoff yet." Never run it in a worktree where a runner is active.
 
