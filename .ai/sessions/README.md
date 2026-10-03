@@ -14,13 +14,13 @@ Shared rules for every session:
 ---
 
 ## Claude 1 — lead (Claude Code)
-- Worktree: `Project-GameDev-Agents/Claude1`, branch `ai/story-claude1` for own tasks; merges into `claude/game-project-lead-9a9ecc`.
+- Worktree: `Project-GameDev-Agents/Claude1`, branch `ai/3d-claude1` for own tasks; merges into `claude/game-project-lead-9a9ecc`.
 - Lead duties first: write task specs in `.ai/tasks/`, review worker handoffs, run the full test suite after each merge, keep `.ai/checkpoint.md` and the ownership plan current.
 - Own tasks: T4S-02 (Thai story content into `content/story_mode.json`, from `docs/design/story-script-draft.md` and `story-script-routes.md`), then T4S-03 (party rename + Story class pools, after T4S-01c merges).
 - Start prompt: "You are Claude 1, lead of BEYOND THE WORLD'S END. Read `.ai/sessions/README.md`, `docs/plans/2026-10-03-story-slice-ownership.md` and `.ai/checkpoint.md`, then report current task status in Thai."
 
 ## Claude 2 (Claude Code)
-- Worktree: `Project-GameDev-Agents/Claude2`, branch `ai/story-claude2`.
+- Worktree: `Project-GameDev-Agents/Claude2`, branch `ai/3d-claude2`.
 - Task: T4S-04 (`choose_route`, route state + Story save, final encounter by route). Starts after T4S-01a is merged into the lead branch. Spec will be at `.ai/tasks/T4S-04-*.md`.
 - Start prompt: "You are Claude 2. Read `.ai/sessions/README.md` and do the task assigned to Claude 2."
 

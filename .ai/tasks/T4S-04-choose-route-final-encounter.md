@@ -1,7 +1,7 @@
 # T4S-04 — `choose_route` + final encounter by route
 
 - **Task ID:** T4S-04
-- **Owner:** Claude 2 (`ai/story-claude2`, worktree `Project-GameDev-Agents/Claude2`)
+- **Owner:** Claude 2 (`ai/3d-claude2`, worktree `Project-GameDev-Agents/Claude2`)
 - **Dependencies:** T4S-01a merged into `claude/game-project-lead-9a9ecc` (classes `support`/`healer` exist). Start by fast-forwarding from the lead branch.
 - **Read first:** `AGENTS.md`, `CONTEXT.md`, `docs/adr/0014-*.md` (Story mode, local MatchServer, Story save validation), `docs/adr/0016-story-reboot-new-classes-auto-battle.md` (Route + route-2 encounter rules), `docs/design/story-script-routes.md`, `src/client/story/story_director.gd`, `src/client/story/story_save.gd`, `src/client/story/story_launcher.gd`, `src/net/local_connection.gd`, MatchServer command handling and journey/boss code in `src/match/**`
 
@@ -39,4 +39,4 @@ The player picks a route at the decision scene in Layer 5 (before the Guardian B
 4. test_thai_catalog passes.
 
 ## Handoff
-`.ai/handoff/T4S-04.md`: branch + sha, files changed, test result, decisions taken (hook point, enemy scaling rule, loss condition), open questions. Commit on `ai/story-claude2`, never push.
+`.ai/handoff/T4S-04.md`: branch + sha, files changed, test result, decisions taken (hook point, enemy scaling rule, loss condition), open questions. Commit on `ai/3d-claude2`, never push.

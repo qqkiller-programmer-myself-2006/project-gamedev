@@ -7,8 +7,8 @@ Follows `docs/plans/2026-10-02-3d-vertical-slice.md`, ADR-0015, ADR-0016 and `do
 
 | Worker | Engine | Worktree / branch | Strength used for |
 | --- | --- | --- | --- |
-| Claude 1 (lead) | Claude Code | lead branch `claude/game-project-lead-9a9ecc`; own tasks in `Project-GameDev-Agents/Claude1` / `ai/story-claude1` | Lead: specs, review, merge. Own tasks: Thai story writing, story content data |
-| Claude 2 | Claude Code | `Project-GameDev-Agents/Claude2` / `ai/story-claude2` | MatchServer rules (route system) |
+| Claude 1 (lead) | Claude Code | lead branch `claude/game-project-lead-9a9ecc`; own tasks in `Project-GameDev-Agents/Claude1` / `ai/3d-claude1` | Lead: specs, review, merge. Own tasks: Thai story writing, story content data |
+| Claude 2 | Claude Code | `Project-GameDev-Agents/Claude2` / `ai/3d-claude2` | MatchServer rules (route system) |
 | Agy 1 | agy | `Project-GameDev-Agents/Agy1` / `ai/3d-agy1` | Classes, content, balance |
 | Agy 2 | agy | `Project-GameDev-Agents/Agy2` / `ai/3d-agy2` | Client presentation (cutscene, 3D import) |
 | Codex | codex | `Project-GameDev-Agents/Codex1` / `ai/3d-codex1` | Battle HUD + Auto, character images |
