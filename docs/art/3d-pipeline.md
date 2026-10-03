@@ -1,6 +1,6 @@
 # 3D character pipeline (free tools)
 
-Status: accepted by the owner on 2026-10-03. Owner chose **full 3D anime characters in battle**, matching the mood of the reference battle screenshot (characters as real 3D models on the stage, dynamic slanted HUD on top). This supersedes the earlier recommendation of sprite 2.5D.
+Status: **superseded for battle by `docs/art/2-5d-pipeline.md` (owner chose 2.5D, 2026-10-03)**. Kept for a possible later full-3D experiment. Original status: accepted by the owner on 2026-10-03. Owner chose **full 3D anime characters in battle**, matching the mood of the reference battle screenshot (characters as real 3D models on the stage, dynamic slanted HUD on top). This supersedes the earlier recommendation of sprite 2.5D.
 
 Constraints: free tools only, Godot 4.7.2 `gl_compatibility` renderer, Web + Windows export. Reference images set mood only; every model and outfit is our own design (see `docs/design/character-designs-draft.md`).
 
