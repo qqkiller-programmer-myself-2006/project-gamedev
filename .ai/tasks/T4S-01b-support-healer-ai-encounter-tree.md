@@ -1,7 +1,7 @@
 # T4S-01b — Support/Healer: AI preset + Class Encounter + skill tree
 
 - **Task ID:** T4S-01b (ส่วนที่ 2 จาก 3 ของ T4S-01)
-- **Owner:** Agy1 (agy, `ai/3d-agy1`) — fallback: Codex
+- **Owner:** Codex (runner, worktree `Project-GameDev-Agents/Agy1`, branch `ai/3d-agy1`) — agy dropped 2026-10-03
 - **Dependencies:** T4S-01a merge แล้ว (class/skill/effect มีใน `forest.json`)
 - **อ่านก่อน:** `AGENTS.md`, `CONTEXT.md`, `docs/adr/0013-pre-match-loadout-class-race-boons-prestige-gems.md`, `docs/adr/0016-story-reboot-new-classes-auto-battle.md`, โค้ด `PartyAi` และ Class Encounter เดิมใน `src/match/**`
 
