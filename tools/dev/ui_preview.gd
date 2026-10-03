@@ -32,6 +32,8 @@ var _sprite_idle_after := 0.0
 var _used_focus := false
 var _used_item := false
 var _scan_latin := false
+var _cutscene_id := ""
+var _cutscene: CutscenePlayer = null
 var _latin_allowlist := ["Beyond", "World", "End", "Ann", "Bob", "HP", "ATK", "DEF", "MAG", "RES", "SPD", "EXP", "LVL", "STR", "DEX", "CON", "INT", "FTH", "CHA", "LCK", "F", "I", "O", "H", "R", "Esc", "F2"]
 
 
@@ -63,9 +65,16 @@ func _initialize() -> void:
 			var parts := arg.trim_prefix("--resolution=").split("x")
 			if parts.size() == 2 and parts[0].is_valid_int() and parts[1].is_valid_int():
 				DisplayServer.window_set_size(Vector2i(int(parts[0]), int(parts[1])))
+		elif arg.begins_with("--cutscene="):
+			_cutscene_id = arg.trim_prefix("--cutscene=")
 		elif arg.begins_with("--lang="):
 			_language = arg.trim_prefix("--lang=")
 	DirAccess.make_dir_recursive_absolute(out_dir)
+	if not _cutscene_id.is_empty():
+		Tr.setup(_language)
+		set_meta("scale", scale)
+		set_meta("reduced", reduced)
+		return
 	var overrides := {}
 	if not only_class.is_empty():
 		overrides = {"journey": {"sites": {"class": [{"id": "only", "name": "Training Ground",
@@ -82,6 +91,8 @@ func _initialize() -> void:
 
 func _process(delta: float) -> bool:
 	frame += 1
+	if not _cutscene_id.is_empty():
+		return _drive_cutscene()
 	if frame == 2:
 		app.settings.text_scale = get_meta("scale")
 		app.settings.reduced_motion = get_meta("reduced")
@@ -362,6 +373,32 @@ func _preview_route(options: Array, slot: int, view: Dictionary) -> int:
 			if str(option.get("type", "")) == "rest":
 				return int(option["index"])
 	return MatchBot.sensible_route(options, slot, view)
+
+
+## --cutscene=ID: plays content/cutscenes/ID.json; shots at the first subtitle, the choices, and the end.
+func _drive_cutscene() -> bool:
+	if frame == 2:
+		var loaded := CutsceneData.load_cutscene(_cutscene_id)
+		if not loaded["ok"]:
+			print("cutscene invalid: ", loaded["errors"])
+			quit(1)
+			return true
+		_cutscene = CutscenePlayer.new(loaded["data"], {}, get_meta("scale"), get_meta("reduced"))
+		root.add_child(_cutscene)
+		return false
+	if _cutscene == null or not is_instance_valid(_cutscene):
+		if frame > 4:
+			print("cutscene finished")
+			quit(0)
+		return false
+	if not shots.has("cutscene_subtitles") and _cutscene._subtitle.text != "" and _cutscene._elapsed > 0.2:
+		_shot("cutscene_subtitles")
+	elif not shots.has("cutscene_choices") and _cutscene._choice_box.visible:
+		_shot("cutscene_choices")
+		_press(KEY_ENTER)
+	elif frame > 60 * 60:
+		quit(1)
+	return false
 
 
 func _press(keycode: int) -> void:

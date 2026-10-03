@@ -1,0 +1,31 @@
+{
+  "id": "sample",
+  "start": "s1",
+  "nodes": {
+    "s1": {
+      "clip": "res://assets/video/placeholder_red.ogv",
+      "subtitles": [
+        {"t": 0.0, "end": 1.5, "text": "ลมเย็นพัดผ่านป่าเก่าแก่"},
+        {"t": 1.5, "text": "ทุกคนมองไปยังเส้นทางที่ทอดยาวไปข้างหน้า"}
+      ],
+      "next": "s2"
+    },
+    "s2": {
+      "clip": "res://assets/video/placeholder_green.ogv",
+      "subtitles": [{"t": 0.0, "text": "เจ้าจะเลือกทางไหน"}],
+      "choices": [
+        {"label": "อยู่กับเพื่อน", "next": "s3a", "flag": "stay", "default": true},
+        {"label": "ไปตามภารกิจ", "next": "s3b", "flag": "mission"}
+      ]
+    },
+    "s3a": {
+      "clip": "res://assets/video/placeholder_blue.ogv",
+      "variants": {"mission": "res://assets/video/placeholder_red.ogv"},
+      "subtitles": [{"t": 0.0, "text": "พวกเขายืนเคียงข้างกันจนถึงที่สุด"}]
+    },
+    "s3b": {
+      "clip": "res://assets/video/placeholder_blue.ogv",
+      "subtitles": [{"t": 0.0, "text": "ภารกิจต้องมาก่อน แม้จะต้องเดินคนเดียว"}]
+    }
+  }
+}
