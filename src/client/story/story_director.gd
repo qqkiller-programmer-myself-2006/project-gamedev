@@ -3,6 +3,7 @@ extends Control
 
 const DialoguePanelScript = preload("res://src/client/story/dialogue_panel.gd")
 const ChapterCardScript = preload("res://src/client/story/chapter_card.gd")
+const CutscenePlayerScript = preload("res://src/client/cutscene/cutscene_player.gd")
 
 ## Presentation-only story queue. It observes client data and never sends commands.
 signal presentation_started(item)
@@ -22,6 +23,8 @@ var opening_presentation_pending := false
 var restoring := false
 ## Presentation ids copied from the client-side Story save on Continue.
 var restored_presentations: Dictionary = {}
+## Flags reported by finished cutscenes (never sent to the server).
+var cutscene_flags: Dictionary = {}
 var text_scale := 1.0
 var reduced_motion := false
 var _safe_log_top_y := 0.0
@@ -137,7 +140,16 @@ func _enqueue_scene(trigger: String) -> void:
 	if shown.has(trigger) or not content.get("scenes", {}).has(trigger):
 		return
 	shown[trigger] = true
-	queue.append({"kind":"scene", "id":trigger, "lines":content["scenes"][trigger]})
+	var scene = content["scenes"][trigger]
+	if scene is Dictionary and str(scene.get("type", "")) == "cutscene":
+		enqueue_cutscene(str(scene.get("id", "")))
+		return
+	queue.append({"kind":"scene", "id":trigger, "lines":scene})
+
+## Queue a `{"type": "cutscene", "id": ...}` presentation entry (content/cutscenes/<id>.json).
+func enqueue_cutscene(id: String) -> void:
+	queue.append({"kind":"cutscene", "id":id})
+	_pump()
 
 func _enqueue_card(chapter: Dictionary) -> void:
 	var key := "chapter_%s" % chapter.get("number", 0)
@@ -186,6 +198,17 @@ func _pump() -> void:
 	if is_instance_valid(current) or queue.is_empty() or (_is_decision_pending() and not opening_presentation_pending):
 		return
 	var item: Dictionary = queue.pop_front()
+	if item.kind == "cutscene":
+		var loaded := CutsceneData.load_cutscene(str(item.get("id", "")))
+		if not loaded["ok"]:
+			push_warning("cutscene '%s' skipped: %s" % [item.get("id", ""), loaded["errors"]])
+			_pump()
+			return
+		current = CutscenePlayerScript.new(loaded["data"], cutscene_flags, text_scale, reduced_motion)
+		add_child(current)
+		current.finished.connect(_on_cutscene_finished.bind(item))
+		presentation_started.emit(item)
+		return
 	if item.kind == "card":
 		current = ChapterCardScript.new(item.chapter, reduced_motion)
 	else:
@@ -199,6 +222,10 @@ func _pump() -> void:
 	add_child(current)
 	current.finished.connect(_on_finished.bind(item))
 	presentation_started.emit(item)
+
+func _on_cutscene_finished(flags: Dictionary, item: Dictionary) -> void:
+	cutscene_flags.merge(flags, true)
+	_on_finished(item)
 
 func _on_finished(item: Dictionary) -> void:
 	current = null
