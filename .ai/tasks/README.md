@@ -108,3 +108,5 @@ These are historical executor task specs retained for reference.
   - [T4S-01a-support-healer-effects-classes.md](T4S-01a-support-healer-effects-classes.md) — Agy1: effect ใหม่ + class + skill + test.
   - [T4S-01b-support-healer-ai-encounter-tree.md](T4S-01b-support-healer-ai-encounter-tree.md) — Agy1: AI preset + Class Encounter + skill tree (หลัง 01a).
   - [T4S-01c-support-healer-balance.md](T4S-01c-support-healer-balance.md) — Agy1: simulate + ปรับ balance (หลัง 01b).
+- [T4S-04-choose-route-final-encounter.md](T4S-04-choose-route-final-encounter.md) — Claude 2: `choose_route` + บอสสุดท้ายตามรูท + ฉากสู้เพื่อนรูท 2 (หลัง 01a merge).
+- [T3D-08-cutscene-player.md](T3D-08-cutscene-player.md) — Agy 2: cutscene router + ตัวเล่น `.ogv` + ซับไทย.
