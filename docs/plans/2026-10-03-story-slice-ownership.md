@@ -24,8 +24,10 @@ Follows `docs/plans/2026-10-02-3d-vertical-slice.md`, ADR-0015, ADR-0016 and `do
 | T4S-04 | `choose_route` command + state + Story save; final encounter by route (1/3 Guardian Selen, 2 friends fight with IQ HP floor 1) | Claude 2 | T4S-01a merged | `src/match/**`, `src/profile/**` (Story save), tests |
 | T4S-05 | Auto command (player party driven by `PartyAi`) + wire HUD Auto button | Codex | T3D-07, T4S-01b | `src/match/**` (command), `src/client/match/battle/hud/**` |
 | T3D-08 | Cutscene router + `.ogv` player (graph per ADR-0015, skip, Thai subtitles) | Claude 2 (in Claude2) | — | `src/client/cutscene/**` |
-| T3D-09 | VRM pipeline: godot-vrm addon, one sample model + Mixamo idle/strike/hurt/die in `Battle3DStage` | Claude 2 (in Claude2) | T3D-08, owner's first `.vrm` | `addons/**`, `src/client/match/battle3d/**` |
-| TART-01 | Character sheets (6 main + 4 side) from `prompt-pack.md` | Codex (image) | T3D-07 | `assets/art/sheets/**`, `MANIFEST.3d.json` |
+| T3D-09 | **On hold** — full-3D VRM experiment, replaced by 2.5D (owner decision 2026-10-03, `docs/art/2-5d-pipeline.md`) | — | owner go-ahead | — |
+| T25D-01 | 2.5D sprite units in `Battle3DStage` (placeholder art first) | Claude 2 (in Claude2) | T4S-04 | `src/client/match/battle3d/**` |
+| TART-02 | Battle sprites (idle per class, hurt, down) + portraits, chroma key, manifest | Codex + Claude 1 | TART-01, owner locks sheets | `assets/art/**`, `tools/art/chroma_key.py` |
+| TART-01 | Character sheets, 6 main x 3 candidates, owner picks and locks | Codex (image) | — (approved to dispatch) | `art_source/**` |
 
 ## Waves (max 2 Godot test suites at once — enforced by `tools/run_tests.sh`)
 
@@ -33,8 +35,8 @@ Follows `docs/plans/2026-10-02-3d-vertical-slice.md`, ADR-0015, ADR-0016 and `do
 
 1. **Now:** lead reviews/merges T4S-01a and T3D-07. Claude 1 T4S-02 in between.
 2. **Next:** Codex T4S-01b; Claude 2 T4S-04 (after 01a merge).
-3. **Then:** Codex 01c → T4S-05 → TART-01; Claude 2 T3D-08; Claude 1 T4S-03 (after 01c).
-4. **Last:** Claude 2 T3D-09 once the owner has the first VRoid model.
+3. **Then:** Codex 01c → TART-01 (can run in parallel with 01c: no Godot) → T4S-05 → TART-02 after the owner locks sheets; Claude 2 T3D-08; Claude 1 T4S-03 (after 01c).
+4. **Last:** Claude 2 T25D-01 after T4S-04 (real sprites drop in when TART-02 lands). T3D-09 (full 3D) is on hold.
 ## Conflict rules
 - `content/forest.json`: Codex (T4S-01 chain) owns it until T4S-01c merges; then Claude 1 (T4S-03). Nobody else edits it.
 - `src/match/**`: Codex (classes/effects, T4S-01 chain), Claude 2 (route, new files where possible), Codex (Auto command, new files where possible). Lead merges in order 01a → T4S-04 → 01b → T4S-05.

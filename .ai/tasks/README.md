@@ -110,3 +110,6 @@ These are historical executor task specs retained for reference.
   - [T4S-01c-support-healer-balance.md](T4S-01c-support-healer-balance.md) — Agy1: simulate + ปรับ balance (หลัง 01b).
 - [T4S-04-choose-route-final-encounter.md](T4S-04-choose-route-final-encounter.md) — Claude 2: `choose_route` + บอสสุดท้ายตามรูท + ฉากสู้เพื่อนรูท 2 (หลัง 01a merge).
 - [T3D-08-cutscene-player.md](T3D-08-cutscene-player.md) — Agy 2: cutscene router + ตัวเล่น `.ogv` + ซับไทย.
+- [TART-01-character-sheets.md](TART-01-character-sheets.md) — Codex: character sheet 6 ตัว x 3 ตัวเลือก ให้ owner เลือกล็อก (2.5D).
+- [TART-02-battle-sprites.md](TART-02-battle-sprites.md) — Codex + Claude 1: sprite สู้/portrait 40 ภาพ + chroma key (หลัง owner ล็อก sheet).
+- [T25D-01-sprite-units.md](T25D-01-sprite-units.md) — Claude 2: ให้ Battle3DStage แสดงตัวละครเป็น sprite (placeholder ก่อน).
