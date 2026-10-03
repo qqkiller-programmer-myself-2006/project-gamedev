@@ -30,29 +30,20 @@ Shared rules for every session:
 - Lead branch tip pushed to `origin/claude/game-project-lead-9a9ecc`; suite last verified at 519 passed (after T3D-01..06).
 - **Running (started by the previous lead session; logs in `D:\UserData\Documents\LRU\Game Dev\Project-GameDev\.claude\worktrees\close-claude-codex-issues-d72ea7\.ai\logs\`):**
   - T3D-07 battle HUD — Codex in `Codex1` (uncommitted changes there: `src/client/match/battle/hud/`, `battle_view.gd`, `ui_kit.gd`, `ui_preview.gd`, i18n, `tests/client/match/battle/`). When it ends: review against `.ai/tasks/T3D-07-battle-hud.md`, run suite, take the required screenshots in a real window if Codex could not, commit on `ai/3d-codex1`, merge.
-  - T4S-01a Support/Healer — agy in `Agy1` (fallback codex). Same review flow; then dispatch T4S-01b to Agy 1.
-- **Ready specs:** T4S-04 (Claude 2, after 01a merge), T3D-08 (Agy 2, can start now). Not yet written: T4S-02/T4S-03 (own tasks), T4S-05 (Auto), TART-01 (character sheets), T3D-09 (VRM).
-- Owner decisions pending: whether the agy2 second-account trick (separate `USERPROFILE`) works; first VRoid model for T3D-09.
+  - T4S-01a Support/Healer — agy stalled, Codex finished it (fallback) in `Agy1`; uncommitted there. Same review flow, commit on `ai/3d-agy1`, merge; then dispatch T4S-01b to **Codex in `Agy1`**.
+- **Ready specs:** T4S-04 (Claude 2, after 01a merge), T3D-08 (Claude 2, after T4S-04). Not yet written: T4S-02/T4S-03 (own tasks), T4S-05 (Auto), TART-01 (character sheets), T3D-09 (VRM).
+- **agy dropped (2026-10-03):** a second agy account cannot be separated on one Windows user (login is in Windows Credential Manager). Do not dispatch `-Agent agy` and do not use `-FallbackAgent agy`. Pending owner decision: first VRoid model for T3D-09.
 - Lead duties first: write task specs in `.ai/tasks/`, review worker handoffs, run the full test suite after each merge, keep `.ai/checkpoint.md` and the ownership plan current.
 - Own tasks: T4S-02 (Thai story content into `content/story_mode.json`, from `docs/design/story-script-draft.md` and `story-script-routes.md`), then T4S-03 (party rename + Story class pools, after T4S-01c merges).
 - Start prompt: "You are Claude 1, lead of BEYOND THE WORLD'S END. Read `.ai/sessions/README.md`, `docs/plans/2026-10-03-story-slice-ownership.md` and `.ai/checkpoint.md`, then report current task status in Thai."
 
 ## Claude 2 (Claude Code)
 - Worktree: `Project-GameDev-Agents/Claude2`, branch `ai/3d-claude2`.
-- Task: T4S-04 (`choose_route`, route state + Story save, final encounter by route). Starts after T4S-01a is merged into the lead branch. Spec will be at `.ai/tasks/T4S-04-*.md`.
-- Start prompt: "You are Claude 2. Read `.ai/sessions/README.md` and do the task assigned to Claude 2."
+- Tasks: T4S-04 (`choose_route`, route state + Story save, final encounter by route; starts after T4S-01a is merged), then T3D-08 (cutscene router + `.ogv` player; the spec says Agy 2 — Claude 2 owns it now, work in `Claude2`/`ai/3d-claude2`), then T3D-09 (VRM pipeline, after the owner's first VRoid model).
+- Start prompt: "You are Claude 2. Read `.ai/sessions/README.md` and do the next Claude 2 task that has no handoff yet."
 
-## Agy 1 (agy)
-- Worktree: `Project-GameDev-Agents/Agy1`, branch `ai/3d-agy1`.
-- Tasks: T4S-01a, then 01b, then 01c (`.ai/tasks/T4S-01*.md`). Owns `content/forest.json` until 01c merges.
-- Start prompt: "You are Agy 1. Read `.ai/sessions/README.md` and do the next Agy 1 task that has no handoff yet."
+## Codex (executor, dispatched by Claude 1 through `.ai/run-agent.ps1`)
+- T4S-01 chain in `Project-GameDev-Agents/Agy1` / `ai/3d-agy1` (01a done, then 01b, 01c — the task files say Agy 1; Codex owns them now).
+- Then in `Project-GameDev-Agents/Codex1` / `ai/3d-codex1`: T4S-05 (Auto command), TART-01 (character sheets).
+- Codex can also be opened interactively by the owner; start prompt: "Read `.ai/sessions/README.md` and do the next Codex task that has no handoff yet." Never run it in a worktree where a runner is active.
 
-## Agy 2 (agy)
-- Worktree: `Project-GameDev-Agents/Agy2`, branch `ai/3d-agy2`.
-- Tasks: T3D-08 (cutscene router + `.ogv` player), then T3D-09 (VRM pipeline, after the owner's first VRoid model).
-- Start prompt: "You are Agy 2. Read `.ai/sessions/README.md` and do the next Agy 2 task that has no handoff yet."
-
-## Codex
-- Worktree: `Project-GameDev-Agents/Codex1`, branch `ai/3d-codex1`.
-- Tasks: T3D-07 (battle HUD), then T4S-05 (Auto command), then TART-01 (character sheets).
-- Start prompt: "You are Codex. Read `.ai/sessions/README.md` and do the next Codex task that has no handoff yet."
