@@ -89,6 +89,23 @@ func test_class_encounter_opens_with_a_challenge_for_its_class() -> void:
 	assert_eq(encounter["trial"]["round_limit"], 3)
 
 
+func test_support_and_healer_class_encounters_can_be_passed_and_accepted() -> void:
+	for class_id in ["support", "healer"]:
+		var trainer := str(ForestContent.load_default().get_value("classes.%s.challenge.trainer" % class_id))
+		var site := {"id": "%s_training" % class_id, "name": "%s Training Ground" % class_id,
+				"hint": "A trainer waits to teach a new Class.", "classes": {class_id: 1}}
+		_start(1, {"journey": {"sites": {"class": [site]}},
+				"enemies": {trainer: {"stats": {"max_hp": 1}}}})
+		_take_route("class")
+		var encounter := _encounter()
+		assert_eq(encounter["class"], class_id)
+		assert_eq(encounter["class_info"]["skills"].size(), 3)
+		_fight_trial()
+		assert_true(_encounter()["passed"], "%s trainer challenge passes" % class_id)
+		assert_ok(h.server.command(sessions[0], {"type": "class_choice", "accept": true}))
+		assert_eq(_view()["party"][0]["class"], class_id)
+
+
 func test_beating_the_trainer_offers_the_class_to_every_classless_character() -> void:
 	_start(1)
 	_take_route("class")

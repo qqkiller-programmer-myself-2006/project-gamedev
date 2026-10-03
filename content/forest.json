@@ -67,7 +67,9 @@
       "swordsman",
       "archer",
       "mage",
-      "assassin"
+      "assassin",
+      "support",
+      "healer"
     ]
   },
   "meta": {
@@ -850,6 +852,24 @@
           "hint": "A thief watches from the ferns, twirling a dagger.",
           "classes": {
             "assassin": 1
+          }
+        },
+        {
+          "id": "veteran_hunter_support",
+          "name": "Hunter Camp",
+          "hint": "Hunters test newcomers with bow and blade.",
+          "layers": [4, 4],
+          "classes": {
+            "support": 1
+          }
+        },
+        {
+          "id": "shrine_healer",
+          "name": "Ruined Shrine",
+          "hint": "Blue fire flickers between the broken pillars.",
+          "layers": [4, 4],
+          "classes": {
+            "healer": 1
           }
         }
       ]

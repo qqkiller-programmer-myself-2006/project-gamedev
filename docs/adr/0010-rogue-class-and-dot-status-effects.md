@@ -5,6 +5,10 @@ superseded_in_part_by: ADR-0013
 
 > Historical note: ADR-0013 moves Enervation from Rogue's class passive to a pre-match Boon. The Class was later renamed Assassin in #74.
 
+> 2026-10-03 addendum (ADR-0016): Support and Healer extend the Tier 1 roster. Their
+> skills and AI presets are data-backed in `content/forest.json`; both are
+> available through Class Encounters and the shared seven-node meta class tree.
+
 # เพิ่ม Rogue เป็น Tier 1 Class ตัวที่ 5 พร้อมระบบ Status effect แบบ DoT (ขยาย scope ของ ADR-0003)
 
 Forest vertical slice มี Tier 1 Class 5 แบบ: Swordsman, Archer, Mage, Guardian และ **Rogue** (Melee DoT: มีด + ยาพิษ) ซึ่งค้นพบผ่าน Class Encounter ของตัวเองเหมือน Class อื่น เพื่อรองรับ Rogue เกมมีระบบ **Status effect** ทั่วไปที่ติดได้ทั้งตัวละครและศัตรู โดยเริ่มจาก DoT 3 ชนิดคือ **Bleed**, **Poison** และ **Toxin** และ Rogue มี passive **Enervation** ที่ทำให้ DoT หลายชนิดบนเป้าเดียวกันเสริมกัน ออกแบบตามแบบอ้างอิง AAC (`docs/references/aac_rogue/README.md`) เราตัดสินขยาย scope ครั้งนี้ตามที่ ADR-0003 กำหนดว่าการเพิ่ม content ต้องผ่านการตัดสินใจใหม่ เพราะ Party มี 5 ตัวละคร การมี 5 Class ทำให้ทุก slot มีบทบาทที่ต่างกันได้ และ DoT build ให้ความลึกเชิงวางแผนที่ PRD ต้องการ

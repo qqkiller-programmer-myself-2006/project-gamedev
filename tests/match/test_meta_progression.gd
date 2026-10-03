@@ -32,9 +32,21 @@ func test_race_purchase_and_tree_costs_caps_and_reset_refund() -> void:
 	assert_eq(h.room_view(session)["profile"]["gems"], before + 100)
 
 
+func test_support_and_healer_skill_trees_load_and_allow_node_purchases() -> void:
+	var h := MatchHarness.new(25, {}, _profile(1000))
+	var session := _room(h)
+	var nodes: Dictionary = h.content.get_dict("meta.class_tree")
+	assert_eq(nodes.size(), 7, "both new Classes use the full 3-3-1 tree")
+	for class_id in ["support", "healer"]:
+		assert_ok(h.server.command(session, {"type": "tree_upgrade", "class": class_id, "node": "stat_points"}))
+		assert_eq(h.room_view(session)["profile"]["class_trees"][class_id]["stat_points"], 1)
+	assert_eq(h.room_view(session)["profile"]["gems"], 980)
+
+
 func test_match_end_awards_gems_and_persists_them() -> void:
 	var store := _profile(0)
-	var h := MatchHarness.new(22, MatchHarness.merge([MatchHarness.EASY, MatchHarness.ALL_COMBAT, MatchHarness.WOLF_PAIR]), store)
+	var h := MatchHarness.new(22, MatchHarness.merge([MatchHarness.EASY, MatchHarness.ALL_COMBAT,
+			MatchHarness.WOLF_PAIR, {"party": {"ai_class_order": ["guardian", "swordsman", "archer", "mage", "assassin"]}}]), store)
 	var session := _room(h)
 	assert_ok(h.server.command(session, {"type": "set_loadout", "class": "swordsman", "race": "Human", "boons": []}))
 	assert_ok(h.server.command(session, {"type": "start_match"}))
