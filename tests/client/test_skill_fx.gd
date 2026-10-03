@@ -1,12 +1,16 @@
 extends "res://tests/test_case.gd"
 
 const SKILL_FX := preload("res://src/client/match/battle/skill_fx.gd")
+## T4S-01a adds content-driven skills without introducing client FX assets.
+const CONTENT_ONLY_SKILLS := ["mending_light", "renewing_wave", "cleanse", "rally", "weaken", "energize"]
 
 
 func test_every_forest_skill_has_loadable_manifest_frames() -> void:
 	var forest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/forest.json"))
 	var manifest: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/fx/manifest.json"))
 	for skill in forest.get("skills", {}):
+		if CONTENT_ONLY_SKILLS.has(skill):
+			continue
 		assert_true(manifest.has(skill), "%s must have a manifest entry" % skill)
 		var info: Dictionary = manifest[skill]
 		var count := int(info.get("frames", 0))

@@ -589,6 +589,48 @@
         "crit": 0.12
       },
       "aggro": 0.85
+    },
+    "support": {
+      "name": "Support",
+      "role": "Tactical Support",
+      "recommended_stats": ["CHA", "DEX"],
+      "description": "Strengthens allies, weakens enemies, and restores a companion's Energy.",
+      "icon": "shield",
+      "attack": {"target": "enemy", "range": "ranged", "damage": {"stat": "atk", "power": 1, "element": "physical"}},
+      "skills": ["rally", "weaken", "energize"],
+      "ai": "support",
+      "challenge": {
+        "trainer": "veteran_hunter",
+        "rounds": 3,
+        "intro": "A veteran hunter lowers her bow. \"Power is nothing without timing. Help your allies and hinder your foes.\"",
+        "pass": "She nods. \"A good ally can change the whole fight.\"",
+        "fail": "She shakes her head. \"Watch the field, not just your target.\""
+      },
+      "invest_focus": "cha",
+      "attributes": {"str": 2, "dex": 6, "con": 3, "int": 3, "fth": 3, "cha": 7, "lck": 3},
+      "atk_attr": "dex",
+      "base": {"max_hp": 16, "atk": -2, "def": 1, "mag": 1, "res": 2, "spd": 7, "crit": 0.03}
+    },
+    "healer": {
+      "name": "Healer",
+      "role": "Healing / Support",
+      "recommended_stats": ["FTH", "INT"],
+      "description": "Restores one ally or the whole Party, and cleanses harmful Status effects.",
+      "icon": "regen",
+      "attack": {"target": "enemy", "range": "ranged", "damage": {"stat": "mag", "power": 1, "element": "spirit"}},
+      "skills": ["mending_light", "renewing_wave", "cleanse"],
+      "ai": "healer",
+      "challenge": {
+        "trainer": "shrine_spirit",
+        "rounds": 3,
+        "intro": "A shrine spirit gathers gentle light. \"Mend what is broken, and let no lingering harm take root.\"",
+        "pass": "The spirit's glow warms the shrine. \"Carry this light to those who need it.\"",
+        "fail": "The light dims. \"Steady your hands, then try again.\""
+      },
+      "invest_focus": "fth",
+      "attributes": {"str": 2, "dex": 3, "con": 3, "int": 6, "fth": 7, "cha": 3, "lck": 3},
+      "atk_attr": "int",
+      "base": {"max_hp": 14, "atk": -2, "def": 1, "mag": 4, "res": 1, "spd": 6, "crit": 0.03}
     }
   },
   "leveling": {
@@ -1989,6 +2031,54 @@
           }
         ]
       }
+    },
+    "mending_light": {
+      "name": "Mending Light",
+      "class": "healer",
+      "description": "Restore 20 HP to one living ally. Costs 2 Energy. Cooldown: 2 turns.",
+      "cooldown": 2,
+      "energy": 2,
+      "use": {"target": "ally", "heal": 20}
+    },
+    "renewing_wave": {
+      "name": "Renewing Wave",
+      "class": "healer",
+      "description": "Restore 12 HP to every living Party member. Costs 3 Energy. Cooldown: 4 turns.",
+      "cooldown": 4,
+      "energy": 3,
+      "use": {"target": "all_allies", "heal": 12}
+    },
+    "cleanse": {
+      "name": "Cleanse",
+      "class": "healer",
+      "description": "Remove harmful Status effects from one ally. Costs 2 Energy. Cooldown: 3 turns.",
+      "cooldown": 3,
+      "energy": 2,
+      "use": {"target": "ally", "cleanse": true}
+    },
+    "rally": {
+      "name": "Rally",
+      "class": "support",
+      "description": "Increase one ally's damage dealt by 20% for 3 turns. Costs 2 Energy. Cooldown: 3 turns.",
+      "cooldown": 3,
+      "energy": 2,
+      "use": {"target": "ally", "apply_status": [{"status": "rally", "stacks": 1}]}
+    },
+    "weaken": {
+      "name": "Weaken",
+      "class": "support",
+      "description": "Reduce one enemy's damage dealt by 30% for 2 turns. Costs 1 Energy. Cooldown: 3 turns.",
+      "cooldown": 3,
+      "energy": 1,
+      "use": {"target": "enemy", "range": "ranged", "apply_status": [{"status": "weakened", "stacks": 1}]}
+    },
+    "energize": {
+      "name": "Energize",
+      "class": "support",
+      "description": "Give 2 Energy to one other ally, up to their Energy cap. Costs 1 Energy. Cooldown: 2 turns.",
+      "cooldown": 2,
+      "energy": 1,
+      "use": {"target": "other_ally", "grant_energy": 2}
     }
   },
   "statuses": {
@@ -2034,6 +2124,28 @@
       },
       "description": "Weapon coated: the next 3 damaging actions also apply Poison.",
       "color": "#4fc3d9",
+      "tick_every": 1
+    },
+    "rally": {
+      "name": "Rally",
+      "kind": "buff",
+      "negative": false,
+      "turns": 3,
+      "max_stacks": 1,
+      "modifiers": {"damage_out": 1.2},
+      "description": "Deals 20% more direct damage for 3 turns.",
+      "color": "#e8bd56",
+      "tick_every": 1
+    },
+    "weakened": {
+      "name": "Weakened",
+      "kind": "debuff",
+      "negative": true,
+      "turns": 2,
+      "max_stacks": 1,
+      "modifiers": {"damage_out": 0.7},
+      "description": "Deals 30% less direct damage for 2 turns.",
+      "color": "#9a83c7",
       "tick_every": 1
     }
   },

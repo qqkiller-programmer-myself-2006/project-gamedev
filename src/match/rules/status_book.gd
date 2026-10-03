@@ -105,6 +105,35 @@ func has(unit_id: String, status: String) -> bool:
 	return false
 
 
+## Removes harmful effects from `unit_id` and returns their ids. Harmful
+## statuses are explicitly marked in content; DoTs are harmful by default.
+func cleanse(unit_id: String) -> Array[String]:
+	var removed: Array[String] = []
+	var kept: Array = []
+	for entry in _on.get(unit_id, []):
+		var status := str(entry["status"])
+		var info := _content.get_dict("statuses.%s" % status)
+		if bool(info.get("negative", str(info.get("kind", "dot")) == "dot")):
+			removed.append(status)
+		else:
+			kept.append(entry)
+	if kept.is_empty():
+		_on.erase(unit_id)
+	else:
+		_on[unit_id] = kept
+	return removed
+
+
+## Multiplies outgoing or incoming direct damage from active timed statuses.
+func damage_modifier(unit_id: String, modifier: String) -> float:
+	var total := 1.0
+	for entry in _on.get(unit_id, []):
+		var value := float(_content.get_value(
+				"statuses.%s.modifiers.%s" % [entry["status"], modifier], 1.0))
+		total *= value
+	return total
+
+
 ## Number of different DoT kinds on `unit_id`.
 func distinct_dots(unit_id: String) -> int:
 	var count := 0

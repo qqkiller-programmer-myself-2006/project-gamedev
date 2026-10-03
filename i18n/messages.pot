@@ -389,6 +389,10 @@ msgstr ""
 msgid "A shielded swordsman whose bones blunt physical blows."
 msgstr ""
 
+#: content/forest.json:classes.healer.challenge.intro
+msgid "A shrine spirit gathers gentle light. \"Mend what is broken, and let no lingering harm take root.\""
+msgstr ""
+
 #: content/forest.json:items.wolf_pelt.description
 msgid "A thick grey pelt. Crafting material."
 msgstr ""
@@ -411,6 +415,10 @@ msgstr ""
 
 #: content/story_mode.json:scenes.class_gained[2].text
 msgid "A useful promise. We still have a long road ahead."
+msgstr ""
+
+#: content/forest.json:classes.support.challenge.intro
+msgid "A veteran hunter lowers her bow. \"Power is nothing without timing. Help your allies and hinder your foes.\""
 msgstr ""
 
 #: content/forest.json:classes.archer.challenge.intro
@@ -589,7 +597,7 @@ msgstr ""
 msgid "Balanced and dependable. Strong melee strikes, solid health."
 msgstr ""
 
-#: src/client/title/title_screen.gd:182 src/client/home3d/home3d.gd:16
+#: src/client/title/title_screen.gd:182
 msgid "Battle"
 msgstr ""
 
@@ -705,8 +713,8 @@ msgstr ""
 msgid "CHOOSE YOUR JOURNEY"
 msgstr ""
 
-#: src/client/lobby/character_setup.gd:190 src/client/title/title_screen.gd:183 src/client/home3d/home3d.gd:17
-msgid "Class"
+#: src/client/ui/ui_text.gd:TYPE_TAGS.class
+msgid "CLASS"
 msgstr ""
 
 #: src/client/match/match_screen.gd:709
@@ -825,7 +833,7 @@ msgstr ""
 msgid "Chosen"
 msgstr ""
 
-#: src/client/lobby/character_setup.gd:190 src/client/title/title_screen.gd:183 src/client/home3d/home3d.gd:17
+#: src/client/lobby/character_setup.gd:190 src/client/title/title_screen.gd:183
 msgid "Class"
 msgstr ""
 
@@ -855,6 +863,10 @@ msgstr ""
 
 #: content/forest.json:story.clues.guardian_mark.title
 msgid "Claw-Marked Shield"
+msgstr ""
+
+#: content/forest.json:skills.cleanse.name
+msgid "Cleanse"
 msgstr ""
 
 #: src/client/ui/ui_text.gd:LABELS.story_picker_choose_hint
@@ -1033,6 +1045,14 @@ msgstr ""
 msgid "Deals 18 fire damage to every enemy."
 msgstr ""
 
+#: content/forest.json:statuses.rally.description
+msgid "Deals 20% more direct damage for 3 turns."
+msgstr ""
+
+#: content/forest.json:statuses.weakened.description
+msgid "Deals 30% less direct damage for 2 turns."
+msgstr ""
+
 #: src/client/match/class_panel.gd:40
 msgid "Decline [N]"
 msgstr ""
@@ -1139,6 +1159,10 @@ msgstr ""
 
 #: src/client/ui/ui_text.gd:client_literal
 msgid "Enemies defeated"
+msgstr ""
+
+#: content/forest.json:skills.energize.name
+msgid "Energize"
 msgstr ""
 
 #: src/client/match/camp/camp_view.gd:666
@@ -1365,6 +1389,10 @@ msgstr ""
 msgid "Giant Spider"
 msgstr ""
 
+#: content/forest.json:skills.energize.description
+msgid "Give 2 Energy to one other ally, up to their Energy cap. Costs 1 Energy. Cooldown: 2 turns."
+msgstr ""
+
 #: content/forest.json:enemies.bramble_archer.name
 msgid "Goblin"
 msgstr ""
@@ -1435,6 +1463,14 @@ msgstr ""
 
 #: content/story_mode.json:prologue[2].text
 msgid "He went west with a map and a stubborn plan. That sounds like him."
+msgstr ""
+
+#: content/forest.json:classes.healer.name
+msgid "Healer"
+msgstr ""
+
+#: content/forest.json:classes.healer.role
+msgid "Healing / Support"
 msgstr ""
 
 #: content/forest.json:items.herb.name
@@ -1511,6 +1547,10 @@ msgstr ""
 
 #: src/client/lobby/character_setup.gd:453
 msgid "ID: %s…"
+msgstr ""
+
+#: content/forest.json:skills.rally.description
+msgid "Increase one ally's damage dealt by 20% for 3 turns. Costs 2 Energy. Cooldown: 3 turns."
 msgstr ""
 
 #: src/client/match/camp/camp_view.gd:677
@@ -1725,6 +1765,10 @@ msgstr ""
 msgid "Mend"
 msgstr ""
 
+#: content/forest.json:skills.mending_light.name
+msgid "Mending Light"
+msgstr ""
+
 #: content/forest.json:enemies.forest_wisp.description
 msgid "Mends wounded allies and hurls spirit fire when none need healing."
 msgstr ""
@@ -1933,7 +1977,7 @@ msgstr ""
 msgid "PLAYER"
 msgstr ""
 
-#: src/client/title/title_screen.gd:182 src/client/home3d/home3d.gd:16
+#: src/client/title/title_screen.gd:182
 msgid "Party"
 msgstr ""
 
@@ -2073,6 +2117,10 @@ msgstr ""
 msgid "Raise your shield for everyone: the whole Party takes 40% less damage until your next turn. Costs 2 Energy. Cooldown: 3 turns."
 msgstr ""
 
+#: content/forest.json:skills.rally.name content/forest.json:statuses.rally.name
+msgid "Rally"
+msgstr ""
+
 #: content/forest.json:classes.archer.role
 msgid "Ranged DPS"
 msgstr ""
@@ -2129,8 +2177,20 @@ msgstr ""
 msgid "Reduce motion (no sliding, fading or floating numbers)"
 msgstr ""
 
+#: content/forest.json:skills.weaken.description
+msgid "Reduce one enemy's damage dealt by 30% for 2 turns. Costs 1 Energy. Cooldown: 3 turns."
+msgstr ""
+
+#: content/forest.json:skills.cleanse.description
+msgid "Remove harmful Status effects from one ally. Costs 2 Energy. Cooldown: 3 turns."
+msgstr ""
+
 #: content/forest.json:enemies.grey_wolf.special.name
 msgid "Rend"
+msgstr ""
+
+#: content/forest.json:skills.renewing_wave.name
+msgid "Renewing Wave"
 msgstr ""
 
 #: src/client/ui/ui_text.gd:CONFIRM.reset_skills[2] src/client/ui/ui_text.gd:client_literal
@@ -2157,12 +2217,24 @@ msgstr ""
 msgid "Rest while we can. Tomorrow, the trail climbs."
 msgstr ""
 
+#: content/forest.json:skills.renewing_wave.description
+msgid "Restore 12 HP to every living Party member. Costs 3 Energy. Cooldown: 4 turns."
+msgstr ""
+
+#: content/forest.json:skills.mending_light.description
+msgid "Restore 20 HP to one living ally. Costs 2 Energy. Cooldown: 2 turns."
+msgstr ""
+
 #: content/forest.json:items.herb.description
 msgid "Restores 30 HP to one ally."
 msgstr ""
 
 #: content/forest.json:items.tonic.description
 msgid "Restores 70 HP to one ally."
+msgstr ""
+
+#: content/forest.json:classes.healer.description
+msgid "Restores one ally or the whole Party, and cleanses harmful Status effects."
 msgstr ""
 
 #: src/client/match/camp/camp_view.gd:899
@@ -2201,12 +2273,12 @@ msgstr ""
 msgid "Ruined Shrine"
 msgstr ""
 
-#: src/client/title/title_screen.gd:183 src/client/ui/ui_text.gd:client_literal src/client/home3d/home3d.gd:17
-msgid "Shop"
+#: src/client/ui/ui_text.gd:TYPE_TAGS.merchant
+msgid "SHOP"
 msgstr ""
 
-#: src/client/title/title_screen.gd:182 src/client/home3d/home3d.gd:16
-msgid "Story"
+#: src/client/ui/ui_text.gd:TYPE_TAGS.story
+msgid "STORY"
 msgstr ""
 
 #: src/client/title/title_screen.gd:244
@@ -2237,7 +2309,7 @@ msgstr ""
 msgid "Select"
 msgstr ""
 
-#: src/client/title/settings_panel.gd:24 src/client/title/title_screen.gd:183 src/client/home3d/home3d.gd:17
+#: src/client/title/settings_panel.gd:24 src/client/title/title_screen.gd:183
 msgid "Settings"
 msgstr ""
 
@@ -2253,6 +2325,14 @@ msgstr ""
 msgid "She lowers her bow with a grin. \"Fast hands. Take this bow, it has waited for someone like you.\""
 msgstr ""
 
+#: content/forest.json:classes.support.challenge.pass
+msgid "She nods. \"A good ally can change the whole fight.\""
+msgstr ""
+
+#: content/forest.json:classes.support.challenge.fail
+msgid "She shakes her head. \"Watch the field, not just your target.\""
+msgstr ""
+
 #: content/forest.json:enemies.skeleton.special.name
 msgid "Shield Bash"
 msgstr ""
@@ -2265,7 +2345,7 @@ msgstr ""
 msgid "Shoots from the back row; melee cannot reach it while the front row stands."
 msgstr ""
 
-#: src/client/title/title_screen.gd:183 src/client/ui/ui_text.gd:client_literal src/client/home3d/home3d.gd:17
+#: src/client/title/title_screen.gd:183 src/client/ui/ui_text.gd:client_literal
 msgid "Shop"
 msgstr ""
 
@@ -2417,7 +2497,7 @@ msgstr ""
 msgid "Status: Unlocked"
 msgstr ""
 
-#: src/client/title/title_screen.gd:182 src/client/home3d/home3d.gd:16
+#: src/client/title/title_screen.gd:182
 msgid "Story"
 msgstr ""
 
@@ -2461,12 +2541,24 @@ msgstr ""
 msgid "Story · offline, control all five"
 msgstr ""
 
+#: content/forest.json:classes.support.description
+msgid "Strengthens allies, weakens enemies, and restores a companion's Energy."
+msgstr ""
+
+#: content/forest.json:classes.support.name
+msgid "Support"
+msgstr ""
+
 #: content/forest.json:classes.swordsman.name src/client/ui/ui_text.gd:client_literal
 msgid "Swordsman"
 msgstr ""
 
 #: src/client/match/battle/combat_panel.gd:129
 msgid "TARGET [%d]"
+msgstr ""
+
+#: content/forest.json:classes.support.role
+msgid "Tactical Support"
 msgstr ""
 
 #: content/forest.json:story.events.old_campfire.choices[1].hint
@@ -2721,6 +2813,10 @@ msgstr ""
 msgid "The journey into the Forest begins."
 msgstr ""
 
+#: content/forest.json:classes.healer.challenge.fail
+msgid "The light dims. \"Steady your hands, then try again.\""
+msgstr ""
+
 #: src/client/ui/ui_text.gd:ERRORS.invalid_item
 msgid "The merchant does not sell that."
 msgstr ""
@@ -2783,6 +2879,10 @@ msgstr ""
 
 #: src/client/ui/ui_text.gd:EMPTY.inventory
 msgid "The shared bag is empty. Win fights, open Treasure or buy from a Merchant to fill it."
+msgstr ""
+
+#: content/forest.json:classes.healer.challenge.pass
+msgid "The spirit's glow warms the shrine. \"Carry this light to those who need it.\""
 msgstr ""
 
 #: content/forest.json:classes.guardian.challenge.intro
@@ -3129,6 +3229,14 @@ msgstr ""
 msgid "Weak to: %s"
 msgstr ""
 
+#: content/forest.json:skills.weaken.name
+msgid "Weaken"
+msgstr ""
+
+#: content/forest.json:statuses.weakened.name
+msgid "Weakened"
+msgstr ""
+
 #: src/client/match/camp/camp_view.gd:838
 msgid "Weapon"
 msgstr ""
@@ -3379,21 +3487,4 @@ msgstr ""
 
 #: src/client/match/battle/battle_token.gd:134
 msgid "you"
-msgstr ""
-
-
-#: src/client/home3d/home3d.gd:20
-msgid "Unavailable"
-msgstr ""
-
-#: src/client/ui/ui_text.gd:88
-msgid "CLASS"
-msgstr ""
-
-#: src/client/ui/ui_text.gd:88
-msgid "SHOP"
-msgstr ""
-
-#: src/client/ui/ui_text.gd:88
-msgid "STORY"
 msgstr ""
