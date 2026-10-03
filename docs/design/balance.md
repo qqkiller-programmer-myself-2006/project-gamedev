@@ -183,3 +183,28 @@ All five measured modes are inside the target. Rejected commands were 0 in every
 | เวลาจำลองเฉลี่ย | 9.3 นาที | 12.5 นาที |
 
 HP บอส (1350) ไม่เปลี่ยน เพื่อรักษาความยาวของบอสตาม #89
+
+## T4S-01c Support/Healer balance (100 seeds from 1000, `--pace`)
+
+Baseline ran after adding Support and Healer. One numeric tuning pass reduced Healer's
+single-target heal 20 → 18, Party heal 12 → 10, and Weaken's damage-out multiplier
+0.7 → 0.8. Rally, Energy costs, cooldowns, and durations were unchanged.
+
+| Mode | Baseline | After tuning | Target |
+| --- | ---: | ---: | ---: |
+| Default, 1 player | 84% | 83% | 70–92% |
+| Default, 2 players | 76% | 76% | 70–92% |
+| Loadout, 1 player | 91% | 91% | 70–92% |
+| Loadout, 2 players | 97% | 97% | 70–92% |
+| Story | 86% | 86% | 70–92% |
+
+Rejected commands were 0 for all multiplayer runs and 4 for both Story runs. The
+remaining Loadout Duo result is 5 points above target. This simulator's Loadout roster
+assigns only Swordsman, Archer, Mage, Guardian, and Assassin; its Story roster also
+uses those five Classes. Therefore Support/Healer numeric tuning cannot change either
+of those two results. Further Support/Healer-only tuning was stopped after this pass;
+making those modes exercise the new Classes requires changing the simulator's roster.
+
+The JSON skill descriptions still state the pre-tuning heal amounts and Weaken
+percentage because this task permits numeric balance edits only. Update those strings
+when a follow-up task allows descriptive content edits.

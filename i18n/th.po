@@ -629,7 +629,7 @@ msgstr "โอกาสป้องกัน"
 msgid "Block Damage Reduction"
 msgstr "ลดความเสียหายเมื่อป้องกัน"
 
-#: content/forest.json:journey.sites.class[2].hint
+#: content/forest.json:journey.sites.class[2].hint content/forest.json:journey.sites.class[6].hint
 msgid "Blue fire flickers between the broken pillars."
 msgstr "ไฟสีน้ำเงินริบหรี่ระหว่างเสาหักพัง"
 
@@ -1053,13 +1053,13 @@ msgstr "ความมืดปิดล้อมกลุ่มไว้ ท�
 msgid "Deals 18 fire damage to every enemy."
 msgstr "สร้างความเสียหายไฟ 18 แก่ศัตรูทุกตัว"
 
+#: content/forest.json:statuses.weakened.description
+msgid "Deals 20% less direct damage for 2 turns."
+msgstr "ทำความเสียหายโดยตรงได้น้อยลง 20% เป็นเวลา 2 เทิร์น"
+
 #: content/forest.json:statuses.rally.description
 msgid "Deals 20% more direct damage for 3 turns."
 msgstr "ทำความเสียหายโดยตรงได้มากขึ้น 20% เป็นเวลา 3 เทิร์น"
-
-#: content/forest.json:statuses.weakened.description
-msgid "Deals 30% less direct damage for 2 turns."
-msgstr "ทำความเสียหายโดยตรงได้น้อยลง 30% เป็นเวลา 2 เทิร์น"
 
 #: src/client/match/class_panel.gd:40
 msgid "Decline [N]"
@@ -1541,11 +1541,11 @@ msgstr "เสียงหอนอยู่ใกล้มาก การต�
 msgid "Human"
 msgstr "มนุษย์"
 
-#: content/forest.json:journey.sites.class[1].name
+#: content/forest.json:journey.sites.class[1].name content/forest.json:journey.sites.class[5].name
 msgid "Hunter Camp"
 msgstr "ค่ายพราน"
 
-#: content/forest.json:journey.sites.class[1].hint
+#: content/forest.json:journey.sites.class[1].hint content/forest.json:journey.sites.class[5].hint
 msgid "Hunters test newcomers with bow and blade."
 msgstr "เหล่าพรานทดสอบผู้มาใหม่ด้วยธนูและดาบ"
 
@@ -2198,8 +2198,8 @@ msgid "Reduce motion (no sliding, fading or floating numbers)"
 msgstr "ลดการเคลื่อนไหว (ไม่มีการเลื่อน จาง หรือแสดงตัวเลขลอย)"
 
 #: content/forest.json:skills.weaken.description
-msgid "Reduce one enemy's damage dealt by 30% for 2 turns. Costs 1 Energy. Cooldown: 3 turns."
-msgstr "ลดความเสียหายที่ศัตรูหนึ่งตัวทำได้ 30% เป็นเวลา 2 เทิร์น ใช้พลังงาน 1 หน่วย คูลดาวน์ 3 เทิร์น"
+msgid "Reduce one enemy's damage dealt by 20% for 2 turns. Costs 1 Energy. Cooldown: 3 turns."
+msgstr "ลดความเสียหายที่ศัตรูหนึ่งตัวทำได้ 20% เป็นเวลา 2 เทิร์น ใช้พลังงาน 1 หน่วย คูลดาวน์ 3 เทิร์น"
 
 #: content/forest.json:skills.cleanse.description
 msgid "Remove harmful Status effects from one ally. Costs 2 Energy. Cooldown: 3 turns."
@@ -2238,12 +2238,12 @@ msgid "Rest while we can. Tomorrow, the trail climbs."
 msgstr "พักเท่าที่ทำได้ พรุ่งนี้เส้นทางจะสูงชันขึ้น"
 
 #: content/forest.json:skills.renewing_wave.description
-msgid "Restore 12 HP to every living Party member. Costs 3 Energy. Cooldown: 4 turns."
-msgstr "ฟื้นฟูพลังชีวิต 12 หน่วยให้สมาชิกกลุ่มที่ยังมีชีวิตทุกคน ใช้พลังงาน 3 หน่วย คูลดาวน์ 4 เทิร์น"
+msgid "Restore 10 HP to every living Party member. Costs 3 Energy. Cooldown: 4 turns."
+msgstr "ฟื้นฟูพลังชีวิต 10 หน่วยให้สมาชิกกลุ่มที่ยังมีชีวิตทุกคน ใช้พลังงาน 3 หน่วย คูลดาวน์ 4 เทิร์น"
 
 #: content/forest.json:skills.mending_light.description
-msgid "Restore 20 HP to one living ally. Costs 2 Energy. Cooldown: 2 turns."
-msgstr "ฟื้นฟูพลังชีวิต 20 หน่วยให้พันธมิตรที่ยังมีชีวิตหนึ่งคน ใช้พลังงาน 2 หน่วย คูลดาวน์ 2 เทิร์น"
+msgid "Restore 18 HP to one living ally. Costs 2 Energy. Cooldown: 2 turns."
+msgstr "ฟื้นฟูพลังชีวิต 18 หน่วยให้พันธมิตรที่ยังมีชีวิตหนึ่งคน ใช้พลังงาน 2 หน่วย คูลดาวน์ 2 เทิร์น"
 
 #: content/forest.json:items.herb.description
 msgid "Restores 30 HP to one ally."
@@ -2289,7 +2289,7 @@ msgstr "ผู้เฝ้าหยั่งราก"
 msgid "Roots coil beneath {target}. Something huge is coming next turn!"
 msgstr "รากไม้เลื้อยอยู่ใต้ {target} มีบางสิ่งมหึมากำลังมาในเทิร์นหน้า!"
 
-#: content/forest.json:journey.sites.class[2].name
+#: content/forest.json:journey.sites.class[2].name content/forest.json:journey.sites.class[6].name
 msgid "Ruined Shrine"
 msgstr "ศาลเจ้าพัง"
 
