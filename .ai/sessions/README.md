@@ -7,7 +7,7 @@ Shared rules for every session:
 - Work only in your own worktree and branch. Never push. Never edit another worker's paths.
 - Before starting: `git merge --ff-only claude/game-project-lead-9a9ecc` (or ask the lead if it is not a fast-forward).
 - Read `AGENTS.md`, `CONTEXT.md`, the task file, and the ADRs it lists.
-- Tests: `GODOT=D:/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe bash tools/run_tests.sh`. Run `--headless --path . --import` after adding a `class_name`. At most 2 Godot test runs at the same time on this laptop — if another worker is testing, wait.
+- Tests: `GODOT=D:/dev-tools/godot/Godot_v4.7.2-stable_win64_console.exe bash tools/run_tests.sh`. Run `--headless --path . --import` after adding a `class_name`. At most 2 Godot test suites run at the same time on this laptop; `tools/run_tests.sh` enforces this with slots next to the Godot binary and waits automatically (prints "Waiting for a free Godot test slot").
 - Respond to the owner in Thai. Code, commits and docs in English unless the file is already Thai.
 - When done: commit on your branch, then write the handoff (branch + sha, files, test result, open questions) to `.ai/handoff/<task-id>.md` in your worktree and tell the owner. The lead reviews and merges.
 
