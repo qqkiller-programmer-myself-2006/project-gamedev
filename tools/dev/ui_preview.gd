@@ -8,6 +8,7 @@ extends SceneTree
 ##
 ## Options: --out=DIR  --seed=N  --speed=X (game seconds per real second)
 ##          --scale=1.2 (text size)  --reduced-motion
+##          --3d (render BattleView with the embedded Battle3D stage and HUD)
 ##          --class=assassin (every Class Encounter teaches that Class)
 ##          --setup-only (capture Room and Character setup, then exit)
 ##          --resolution=1920x1080 (window size; the UI stretches from 1280x720)
@@ -32,6 +33,10 @@ var _sprite_idle_after := 0.0
 var _used_focus := false
 var _used_item := false
 var _scan_latin := false
+var _preview_3d := false
+var _3d_hud_only := false
+var _capture_3d_hud_started := false
+var _capture_3d_hud_done := false
 var _latin_allowlist := ["Beyond", "World", "End", "Ann", "Bob", "HP", "ATK", "DEF", "MAG", "RES", "SPD", "EXP", "LVL", "STR", "DEX", "CON", "INT", "FTH", "CHA", "LCK", "F", "I", "O", "H", "R", "Esc", "F2"]
 
 
@@ -57,6 +62,11 @@ func _initialize() -> void:
 			_story_setup_only = true
 		elif arg == "--scan-latin":
 			_scan_latin = true
+		elif arg == "--3d":
+			_preview_3d = true
+		elif arg == "--3d-hud-only":
+			_preview_3d = true
+			_3d_hud_only = true
 		elif arg.begins_with("--class="):
 			only_class = arg.trim_prefix("--class=")
 		elif arg.begins_with("--resolution="):
@@ -73,7 +83,7 @@ func _initialize() -> void:
 				"rules": {"ai_class_cap": 5}}
 	harness = MatchHarness.new(seed_value, overrides)
 	app = ClientApp.new()
-	app.configure({"name": "Ann", "lang": _language})
+	app.configure({"name": "Ann", "lang": _language, "3d": _preview_3d})
 	root.add_child(app)
 	set_meta("scale", scale)
 	set_meta("reduced", reduced)
@@ -179,7 +189,8 @@ func _process(delta: float) -> bool:
 		return false
 	if frame < 70:
 		return false
-	harness.clock.advance(delta * speed)
+	if not (_capture_3d_hud_started and not _capture_3d_hud_done):
+		harness.clock.advance(delta * speed)
 	harness.server.update()
 	friend_bot.act(friend)
 	if _done_at > 0:
@@ -224,6 +235,10 @@ func _drive() -> void:
 		return
 	if not shots.has(key):
 		_shot(key)
+	if _preview_3d and key.ends_with("_turn") and not _capture_3d_hud_started:
+		_capture_3d_hud_started = true
+		await _capture_3d_edge_states(battle)
+		_capture_3d_hud_done = true
 	_act(key, view)
 	_think_until = Time.get_ticks_msec() / 1000.0 + 0.5
 
@@ -247,6 +262,77 @@ func _capture_sprite_frames(battle: BattleView) -> void:
 		var name := "sprite_" + state
 		if not shots.has(name):
 			_shot(name)
+
+
+## Capture rare HUD states from temporary presentation snapshots, then restore
+## the real battle state before the preview sends its next action.
+func _capture_3d_edge_states(battle: BattleView) -> void:
+	var original_view := battle._view
+	var original_combat := battle._combat
+	var original_mode := battle._screen.combat_mode
+	var original_banner_visible := battle._banner.visible
+	battle._banner.visible = false
+	battle._combat = original_combat.duplicate(true)
+	var choices: Dictionary = battle._combat.get("choices", {})
+	var skills: Dictionary = choices.get("skills", {})
+	if skills.is_empty():
+		skills["preview_skill"] = {"name": Tr.t("Skill"), "cooldown": 0, "energy": 2,
+			"affordable": true, "targets": ["e0"], "target": "single_enemy", "description": Tr.t("battle_hud_skill_description")}
+	choices["skills"] = skills
+	var items: Dictionary = choices.get("items", {})
+	if items.is_empty():
+		items["healing_herb"] = {"count": 1, "targets": ["p0"], "target": "single_ally"}
+	choices["items"] = items
+	battle._screen.combat_mode = "skills"
+	battle.refresh_action_panel()
+	await process_frame
+	await process_frame
+	_shot("04_combat_skills")
+
+	battle._screen.combat_mode = "items"
+	battle.refresh_action_panel()
+	await process_frame
+	await process_frame
+	_shot("04_combat_items")
+
+	battle._screen.combat_mode = "attack"
+	battle.refresh_action_panel()
+	await process_frame
+	await process_frame
+	_shot("04_combat_target")
+
+	battle._view = original_view.duplicate(true)
+	battle._combat = original_combat.duplicate(true)
+	var party: Array = battle._view.get("party", [])
+	if not party.is_empty():
+		party[0]["hp"] = 0
+		party[0]["statuses"] = []
+	battle._render_3d_hud()
+	await process_frame
+	await process_frame
+	_shot("04_combat_character_dead")
+
+	battle._view = original_view.duplicate(true)
+	battle._combat = original_combat.duplicate(true)
+	party = battle._view.get("party", [])
+	if not party.is_empty():
+		party[0]["energy"] = 0
+	skills = battle._combat.get("choices", {}).get("skills", {})
+	for skill_id in skills:
+		skills[skill_id]["affordable"] = false
+	battle._screen.combat_mode = "skills"
+	battle.refresh_action_panel()
+	await process_frame
+	await process_frame
+	_shot("04_combat_energy_low")
+
+	battle._view = original_view
+	battle._combat = original_combat
+	battle._screen.combat_mode = original_mode
+	battle._banner.visible = original_banner_visible
+	battle.refresh_action_panel()
+	if _3d_hud_only:
+		quit(0)
 
 
 func _situation(view: Dictionary) -> String:

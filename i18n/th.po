@@ -61,7 +61,7 @@ msgstr "พร้อมแล้ว %d จาก %d"
 msgid "%d/%d %s %s"
 msgstr "%d/%d %s %s"
 
-#: src/client/match/battle/battle_view.gd:338
+#: src/client/match/battle/battle_view.gd:365
 msgid "%ds"
 msgstr "%d วินาที"
 
@@ -73,7 +73,7 @@ msgstr "เหลือเวลา %d วินาที%s"
 msgid "%s  (Layer %d, %s)"
 msgstr "%s (ชั้น %d, %s)"
 
-#: src/client/match/battle/battle_view.gd:605
+#: src/client/match/battle/battle_view.gd:648
 msgid "%s  Lv %d - %s"
 msgstr "%s  ระดับ %d - %s"
 
@@ -89,15 +89,15 @@ msgstr "%s %s."
 msgid "%s %s: %s."
 msgstr "%s %s: %s."
 
-#: src/client/match/battle/battle_view.gd:508 src/client/match/camp/camp_view.gd:144
+#: src/client/match/battle/battle_view.gd:551 src/client/match/camp/camp_view.gd:144
 msgid "%s (%d/%d)"
 msgstr "%s (%d/%d)"
 
-#: src/client/match/battle/battle_view.gd:1235 src/client/match/battle/combat_panel.gd:231
+#: src/client/match/battle/battle_view.gd:1300 src/client/match/battle/combat_panel.gd:231
 msgid "%s (AI) is acting..."
 msgstr "%s (เอไอ) กำลังลงมือ..."
 
-#: src/client/match/battle/battle_view.gd:886
+#: src/client/match/battle/battle_view.gd:930
 msgid "%s - Lv %d"
 msgstr "%s - ระดับ %d"
 
@@ -129,7 +129,7 @@ msgstr "%sได้รับ%s"
 msgid "%s gathers power for %s..."
 msgstr "%sรวบรวมพลังเพื่อใช้%s..."
 
-#: src/client/match/battle/battle_view.gd:1237
+#: src/client/match/battle/battle_view.gd:1302
 msgid "%s is acting..."
 msgstr "%s กำลังลงมือ..."
 
@@ -189,7 +189,7 @@ msgstr "%s · ระดับ %d"
 msgid "%s, %s, blocks the way!"
 msgstr "%s %s ขวางทางอยู่!"
 
-#: src/client/ui/ui_kit.gd:472
+#: src/client/ui/ui_kit.gd:475
 msgid "%s: %s stack(s), %s turn(s) left"
 msgstr "%s: %s ชั้น เหลือ %s เทิร์น"
 
@@ -197,7 +197,7 @@ msgstr "%s: %s ชั้น เหลือ %s เทิร์น"
 msgid "'If the Chalice asks a price, I will pay it. Not you. Not the children. Never the children.'"
 msgstr "'หากจอกศักดิ์สิทธิ์เรียกร้องราคา ฉันจะจ่ายเอง ไม่ใช่เธอ ไม่ใช่ลูก ๆ ไม่มีวันเป็นลูก ๆ'"
 
-#: src/client/match/battle/battle_view.gd:1206
+#: src/client/match/battle/battle_view.gd:1271
 msgid "+%d Gold for you"
 msgstr "ได้รับทองส่วนตัว +%d เหรียญ"
 
@@ -561,6 +561,10 @@ msgstr "จะโจมตีใคร?"
 msgid "Audio: Kenney, Zane Little Music, Emma_MA, marcelofg55, JaggedStone, artisticdude and Brian MacIntosh (CC0); YannZ and leohpaz (CC-BY 4.0). Full credits: assets/audio/CREDITS.md"
 msgstr "เสียง: Kenney, Zane Little Music, Emma_MA, marcelofg55, JaggedStone, artisticdude และ Brian MacIntosh (CC0); YannZ และ leohpaz (CC-BY 4.0) ดูเครดิตทั้งหมดที่ assets/audio/CREDITS.md"
 
+#: src/client/match/battle/hud/battle_hud_3d.gd:307
+msgid "Auto"
+msgstr "อัตโนมัติ"
+
 #: src/client/match/battle/combat_panel.gd:116
 msgid "BACK ROW"
 msgstr "แถวหลัง"
@@ -589,11 +593,11 @@ msgstr "กลับเมนู [Esc]"
 msgid "Balanced and dependable. Strong melee strikes, solid health."
 msgstr "สมดุลและไว้ใจได้ การโจมตีระยะประชิดแข็งแกร่ง พลังชีวิตดี"
 
-#: src/client/title/title_screen.gd:182 src/client/home3d/home3d.gd:16
+#: src/client/title/title_screen.gd:182
 msgid "Battle"
 msgstr "ต่อสู้"
 
-#: src/client/match/battle/battle_view.gd:566
+#: src/client/match/battle/battle_view.gd:609
 msgid "Beat the trainer within %d rounds to learn the %s Class. Nobody can fall here."
 msgstr "เอาชนะครูฝึกภายใน %d รอบเพื่อเรียนรู้อาชีพ%s ที่นี่ไม่มีใครหมดสติได้"
 
@@ -705,8 +709,8 @@ msgstr "ตัวเลือก"
 msgid "CHOOSE YOUR JOURNEY"
 msgstr "เลือกการเดินทางของคุณ"
 
-#: src/client/lobby/character_setup.gd:190 src/client/title/title_screen.gd:183 src/client/home3d/home3d.gd:17
-msgid "Class"
+#: src/client/ui/ui_text.gd:TYPE_TAGS.class
+msgid "CLASS"
 msgstr "อาชีพ"
 
 #: src/client/match/match_screen.gd:709
@@ -733,11 +737,11 @@ msgstr "ถ้ำ"
 msgid "Cave Mouth"
 msgstr "ปากถ้ำ"
 
-#: src/client/match/battle/battle_view.gd:1199 src/client/match/battle/combat_panel.gd:242
+#: src/client/match/battle/battle_view.gd:1264 src/client/match/battle/combat_panel.gd:242
 msgid "Challenge won!"
 msgstr "ชนะการประลองแล้ว!"
 
-#: src/client/match/battle/battle_view.gd:565
+#: src/client/match/battle/battle_view.gd:608
 msgid "Challenge: %s"
 msgstr "การประลอง: %s"
 
@@ -797,7 +801,7 @@ msgstr "เลือกอาชีพให้ %s"
 msgid "Choose a Class for every traveller."
 msgstr "เลือกอาชีพให้ผู้เดินทางทุกคน"
 
-#: src/client/match/battle/battle_view.gd:856
+#: src/client/match/battle/battle_view.gd:899
 msgid "Choose a target on the field (1-%d), Esc to go back"
 msgstr "เลือกเป้าหมายบนสนาม (1-%d) กด Esc เพื่อย้อนกลับ"
 
@@ -825,7 +829,7 @@ msgstr "เลือกเส้นทางเข้าสู่ป่า"
 msgid "Chosen"
 msgstr "เลือกแล้ว"
 
-#: src/client/lobby/character_setup.gd:190 src/client/title/title_screen.gd:183 src/client/home3d/home3d.gd:17
+#: src/client/lobby/character_setup.gd:190 src/client/title/title_screen.gd:183
 msgid "Class"
 msgstr "อาชีพ"
 
@@ -877,7 +881,7 @@ msgstr "ปิด [Esc]"
 msgid "Clue log [C]"
 msgstr "บันทึกเบาะแส [C]"
 
-#: src/client/match/battle/battle_view.gd:1209
+#: src/client/match/battle/battle_view.gd:1274
 msgid "Clue: %s"
 msgstr "เบาะแส: %s"
 
@@ -944,6 +948,10 @@ msgstr "ค่าใช้จ่าย: %s\nสถานะ: ปลดล็อ�
 #: src/client/ui/ui_text.gd:ERRORS.cannot_connect
 msgid "Could not reach the server. Check the address and try again."
 msgstr "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบที่อยู่แล้วลองอีกครั้ง."
+
+#: src/client/match/battle/battle_view.gd:1175
+msgid "Count: %d | %s"
+msgstr "จำนวน %d | %s"
 
 #: src/client/match/camp/camp_view.gd:477 src/client/ui/ui_text.gd:client_literal
 msgid "Craft"
@@ -1057,11 +1065,11 @@ msgstr "พ่ายแพ้ %s เป็นฝ่ายชนะในคร�
 msgid "Defend [D]"
 msgstr "ป้องกัน [D]"
 
-#: src/client/match/battle/battle_view.gd:551 src/client/match/battle/combat_panel.gd:99
+#: src/client/match/battle/battle_view.gd:594 src/client/match/battle/combat_panel.gd:99
 msgid "Defend [D] to halve it, or have a Guardian Protect them."
 msgstr "ป้องกัน [D] เพื่อลดความเสียหายครึ่งหนึ่ง หรือให้ผู้พิทักษ์คุ้มครอง"
 
-#: src/client/match/battle/battle_view.gd:551 src/client/match/battle/combat_panel.gd:99
+#: src/client/match/battle/battle_view.gd:594 src/client/match/battle/combat_panel.gd:99
 msgid "Defend [D] to halve it, or raise Shield Wall."
 msgstr "ป้องกัน [D] เพื่อลดความเสียหายครึ่งหนึ่ง หรือใช้กำแพงโล่"
 
@@ -1144,6 +1152,10 @@ msgstr "ศัตรูที่ปราบได้"
 #: src/client/match/camp/camp_view.gd:666
 msgid "Energy"
 msgstr "พลังงาน"
+
+#: src/client/match/battle/battle_view.gd:1128
+msgid "Energy %d CD %d"
+msgstr "พลังงาน %d คูลดาวน์ %d"
 
 #: src/client/match/battle/combat_panel.gd:146
 msgid "Energy %d/%d - Skills spend Energy; you regain 1 each of your turns."
@@ -1269,11 +1281,11 @@ msgstr "ถ้วยดีบุกของพ่อ"
 msgid "Father's apprentice"
 msgstr "ศิษย์ของพ่อ"
 
-#: src/client/match/battle/battle_view.gd:913
+#: src/client/match/battle/battle_view.gd:957
 msgid "Fight"
 msgstr "สู้"
 
-#: src/client/match/battle/battle_view.gd:914 src/client/ui/ui_text.gd:client_literal
+#: src/client/match/battle/battle_view.gd:958 src/client/ui/ui_text.gd:client_literal
 msgid "Fight [F]"
 msgstr "ต่อสู้ [F]"
 
@@ -1297,7 +1309,7 @@ msgstr "ลูกไฟ"
 msgid "Firebomb"
 msgstr "ระเบิดเพลิง"
 
-#: src/client/match/battle/battle_view.gd:922
+#: src/client/match/battle/battle_view.gd:966 src/client/match/battle/hud/battle_hud_3d.gd:195
 msgid "Focus"
 msgstr "ตั้งสมาธิ"
 
@@ -1392,6 +1404,10 @@ msgstr "เข้าใจแล้ว [H]"
 #: content/forest.json:meta.passives.grace.name
 msgid "Grace"
 msgstr "สง่างาม"
+
+#: src/client/match/battle/hud/battle_hud_3d.gd:197
+msgid "Guard"
+msgstr "ป้องกัน"
 
 #: content/forest.json:skills.protect.description
 msgid "Guard one ally until your next turn: attacks aimed at them hit you instead, with 30% less damage. Costs 1 Energy. No cooldown."
@@ -1545,15 +1561,19 @@ msgstr "ยังไม่ถึงเทิร์นของคุณ."
 msgid "It was a tie, so the path was chosen at random among the tied options."
 msgstr "คะแนนเสมอกัน จึงสุ่มเลือกเส้นทางจากตัวเลือกที่คะแนนเท่ากัน"
 
+#: src/client/match/battle/hud/battle_hud_3d.gd:196
+msgid "Item"
+msgstr "ไอเทม"
+
 #: src/client/match/battle/combat_panel.gd:159
 msgid "Item [I]"
 msgstr "ไอเทม [I]"
 
-#: src/client/match/battle/battle_view.gd:917
+#: src/client/match/battle/battle_view.gd:961
 msgid "Items"
 msgstr "ไอเทม"
 
-#: src/client/match/battle/battle_view.gd:918 src/client/ui/ui_text.gd:client_literal
+#: src/client/match/battle/battle_view.gd:962 src/client/ui/ui_text.gd:client_literal
 msgid "Items [I]"
 msgstr "ไอเทม [I]"
 
@@ -1669,7 +1689,7 @@ msgstr "หลงทางในความมืด"
 msgid "Lunaeia"
 msgstr "ลูนาเอีย"
 
-#: src/client/match/battle/battle_view.gd:695
+#: src/client/match/battle/battle_view.gd:738
 msgid "Lv %d"
 msgstr "ระดับ %d"
 
@@ -1933,7 +1953,7 @@ msgstr "ช่วงที่ %d/%d: %s"
 msgid "PLAYER"
 msgstr "ผู้เล่น"
 
-#: src/client/title/title_screen.gd:182 src/client/home3d/home3d.gd:16
+#: src/client/title/title_screen.gd:182
 msgid "Party"
 msgstr "ปาร์ตี้"
 
@@ -1957,7 +1977,7 @@ msgstr "รองเท้าหนังสัตว์"
 msgid "Phase %d - %s: %s"
 msgstr "ช่วงที่ %d - %s: %s"
 
-#: src/client/match/battle/battle_view.gd:544
+#: src/client/match/battle/battle_view.gd:587
 msgid "Phase %d/%d"
 msgstr "ระยะที่ %d/%d"
 
@@ -2089,7 +2109,7 @@ msgstr "ไปถึง"
 msgid "Reads every page of Father's journal twice."
 msgstr "อ่านทุกหน้าของสมุดบันทึกพ่อซ้ำสองครั้ง"
 
-#: src/client/match/battle/battle_view.gd:963
+#: src/client/match/battle/battle_view.gd:1007
 msgid "Ready"
 msgstr "พร้อม"
 
@@ -2201,13 +2221,13 @@ msgstr "รากไม้เลื้อยอยู่ใต้ {target} ม�
 msgid "Ruined Shrine"
 msgstr "ศาลเจ้าพัง"
 
-#: src/client/title/title_screen.gd:183 src/client/ui/ui_text.gd:client_literal src/client/home3d/home3d.gd:17
-msgid "Shop"
+#: src/client/ui/ui_text.gd:TYPE_TAGS.merchant
+msgid "SHOP"
 msgstr "ร้านค้า"
 
-#: src/client/title/title_screen.gd:182 src/client/home3d/home3d.gd:16
-msgid "Story"
-msgstr "เนื้อเรื่อง"
+#: src/client/ui/ui_text.gd:TYPE_TAGS.story
+msgid "STORY"
+msgstr "เรื่องราว"
 
 #: src/client/title/title_screen.gd:244
 msgid "STORY PARTY"
@@ -2237,7 +2257,7 @@ msgstr "ลูกคนรอง"
 msgid "Select"
 msgstr "เลือก"
 
-#: src/client/title/settings_panel.gd:24 src/client/title/title_screen.gd:183 src/client/home3d/home3d.gd:17
+#: src/client/title/settings_panel.gd:24 src/client/title/title_screen.gd:183
 msgid "Settings"
 msgstr "ตั้งค่า"
 
@@ -2265,7 +2285,7 @@ msgstr "กำแพงโล่"
 msgid "Shoots from the back row; melee cannot reach it while the front row stands."
 msgstr "ยิงจากแถวหลัง; การโจมตีระยะประชิดเอื้อมไม่ถึงตราบใดที่แถวหน้ายังยืนอยู่"
 
-#: src/client/title/title_screen.gd:183 src/client/ui/ui_text.gd:client_literal src/client/home3d/home3d.gd:17
+#: src/client/title/title_screen.gd:183 src/client/ui/ui_text.gd:client_literal
 msgid "Shop"
 msgstr "ร้านค้า"
 
@@ -2288,6 +2308,10 @@ msgstr "เส้นใยไหมสั่นไหวข้ามทางผ
 #: content/forest.json:enemies.skeleton.name
 msgid "Skeleton"
 msgstr "โครงกระดูก"
+
+#: src/client/match/battle/hud/battle_hud_3d.gd:194
+msgid "Skill"
+msgstr "ทักษะ"
 
 #: src/client/match/class_panel.gd:101
 msgid "Skill - %s: %s"
@@ -2417,7 +2441,7 @@ msgstr "แต้มสถานะ"
 msgid "Status: Unlocked"
 msgstr "สถานะ: ปลดล็อกแล้ว"
 
-#: src/client/title/title_screen.gd:182 src/client/home3d/home3d.gd:16
+#: src/client/title/title_screen.gd:182
 msgid "Story"
 msgstr "เนื้อเรื่อง"
 
@@ -2461,6 +2485,10 @@ msgstr "เนื้อเรื่องใช้โปรไฟล์แยก
 msgid "Story · offline, control all five"
 msgstr "เนื้อเรื่อง · ออฟไลน์ ควบคุมทั้งห้าตัวละคร"
 
+#: src/client/match/battle/hud/battle_hud_3d.gd:193
+msgid "Strike"
+msgstr "โจมตี"
+
 #: content/forest.json:classes.swordsman.name src/client/ui/ui_text.gd:client_literal
 msgid "Swordsman"
 msgstr "นักดาบ"
@@ -2480,6 +2508,10 @@ msgstr "รับอาชีพ%sหรือไม่?"
 #: content/forest.json:classes.guardian.role
 msgid "Tank / Defense"
 msgstr "แทงก์ / ป้องกัน"
+
+#: src/client/match/battle/hud/battle_hud_3d.gd:251
+msgid "Target"
+msgstr "เป้าหมาย"
 
 #: src/client/match/battle/combat_panel.gd:215
 msgid "Target for %s?"
@@ -2621,7 +2653,7 @@ msgstr "กองไฟเก่า"
 msgid "The Party falls, their journey through the Forest unfinished."
 msgstr "กลุ่มพ่ายแพ้ การเดินทางผ่านป่ายังไม่สิ้นสุด"
 
-#: src/client/match/battle/battle_view.gd:1214 src/client/match/battle/combat_panel.gd:255 src/client/match/match_screen.gd:572
+#: src/client/match/battle/battle_view.gd:1279 src/client/match/battle/combat_panel.gd:255 src/client/match/match_screen.gd:572
 msgid "The Party has fallen..."
 msgstr "กลุ่มพ่ายแพ้แล้ว..."
 
@@ -2693,7 +2725,7 @@ msgstr "ศัตรูล้มลง!"
 msgid "The fastest of the Party. Shoots any enemy, even in the back row, and often lands critical hits."
 msgstr "สมาชิกที่เร็วที่สุดของกลุ่ม ยิงศัตรูตัวใดก็ได้แม้อยู่แถวหลัง และมักติดคริติคอล"
 
-#: src/client/match/battle/battle_view.gd:1229
+#: src/client/match/battle/battle_view.gd:1294
 msgid "The fight is over."
 msgstr "การต่อสู้จบลงแล้ว"
 
@@ -2889,7 +2921,7 @@ msgstr "หมดเวลา - การประลองสิ้นสุด
 msgid "Time is up for the Challenge."
 msgstr "หมดเวลาการท้าทายแล้ว"
 
-#: src/client/match/battle/battle_view.gd:1211
+#: src/client/match/battle/battle_view.gd:1276
 msgid "Time is up!"
 msgstr "หมดเวลาแล้ว!"
 
@@ -2961,15 +2993,15 @@ msgstr "สมบัติ"
 msgid "Treasure! +%d Gold for you."
 msgstr "พบสมบัติ! คุณได้รับทองส่วนตัว +%d เหรียญ"
 
-#: src/client/match/battle/battle_view.gd:951
+#: src/client/match/battle/battle_view.gd:995
 msgid "Turn"
 msgstr "เทิร์น"
 
-#: src/client/match/battle/battle_view.gd:580
+#: src/client/match/battle/battle_view.gd:623
 msgid "Turn %d"
 msgstr "เทิร์น %d"
 
-#: src/client/match/battle/battle_view.gd:111
+#: src/client/match/battle/battle_view.gd:120
 msgid "Turn 1"
 msgstr "เทิร์น 1"
 
@@ -3025,7 +3057,7 @@ msgstr "พรานชำนาญ"
 msgid "Vials"
 msgstr "ขวดยา"
 
-#: src/client/match/battle/battle_view.gd:1199 src/client/match/battle/combat_panel.gd:244
+#: src/client/match/battle/battle_view.gd:1264 src/client/match/battle/combat_panel.gd:244
 msgid "Victory!"
 msgstr "ชนะแล้ว!"
 
@@ -3077,7 +3109,7 @@ msgstr "กำแพง"
 msgid "WARNING: %s"
 msgstr "คำเตือน: %s"
 
-#: src/client/match/battle/battle_view.gd:550 src/client/match/battle/combat_panel.gd:97
+#: src/client/match/battle/battle_view.gd:593 src/client/match/battle/combat_panel.gd:97
 msgid "WARNING: %s next turn, aimed at %s!"
 msgstr "คำเตือน: %s จะโจมตีในเทิร์นหน้า เล็งไปที่ %s!"
 
@@ -3093,7 +3125,7 @@ msgstr "ยินดีต้อนรับ นักเดินทาง"
 msgid "Waiting for %s (Host) to start the Match..."
 msgstr "กำลังรอให้%s (เจ้าห้อง) เริ่มแมตช์..."
 
-#: src/client/match/battle/battle_view.gd:1233 src/client/match/battle/combat_panel.gd:227
+#: src/client/match/battle/battle_view.gd:1298 src/client/match/battle/combat_panel.gd:227
 msgid "Waiting for %s to act..."
 msgstr "กำลังรอให้%sลงมือ..."
 
@@ -3125,7 +3157,7 @@ msgstr "เราจะรู้ราคาก่อนที่ใครจะ
 msgid "We will find him. The road beyond the Forest is open."
 msgstr "เราจะตามหาเขาให้พบ เส้นทางเลยป่าเปิดอยู่"
 
-#: src/client/match/battle/battle_view.gd:778 src/client/match/battle/combat_panel.gd:124
+#: src/client/match/battle/battle_view.gd:821 src/client/match/battle/combat_panel.gd:124
 msgid "Weak to: %s"
 msgstr "แพ้ทาง: %s"
 
@@ -3349,6 +3381,34 @@ msgstr "[E]"
 msgid "attacks"
 msgstr "โจมตี"
 
+#: src/client/match/battle/hud/battle_hud_3d.gd:310
+msgid "battle_hud_auto_unavailable"
+msgstr "ระบบต่อสู้อัตโนมัติยังไม่พร้อมใช้งาน"
+
+#: src/client/match/battle/hud/battle_hud_3d.gd:134
+msgid "battle_hud_command_unavailable"
+msgstr "คำสั่งนี้ยังใช้ไม่ได้ในตอนนี้"
+
+#: src/client/match/battle/hud/battle_hud_3d.gd:185
+msgid "battle_hud_focus_description"
+msgstr "ฟื้นฟูพลังงานและเตรียมตัวสำหรับคำสั่งถัดไป"
+
+#: src/client/match/battle/hud/battle_hud_3d.gd:187
+msgid "battle_hud_guard_description"
+msgstr "ลดความเสียหายที่ได้รับจนกว่าจะถึงเทิร์นถัดไป"
+
+#: src/client/match/battle/hud/battle_hud_3d.gd:186
+msgid "battle_hud_item_description"
+msgstr "เลือกไอเทม แล้วเลือกเป้าหมายที่ใช้ได้"
+
+#: src/client/match/battle/hud/battle_hud_3d.gd:184
+msgid "battle_hud_skill_description"
+msgstr "เลือกสกิล แล้วเลือกเป้าหมายที่ใช้ได้"
+
+#: src/client/match/battle/hud/battle_hud_3d.gd:183
+msgid "battle_hud_strike_description"
+msgstr "เลือกศัตรูที่ยังต่อสู้ได้เพื่อโจมตี"
+
 #: src/client/match/match_screen.gd:579
 msgid "declines"
 msgstr "ปฏิเสธ"
@@ -3369,7 +3429,7 @@ msgstr "รับ"
 msgid "the Party raises its guard"
 msgstr "กลุ่มตั้งการป้องกัน"
 
-#: src/client/match/battle/battle_view.gd:549 src/client/match/battle/combat_panel.gd:96
+#: src/client/match/battle/battle_view.gd:592 src/client/match/battle/combat_panel.gd:96
 msgid "the whole Party"
 msgstr "ทั้งกลุ่ม"
 
@@ -3417,22 +3477,11 @@ msgstr "คุณ"
 #~ msgid "Treasure! +%d Gold."
 #~ msgstr "พบสมบัติ! ได้รับทอง %d"
 
+#~ msgid "Unavailable"
+#~ msgstr "ยังไม่พร้อมใช้งาน"
+
 #~ msgid "Victory! +%d EXP each, +%d Gold."
 #~ msgstr "ชนะ! ทุกคนได้รับค่าประสบการณ์ %d และทอง %d"
 
-
-#: src/client/home3d/home3d.gd:20
-msgid "Unavailable"
-msgstr "ยังไม่พร้อมใช้งาน"
-
-#: src/client/ui/ui_text.gd:88
-msgid "CLASS"
-msgstr "อาชีพ"
-
-#: src/client/ui/ui_text.gd:88
-msgid "SHOP"
-msgstr "ร้านค้า"
-
-#: src/client/ui/ui_text.gd:88
-msgid "STORY"
-msgstr "เรื่องราว"
+#~ msgid "battle_hud_%s_description"
+#~ msgstr ""

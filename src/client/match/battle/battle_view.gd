@@ -36,7 +36,9 @@ var _tokens: Dictionary = {}
 var _previous_tokens: Dictionary = {}
 var _use_3d := false
 var _battle3d: Battle3DStage
+var _hud_3d: BattleHud3D
 var _projected_anchors: Dictionary = {}
+var _selected_target_3d := ""
 
 var _stage: Control
 var _backdrop: BattleBackdrop
@@ -91,6 +93,12 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	if _use_3d:
 		_stage.resized.connect(_place_3d_overlays)
 	add_child(_stage)
+	if _use_3d:
+		_hud_3d = BattleHud3D.new()
+		_hud_3d.name = "BattleHud3D"
+		_hud_3d.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		_hud_3d.z_index = 20
+		add_child(_hud_3d)
 
 	var left := MarginContainer.new()
 	left.set_anchors_preset(Control.PRESET_LEFT_WIDE)
@@ -108,6 +116,7 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	scroll.add_child(_timeline)
 	left.add_child(scroll)
 	add_child(left)
+	left.visible = not _use_3d
 	var turn_label := UiKit.pixel_label(Tr.t("Turn 1"), "body", UiKit.GOLD)
 	turn_label.add_theme_font_size_override("font_size", int(18 * _app.settings.text_scale))
 	_turn_banner = UiKit.panel(turn_label, "OrnamentPanel")
@@ -116,11 +125,13 @@ func setup(screen: MatchScreen, app: ClientApp) -> void:
 	_turn_banner.offset_left = 20
 	_turn_banner.offset_top = 57
 	_turn_banner.custom_minimum_size = Vector2(208, 43)
+	_turn_banner.visible = not _use_3d
 	add_child(_turn_banner)
 	_enemy_plates = Control.new()
 	_enemy_plates.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_enemy_plates.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_enemy_plates.z_index = 4
+	_enemy_plates.visible = not _use_3d
 	add_child(_enemy_plates)
 
 	_menu_panel = screen.build_corner_menu(self)
@@ -300,9 +311,21 @@ func build(view: Dictionary, combat: Dictionary) -> void:
 
 func refresh_action_panel() -> void:
 	if _use_3d:
+		_choices.clear()
+		var targets := _current_targets()
+		if not targets.has(_selected_target_3d):
+			_selected_target_3d = str(targets[0]) if not targets.is_empty() else ""
+		for target_value in targets:
+			var target := str(target_value)
+			var command := _target_command(target)
+			_choices.append(func() -> void: _send(command))
 		_sync_3d_state()
 		_place_3d_overlays()
 		_build_bottom(_view)
+		if _screen.combat_mode in ["skills", "items"]:
+			UiKit.focus_first(_combat_grid)
+		elif _screen.combat_mode.is_empty():
+			_hud_3d.focus_first_command()
 		return
 	_choices.clear()
 	for token_value in _tokens.values():
@@ -330,15 +353,21 @@ func tick() -> void:
 	if not _combat.get("your_turn", false):
 		_countdown.text = Tr.t(_waiting_text())
 		_countdown.remove_theme_color_override("font_color")
+		if _use_3d and is_instance_valid(_hud_3d):
+			_hud_3d.set_countdown(_countdown.text, false)
 		return
 	if _deadline == null or float(_deadline) < 0.0:
 		_countdown.text = ""
+		if _use_3d and is_instance_valid(_hud_3d):
+			_hud_3d.set_countdown("", false)
 		return
 	var left := _app.seconds_left(_deadline)
 	_countdown.text = Tr.t("%ds" % ceili(left))
 	var next_color := UiKit.WARN if left <= 5.0 else UiKit.TEXT
 	if _countdown.get_theme_color("font_color") != next_color:
 		_countdown.add_theme_color_override("font_color", next_color)
+	if _use_3d and is_instance_valid(_hud_3d):
+		_hud_3d.set_countdown(_countdown.text, left <= 5.0)
 	if _combat.get("your_turn", false):
 		_screen.warn_if_short(_deadline, left)
 
@@ -360,6 +389,20 @@ func handle_key(key: int) -> bool:
 		return true
 	if not _combat.get("your_turn", false):
 		return false
+	if _use_3d and not _choices.is_empty():
+		if key == KEY_LEFT or key == KEY_RIGHT:
+			var targets := _current_targets()
+			if not targets.is_empty():
+				var current_index := targets.find(_selected_target_3d)
+				var direction := -1 if key == KEY_LEFT else 1
+				_selected_target_3d = str(targets[posmod(current_index + direction, targets.size())])
+				_render_3d_hud()
+				return true
+		if key == KEY_ENTER or key == KEY_KP_ENTER:
+			var target_index := _current_targets().find(_selected_target_3d)
+			if target_index >= 0 and target_index < _choices.size():
+				_choices[target_index].call()
+				return true
 	var choices: Dictionary = _combat.get("choices", {})
 	match key:
 		KEY_F:
@@ -850,7 +893,7 @@ func _build_bottom(view: Dictionary) -> void:
 		_combat_grid.offset_top = 235
 		_combat_grid.offset_bottom = minf(600.0, size.y - 285.0)
 		_combat_grid.visible = not _banner.visible
-		_combat_grid.z_index = 5
+		_combat_grid.z_index = 25 if _use_3d else 5
 		add_child(_combat_grid)
 	elif your_turn and not mode.is_empty():
 		var caption := UiKit.pixel_label("Choose a target on the field (1-%d), Esc to go back" % _choices.size(), "small", UiKit.ACCENT)
@@ -861,7 +904,8 @@ func _build_bottom(view: Dictionary) -> void:
 		_target_prompt.set_anchors_preset(Control.PRESET_TOP_WIDE)
 		_target_prompt.offset_top = 202
 		_target_prompt.offset_bottom = 232
-		_target_prompt.z_index = 6
+		_target_prompt.z_index = 26 if _use_3d else 6
+		_target_prompt.visible = not _use_3d
 		add_child(_target_prompt)
 
 	var hud := UiKit.hbox(12)
@@ -992,12 +1036,16 @@ func _build_bottom(view: Dictionary) -> void:
 		_skill_marks.add_child(squares)
 		squares.set_anchors_preset(Control.PRESET_FULL_RECT)
 		squares.alignment = BoxContainer.ALIGNMENT_END
+		_skill_marks.visible = not _use_3d
 		add_child(_skill_marks)
 		# The label theme can increase each badge's minimum width after it enters
 		# the tree. Recompute the anchored row width once those sizes are known so
 		# the last skill badge stays inside the viewport at larger text scales.
 		call_deferred("_fit_skill_marks")
 	_bottom.add_child(row)
+	_bottom.visible = not _use_3d
+	if _use_3d and is_instance_valid(_hud_3d):
+		_render_3d_hud()
 	call_deferred("_layout_battle_overlays")
 
 
@@ -1076,6 +1124,8 @@ func _card_grid(mode: String, choices: Dictionary) -> Control:
 	var grid := GridContainer.new()
 	grid.columns = 2 if size.x < 1200.0 else 3
 	var cost_text := "Cost: %d | Cooldown: %d" if _app.settings.text_scale < 1.4 else "Cost %d | CD %d"
+	if _use_3d:
+		cost_text = Tr.t("Energy %d CD %d")
 	grid.add_theme_constant_override("h_separation", 6)
 	grid.add_theme_constant_override("v_separation", 6)
 	if mode == "skills":
@@ -1096,8 +1146,18 @@ func _card_grid(mode: String, choices: Dictionary) -> Control:
 				why = "Needs %d Energy." % int(info.get("energy", 0))
 			elif info["targets"].is_empty():
 				why = "No valid target."
+			if _use_3d and cooldown > 0:
+				why = UiText.error("skill_on_cooldown")
+			elif _use_3d and not affordable:
+				why = UiText.error("not_enough_energy")
+			elif _use_3d and info["targets"].is_empty():
+				why = UiText.error("invalid_target")
 			var tip := str(info.get("description", ""))
-			if not why.is_empty():
+			if _use_3d:
+				tip = Tr.t(tip)
+				if not why.is_empty():
+					tip = Tr.t(why) + "\n" + tip
+			elif not why.is_empty():
 				tip = why + "\n" + tip
 			var pick := func() -> void: _pick_skill(skill_id, info)
 			grid.add_child(_card(str(info["name"]), sub, "skill", int(info.get("energy", 0)), usable, tip, pick))
@@ -1107,8 +1167,13 @@ func _card_grid(mode: String, choices: Dictionary) -> Control:
 			var usable: bool = not info["targets"].is_empty()
 			var pretty := UiText.item_name(str(item_id))
 			var description := _item_description(item_id)
+			if _use_3d:
+				description = Tr.t(description)
 			var pick := func() -> void: _pick_item(item_id, info)
-			grid.add_child(_card(pretty, "x%d | %s" % [int(info["count"]), description], "items",
+			var item_sub := "x%d | %s" % [int(info["count"]), description]
+			if _use_3d:
+				item_sub = Tr.t("Count: %d | %s") % [int(info["count"]), description]
+			grid.add_child(_card(pretty, item_sub, "items",
 					-1, usable, description, pick, true))
 	var holder := UiKit.panel(grid, "HudPanel")
 	var scroll := ScrollContainer.new()
@@ -1349,19 +1414,44 @@ func _place_3d_overlays() -> void:
 		var anchor := _projected_anchors[id] as Control
 		if is_instance_valid(anchor):
 			anchor.position = stage_offset + _battle3d.unit_screen_position(str(id))
-	for plate in _enemy_plates.get_children():
-		var id := str(plate.get_meta("unit_id", ""))
-		var head := _battle3d.unit_head_screen_position(id)
-		if id.is_empty() or head.x < 0.0:
-			plate.visible = false
-			continue
-		plate.visible = true
-		plate.position = stage_offset + head - Vector2(plate.size.x * 0.5, plate.size.y + 8.0)
+	if is_instance_valid(_enemy_plates):
+		for plate in _enemy_plates.get_children():
+			var id := str(plate.get_meta("unit_id", ""))
+			var head := _battle3d.unit_head_screen_position(id)
+			if id.is_empty() or head.x < 0.0:
+				plate.visible = false
+				continue
+			plate.visible = not _use_3d
+			plate.position = stage_offset + head - Vector2(plate.size.x * 0.5, plate.size.y + 8.0)
+	var actor := str(_combat.get("actor", ""))
+	if not actor.is_empty() and is_instance_valid(_hud_3d):
+		_hud_3d.set_command_origin(stage_offset + _battle3d.unit_screen_position(actor) + Vector2(-104, 100))
+
+
+func _render_3d_hud() -> void:
+	if not _use_3d or not is_instance_valid(_hud_3d):
+		return
+	var party: Array = _view.get("party", []).duplicate(true)
+	var statuses: Dictionary = _combat.get("statuses", {})
+	for member in party:
+		var id := "p%d" % int(member.get("slot", 0))
+		member["statuses"] = statuses.get(id, [])
+	var callbacks := {
+		"strike": Callable(self, "_set_mode").bind("attack"),
+		"skill": Callable(self, "_set_mode").bind("skills"),
+		"focus": Callable(self, "_send").bind({"action": "focus"}),
+		"item": Callable(self, "_set_mode").bind("items"),
+		"guard": Callable(self, "_send").bind({"action": "defend"}),
+	}
+	var countdown_text := _countdown.text if is_instance_valid(_countdown) else ""
+	_hud_3d.render(_view, _combat, party, _screen.combat_mode, _current_targets(),
+		_selected_target_3d, countdown_text, _app.settings.text_scale, callbacks)
 
 
 func _on_3d_unit_clicked(id: String) -> void:
 	if not _current_targets().has(id):
 		return
+	_selected_target_3d = id
 	_send(_target_command(id))
 
 
@@ -1400,6 +1490,9 @@ static func _centered(node: Control) -> Control:
 
 ## Focuses the first target on the field, else the first HUD button.
 func focus_default() -> void:
+	if _use_3d and is_instance_valid(_hud_3d):
+		_hud_3d.focus_first_command()
+		return
 	for id in _tokens:
 		var token: BattleToken = _tokens[id]
 		if token.target_number == 1:
