@@ -104,3 +104,4 @@ These are historical executor task specs retained for reference.
 - [T3D-05-qa-baseline.md](T3D-05-qa-baseline.md) — Agy2: QA baseline + perf harness.
 - [T3D-06-entry-hooks.md](T3D-06-entry-hooks.md) — Codex1: hook Home3D เข้า title + Battle3D เข้า BattleView (--3d) + i18n.
 - [T3D-07-battle-hud.md](T3D-07-battle-hud.md) — Codex1: HUD การต่อสู้ ดำ/แดง/ขาว แผงเฉียง คำสั่งพัดรอบตัวละคร (ยังไม่สั่งรัน).
+- [T4S-01-classes-support-healer.md](T4S-01-classes-support-healer.md) — Agy1: เพิ่ม Class Support/Healer (server+content+balance).

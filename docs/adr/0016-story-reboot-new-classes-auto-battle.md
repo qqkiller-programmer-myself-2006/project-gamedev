@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # Story reboot: ตัวละครชุดใหม่, Class Support/Healer, ฉากสู้รูท 2, ปุ่ม Auto, ภาษาไทยเป็นหลัก
@@ -13,6 +13,7 @@ status: proposed
 - **Class ใหม่:** `support` และ `healer` เป็น Class ระดับ Tier 1 เพิ่มจากเดิม ข้อเสนอบทบาท: Healer ฟื้น HP และล้าง Status effect, Support บัฟ/ดีบัฟและเพิ่ม Energy ให้เพื่อน (เจ้าของงานยืนยันแล้ว) เพิ่ม Skill, AI preset, skill tree, ไอคอน และ sprite; Multiplayer เข้าถึง Class ใหม่ได้ด้วย (ไม่แยกระบบ)
 - **Encounter รูท 2:** encounter พิเศษที่ศัตรูคือเพื่อน 4 คน และตัวละครไอคิวมีกฎ "ตายไม่ได้" (HP ลดได้แต่ไม่ต่ำกว่า 1 ตลอด encounter) ศัตรู 4 ตัวคือเพื่อนในทีม **ใช้อาชีพที่ผู้เล่นเลือกไว้** (สร้าง enemy จาก Class/ระดับของตัวละครนั้นตอนเริ่ม encounter ไม่ตายตัว) ผู้เล่นควบคุมได้เอง เมื่อศัตรูครบทุกตัวล้ม ไปต่อ cutscene
 - **ปุ่ม Auto:** คำสั่งฝั่ง client เปิด/ปิด AI ควบคุม slot ของผู้เล่น (ใช้ AI replacement เดิมของ `PartyAi`) ใช้ได้ใน Story mode ทุกการต่อสู้ (เจ้าของงานยืนยันแล้ว) Auto ควบคุมเฉพาะ combat และ **ไม่ข้ามหรือเล่น cutscene แทนผู้เล่น**
+- **Route:** ฉากตัดสินใจที่ประตูถ้ำ (Layer 5) ส่งคำสั่ง `choose_route` (1 = อยู่กับเพื่อน, 2 = อยู่กับแนนนี่, 3 = ทำตามภารกิจ) ให้ server เก็บใน state ของ Story room และใน Story save (ผ่าน validation เดิมของ ADR-0014) server ใช้ route เลือก encounter สุดท้าย: 1 และ 3 = Guardian Boss (เซลเลน), 2 = encounter สู้เพื่อน 4 คน
 - **ฉากจบ 3 รูท** เลือกที่ฉากตัดสินใจก่อน Guardian Boss ใน Layer 5; ฉากเกมแพ้แยกตาม Layer
 - **ภาษา:** ภาษาไทยเป็นค่าเริ่มต้นของทั้งเกม และเป็นภาษาเดียวที่รองรับใน slice นี้ เนื้อเรื่อง Story mode (`content/story_mode.json`, ฝั่ง client) เขียนเป็นไทยโดยตรง ส่วนข้อความที่ server ส่ง (`content/forest.json`) ต้องมีคำแปลไทยใน `i18n/th.po` หรือย้ายเป็นไทยใน content ปรับ ADR-0007
 
