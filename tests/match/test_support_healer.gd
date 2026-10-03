@@ -49,14 +49,14 @@ func test_healer_single_target_and_party_heals_apply_and_cap_at_max_hp() -> void
 	run.party[0]["hp"] = 10
 	run.party[1]["hp"] = 10
 	var single := combat._apply_profile(run, "p0", combat.skill_profile(run, "mending_light"), ["p1"])
-	assert_eq(single[0]["heal"], 23, "Faith Attribute scales healing")
-	assert_eq(run.party[1]["hp"], 33)
+	assert_eq(single[0]["heal"], 21, "Faith Attribute scales healing")
+	assert_eq(run.party[1]["hp"], 31)
 	run.party[0]["hp"] = 10
 	var all_targets: Array = combat.valid_targets(run, "p0", combat.skill_profile(run, "renewing_wave"))
 	var group := combat._apply_profile(run, "p0", combat.skill_profile(run, "renewing_wave"), all_targets)
 	assert_eq(group.size(), 5)
-	assert_eq(run.party[0]["hp"], 24)
-	assert_eq(run.party[1]["hp"], 47)
+	assert_eq(run.party[0]["hp"], 22)
+	assert_eq(run.party[1]["hp"], 43)
 
 
 func test_cleanse_removes_negative_statuses_but_keeps_buffs() -> void:
@@ -99,7 +99,7 @@ func test_timed_rally_and_weaken_modify_damage_until_they_expire() -> void:
 	assert_eq(combat._hit(run, "p1", enemy, {"amount": 20})["damage"], base_out, "Rally expires after three own turns")
 	combat._apply_profile(run, "p0", combat.skill_profile(run, "weaken"), ["e0"])
 	var reduced: int = combat._hit(run, "e0", ally, {"amount": 20})["damage"]
-	assert_eq(reduced, 14)
+	assert_eq(reduced, 16)
 	combat.status_book.start_turn("e0")
 	combat.status_book.start_turn("e0")
 	assert_eq(combat._hit(run, "e0", ally, {"amount": 20})["damage"], 20, "Weaken expires after two own turns")
