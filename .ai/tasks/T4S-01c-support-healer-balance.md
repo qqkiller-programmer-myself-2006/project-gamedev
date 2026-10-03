@@ -1,7 +1,7 @@
 # T4S-01c — Support/Healer: balance
 
 - **Task ID:** T4S-01c (ส่วนที่ 3 จาก 3 ของ T4S-01)
-- **Owner:** Agy1 (agy, `ai/3d-agy1`) — fallback: Codex
+- **Owner:** Codex (runner, worktree `Project-GameDev-Agents/Agy1`, branch `ai/3d-agy1`) — agy dropped 2026-10-03. If `tools/run_tests.sh` fails in your sandbox (missing dirname/seq/sleep), run the Godot test runner directly and say so in the handoff.
 - **Dependencies:** T4S-01b merge แล้ว
 - **อ่านก่อน:** `docs/design/balance.md`, `tools/dev/simulate*`
 
